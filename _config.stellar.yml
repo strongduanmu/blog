@@ -1,11 +1,28 @@
 sidebar:
-  logo:
-    title: '[<img no-lazy height="32px" src="xxx"/>](/)'
   menu:
-    post: '[btn.blog](/)'
-    wiki: '[btn.wiki](/wiki/)'
-    notes: '[笔记](/notes/)'
+    post: '[博客](/)'
+    wiki: '[文档](/wiki/)'
+    notes: '[便笺](/notes/)'
     more: '[更多](/more/)'
+  # Sidebar widgets
+  widgets:
+    # Recent update
+    recent:
+      layout: recent
+      rss: /atom.xml # npm i hexo-generator-feed
+      limit: 5 # Count of posts
+    # TOC (valid only in layout:post/wiki)
+    toc:
+      layout: toc
+      list_number: false
+      min_depth: 2
+      max_depth: 5
+    # welcome
+    welcome:
+      layout: markdown
+      title: 欢迎，欢迎！
+      content:
+        - 欢迎光临端小强的博客，主要用来记录个人日常工作学习的经验和感悟，欢迎留言交流。
 
 comments:
   service: utterances # utterances
@@ -13,6 +30,7 @@ comments:
     repo: strongduanmu/blog-comments
 
 article:
+  auto_excerpt: 200
   # npm i hexo-related-popular-posts
   related_posts:
     enable: true
