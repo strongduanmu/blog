@@ -1,6 +1,10 @@
 ---
 title: Hello World
+cover: https://cdn.jsdelivr.net/gh/cdn-x/xaoxuu/blog/2020-0927a@1x.svg
+categories: [设计开发]
+tags: [iOS, 心率]
 ---
+
 Welcome to [Hexo](https://hexo.io/)! This is your very first post. Check [documentation](https://hexo.io/docs/) for more info. If you get any problems when using Hexo, you can find the answer in [troubleshooting](https://hexo.io/docs/troubleshooting.html) or you can ask me on [GitHub](https://github.com/hexojs/hexo/issues).
 
 ## Quick Start
