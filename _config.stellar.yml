@@ -1,0 +1,20 @@
+sidebar:
+  logo:
+    title: '[<img no-lazy height="32px" src="xxx"/>](/)'
+  menu:
+    post: '[btn.blog](/)'
+    wiki: '[btn.wiki](/wiki/)'
+    notes: '[笔记](/notes/)'
+    more: '[更多](/more/)'
+
+comments:
+  service: utterances # utterances
+  utterances:
+    repo: strongduanmu/blog-comments
+
+article:
+  # npm i hexo-related-popular-posts
+  related_posts:
+    enable: true
+    title: 您可能感兴趣的文章
+    max_count: 5
