@@ -23,6 +23,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        with: # 条件
+          submodules: true # Checkout private submodules(themes or something else).
 
       - name: Use Node.js ${{ matrix.node_version }}
         uses: actions/setup-node@v1
