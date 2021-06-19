@@ -27,7 +27,7 @@ sidebar:
 comments:
   service: utterances # utterances
   utterances:
-    repo: strongduanmu/blog-comments
+    repo: strongduanmu/blog
 
 article:
   auto_excerpt: 200
@@ -36,3 +36,14 @@ article:
     enable: true
     title: 您可能感兴趣的文章
     max_count: 5
+
+footer:
+  social:
+    - icon: '<img src="https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.3/social/08a41b181ce68.svg"/>'
+      url: https://github.com/strongduanmu
+    - icon: '<img src="https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.3/social/3845874.svg"/>'
+      url: https://open.spotify.com/user/strongduanmu
+    - icon: '<img src="https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.3/social/3616429.svg"/>'
+      url: https://unsplash.com/@strongduanmu
+    - icon: '<img src="https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.3/social/942ebbf1a4b91.svg"/>'
+      url: /about/#comments
