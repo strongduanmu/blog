@@ -1,7 +1,7 @@
 ---
 layout: wiki
 wiki: Calcite 官方文档中文版
-order: -098
+order: 002
 title: 案例
 comment_id: 'calcite_doc'
 ---

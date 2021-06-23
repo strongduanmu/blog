@@ -1,7 +1,7 @@
 ---
 layout: wiki
 wiki: Calcite 官方文档中文版
-order: -100
+order: 000
 seo_title: Calcite 官方文档中文版
 title: 前言
 cover: true
