@@ -102,3 +102,10 @@ ShardingSphere 最新 SQL 语句支持情况可以参考[官方文档](https://s
 ## 结语
 
 Apache ShardingSphere 项目仍然在快速发展中，在后续的版本中，我们将持续提升各种数据库的 SQL 支持度，不断完善内核功能，努力为社区提供更多强大的功能，欢迎持续关注并积极参与社区任务。
+
+## 参考文档
+
+* [新版发布｜ShardingSphere 5.0.0-beta 来了](https://mp.weixin.qq.com/s/MjvoJ_GVbgtWq2HHwLIZAg)
+* [细数 ShardingSphere 5.0.0-beta 版本新功能](https://mp.weixin.qq.com/s/hqFHEAPZHcoEfC4ghj3QSA)
+* [从中间件到分布式数据库生态，ShardingSphere 5.x革新变旧](https://mp.weixin.qq.com/s/ltyO4PAFvLw8nusalGBgPA)
+
