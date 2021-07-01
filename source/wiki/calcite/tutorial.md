@@ -2,8 +2,8 @@
 layout: wiki
 wiki: Calcite 官方文档中文版
 order: 002
-title: 案例
-comment_id: 'calcite_doc'
+title: 教程
+comment_id: 'calcite_chinese_doc'
 ---
 
 ## Tutorial

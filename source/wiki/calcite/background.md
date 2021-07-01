@@ -3,42 +3,35 @@ layout: wiki
 wiki: Calcite 官方文档中文版
 order: 001
 title: 背景
-comment_id: 'calcite_doc'
+cover: true
+logo:
+  src: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625102427.jpg
+description: Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、SQL 校验、SQL 查询优化、SQL 生成以及数据连接查询等典型数据库管理功能。目前，Apache Calcite 作为 SQL 解析与优化引擎，已经广泛使用在 Hive、Drill、Flink、Phoenix 和 Storm 等项目中。
+comment_id: 'calcite_chinese_doc'
 ---
 
-## Background
+> 原文链接：https://calcite.apache.org/docs/
 
-Apache Calcite is a dynamic data management framework.
+`Apache Calcite` 是一个动态数据管理框架。它包含了构成典型数据库管理系统的许多部分，但省略了一些关键功能，如：数据存储、处理数据的算法以及用于存储元数据的库。
 
-It contains many of the pieces that comprise a typical database management system, but omits some key functions: storage of data, algorithms to process data, and a repository for storing metadata.
+Calcite 有意不参与存储和处理数据的业务。 正如我们将看到的，这使其成为在应用程序与一个或多个数据存储位置和数据处理引擎之间进行调解的绝佳选择。 它也是构建数据库的完美基础：只需添加数据。为了说明这一点，让我们创建一个 Calcite 的空实例，然后将其指向一些数据。
 
-Calcite intentionally stays out of the business of storing and processing data. As we shall see, this makes it an excellent choice for mediating between applications and one or more data storage locations and data processing engines. It is also a perfect foundation for building a database: just add data.
-
-To illustrate, let’s create an empty instance of Calcite and then point it at some data.
-
-```
+```java
 public static class HrSchema {
-  public final Employee[] emps = 0;
-  public final Department[] depts = 0;
+    public final Employee[] emps = 0;
+    public final Department[] depts = 0;
 }
+
 Class.forName("org.apache.calcite.jdbc.Driver");
 Properties info = new Properties();
 info.setProperty("lex", "JAVA");
-Connection connection =
-    DriverManager.getConnection("jdbc:calcite:", info);
-CalciteConnection calciteConnection =
-    connection.unwrap(CalciteConnection.class);
+Connection connection = DriverManager.getConnection("jdbc:calcite:", info);
+CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
 SchemaPlus rootSchema = calciteConnection.getRootSchema();
 Schema schema = new ReflectiveSchema(new HrSchema());
 rootSchema.add("hr", schema);
 Statement statement = calciteConnection.createStatement();
-ResultSet resultSet = statement.executeQuery(
-    "select d.deptno, min(e.empid)\n"
-    + "from hr.emps as e\n"
-    + "join hr.depts as d\n"
-    + "  on e.deptno = d.deptno\n"
-    + "group by d.deptno\n"
-    + "having count(*) > 1");
+ResultSet resultSet = statement.executeQuery("SELECT d.deptno, min(e.empid) FROM hr.emps AS e JOIN hr.depts AS d ON e.deptno = d.deptno GROUP BY d.deptno HAVING COUNT(*) > 1");
 print(resultSet);
 resultSet.close();
 statement.close();
@@ -71,7 +64,7 @@ In-memory and JDBC are just two familiar examples. Calcite can handle any data s
 
 For more advanced integration, you can write optimizer rules. Optimizer rules allow Calcite to access data of a new format, allow you to register new operators (such as a better join algorithm), and allow Calcite to optimize how queries are translated to operators. Calcite will combine your rules and operators with built-in rules and operators, apply cost-based optimization, and generate an efficient plan.
 
-## Writing an adapter[Permalink](https://calcite.apache.org/docs/#writing-an-adapter)
+## 编写一个适配器
 
 The subproject under example/csv provides a CSV adapter, which is fully functional for use in applications but is also simple enough to serve as a good template if you are writing your own adapter.
 
@@ -79,7 +72,7 @@ See the [tutorial](https://calcite.apache.org/docs/tutorial.html) for informatio
 
 See the [HOWTO](https://calcite.apache.org/docs/howto.html) for more information about using other adapters, and about using Calcite in general.
 
-## Status[Permalink](https://calcite.apache.org/docs/#status)
+## 状态
 
 The following features are complete.
 
