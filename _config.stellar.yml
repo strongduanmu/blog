@@ -3,7 +3,7 @@ sidebar:
     post: '[博客](/)'
     wiki: '[文档](/wiki/)'
     notes: '[便笺](/notes/)'
-    more: '[更多](/more/)'
+    more: '[关于](/about/)'
   # Sidebar widgets
   widgets:
     # Recent update

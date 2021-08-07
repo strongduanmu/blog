@@ -1,0 +1,5 @@
+welcome:
+  layout: markdown
+  title: '欢迎访问'
+  content:
+    - '欢迎光临端小强的博客，本站主要用来记录日常工作学习的经验和感悟，欢迎留言交流。'
