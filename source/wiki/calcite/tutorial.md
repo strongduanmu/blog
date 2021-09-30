@@ -6,47 +6,47 @@ title: 教程
 comment_id: 'calcite_chinese_doc'
 ---
 
-## Tutorial
+> 原文链接：https://calcite.apache.org/docs/tutorial.html
 
-This is a step-by-step tutorial that shows how to build and connect to Calcite. It uses a simple adapter that makes a directory of CSV files appear to be a schema containing tables. Calcite does the rest, and provides a full SQL interface.
+这是一个分步教程，展示了如何构建和连接 Calcite。它使用一个简单的适配器，使 `CSV` 文件的目录看起来像是包含表的模式。Calcite 完成剩下的工作，并提供完整的 SQL 接口。
 
-Calcite-example-CSV is a fully functional adapter for Calcite that reads text files in [CSV (comma-separated values)](https://en.wikipedia.org/wiki/Comma-separated_values) format. It is remarkable that a couple of hundred lines of Java code are sufficient to provide full SQL query capability.
+`Calcite-example-CSV` 是一个功能齐全的 Calcite 适配器，它可以读取 [CSV（逗号分隔值）](https://en.wikipedia.org/wiki/Comma-separated_values)格式的文本文件。值得注意的是，几百行 Java 代码就足以提供完整的 SQL 查询功能。
 
-CSV also serves as a template for building adapters to other data formats. Even though there are not many lines of code, it covers several important concepts:
+CSV 还可用作构建适用于其他数据格式的适配器的模板。尽管代码行数不多，但它涵盖了几个重要的概念：
 
-- user-defined schema using SchemaFactory and Schema interfaces;
-- declaring schemas in a model JSON file;
-- declaring views in a model JSON file;
-- user-defined table using the Table interface;
-- determining the record type of a table;
-- a simple implementation of Table, using the ScannableTable interface, that enumerates all rows directly;
-- a more advanced implementation that implements FilterableTable, and can filter out rows according to simple predicates;
-- advanced implementation of Table, using TranslatableTable, that translates to relational operators using planner rules.
+- 使用 SchemaFactory 和 Schema 接口的用户自定义模式；
+- 在 JSON 格式的模型文件中声明模式；
+- 在 JSON 格式的模型文件中声明视图；
+- 使用 Table 接口的用户自定义表；
+- 确定表的记录类型；
+- Table 的简单实现，使用 ScannableTable 接口，直接枚举所有行；
+- 更高级的实现，实现了FilterableTable，可以根据简单的谓词过滤掉行；
+- Table 的高级实现，使用 TranslatableTable 的规划器规则转换为关系运算符。
 
-## Download and build[Permalink](https://calcite.apache.org/docs/tutorial.html#download-and-build)
+## 下载和构建
 
-You need Java (version 8, 9 or 10) and Git.
+你需要 Java（版本 8、9 或 10）和 Git。
 
-```
+```shell
 $ git clone https://github.com/apache/calcite.git
 $ cd calcite/example/csv
 $ ./sqlline
 ```
 
-## First queries[Permalink](https://calcite.apache.org/docs/tutorial.html#first-queries)
+## 第一条查询
 
-Now let’s connect to Calcite using [sqlline](https://github.com/julianhyde/sqlline), a SQL shell that is included in this project.
+现在让我们使用 [sqlline](https://github.com/julianhyde/sqlline) 连接到 Calcite，它是一个包含在 Calcite 项目中的 SQL shell 功能。
 
-```
+```shell
 $ ./sqlline
 sqlline> !connect jdbc:calcite:model=src/test/resources/model.json admin admin
 ```
 
-(If you are running Windows, the command is `sqlline.bat`.)
+如果您运行的是 Windows，则命令为 `sqlline.bat`。
 
-Execute a metadata query:
+执行元数据查询：
 
-```
+```shell
 sqlline> !tables
 +------------+--------------+-------------+---------------+----------+------+
 | TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  |  TABLE_TYPE   | REMARKS  | TYPE |
@@ -59,13 +59,13 @@ sqlline> !tables
 +------------+--------------+-------------+---------------+----------+------+
 ```
 
-(JDBC experts, note: sqlline’s `!tables` command is just executing [`DatabaseMetaData.getTables()`](https://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])) behind the scenes. It has other commands to query JDBC metadata, such as `!columns` and `!describe`.)
+（JDBC 专家注意：sqlline 的`!tables`命令只是在背后执行了 [`DatabaseMetaData.getTables()`](https://docs.oracle.com/javase/7/docs/api/java/sql/DatabaseMetaData.html#getTables(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])) 。它还有其他命令来查询 JDBC 元数据，例如`!columns`和`!describe`。）
 
-As you can see there are 5 tables in the system: tables `EMPS`, `DEPTS` and `HOBBIES` in the current `SALES` schema, and `COLUMNS` and `TABLES` in the system `metadata` schema. The system tables are always present in Calcite, but the other tables are provided by the specific implementation of the schema; in this case, the `EMPS` and `DEPTS` tables are based on the `EMPS.csv` and `DEPTS.csv` files in the `resources/sales` directory.
+正如你所看见的，系统中有 5 张表：  `EMPS`，`DEPTS`和`HOBBIES`表在当前 `SALES`模式中，`COLUMNS`和 `TABLES`在系统`metadata`模式中。系统表始终存在于 Calcite 中，但其他表由模式的特定实现提供；在这个场景下，`EMPS`和`DEPTS`表是基于目录中的 `EMPS.csv`和`DEPTS.csv`文件 `resources/sales`。
 
-Let’s execute some queries on those tables, to show that Calcite is providing a full implementation of SQL. First, a table scan:
+让我们对这些表执行一些查询，以展示 Calcite 提供的 SQL 完整实现。首先，表扫描：
 
-```
+```shell
 sqlline> SELECT * FROM emps;
 +--------+--------+---------+---------+----------------+--------+-------+---+
 | EMPNO  |  NAME  | DEPTNO  | GENDER  |      CITY      | EMPID  |  AGE  | S |
@@ -78,9 +78,9 @@ sqlline> SELECT * FROM emps;
 +--------+--------+---------+---------+----------------+--------+-------+---+
 ```
 
-Now JOIN and GROUP BY:
+再进行关联和分组：
 
-```
+```shell
 sqlline> SELECT d.name, COUNT(*)
 . . . .> FROM emps AS e JOIN depts AS d ON e.deptno = d.deptno
 . . . .> GROUP BY d.name;
@@ -92,9 +92,9 @@ sqlline> SELECT d.name, COUNT(*)
 +------------+---------+
 ```
 
-Last, the VALUES operator generates a single row, and is a convenient way to test expressions and SQL built-in functions:
+最后，VALUES 运算符生成一个单行，这是测试表达式和 SQL 内置函数的快捷方法：
 
-```
+```shell
 sqlline> VALUES CHAR_LENGTH('Hello, ' || 'world!');
 +---------+
 | EXPR$0  |
@@ -103,17 +103,17 @@ sqlline> VALUES CHAR_LENGTH('Hello, ' || 'world!');
 +---------+
 ```
 
-Calcite has many other SQL features. We don’t have time to cover them here. Write some more queries to experiment.
+Calcite 有许多其他 SQL 特性。我们没有时间在这里介绍它们。你可以再写一些查询来试验。
 
-## Schema discovery[Permalink](https://calcite.apache.org/docs/tutorial.html#schema-discovery)
+## 模式探索
 
-Now, how did Calcite find these tables? Remember, core Calcite does not know anything about CSV files. (As a “database without a storage layer”, Calcite doesn’t know about any file formats.) Calcite knows about those tables because we told it to run code in the calcite-example-csv project.
+现在，Calcite 是如何找到这些表的？请记住，Calcite 内部对 CSV 文件一无所知（作为`没有存储层的数据库`，Calcite 不了解任何文件格式）。Calcite 知道这些表，是因为我们告诉去执行 `calcite-example-csv` 项目中的代码。
 
-There are a couple of steps in that chain. First, we define a schema based on a schema factory class in a model file. Then the schema factory creates a schema, and the schema creates several tables, each of which knows how to get data by scanning a CSV file. Last, after Calcite has parsed the query and planned it to use those tables, Calcite invokes the tables to read the data as the query is being executed. Now let’s look at those steps in more detail.
+这个过程有几个步骤。首先，我们根据模型文件中的模式工厂类定义了一个模式。然后模式工厂创建了一个模式，并且这个模式创建几个表，每个表都知道如何通过扫描一个 CSV 文件来获取数据。最后，在 Calcite 解析了查询并生成计划来使用这些表之后，Calcite 在执行查询时调用这些表来读取数据。现在让我们更详细地了解这些步骤。
 
-On the JDBC connect string we gave the path of a model in JSON format. Here is the model:
+在 JDBC 连接字符串上，我们以 JSON 格式给出了模型的路径。下面是模型：
 
-```
+```json
 {
   version: '1.0',
   defaultSchema: 'SALES',
@@ -130,9 +130,9 @@ On the JDBC connect string we gave the path of a model in JSON format. Here is t
 }
 ```
 
-The model defines a single schema called ‘SALES’. The schema is powered by a plugin class, [org.apache.calcite.adapter.csv.CsvSchemaFactory](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvSchemaFactory.java), which is part of the calcite-example-csv project and implements the Calcite interface [SchemaFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html). Its `create` method instantiates a schema, passing in the `directory` argument from the model file:
+这个模型定义了一个名为`SALES`的单个模式。该模式由插件类 [org.apache.calcite.adapter.csv.CsvSchemaFactory](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvSchemaFactory.java) 提供支持，它是 `calcite-example-csv` 项目的一部分，并实现了 Calcite 接口 [SchemaFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html)。它的`create`方法实例化了一个模式，并从模型文件中传入了 `directory`参数：
 
-```
+```java
 public Schema create(SchemaPlus parentSchema, String name,
     Map<String, Object> operand) {
   String directory = (String) operand.get("directory");
@@ -149,13 +149,13 @@ public Schema create(SchemaPlus parentSchema, String name,
 }
 ```
 
-Driven by the model, the schema factory instantiates a single schema called ‘SALES’. The schema is an instance of [org.apache.calcite.adapter.csv.CsvSchema](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvSchema.java) and implements the Calcite interface [Schema](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html).
+在模型的驱动下，模式工厂实例化了一个名为`SALES`的模式。该模式是 [org.apache.calcite.adapter.csv.CsvSchema](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvSchema.java) 的一个实例， 并实现了 Calcite 接口 [Schema](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html)。
 
-A schema’s job is to produce a list of tables. (It can also list sub-schemas and table-functions, but these are advanced features and calcite-example-csv does not support them.) The tables implement Calcite’s [Table](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Table.html) interface. `CsvSchema` produces tables that are instances of [CsvTable](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvTable.java) and its sub-classes.
+模式的一项工作是生成一系列的表（它还可以列出子模式和表函数，但这些是高级功能，`calcite-example-csv` 不支持它们）。这些表实现了 Calcite 的 [Table](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Table.html) 接口。`CsvSchema`生成的表是[CsvTable](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvTable.java) 及其子类的实例 。
 
-Here is the relevant code from `CsvSchema`, overriding the `getTableMap()` method in the `AbstractSchema` base class.
+这是来自 `CsvSchema` 的相关代码，覆写了 `AbstractSchema` 基类中的 `getTableMap()` 方法。
 
-```
+```java
 protected Map<String, Table> getTableMap() {
   // Look for files in the directory ending in ".csv", ".csv.gz", ".json",
   // ".json.gz".
@@ -203,9 +203,9 @@ private Table createTable(File file) {
 }
 ```
 
-The schema scans the directory and finds all files whose name ends with “.csv” and creates tables for them. In this case, the directory is `sales` and contains files `EMPS.csv` and `DEPTS.csv`, which these become the tables `EMPS` and `DEPTS`.
+这个模式扫描目录并查找所有名称以 `.csv` 结尾的文件，并为它们创建表。在这种情况下，目录是`sales`并且包含文件`EMPS.csv`和`DEPTS.csv`，这些文件成为表`EMPS`和`DEPTS`。
 
-## Tables and views in schemas[Permalink](https://calcite.apache.org/docs/tutorial.html#tables-and-views-in-schemas)
+## 模式中的表和视图
 
 Note how we did not need to define any tables in the model; the schema generated the tables automatically.
 
@@ -215,7 +215,7 @@ Let’s see how to create an important and useful type of table, namely a view.
 
 A view looks like a table when you are writing a query, but it doesn’t store data. It derives its result by executing a query. The view is expanded while the query is being planned, so the query planner can often perform optimizations like removing expressions from the SELECT clause that are not used in the final result.
 
-Here is a schema that defines a view:
+Here is a schema that defines a view:	
 
 ```
 {
