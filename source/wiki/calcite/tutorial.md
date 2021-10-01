@@ -259,36 +259,36 @@ sqlline> SELECT e.name, d.name FROM female_emps AS e JOIN depts AS d on e.deptno
 
 ## 自定义表
 
-自定义表是其实现由用户定义的代码驱动的表。他们不需要生活在自定义模式中。
+自定义表是那些由用户自定义的代码驱动的表。他们不需要存在于自定义模式中。
 
-有一个例子`model-with-custom-table.json`：
+在 `model-with-custom-table.json` 模型文件中，有一个自定义表的例子：
 
 ```json
 {
-  version: '1.0',
-  defaultSchema: 'CUSTOM_TABLE',
-  schemas: [
-    {
-      name: 'CUSTOM_TABLE',
-      tables: [
+    "version": "1.0",
+    "defaultSchema": "CUSTOM_TABLE",
+    "schemas": [
         {
-          name: 'EMPS',
-          type: 'custom',
-          factory: 'org.apache.calcite.adapter.csv.CsvTableFactory',
-          operand: {
-            file: 'sales/EMPS.csv.gz',
-            flavor: "scannable"
-          }
+            "name": "CUSTOM_TABLE",
+            "tables": [
+                {
+                    "name": "EMPS",
+                    "type": "custom",
+                    "factory": "org.apache.calcite.adapter.csv.CsvTableFactory",
+                    "operand": {
+                        "file": "sales/EMPS.csv.gz",
+                        "flavor": "scannable"
+                    }
+                }
+            ]
         }
-      ]
-    }
-  ]
+    ]
 }
 ```
 
-我们可以用通常的方式查询表：
+我们可以使用常规的方式查询自定义表：
 
-```shell
+```sql
 sqlline> !connect jdbc:calcite:model=src/test/resources/model-with-custom-table.json admin admin
 sqlline> SELECT empno, name FROM custom_table.emps;
 +--------+--------+
@@ -302,53 +302,51 @@ sqlline> SELECT empno, name FROM custom_table.emps;
 +--------+--------+
 ```
 
-该模式是一个常规模式，并包含一个由[org.apache.calcite.adapter.csv.CsvTableFactory](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvTableFactory.java)提供支持的自定义表 ，它实现了 Calcite 接口 [TableFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TableFactory.html)。它的`create`方法实例化 a `CsvScannableTable`，`file`从模型文件中传入参数：
+这个模式是一个常规模式，包含了一个由 `org.apache.calcite.adapter.csv.CsvTableFactory` 提供支持的自定义表，它实现了 Calcite `TableFactory` 接口。它的 `create` 方法，根据从模型文件中传入的 `file` 参数，实例化了 `CsvScannableTable`：
 
 ```java
-public CsvTable create(SchemaPlus schema, String name,
-    Map<String, Object> map, RelDataType rowType) {
-  String fileName = (String) map.get("file");
-  final File file = new File(fileName);
-  final RelProtoDataType protoRowType =
-      rowType != null ? RelDataTypeImpl.proto(rowType) : null;
-  return new CsvScannableTable(file, protoRowType);
+public CsvTable create(SchemaPlus schema, String name, Map<String, Object> map, RelDataType rowType) {
+    String fileName = (String) map.get("file");
+    final File file = new File(fileName);
+    final RelProtoDataType protoRowType = rowType != null ? RelDataTypeImpl.proto(rowType) : null;
+    return new CsvScannableTable(file, protoRowType);
 }
 ```
 
-实现自定义表通常是实现自定义模式的更简单的替代方法。这两种方法最终可能会创建类似的`Table`接口实现，但对于自定义表，你不需要实现元数据发现。（`CsvTableFactory` 创建一个`CsvScannableTable`，就像一样`CsvSchema`，但表实现不会扫描文件系统以查找 .csv 文件。）
+实现自定义表，通常是实现自定义模式的一个更简单方法。这两种方法可能最终都会创建类似的 `Table` 接口实现，但对于自定义表，你不需要实现元数据发现。`CsvTableFactory` 创建一个 `CsvScannableTable`，就像 `CsvSchema` 所做的那样，但表的实现不会扫描文件系统来查找 `.csv` 文件。
 
-自定义表需要模型的作者做更多的工作（作者需要明确指定每个表及其文件），但也给作者更多的控制权（例如，为每个表提供不同的参数）。
+自定义表需要模型的开发者做更多的工作，需要明确指定每个表及其文件，但也给开发者提供了更多的控制权，例如，为每个表提供不同的参数。
 
 ## 模型中的注释
 
-模型可以使用`/* ... */`和`//`语法包含注释：
+模型可以使用 `/* ... */` 和 `//` 语法来包含注释：
 
 ```json
 {
-  version: '1.0',
-  /* Multi-line
+    "version":"1.0",
+  	/* Multi-line
      comment. */
-  defaultSchema: 'CUSTOM_TABLE',
-  // Single-line comment.
-  schemas: [
-    ..
-  ]
+    "defaultSchema":"CUSTOM_TABLE",
+    // Single-line comment.
+    "schemas":[
+        ..
+    ]
 }
 ```
 
-（注释不是标准的 JSON，而是一种无害的扩展。）
+注释不是标准的 JSON，而是一种无害的扩展。
 
-## 使用规划器规则优化查询
+## 使用优化器规则优化查询
 
-到目前为止我们看到的表实现，只要表不包含大量数据就可以。但是，如果你的客户表有一百列和一百万行，你宁愿系统没有为每个查询检索所有数据。你希望 Calcite 与适配器协商并找到一种更有效的数据访问方式。
+到目前为止，我们看到的表实现都是可以接受的，只要表不包含大量数据。但是，如果你的客户的表有一百列以及一百万行，你肯定更愿意看到系统在每个查询时，不要检索出所有的数据。你可能希望 Calcite 与适配器协商，并找到一种更有效的数据访问方式。
 
-这种协商是查询优化的一种简单形式。Calcite 通过添加*规划器规则来*支持查询优化。规划器规则通过在查询解析树中查找模式（例如某种表顶部的项目）来操作，并用一组新的实现优化的节点替换树中匹配的节点。
+这种协商就是查询优化的一种简单形式。Calcite 通过添加 `优化器规则` 来支持查询优化。优化器规则在查询解析树中查找模式（例如某种表解析树顶部的投影），并使用一组新的优化节点来替换树中匹配的节点。
 
-规划器规则也是可扩展的，如模式和表。因此，如果你有一个要通过 SQL 访问的数据存储，则首先定义自定义表或模式，然后定义一些规则以提高访问效率。
+优化器规则像模式和表一样，也是可扩展的。因此，如果你有一个想要通过 SQL 访问的数据存储，你可以首先定义自定义表或模式，然后定义一些规则来提高访问的效率。
 
-要查看此操作，让我们使用规划器规则访问 CSV 文件中的列子集。让我们对两个非常相似的模式运行相同的查询：
+让我们通过一个实战来加深理解，使用优化器规则访问 CSV 文件中的部分列。下面有两个非常相似的模式，我们执行相同的查询：
 
-```shell
+```sql
 sqlline> !connect jdbc:calcite:model=src/test/resources/model.json admin admin
 sqlline> explain plan for select name from emps;
 +-----------------------------------------------------+
@@ -367,190 +365,200 @@ sqlline> explain plan for select name from emps;
 +-----------------------------------------------------+
 ```
 
-是什么导致计划的差异？让我们跟随证据的踪迹。在 `smart.json`模型文件中，只有一行：
+是什么导致了执行计划的差异？让我们跟着证据的线索走。在 `smart.json` 模型文件中，只有一行：
 
 ```properties
 flavor: "translatable"
 ```
 
-这会导致 a`CsvSchema`被创建 `flavor = TRANSLATABLE`，并且它的`createTable`方法创建[CsvTranslatableTable](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvTranslatableTable.java) 而不是 a 的实例 `CsvScannableTable`。
+这个配置会使用 `flavor = TRANSLATABLE` 来创建 `CsvSchema`，它的 `createTable` 方法创建了 `CsvTranslatableTable` 而不是 `CsvScannableTable`。
 
-`CsvTranslatableTable`实现`TranslatableTable.toRel()` 创建[CsvTableScan](https://github.com/apache/calcite/blob/master/example/csv/src/main/java/org/apache/calcite/adapter/csv/CsvTableScan.java)的 方法 。表扫描是查询运算符树的叶子。通常的实现是 `EnumerableTableScan`，但我们创建了一个独特的子类型，它将导致规则触发。
+`CsvTranslatableTable` 实现了 `TranslatableTable.toRel()` 方法，用来创建 `CsvTableScan`。表扫描是查询操作树的叶子节点。通常实现是 `EnumerableTableScan`，但我们创建了一个独特的子类型，它将导致规则触发。
 
-这是完整的规则：
+下面是完整的规则实现：
 
 ```java
-public class CsvProjectTableScanRule
-    extends RelRule<CsvProjectTableScanRule.Config> {
-  /** Creates a CsvProjectTableScanRule. */
-  protected CsvProjectTableScanRule(Config config) {
-    super(config);
-  }
-
-  @Override public void onMatch(RelOptRuleCall call) {
-    final LogicalProject project = call.rel(0);
-    final CsvTableScan scan = call.rel(1);
-    int[] fields = getProjectFields(project.getProjects());
-    if (fields == null) {
-      // Project contains expressions more complex than just field references.
-      return;
+public class CsvProjectTableScanRule extends RelRule<CsvProjectTableScanRule.Config> {
+    
+    /**
+     * Creates a CsvProjectTableScanRule.
+     */
+    protected CsvProjectTableScanRule(Config config) {
+        super(config);
     }
-    call.transformTo(
-        new CsvTableScan(
-            scan.getCluster(),
-            scan.getTable(),
-            scan.csvTable,
-            fields));
-  }
-
-  private int[] getProjectFields(List<RexNode> exps) {
-    final int[] fields = new int[exps.size()];
-    for (int i = 0; i < exps.size(); i++) {
-      final RexNode exp = exps.get(i);
-      if (exp instanceof RexInputRef) {
-        fields[i] = ((RexInputRef) exp).getIndex();
-      } else {
-        return null; // not a simple projection
-      }
+    
+    @Override
+    public void onMatch(RelOptRuleCall call) {
+        final LogicalProject project = call.rel(0);
+        final CsvTableScan scan = call.rel(1);
+        int[] fields = getProjectFields(project.getProjects());
+        if (fields == null) {
+            // Project contains expressions more complex than just field references.
+            return;
+        }
+        call.transformTo(new CsvTableScan(scan.getCluster(), scan.getTable(), scan.csvTable, fields));
     }
-    return fields;
-  }
-
-  /** Rule configuration. */
-  public interface Config extends RelRule.Config {
-    Config DEFAULT = EMPTY
-        .withOperandSupplier(b0 ->
-            b0.operand(LogicalProject.class).oneInput(b1 ->
-                b1.operand(CsvTableScan.class).noInputs()))
-        .as(Config.class);
-
-    @Override default CsvProjectTableScanRule toRule() {
-      return new CsvProjectTableScanRule(this);
+    
+    private int[] getProjectFields(List<RexNode> exps) {
+        final int[] fields = new int[exps.size()];
+        for (int i = 0; i < exps.size(); i++) {
+            final RexNode exp = exps.get(i);
+            if (exp instanceof RexInputRef) {
+                fields[i] = ((RexInputRef) exp).getIndex();
+            } else {
+                return null; // not a simple projection
+            }
+        }
+        return fields;
+    }
+    
+    /**
+     * Rule configuration.
+     */
+    public interface Config extends RelRule.Config {
+        
+        Config DEFAULT = EMPTY.withOperandSupplier(b0 -> b0.operand(LogicalProject.class)
+                .oneInput(b1 -> b1.operand(CsvTableScan.class).noInputs())).as(Config.class);
+        
+        @Override
+        default CsvProjectTableScanRule toRule() {
+            return new CsvProjectTableScanRule(this);
+        }
     }
 }
 ```
 
-规则的默认实例驻留在`CsvRules`holder 类中：
+规则的默认实例驻留在 `CsvRules` 的持有类中：
 
 ```java
+/**
+ * Planner rules relating to the CSV adapter.
+ */
 public abstract class CsvRules {
-  public static final CsvProjectTableScanRule PROJECT_SCAN =
-      CsvProjectTableScanRule.Config.DEFAULT.toRule();
+    
+    private CsvRules() {
+    }
+    
+    /**
+     * Rule that matches a {@link org.apache.calcite.rel.core.Project} on
+     * a {@link CsvTableScan} and pushes down projects if possible.
+     */
+    public static final CsvProjectTableScanRule PROJECT_SCAN = CsvProjectTableScanRule.Config.DEFAULT.toRule();
 }
 ```
 
-`withOperandSupplier`对默认配置中的方法（中的`DEFAULT`字段`interface Config`）的调用声明了将导致规则触发的关系表达式模式。如果规划器看到 a`LogicalProject`的唯一输入是`CsvTableScan`没有输入的 a ，它将调用该规则。
+在默认配置类中（`Config` 接口中的 `DEFAULT` 字段），对 `withOperandSupplier` 方法的调用声明了关系表达式的匹配模式，这个匹配模式会导致规则的触发。如果优化器发现 `LogicalProject` 的唯一输入是一个没有输入的 `CsvTableScan`，它将调用这个规则。
 
-规则的变体是可能的。例如，不同的规则实例可能会匹配 a`EnumerableProject`上的 a `CsvTableScan`。
+规则的变体是可能存在的。例如，不同的规则实例可能会在 `CsvTableScan` 上匹配到 `EnumerableProject`。
 
-该`onMatch`方法生成一个新的关系表达式并调用 `RelOptRuleCall.transformTo()` 以指示规则已成功触发。
+`onMatch` 方法生成一个新的关系表达式，并调用 `RelOptRuleCall.transformTo()` 来表明规则已经成功触发。
 
 ## 查询优化过程
 
-关于 Calcite 的查询规划器有多聪明有很多要说的，但我们不会在这里说。聪明旨在减轻你的负担，规划规则的作者。
+有很多关于 Calcite 查询优化器是多么巧妙的说法，但是我们不会在这里谈论它。巧妙是设计用来减轻你的负担——优化器规则的开发者。
 
-首先，Calcite 不会按照规定的顺序触发规则。查询优化过程遵循分支树的许多分支，就像下棋程序检查许多可能的移动序列一样。如果规则 A 和 B 都匹配查询运算符树的给定部分，则 Calcite 可以同时触发。
+首先，Calcite 不会按照指定的顺序触发规则。查询优化过程按照分支树的众多分支执行，就像下棋程序检查许多可能的位移顺序一样。如果规则 A 和 B 都匹配了查询操作树的给定部分，则 Calcite 可以同时触发。
 
-其次，Calcite 在计划之间进行选择时使用成本，但成本模型并不能阻止规则的触发，这在短期内似乎更昂贵。
+其次，Calcite 基于成本在多个计划中进行选择，但成本模型并不能阻止规则的触发，这个操作在短期内看起来似乎代价更大。
 
-许多优化器都有一个线性优化方案。如上所述，面对规则 A 和规则 B 之间的选择，这样的优化器需要立即选择。它可能有诸如“将规则 A 应用于整棵树，然后将规则 B 应用于整棵树”之类的策略，或者应用基于成本的策略，应用产生更便宜结果的规则。
+许多优化器都有一个线性优化方案。如上所述，在面对规则 A 和规则 B 这样的选择时，线性优化器需要立即选择。它可能有诸如 `将规则 A 应用于整棵树，然后将规则 B 应用于整棵树` 之类的策略，或者使用基于成本的策略，应用代价最小的规则。
 
-方解石不需要这样的妥协。这使得组合各种规则集变得简单。如果，假设你想将识别物化视图的规则与从 CSV 和 JDBC 源系统读取的规则结合起来，你只需将所有规则的集合提供给 Calcite 并告诉它执行它。
+Calcite 不需要进行这样的妥协。这使得组合各种规则集合变得简单。如果你想要将 `识别物化视图的规则` 与 `从 CSV 和 JDBC 源系统读取数据的规则` 结合起来，你只要将所有规则的集合提供给 Calcite 并告诉它去执行即可。
 
-方解石确实使用成本模型。成本模型决定最终使用哪个计划，有时会修剪搜索树以防止搜索空间爆炸，但它从不强迫你在规则 A 和规则 B 之间进行选择。 这很重要，因为它避免陷入局部最小值在实际上不是最佳的搜索空间中。
+Calcite 确实使用了成本模型。成本模型决定最终使用哪个计划，有时会修剪搜索树以防止搜索空间爆炸，但它从不强迫你在规则 A 和规则 B 之间进行选择。这点很重要，因为它避免了陷入在搜索空间中不是全局最佳的局部最小值。
 
-此外（你猜对了）成本模型是可插入的，它所基于的表和查询运算符统计也是如此。但这可能是以后的主题。
+此外，如你所想，成本模型是可插拔的，它所依赖的表和查询操作统计也是可插拔的，但那些都是后面的主题。
 
 ## JDBC 适配器
 
 JDBC 适配器将 JDBC 数据源中的模式映射为 Calcite 模式。
 
-例如，这个模式从 MySQL “foodmart” 数据库中读取：
+例如，下面这个模式从 MySQL `foodmart` 数据库中读取：
 
 ```json
 {
-  version: '1.0',
-  defaultSchema: 'FOODMART',
-  schemas: [
-    {
-      name: 'FOODMART',
-      type: 'custom',
-      factory: 'org.apache.calcite.adapter.jdbc.JdbcSchema$Factory',
-      operand: {
-        jdbcDriver: 'com.mysql.jdbc.Driver',
-        jdbcUrl: 'jdbc:mysql://localhost/foodmart',
-        jdbcUser: 'foodmart',
-        jdbcPassword: 'foodmart'
-      }
-    }
-  ]
+    "version": "1.0",
+    "defaultSchema": "FOODMART",
+    "schemas": [
+        {
+            "name": "FOODMART",
+            "type": "custom",
+            "factory": "org.apache.calcite.adapter.jdbc.JdbcSchema$Factory",
+            "operand": {
+                "jdbcDriver": "com.mysql.jdbc.Driver",
+                "jdbcUrl": "jdbc:mysql://localhost/foodmart",
+                "jdbcUser": "foodmart",
+                "jdbcPassword": "foodmart"
+            }
+        }
+    ]
 }
 ```
 
-（FoodMart 数据库使用过 Mondrian OLAP 引擎的人应该比较熟悉，因为它是 Mondrian 的主要测试数据集。要加载数据集，请按照[Mondrian 的安装说明进行操作](https://mondrian.pentaho.com/documentation/installation.php#2_Set_up_test_data)。）
+> `FoodMart` 数据库，使用过 `Mondrian OLAP` 引擎的人应该比较熟悉，因为它是 `Mondrian` 的主要测试数据集。要加载数据集，请按照 [Mondrian 安装说明](https://mondrian.pentaho.com/documentation/installation.php#2_Set_up_test_data) 进行操作。
 
-**当前限制**：JDBC 适配器当前只下推表扫描操作；所有其他处理（过滤、连接、聚合等）都发生在 Calcite 中。我们的目标是将尽可能多的处理下推到源系统，在我们进行时翻译语法、数据类型和内置函数。如果 Calcite 查询基于来自单个 JDBC 数据库的表，原则上整个查询应该转到该数据库。如果表来自多个 JDBC 源，或者 JDBC 和非 JDBC 的混合，Calcite 将尽可能使用最有效的分布式查询方法。
+**当前限制**：JDBC 适配器当前只下推了表扫描操作，所有其他处理（`过滤`、`连接`、`聚合` 等）都发生在 Calcite 中。我们的目标是将尽可能多的处理下推到源系统，例如：语法转换、数据类型和内置函数，这些都是我们在做的。如果 Calcite 查询是基于单个 JDBC 数据库的表，原则上整个查询应该转到数据库上执行。如果表是来自多个 JDBC 数据源，或者 JDBC 和非 JDBC 的混合数据源，Calcite 将尽可能使用最有效的分布式查询方法。
 
 ## 克隆 JDBC 适配器
 
-克隆 JDBC 适配器会创建一个混合数据库。数据来自 JDBC 数据库，但在第一次访问每个表时被读入内存表。Calcite 基于这些内存表评估查询，实际上是数据库的缓存。
+克隆 JDBC 适配器会创建一个混合数据库。数据来自 JDBC 数据库，但在第一次访问每个表时会将数据读入内存表。Calcite 基于这些内存表获取查询结果，内存表实际上是数据库的缓存。
 
-例如，以下模型从 MySQL “foodmart” 数据库读取表：
-
-```json
-{
-  version: '1.0',
-  defaultSchema: 'FOODMART_CLONE',
-  schemas: [
-    {
-      name: 'FOODMART_CLONE',
-      type: 'custom',
-      factory: 'org.apache.calcite.adapter.clone.CloneSchema$Factory',
-      operand: {
-        jdbcDriver: 'com.mysql.jdbc.Driver',
-        jdbcUrl: 'jdbc:mysql://localhost/foodmart',
-        jdbcUser: 'foodmart',
-        jdbcPassword: 'foodmart'
-      }
-    }
-  ]
-}
-```
-
-另一种技术是在现有模式之上构建克隆模式。你可以使用该`source`属性来引用模型中先前定义的架构，如下所示：
+例如，以下模型从 MySQL `foodmart` 数据库读取表：
 
 ```json
 {
-  version: '1.0',
-  defaultSchema: 'FOODMART_CLONE',
-  schemas: [
-    {
-      name: 'FOODMART',
-      type: 'custom',
-      factory: 'org.apache.calcite.adapter.jdbc.JdbcSchema$Factory',
-      operand: {
-        jdbcDriver: 'com.mysql.jdbc.Driver',
-        jdbcUrl: 'jdbc:mysql://localhost/foodmart',
-        jdbcUser: 'foodmart',
-        jdbcPassword: 'foodmart'
-      }
-    },
-    {
-      name: 'FOODMART_CLONE',
-      type: 'custom',
-      factory: 'org.apache.calcite.adapter.clone.CloneSchema$Factory',
-      operand: {
-        source: 'FOODMART'
-      }
-    }
-  ]
+    "version": "1.0",
+    "defaultSchema": "FOODMART_CLONE",
+    "schemas": [
+        {
+            "name": "FOODMART_CLONE",
+            "type": "custom",
+            "factory": "org.apache.calcite.adapter.clone.CloneSchema$Factory",
+            "operand": {
+                "jdbcDriver": "com.mysql.jdbc.Driver",
+                "jdbcUrl": "jdbc: mysql: //localhost/foodmart",
+                "jdbcUser": "foodmart",
+                "jdbcPassword": "foodmart"
+            }
+        }
+    ]
 }
 ```
 
-你可以使用这种方法在任何类型的模式上创建克隆模式，而不仅仅是 JDBC。
+另一种技巧是在现有模式之上构建克隆模式。你可以使用 `source` 属性来引用模型中之前定义的模式，就像下面这样：
 
-克隆适配器并不是万能的。我们计划开发更复杂的缓存策略，以及更完整和更高效的内存表实现，但现在克隆 JDBC 适配器展示了可能的内容，并允许我们尝试我们的初始实现。
+```json
+{
+    "version": "1.0",
+    "defaultSchema": "FOODMART_CLONE",
+    "schemas": [
+        {
+            "name": "FOODMART",
+            "type": "custom",
+            "factory": "org.apache.calcite.adapter.jdbc.JdbcSchema$Factory",
+            "operand": {
+                "jdbcDriver": "com.mysql.jdbc.Driver",
+                "jdbcUrl": "jdbc: mysql: //localhost/foodmart",
+                "jdbcUser": "foodmart",
+                "jdbcPassword": "foodmart"
+            }
+        },
+        {
+            "name": "FOODMART_CLONE",
+            "type": "custom",
+            "factory": "org.apache.calcite.adapter.clone.CloneSchema$Factory",
+            "operand": {
+                "source": "FOODMART"
+            }
+        }
+    ]
+}
+```
+
+你可以使用这种方法在任何类型的模式基础上创建克隆模式，不仅仅是 JDBC。
+
+克隆适配器并不是万能的。我们计划开发更复杂的缓存策略，以及更完整和更高效的内存表实现，但现在克隆 JDBC 适配器展示了什么是可行的，并允许我们去尝试初始实现。
 
 ## 更多主题
 
-本教程中还没有描述许多其他方法来扩展 Calcite。该[适配器规格](https://calcite.apache.org/docs/adapter.html)说明参与的 API。
+还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](https://calcite.apache.org/docs/adapter.html) 描述了所有涉及到的 `API`。
