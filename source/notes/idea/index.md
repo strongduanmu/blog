@@ -3,7 +3,6 @@ robots: noindex,nofollow
 sitemap: false
 menu_id: notes
 layout: wiki
-wiki: Notes
 seo_title: IDEA
 order: 30
 ---

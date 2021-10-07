@@ -3,10 +3,6 @@ layout: wiki
 wiki: Calcite 官方文档中文版
 order: 001
 title: 背景
-cover: true
-logo:
-  src: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625102427.jpg
-description: Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、SQL 校验、SQL 查询优化、SQL 生成以及数据连接查询等典型数据库管理功能。目前，Apache Calcite 作为 SQL 解析与优化引擎，已经广泛使用在 Hive、Drill、Flink、Phoenix 和 Storm 等项目中。
 comment_id: 'calcite_chinese_doc'
 ---
 
