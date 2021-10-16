@@ -63,7 +63,7 @@ LogicalProject(DEPTNO=[$7], ENAME=[$1])
   LogicalTableScan(table=[[scott, EMP]])
 ```
 
-对 `builder.field` 的两次调用创建了简单表达式，这些表达式从输入的关系表达式中返回字段——那也就是说，`scan` 方法的调用创建了 `TableScan`。Calcite 将它们转换为按序数的字段引用，例如：`$7` 和 `$1`。
+对 `builder.field` 的两次调用创建了简单表达式，这些表达式从输入的关系表达式中返回字段。那也就是说，`scan` 方法的调用创建了 `TableScan`。Calcite 将它们转换为按序号的字段引用，例如：`$7` 和 `$1`。
 
 ### 添加过滤和聚合
 
@@ -145,15 +145,15 @@ final RelNode result = builder.push(input).adoptConvention(EnumerableConvention.
 
 假设你正在 `EMP` 和 `DEPT` 上构建一个关联查询，`EMP` 有 8 个字段 `EMPNO`、`ENAME`、`JOB`、`MGR`、`HIREDATE`、`SAL`、`COMM`、`DEPTNO`，`DEPT` 有 3 个字段 `DEPTNO`、`DNAME`、`LOC`。在内部，Calcite 使用偏移量来表示这些字段，存储在一个包含 11 个字段的组合输入行中：左侧输入的第一个字段是 `#0`（请记住，序号从 0 开始），右侧输入的第一个字段是 `#8`。
 
-通过构建器 API，你可以指定哪个输入的哪个字段。要引用内部字段是 `#5` 的 `SAL`，可以写成 `builder.field(2, 0, "SAL")`，`builder.field(2, "EMP", "SAL")` 或 `builder.field(2, 0, 5)`。这个写法表示 `在两个输入中的 #0 中的字段 #5`。为什么它需要知道有两个输入？因为它们存储在堆栈中，输入 `#1` 位于堆栈顶部，输入 `#0` 在其下方。如果我们不告诉构建器是两个输入，它不知道输入 `#0` 的深度。
+通过构建器 API，你可以指定哪个输入的哪个字段。要引用内部字段序号是 `#5` 的 `SAL`，可以写成 `builder.field(2, 0, "SAL")`，`builder.field(2, "EMP", "SAL")` 或 `builder.field(2, 0, 5)`。这个写法表示，在两个输入中，`#0` 输入的 `#5` 字段。为什么它需要知道有两个输入？因为它们存储在堆栈中，`#1` 输入位于堆栈顶部，`#0` 输入在其下方。如果我们不告诉构建器是两个输入，它不知道 `#0` 输入的深度。
 
 类似地，要引用内部字段是 `#9 (8 + 1)` 的 `DNAME`，可以写成 `builder.field(2, 1, "DNAME")`，`builder.field(2, "DEPT", "DNAME")` 或 `builder.field(2, 1, 1)`。
 
 ### 递归查询
 
-> 警告：当前的 API 是实验性的，如有变更不会进行通知。
+> 警告：当前 API 是实验性的，如有变更不会另行通知。
 
-下面是一个递归查询的 SQL，用于生成 `1, 2, 3, ...10` 序列：
+下面是一个递归查询的 SQL，用于生成 `1, 2, 3, ...10` 这样的序列：
 
 ```sql
 WITH RECURSIVE aux(i) AS (VALUES (1) UNION ALL SELECT i + 1 FROM aux WHERE i < 10) SELECT * FROM aux
@@ -298,75 +298,75 @@ builder 方法执行了各种优化，具体包括：
 | `desc(expr)`                                                 | 将排序方向改为降序（仅作为 `sort` 或 `sortLimit` 的参数时有效）。 |
 | `nullsFirst(expr)`                                           | 将排序顺序改为空值最先（仅作为 `sort` 或 `sortLimit` 的参数时有效）。 |
 | `nullsLast(expr)`                                            | 将排序顺序改为空值最后（仅作为 `sort` 或 `sortLimit` 的参数时有效）。 |
-| `cursor(n, input)`                                           | 引用第 `input` 个（从 0 开始）关系输入，关系输入是有 n 个输入的 `TableFunctionScan`（惨了 `functionScan`）。 |
+| `cursor(n, input)`                                           | 引用第 `input` 个（从 0 开始）关系输入，关系输入是有 n 个输入的 `TableFunctionScan`（参考 `functionScan`）。 |
 
 #### 模式方法
 
-以下方法返回用于`match`.
+以下方法会返回用于 `match` 中的模式。
 
 | 方法                                 | 描述         |
 | :----------------------------------- | :----------- |
 | `patternConcat(pattern...)`          | 连接模式     |
-| `patternAlter(pattern...)`           | 交替模式     |
+| `patternAlter(pattern...)`           | 替换模式     |
 | `patternQuantify(pattern, min, max)` | 量化模式     |
-| `patternPermute(pattern...)`         | 置换一个模式 |
+| `patternPermute(pattern...)`         | 重新排列模式 |
 | `patternExclude(pattern)`            | 排除模式     |
 
-#### 组键方法
+#### 分组键方法
 
-以下方法返回一个 [RelBuilder.GroupKey](https://calcite.apache.org/javadocAggregate/org/apache/calcite/tools/RelBuilder.GroupKey.html)。
+以下方法会返回一个 `RelBuilder.GroupKey`。
 
-| 方法                                                         | 描述                                                      |
-| :----------------------------------------------------------- | :-------------------------------------------------------- |
-| `groupKey(fieldName...)` `groupKey(fieldOrdinal...)` `groupKey(expr...)` `groupKey(exprList)` | 创建给定表达式的组键                                      |
-| `groupKey(exprList, exprListList)`                           | 使用分组集创建给定表达式的组键                            |
-| `groupKey(bitSet [, bitSets])`                               | 创建给定输入列的组键，如果`bitSets`指定，则具有多个分组集 |
+| 方法                                                         | 描述                                                         |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| `groupKey(fieldName...)`<br/>`groupKey(fieldOrdinal...)` <br/>`groupKey(expr...)` <br/>`groupKey(exprList)` | 创建一个指定表达式的分组键。                                 |
+| `groupKey(exprList, exprListList)`                           | 创建一个使用分组集合的指定表达式的分组键。                   |
+| `groupKey(bitSet [, bitSets])`                               | 创建一个指定输入列的分组键，如果指定了 `bitSets`，则指定输入列包含多个分组集合。 |
 
 #### 聚合调用方法
 
-以下方法返回一个 [RelBuilder.AggCall](https://calcite.apache.org/javadocAggregate/org/apache/calcite/tools/RelBuilder.AggCall.html)。
+以下方法会返回一个 `RelBuilder.AggCall`。
 
-| 方法                                                         | 描述                           |
-| :----------------------------------------------------------- | :----------------------------- |
-| `aggregateCall(op, expr...)` `aggregateCall(op, exprList)`   | 创建对给定聚合函数的调用       |
-| `count([ distinct, alias, ] expr...)` `count([ distinct, alias, ] exprList)` | 创建对`COUNT`聚合函数的调用    |
-| `countStar(alias)`                                           | 创建对`COUNT(*)`聚合函数的调用 |
-| `sum([ distinct, alias, ] expr)`                             | 创建对`SUM`聚合函数的调用      |
-| `min([ alias, ] expr)`                                       | 创建对`MIN`聚合函数的调用      |
-| `max([ alias, ] expr)`                                       | 创建对`MAX`聚合函数的调用      |
+| 方法                                                         | 描述                                 |
+| :----------------------------------------------------------- | :----------------------------------- |
+| `aggregateCall(op, expr...)`<br/>`aggregateCall(op, exprList)` | 为指定的聚合函数创建一个调用。       |
+| `count([ distinct, alias, ] expr...)`<br/>`count([ distinct, alias, ] exprList)` | 为 `COUNT` 聚合函数创建一个调用。    |
+| `countStar(alias)`                                           | 为 `COUNT(*)` 聚合函数创建一个调用。 |
+| `sum([ distinct, alias, ] expr)`                             | 为 `SUM` 聚合函数创建一个调用。      |
+| `min([ alias, ] expr)`                                       | 为 `MIN` 聚合函数创建一个调用。      |
+| `max([ alias, ] expr)`                                       | 为 `MAX` 聚合函数创建一个调用。      |
 
-要进一步修改`AggCall`，请调用其方法：
+如果想要进一步地修改 `AggCall`，可以调用如下方法：
 
-| 方法                                 | 描述                                                |
-| :----------------------------------- | :-------------------------------------------------- |
-| `approximate(approximate)`           | 允许聚合的近似值 `approximate`                      |
-| `as(alias)`                          | 为该表达式分配列别名（请参阅 SQL `AS`）             |
-| `distinct()`                         | 在聚合之前消除重复值（请参阅 SQL `DISTINCT`）       |
-| `distinct(distinct)`                 | 在聚合之前消除重复值如果 `distinct`                 |
-| `filter(expr)`                       | 在聚合之前过滤行（请参阅 SQL `FILTER (WHERE ...)`） |
-| `sort(expr...)` `sort(exprList)`     | 在聚合之前对行进行排序（请参阅 SQL `WITHIN GROUP`） |
-| `unique(expr...)` `unique(exprList)` | 在聚合之前使行唯一（请参阅 SQL `WITHIN DISTINCT`）  |
-| `over()`                             | 将其`AggCall`转换为窗口聚合（见`OverCall`下文）     |
+| 方法                                 | 描述                                                       |
+| :----------------------------------- | :--------------------------------------------------------- |
+| `approximate(approximate)`           | 允许聚合的近似值 `approximate`。                           |
+| `as(alias)`                          | 为表达式分配一个列别名（请参考 SQL `AS`）。                |
+| `distinct()`                         | 在聚合之前消除重复值（请参考 SQL `DISTINCT`）。            |
+| `distinct(distinct)`                 | 如果配置了 `distinct`，则在聚合之前消除重复值。            |
+| `filter(expr)`                       | 在聚合之前过滤行（请参考 SQL `FILTER (WHERE ...)`）。      |
+| `sort(expr...)` `sort(exprList)`     | 在聚合之前对行进行排序（请参考 SQL `WITHIN GROUP`）。      |
+| `unique(expr...)` `unique(exprList)` | 在聚合之前使行唯一（请参考 SQL `WITHIN DISTINCT`）。       |
+| `over()`                             | 将这个 `AggCall` 转换为窗口聚合（参考下面的 `OverCall`）。 |
 
 #### 窗口聚合调用方法
 
-要创建代表对窗口聚合函数的调用的 [RelBuilder.OverCall](https://calcite.apache.org/javadocAggregate/org/apache/calcite/tools/RelBuilder.OverCall.html)，请创建一个聚合调用，然后调用其`over()`方法，例如`count().over()`。
+为了创建一个 `RelBuilder.OverCall`（它代表对窗口聚合函数的调用）， 需要先创建一个聚合调用，然后调用它的 `over()` 方法，例如：`count().over()`。
 
-要进一步修改`OverCall`，请调用其方法：
+如果想要进一步地修改 `OverCall`，可以调用如下方法：
 
-| 方法                                           | 描述                                                         |
-| :--------------------------------------------- | :----------------------------------------------------------- |
-| `rangeUnbounded()`                             | 创建一个无界的基于范围的窗口， `RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` |
-| `rangeFrom(lower)`                             | 创建一个基于范围的窗口，边界在下方， `RANGE BETWEEN lower AND CURRENT ROW` |
-| `rangeTo(upper)`                               | 创建一个基于范围的窗口，在上面有界， `RANGE BETWEEN CURRENT ROW AND upper` |
-| `rangeBetween(lower, upper)`                   | 创建一个基于范围的窗口， `RANGE BETWEEN lower AND upper`     |
-| `rowsUnbounded()`                              | 创建一个无界的基于行的窗口， `ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING` |
-| `rowsFrom(lower)`                              | 创建一个基于行的窗口，边界在下方， `ROWS BETWEEN lower AND CURRENT ROW` |
-| `rowsTo(upper)`                                | 创建一个以行为边界的窗口， `ROWS BETWEEN CURRENT ROW AND upper` |
-| `rowsBetween(lower, upper)`                    | 创建一个基于行的窗口， `ROWS BETWEEN lower AND upper`        |
-| `partitionBy(expr...)` `partitionBy(exprList)` | 根据给定的表达式对窗口进行分区（请参阅 SQL `PARTITION BY`）  |
-| `orderBy(expr...)` `sort(exprList)`            | 对窗口中的行进行排序（请参阅 SQL `ORDER BY`）                |
-| `allowPartial(b)`                              | 设置是否允许部分宽度窗口；默认为真                           |
-| `nullWhenCountZero(b)`                         | 设置如果窗口中没有行，聚合函数是否应评估为空；默认假         |
-| `as(alias)`                                    | 分配列别名（请参阅 SQL `AS`）并将其转换`OverCall`为`RexNode` |
-| `toRex()`                                      | 将其转换`OverCall`为`RexNode`                                |
+| 方法                                                | 描述                                                         |
+| :-------------------------------------------------- | :----------------------------------------------------------- |
+| `rangeUnbounded()`                                  | 创建一个无界的、基于范围的窗口，`RANGE BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`。 |
+| `rangeFrom(lower)`                                  | 创建一个基于范围的、有下界的窗口，`RANGE BETWEEN lower AND CURRENT ROW`。 |
+| `rangeTo(upper)`                                    | 创建一个基于范围的、有上界的窗口，`RANGE BETWEEN CURRENT ROW AND upper`。 |
+| `rangeBetween(lower, upper)`                        | 创建一个基于范围的窗口，`RANGE BETWEEN lower AND upper`。    |
+| `rowsUnbounded()`                                   | 创建一个无界的、基于行的窗口，`ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING`。 |
+| `rowsFrom(lower)`                                   | 创建一个基于行的、有下界的窗口，`ROWS BETWEEN lower AND CURRENT ROW`。 |
+| `rowsTo(upper)`                                     | 创建一个基于行的、有上界的窗口，`ROWS BETWEEN CURRENT ROW AND upper`。 |
+| `rowsBetween(lower, upper)`                         | 创建一个基于行的窗口，`ROWS BETWEEN lower AND upper`。       |
+| `partitionBy(expr...)` <br/>`partitionBy(exprList)` | 根据指定的表达式对窗口进行分区（请参考 SQL `PARTITION BY`）。 |
+| `orderBy(expr...)` <br/>`sort(exprList)`            | 对窗口中的行进行排序（请参考 SQL `ORDER BY`）。              |
+| `allowPartial(b)`                                   | 设置是否允许部分宽度的窗口，默认为 `true`。                  |
+| `nullWhenCountZero(b)`                              | 设置如果窗口中没有数据行时，聚合函数是否应该计算为空，默认 `false`。 |
+| `as(alias)`                                         | 分配列别名（请参考 SQL `AS`），并将 `OverCall` 转换为 `RexNode`。 |
+| `toRex()`                                           | 将 `OverCall` 转换为 `RexNode`。                             |
