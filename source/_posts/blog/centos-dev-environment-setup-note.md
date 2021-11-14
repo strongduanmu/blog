@@ -165,6 +165,6 @@ systemctl disable NetworkManager
 
 ## 参考文档
 
-* [VirtualBox的各种网络模式要如何选择](https://segmentfault.com/a/1190000020231540)
+* [VirtualBox 的各种网络模式要如何选择](https://segmentfault.com/a/1190000020231540)
 * [CentOS 7 配置静态 IP 不生效](https://blog.csdn.net/weixin_37569048/article/details/96852643)
 
