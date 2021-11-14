@@ -157,9 +157,11 @@ systemctl disable NetworkManager
 
 ![1636882498](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/14/1636882498.jpg)
 
-最后，使用 Mac 命令行连接虚拟机进行测试，输入 `ssh root@192.168.56.101`，终于成功登录上服务器。现在，终于可以享受在 Linux 环境下开发的乐趣了。
+最后，使用 Mac 命令行连接虚拟机进行测试，输入 `ssh root@192.168.56.101`，终于成功登录上服务器。
 
 ![1636882727](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/14/1636882727.png)
+
+现在，可以享受在 Linux 环境开发的乐趣了。
 
 ## 参考文档
 
