@@ -13,7 +13,7 @@ header: false
 
 {% about avatar:https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/27/1638011091.jpg height:180px %}
 
-大家好，我是端正强，目前是 Apache ShardingSphere 社区的 Committer 成员，并且担任 SphereEx 高级中间件工程师职位。从 2018 年开始接触 Apache ShardingSphere 中间件，曾主导公司内部海量数据的分库分表，有着丰富的实践经验。本人热爱开源，乐于分享，目前专注于 Apache ShardingSphere 内核模块开发，期待能够和大家多多交流，共同进步。
+大家好，我是端正强，目前是 Apache ShardingSphere 社区的 Committer 成员，并担任 SphereEx 高级中间件工程师职位。从 2018 年开始接触 Apache ShardingSphere 中间件，曾主导公司内部海量数据的分库分表，有着丰富的实践经验。本人热爱开源，乐于分享，目前专注于 Apache ShardingSphere 内核模块开发，期待能够和大家多多交流，共同进步。
 
 {% navbar [博客](/) [文档](/wiki/) [留言](#comments) [GitHub](https://github.com/strongduanmu) %}
 
@@ -40,11 +40,3 @@ header: false
 参与 [Apache DolphinScheduler 和 ShardingSphere 全球线上联合 MeetUp](https://www.meetup.com/dolphinscheduler/events/277413098)，分享 `Insight Into Apache ShardingSphere` 主题演讲，向海外同学介绍 Apache ShardingSphere 项目的概况和核心特性。PPT [下载地址](https://github.com/strongduanmu/cdn/blob/master/share/Insight%20Into%20Apache%20ShardingSphere_Zhengqiang%20Duan.pptx)，视频 [观看地址](https://www.youtube.com/watch?v=BV8QEScCmgU)。
 
 {% endtimeline %}
-
-## 工作经历
-
-TODO
-
-## 个人总结
-
-TODO
