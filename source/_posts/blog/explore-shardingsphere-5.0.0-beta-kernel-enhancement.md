@@ -1,5 +1,5 @@
 ---
-title: 探秘 ShardingSphere 5.0.0-beta 版内核增强
+title: 探秘 ShardingSphere 5.0.0 beta 版内核增强
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2021-06-25 15:58:08
