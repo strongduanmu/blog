@@ -59,12 +59,12 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/14/1636874726
 
 在不同的网络模式下，虚拟机、主机、局域网/外网之间的可访问规则，可以参考如下的表格。
 
-| Mode       | VM→Host | VM←Host                                                      | VM1↔VM2 | VM→Net/LAN | VM←Net/LAN                                                   |
-| ---------- | ------- | ------------------------------------------------------------ | ------- | ---------- | ------------------------------------------------------------ |
-| Host-only  | +       | +                                                            | +       | –          | –                                                            |
-| Internal   | –       | –                                                            | +       | –          | –                                                            |
-| Bridged    | +       | +                                                            | +       | +          | +                                                            |
-| NAT        | +       | [Port forward](https://www.virtualbox.org/manual/ch06.html#natforward) | –       | +          | [Port forward](https://www.virtualbox.org/manual/ch06.html#natforward) |
+| Mode       | VM→Host | VM←Host                                                                         | VM1↔VM2 | VM→Net/LAN | VM←Net/LAN                                                                      |
+| ---------- | ------- | ------------------------------------------------------------------------------- | ------- | ---------- | ------------------------------------------------------------------------------- |
+| Host-only  | +       | +                                                                               | +       | –          | –                                                                               |
+| Internal   | –       | –                                                                               | +       | –          | –                                                                               |
+| Bridged    | +       | +                                                                               | +       | +          | +                                                                               |
+| NAT        | +       | [Port forward](https://www.virtualbox.org/manual/ch06.html#natforward)          | –       | +          | [Port forward](https://www.virtualbox.org/manual/ch06.html#natforward)          |
 | NATservice | +       | [Port forward](https://www.virtualbox.org/manual/ch06.html#network_nat_service) | +       | +          | [Port forward](https://www.virtualbox.org/manual/ch06.html#network_nat_service) |
 
 在了解了 VirtualBox 支持的网络模式后，我们来进行虚拟网卡的设置，本文采用 `Host-Only` 和 `Nat` 组合的配置方式。
@@ -167,4 +167,3 @@ systemctl disable NetworkManager
 
 * [VirtualBox 的各种网络模式要如何选择](https://segmentfault.com/a/1190000020231540)
 * [CentOS 7 配置静态 IP 不生效](https://blog.csdn.net/weixin_37569048/article/details/96852643)
-
