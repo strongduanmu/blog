@@ -67,7 +67,7 @@ executorService.execute(() -> {
 });
 ```
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644543745.png width:600px padding:10px bg:white %}
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644543745.png width:500px padding:20px bg:white %}
 
 - 参数列表：`函数式接口` 中的抽象方法对应的参数列表，前文例子中函数式接口为 Runnable 接口，抽象方法为 run 方法，为空参数方法；
 - 箭头：Lambda 表达式的标志符号，用来分隔参数列表和 Lambda 主体；
@@ -140,17 +140,81 @@ public interface Comparator<T> {
 
 Java8 新增了 `java.util.function` 包，在 function 包中引入了一些常用的函数式接口：
 
-| 函数式接口          | 函数描述符       | 原始类型特化                                                                                                                                                                                                                                                   | 说明           |
-| ------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `Predicate<T>`      | `T->boolean`     | `IntPredicate`, <br/>`LongPredicate`, <br/>`DoublePredicate`                                                                                                                                                                                                   | 断言型接口     |
-| `Consumer<T>`       | `T->void`        | `IntConsumer`, <br/>`LongConsumer`, <br/>`DoubleConsumer`                                                                                                                                                                                                      | 消费型接口     |
-| `Function<T,R>`     | `T->R`           | `IntFunction<R>`, <br/>`IntToDoubleFunction`, <br/>`IntToLongFunction`, <br/>`LongFunction<R>`, <br/>`LongToDoubleFunction`, <br/>`LongToIntFunction`, <br/>`DoubleFunction<R>`, <br/>`ToIntFunction<T>`, <br/>`ToDoubleFunction<T>`, <br/>`ToLongFunction<T>` | 函数型接口     |
-| `Supplier<T>`       | `()->T`          | `BooleanSupplier`, <br/>`IntSupplier`, <br/>`LongSupplier`, <br/>`DoubleSupplier`                                                                                                                                                                              | 供给型接口     |
-| `UnaryOperator<T>`  | `T->T`           | `IntUnaryOperator`, <br/>`LongUnaryOperator`, <br/>`DoubleUnaryOperator`                                                                                                                                                                                       | 一元操作型接口 |
-| `BinaryOperator<T>` | `(T,T)->T`       | `IntBinaryOperator`, <br/>`LongBinaryOperator`, <br/>`DoubleBinaryOperator`                                                                                                                                                                                    | 二元操作型接口 |
-| `BiPredicate<L,R>`  | `(L,R)->boolean` |                                                                                                                                                                                                                                                                | 二元断言型接口 |
-| `BiConsumer<T,U>`   | `(T,U)->void`    | `ObjIntConsumer<T>`, <br/>`ObjLongConsumer<T>`, <br/>`ObjDoubleConsumer<T>`                                                                                                                                                                                    | 二元消费型接口 |
-| `BiFunction<T,U,R>` | `(T,U)->R`       | `ToIntBiFunction<T,U>`, <br/>`ToLongBiFunction<T,U>`, <br/>`ToDoubleBiFunction<T,U>`                                                                                                                                                                           | 二元函数型接口 |
+<style type="text/css">
+.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-baqh">函数式接口</th>
+    <th class="tg-baqh">函数描述符</th>
+    <th class="tg-baqh">原始类型特化</th>
+    <th class="tg-baqh">说明</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-0lax">Predicate&lt;T&gt;</td>
+    <td class="tg-0lax">T -&gt; boolean</td>
+    <td class="tg-0lax">IntPredicate, LongPredicate, DoublePredicate</td>
+    <td class="tg-0lax">断言型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Consumer&lt;T&gt;</td>
+    <td class="tg-0lax">T -&gt; void</td>
+    <td class="tg-0lax">IntConsumer, LongConsumer, DoubleConsumer</td>
+    <td class="tg-0lax">消费型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Function&lt;T, R&gt;</td>
+    <td class="tg-0lax">T -&gt; R</td>
+    <td class="tg-0lax">IntFunction&lt;R&gt;, IntToDoubleFunction, IntToLongFunction, LongFunction&lt;R&gt;, LongToDoubleFunction, LongToIntFunction, DoubleFunction&lt;R&gt;, ToIntFunction&lt;T&gt;, ToDoubleFunction&lt;T&gt;, ToLongFunction&lt;T&gt;</td>
+    <td class="tg-0lax">函数型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">Supplier&lt;T&gt;</td>
+    <td class="tg-0lax">() -&gt; T</td>
+    <td class="tg-0lax">BooleanSupplier, IntSupplier, LongSupplier, DoubleSupplier</td>
+    <td class="tg-0lax">供给型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">UnaryOperator&lt;T&gt;</td>
+    <td class="tg-0lax">T -&gt; T</td>
+    <td class="tg-0lax">IntUnaryOperator, LongUnaryOperator, DoubleUnaryOperator</td>
+    <td class="tg-0lax">一元操作型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">BinaryOperator&lt;T&gt;</td>
+    <td class="tg-0lax">(T, T) -&gt; T</td>
+    <td class="tg-0lax">IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator</td>
+    <td class="tg-0lax">二元操作型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">BiPredicate&lt;L, R&gt;</td>
+    <td class="tg-0lax">(L, R) -&gt; boolean</td>
+    <td class="tg-0lax"></td>
+    <td class="tg-0lax">二元断言型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">BiConsumer&lt;T, U&gt;</td>
+    <td class="tg-0lax">(T, U) -&gt; void</td>
+    <td class="tg-0lax">ObjIntConsumer&lt;T&gt;, ObjLongConsumer&lt;T&gt;, ObjDoubleConsumer&lt;T&gt;</td>
+    <td class="tg-0lax">二元消费型接口</td>
+  </tr>
+  <tr>
+    <td class="tg-0lax">BiFunction&lt;T, U, R&gt;</td>
+    <td class="tg-0lax">(T, U) -&gt; R</td>
+    <td class="tg-0lax">ToIntBiFunction&lt;T, U&gt;, ToLongBiFunction&lt;T, U&gt;, ToDoubleBiFunction&lt;T, U&gt;</td>
+    <td class="tg-0lax">二元函数型接口</td>
+  </tr>
+</tbody>
+</table>
 
 - `Predicate<T>`：断言型接口，抽象方法为 `boolean test(T t)`，传入一个参数，返回一个布尔值。
 
@@ -321,7 +385,42 @@ Stream 操作具有如下特点：
 
 常用的 Stream 操作如下图：
 
-![1644542790](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644542790.jpg)
+<style type="text/css">
+.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
+.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
+  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
+.tg .tg-baqh{text-align:center;vertical-align:top}
+.tg .tg-0lax{text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+<thead>
+  <tr>
+    <th class="tg-baqh" colspan="3">Stream 操作分类</th>
+  </tr>
+</thead>
+<tbody>
+  <tr>
+    <td class="tg-baqh" rowspan="2">中间操作</td>
+    <td class="tg-baqh">无状态</td>
+    <td class="tg-0lax">unordered(), filter(), map(), mapToInt(), mapToLong(), mapToDobule(), flatMap(), flatMapToInt(), flatMapToLong(), flatMapToDobule(), peek()</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">有状态</td>
+    <td class="tg-0lax">distinct(), sorted(), limit(), skip()</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh" rowspan="2">结束操作</td>
+    <td class="tg-baqh">非短路操作</td>
+    <td class="tg-0lax">forEach(), forEachOrdered(), toArray(), reduce(), collect(), max(), min(), count()</td>
+  </tr>
+  <tr>
+    <td class="tg-baqh">短路操作</td>
+    <td class="tg-0lax">anyMatch(), allMatch(), noneMatch(), findFirst(), findAny()</td>
+  </tr>
+</tbody>
+</table>
 
 #### 常⽤的中间操作
 
@@ -705,7 +804,7 @@ System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-
 
 在 Optional 出现之前，Java 的 NullPointerException 问题令人头疼，我们需要手动添加很多判空逻辑：
 
-![1644542092](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644542092.jpg)
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644542092.jpg width:600px padding:20px bg:#2B2B2B %}
 
 为了减少这样的 null 值判断，Java8 借鉴了 Guava Optional，提供了新的 Optional 容器。根据官方文档定义，Optional 是一个容器对象，容器中可能包含也可能不包含一个非空对象。如果对象存在，isPresent() 将会返回 true，get()方法将会返回一个值。
 
@@ -822,15 +921,6 @@ try {
 ## 参考文档
 
 - [Java 8 的新特性—终极版](https://www.jianshu.com/p/5b800057f2d8)
-
 - [Java8 新特性，你应该了解这些](https://juejin.im/post/5ae6bfb66fb9a07a9b35bac1#heading-7)
-
 - [Guide To Java 8 Optional](https://www.baeldung.com/java-optional)
-
-- https://zhuanlan.zhihu.com/java8
-
-- https://www.ibm.com/developerworks/cn/java/j-lo-jdk8newfeature/index.html
-
-- [浅谈 Lambda Expression](https://www.jianshu.com/p/0251fef3211c)
-
 - [一文带你玩转 Java8 Stream 流，从此操作集合 So Easy](https://juejin.im/post/5cc124a95188252d891d00f2)
