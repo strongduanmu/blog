@@ -1,0 +1,9 @@
+online_tools:
+  title: 在线工具
+  description:
+  items:
+    - title: Tables Generator
+      url: https://www.tablesgenerator.com/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799035.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799163.jpg
+      description: 表格生成器
