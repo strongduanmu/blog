@@ -4,7 +4,7 @@ sitemap: false
 menu_id: notes
 layout: wiki
 seo_title: Git
-order: 30
+order: 20
 ---
 
 ## 常用 Git 命令

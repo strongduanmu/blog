@@ -5,6 +5,6 @@ menu_id: notes
 layout: wiki
 ---
 
-{% navbar [IDAE](idea) [Git](git) [Docker](docker) %}
+{% navbar [Docker](docker) [Git](git) [IDAE](idea) %}
 
 {% sites %}
