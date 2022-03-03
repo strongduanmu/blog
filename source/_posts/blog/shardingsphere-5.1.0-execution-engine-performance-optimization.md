@@ -28,7 +28,7 @@ SQL 解析引擎负责对用户输入的 SQL 语句进行解析，并生成包�
 
 从执行性能的角度来看，为每个分片的执行语句分配一个独立的数据库连接，可以充分利用多线程来提升执行性能，也可以将 I/O 所产生的消耗并行处理。此外，为每个分片分配一个独立的数据库连接，还能够避免过早的将查询结果集加载至内存，独立的数据库连接，能够持有查询结果集游标位置的引用，在需要获取相应数据时移动游标即可。
 
-从资源控制的角度来看，应当对业务访问数据库的连接数量进行限制，避免某一业务占用过多的数据库连接资源，影响其他业务的正常访问。 特别是在一个数据库实例中存在较多分表的情况下，一条不包含分片键的逻辑 SQL 将产生落在同库不同表的大量真实 SQL ，如果每条真实SQL都占用一个独立的连接，那么一次查询无疑将会占用过多的资源。
+从资源控制的角度来看，应当对业务访问数据库的连接数量进行限制，避免某一业务占用过多的数据库连接资源，影响其他业务的正常访问。 特别是在一个数据库实例中存在较多分表的情况下，一条不包含分片键的逻辑 SQL 将产生落在同库不同表的大量真实 SQL ，如果每条真实 SQL 都占用一个独立的连接，那么一次查询无疑将会占用过多的资源。
 
 为了解决执行性能和资源控制的冲突问题，Apache ShardingSphere 提出了连接模式的概念，下面是 Apache ShardingSphere 源码对于连接模式的定义。
 
@@ -37,7 +37,7 @@ SQL 解析引擎负责对用户输入的 SQL 语句进行解析，并生成包�
  * Connection Mode.
  */
 public enum ConnectionMode {
-    
+
     MEMORY_STRICTLY, CONNECTION_STRICTLY
 }
 ```
@@ -66,7 +66,7 @@ public enum ConnectionMode {
 
 - UNION 之后的列名使用第一个 SELECT 语句中的列名；
 
-- UNION  中包含 ORDER BY 和 LIMIT 时，需要使用括号将各个查询语句括起来，UNION 无法保证最终的结果集有序，如果需要对 UNION 结果集进行排序，需要在 UNION 语句最后添加 ORDER BY LIMIT 子句；
+- UNION 中包含 ORDER BY 和 LIMIT 时，需要使用括号将各个查询语句括起来，UNION 无法保证最终的结果集有序，如果需要对 UNION 结果集进行排序，需要在 UNION 语句最后添加 ORDER BY LIMIT 子句；
 
 ```SQL
 # 无法保证 UNION 结果集有序
@@ -81,7 +81,7 @@ public enum ConnectionMode {
 
 - UNION 之后的列名使用第一个 SELECT 语句中的列名；
 
-- UNION  中包含 ORDER BY 和 LIMIT 时，需要使用括号将各个查询语句括起来，最后一个 UNION 子句可以不使用括号，不使用括号，则 ORDER BY LIMIT 子句应用于整个 UNION 结果。
+- UNION 中包含 ORDER BY 和 LIMIT 时，需要使用括号将各个查询语句括起来，最后一个 UNION 子句可以不使用括号，不使用括号，则 ORDER BY LIMIT 子句应用于整个 UNION 结果。
 
 - UNION 语句不支持 FOR NO KEY UPDATE、FOR UPDATE、FOR SHARE 和 FOR KEY SHARE；
 
@@ -105,7 +105,7 @@ SELECT product_id FROM order_items UNION SELECT product_id FROM inventories ORDE
 
 综合以上梳理的信息来看，不同的数据库方言都能够支持简单的 `SELECT * FROM table WHERE` 语句，对于 `ORDER BY LIMIT` 也能通过语法调整进行支持，只是使用上存在一些语法差异，而对于更加复杂的分组查询、子查询及关联查询，官方文档上并未进行详细描述。考虑到 SQL 优化性改写需要保证 SQL 兼容性，Apache ShardingSphere 5.1.0 只选择了简单的 `SELECT * FROM table WHERE` 语句进行改写，旨在快速提升 OLTP 场景下的查询性能。
 
-下面展示了 RouteSQLRewriteEngine 改写引擎的最新逻辑，Apache ShardingSphere 5.1.0 中添加了对于 `SELECT * FROM table WHERE`  语句的优化性改写逻辑，首先通过 isNeedAggregateRewrite 进行判断，只有当同一个数据源中的路由结果大于 1，并且真实执行的 SQL 满足 `SELECT * FROM table WHERE` 结构时，才会进行 UNION ALL 改写。
+下面展示了 RouteSQLRewriteEngine 改写引擎的最新逻辑，Apache ShardingSphere 5.1.0 中添加了对于 `SELECT * FROM table WHERE` 语句的优化性改写逻辑，首先通过 isNeedAggregateRewrite 进行判断，只有当同一个数据源中的路由结果大于 1，并且真实执行的 SQL 满足 `SELECT * FROM table WHERE` 结构时，才会进行 UNION ALL 改写。
 
 ```Java
 /**
@@ -472,11 +472,11 @@ rules:
 ```Java
 @State(Scope.Thread)
 public class QueryOptimizationTest {
-    
+
     private PreparedStatement unionAllForCaseOneStatement;
-    
+
     private PreparedStatement unionAllForCaseTwoStatement;
-    
+
     @Setup(Level.Trial)
     public void setup() throws Exception {
         Connection connection = DriverManager.getConnection("jdbc:mysql://10.16.9.201:3307/sharding_db?useSSL=false", "root", "root");
@@ -485,13 +485,13 @@ public class QueryOptimizationTest {
         // CASE 2
         unionAllForCaseTwoStatement = connection.prepareStatement("SELECT SUM(k) AS sumK FROM sbtest1 WHERE id < ?;");
     }
-    
+
     @Benchmark
     public void testUnionAllForCaseOne() throws SQLException {
         unionAllForCaseOneStatement.setInt(1, 200);
         unionAllForCaseOneStatement.executeQuery();
     }
-    
+
     @Benchmark
     public void testUnionAllForCaseTwo() throws SQLException {
         unionAllForCaseTwoStatement.setInt(1, 200);
@@ -540,7 +540,7 @@ public class QueryOptimizationTest {
 
 ![1646306546](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306546.jpg)
 
-CASE 1 与 CASE  2 都是基于 100 万数据量下的 sysbench 表结构进行测试，由于测试表分片数较多，整体性能提升了 4 倍左右，理论上随着分片数的增加，性能提升的效果会更加明显。
+CASE 1 与 CASE 2 都是基于 100 万数据量下的 sysbench 表结构进行测试，由于测试表分片数较多，整体性能提升了 4 倍左右，理论上随着分片数的增加，性能提升的效果会更加明显。
 
 ## **结语**
 
