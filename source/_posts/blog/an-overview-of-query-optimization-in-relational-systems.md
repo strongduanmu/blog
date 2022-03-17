@@ -1,9 +1,12 @@
 ---
 title: 关系系统查询优化概述
-tags: [查询优化]
+tags: [Query Optimization,Paper]
+categories: [Query Optimization]
+date: 2022-01-18 08:39:23
+cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/17/1647475423.jpg
 ---
 
-> 原文链接：https://www.microsoft.com/en-us/research/publication/an-overview-of-query-optimization-in-relational-systems-slides/
+> 本文翻译自论文 `An Overview of Query Optimization in Relational Systems`，原文链接：https://web.stanford.edu/class/cs345d-01/rl/chaudhuri98.pdf，论文介绍了 70 年代以来的优化器方面的研究成本，通过本文的学习，我们可以快速了解关系系统中常见的查询优化技术，为后续学习打下良好的基础。
 
 ## 目标
 
