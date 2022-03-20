@@ -6,351 +6,104 @@ date: 2022-01-18 08:39:23
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/17/1647475423.jpg
 ---
 
-> 本文翻译自论文 `An Overview of Query Optimization in Relational Systems`，原文链接：https://web.stanford.edu/class/cs345d-01/rl/chaudhuri98.pdf，论文介绍了 70 年代以来的优化器方面的研究成本，通过本文的学习，我们可以快速了解关系系统中常见的查询优化技术，为后续学习打下良好的基础。
+本文翻译自论文 [An Overview of Query Optimization in Relational Systems](https://web.stanford.edu/class/cs345d-01/rl/chaudhuri98.pdf)，论文介绍了 70 年代以来优化器方面的研究成果，通过本文的学习，我们可以快速了解关系系统中常见的查询优化技术，为后续深入学习 Calcite 及查询优化技术打下良好的基础。
 
 ## 目标
 
-自 70 年代初以来，在查询优化方面进行了大量工作。 很难在一篇短文中捕捉到大量工作的广度和深度。 因此，我决定主要关注关系数据库系统中 SQL 查询的优化，并提出我对该领域有偏见和不完整的看法。 本文的目标不是全面，而是解释该领域重要工作的基础和现有样本。 我想向这个领域的许多贡献者道歉，因为疏忽或缺乏空间，我未能明确承认他们的工作。 为了便于演示，我冒昧地交易技术精度。
+自上世纪 70 年代初以来，学术界在查询优化领域进行了大量的研究工作。在一篇简短的论文中，很难展现出这些研究工作的广度和深度。因此，我决定将重点放在关系型数据库系统的 SQL 查询优化上，并提出我对这个领域的个人看法。本文的目标不是全面的，而是介绍这个领域的基础理论，并展示这些重要工作的一些示例。我想向这个领域的贡献者们道歉，由于个人疏忽及篇幅原因，我未能明确地感谢他们的工作。此外，为了便于演示，我冒昧地牺牲了技术精度。
 
 ## 简介
 
-关系查询语言提供了一个高级“声明性”接口来访问存储在关系数据库中的数据。随着时间的推移，SQL [41] 已经成为关系查询语言的标准。 SQL 数据库系统的查询评估组件的两个关键组件是查询优化器和查询执行引擎。查询执行引擎实现一组物理运算符。操作员将一个或多个数据流作为输入并产生输出数据流。物理运算符的示例是（外部）排序、顺序扫描、索引扫描、嵌套循环连接和排序合并连接。我将此类运算符称为物理运算符，因为它们不一定与关系运算符一一关联。将物理运算符视为最简单的方法是将代码片段用作构建块以使 SQL 查询的执行成为可能。这种执行的抽象表示是物理运算符树，如图 1 所示。运算符树中的边代表物理运算符之间的数据流。我们交替使用术语物理运算符树和执行计划（或简称为计划）。执行引擎负责执行导致生成查询答案的计划。因此，查询执行引擎的能力决定了可行的操作符树的结构。我们建议读者参考 [20] 以了解查询评估技术的概述。
+关系查询语言提供了高级的 `声明式` 接口，用来访问存储在关系型数据库中的数据。随着时间的推移，SQL[^41] 已经成为关系查询语言的标准。SQL 数据库系统中查询估算组件的两个最关键组件是 `查询优化器` 和 `查询执行引擎`。
 
-![image-20211025085156595](index_files/image-20211025085156595.png)
+查询执行引擎实现了一组物理算法（`physical operators`）。算子负责将一个或多个数据流作为输入，并生成一个输出数据流。物理算子的例子包括：`（外部）排序`、`顺序扫描`、`索引扫描`、`嵌套循环连接`（nested-loop join） 和 `排序合并连接`（sort-merge join）。我将这些算子称为物理算子，因为它们不一定与关系操作符一对一绑定。理解物理算子最简单的方法是将它看做代码块，代码块作为基础模块实现了 SQL 查询语句的执行。这种执行的抽象表示就是物理算子树，如下图所示。算子树中的边表示物理算子之间的数据流。我们使用 `物理算子树`、`执行计划`（或者 `简单的计划`）这些可交换的术语。执行引擎负责计划的执行，并且生成查询的结果。因此，查询执行引擎的能力决定了可行的算子树的结构。读者可以参考[^20]来了解查询估算技术的概要。
 
-查询优化器负责为执行引擎生成输入。它将 SQL 查询的解析表示作为输入，并负责从可能的执行计划空间为给定的 SQL 查询生成有效的执行计划。优化器的任务很重要，因为对于给定的 SQL 查询，可能有大量可能的运算符树：
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/17/1647477934.png width:500px padding:10px bg:white %}
 
-* 给定查询的代数表示可以转换为许多其他逻辑等价的代数表示：例如，Join(Join(A,B),C)=Join(Join(B,C),A)
-* 对于给定的代数表示，可能有许多实现代数表达式的算子树，例如，通常在数据库系统中支持多种连接算法。此外，执行这些计划的吞吐量或响应时间可能大不相同。因此，优化器对执行的明智选择至关重要。因此，查询优化可以被视为一个困难的搜索问题。为了解决这个问题，我们需要提供：
-  * 计划空间（搜索空间）。
-  * 一种成本估算技术，可以将成本分配给搜索空间中的每个计划。直观地说，这是对执行计划所需资源的估计。
-  * 一种可以搜索执行空间的枚举算法。
+查询优化器负责为执行引擎生成输入。它接受一个已解析的 SQL 查询作为输入，并负责从可行的执行计划空间里，为给定的 SQL 查询生成有效的执行计划。优化器的任务很重要，因为对于给定的 SQL 查询，可能有大量可行的算子树：
 
-理想的优化器是这样的：(1) 搜索空间包含低成本的计划 (2) 成本计算技术准确 (3) 枚举算法有效。 这三个任务中的每一个都是重要的，这就是为什么构建一个好的优化器是一项艰巨的任务。 我们首先讨论 System-R 优化框架，因为这是一种非常优雅的方法，有助于推动后续的大部分优化工作。 在第 4 节中，我们将讨论优化器考虑的搜索空间。 本节将提供一个论坛，用于介绍包含在搜索空间中的重要代数变换。 在第 5 节中，我们解决了成本估算的问题。 在第 6 节中，我们讨论了枚举搜索空间的主题。 这样就完成了对基本优化框架的讨论。 在第 7 节中，我们讨论了查询优化方面的一些最新发展。
+* 给定查询的代数表示，可以转换为许多其他逻辑上等价的代数表示，例如：
 
-## 一个示例：SYSTEM-R 优化器
-
-System-R 项目显着提升了关系系统的查询优化状态。 [55] 中的想法已被纳入许多商业优化器中，并且仍然非常重要。我将在 Select-Project-Join (SPJ) 查询的上下文中展示这些重要思想的一个子集。 SPJ 查询类与数据库理论中广泛研究的联合查询密切相关并对其进行封装。在 SPJ 查询上下文中 System-R 优化器的搜索空间由对应于线性连接操作序列的运算符树组成，例如，序列 Join(Join(Join(A,B),C),D) 是如图 2(a) 所示。由于连接的关联和交换属性，这些序列在逻辑上是等价的。连接运算符可以使用嵌套循环或排序合并实现。每个扫描节点都可以使用索引扫描（使用聚集或非聚集索引）或顺序扫描。最后，尽可能早地评估谓词。成本模型为搜索空间中的任何部分或完整计划分配估计成本。它还确定计划中每个运算符输出的数据流的估计大小。它依赖于：
-
-* 对关系和索引维护的一组统计信息，例如，关系中的数据页数、索引中的页数、列中不同值的数量
-
-* 用于估计谓词选择性和为每个运算符节点投影输出数据流大小的公式。例如，连接输出的大小是通过取两个关系的大小的乘积然后应用所有适用谓词的联合选择性来估计的。
-
-* 估算每个运算符查询执行的 CPU 和 I/O 成本的公式。这些公式考虑了其输入数据流的统计属性、输入数据流的现有访问方法以及数据流上的任何可用顺序（例如，如果数据流已排序，则排序合并连接的成本在该流上可能会显着减少）。此外，还检查输出数据流是否有任何顺序。
-
-成本模型使用 (a)-(c) 以自下而上的方式为计划中的运算符计算和关联以下信息： (1) 由运算符节点的输出表示的数据流的大小。 (2) 由操作节点的输出数据流创建或维持的元组的任何排序。 (3) 运营商的预估执行成本（以及目前部分计划的累计成本）。
-
-![image-20211025090048859](index_files/image-20211025090048859.png)
-
-System-R 优化器的枚举算法展示了两种重要的技术：使用动态规划和使用有趣的订单。动态规划方法的本质是基于成本模型满足最优性原则的假设。具体来说，它假设为了获得由 k 个连接组成的 SPJ 查询 Q 的最佳计划，只需考虑由 (k-1) 个连接组成的 Q 子表达式的最佳计划，并使用额外的扩展这些计划加入。换句话说，在确定 Q 的最佳计划时，不需要进一步考虑由 (k-1) 个连接组成的 Q 子表达式（也称为子查询）的次优计划。因此，基于动态规划的枚举查看 SPJ 查询Q 作为要加入的一组关系 {R1,..Rn}。枚举算法自下而上进行。在第 j 步结束时，该算法为所有大小为 j 的子查询生成最佳计划。为了获得由 (j+1) 个关系组成的子查询的最佳计划，我们考虑了通过扩展在第 j 步中构建的计划来构建子查询计划的所有可能方法。例如，{R1,R2,R3,R4} 的最优计划是通过从以下最优计划中选择成本最低的计划获得的： (1) Join({R1,R2,R3},R4) (2 ) 加入({R1,R2,R4},R3) (3) 加入({R1,R3,R4},R2) (4)加入({R2,R3,R4}, R1)。 {R1,R2,R3,R4} 的其余计划可能会被丢弃。动态规划方法比朴素方法快得多，因为不需要枚举 O(n!) 计划，只需枚举 O(n2n -1) 计划。
-System R 优化器的第二个重要方面是考虑有趣的订单。现在让我们考虑用谓词 R1.a = R2.a = R3.a 表示 {R1,R2,R3} 之间的连接的查询。让我们还假设子查询 {R1,R2} 的计划成本分别为 x 和 y，分别用于嵌套循环和排序合并连接，并且 x < y。在这种情况下，在考虑 {R1, R2, R3} 的计划时，我们不会考虑使用排序合并连接 R1 和 R2 的计划。但是，请注意，如果使用 sort-merge 连接 R1 和 R2，则连接的结果将在 a 上排序。排序后的顺序可能会显着降低与 R3 的连接成本。因此，修剪表示 R1 和 R2 之间的排序合并连接的计划可能会导致全局计划的次优。出现问题是因为 R1 和 R2 之间的排序合并连接的结果在输出流中具有对后续连接有用的元组排序。但是，嵌套循环连接没有这样的顺序。因此，给定一个查询，系统 R 确定了可能对查询的执行计划产生影响的元组的排序（因此命名为有趣的顺序）。此外，在 System R 优化器中，只有当两个计划表示相同的表达式并且具有相同的有趣顺序时，才会比较它们。有趣顺序的想法后来在 [22] 中推广到物理属性，并在现代优化器中广泛使用。直观地说，物理属性是计划的任何特征，它不会被同一逻辑表达式的所有计划共享，但会影响后续操作的成本。最后，请注意，System-R 考虑物理特性的方法展示了一种简单的机制来处理任何违反最优性原则的行为，不一定仅源于物理特性。
-尽管 System-R 方法很优雅，但该框架无法轻松扩展以包含扩展搜索空间的其他逻辑转换（超出连接排序）。这导致了更可扩展的优化架构的开发。然而，基于成本的优化、动态规划和有趣订单的使用强烈影响了优化的后续发展。
-
-## 搜索空间
-
-如第 2 节所述，优化的搜索空间取决于保持等价的代数变换集和优化器支持的物理运算符集。在本节中，我将讨论已发现的许多重要代数变换中的一些。应该注意的是，转换不一定会降低成本，因此必须通过枚举算法以基于成本的方式应用，以确保获得积极的收益。
-
-在优化查询的生命周期中，优化器可以使用查询的多种表示。初始表示通常是查询的解析树，最终表示是运算符树。还使用的一种中间表示是捕获代数表达式的逻辑运算符树（也称为查询树）的表示。图 2 是查询树的示例。通常，查询树的节点用附加信息进行注释。
-
-一些系统还使用“面向微积分”的表示来分析查询的结构。对于 SPJ 查询，这样的结构通常由查询图捕获，其中节点表示关系（相关变量），标记的边表示关系之间的连接谓词（参见图 3）。尽管概念上很简单，但这种表示方式并不能以多种方式表示任意 SQL 语句的结构。首先，谓词图只表示一组连接谓词，不能表示其他代数运算符，例如联合。其次，与自然连接不同的是，诸如外连接之类的运算符是不对称的，并且对求值顺序很敏感。最后，这种表示没有捕捉到 SQL 语句可能具有嵌套查询块的事实。在 Starburst 系统 [26] 中使用的 QGM 结构中，构建块是一个增强的查询图，能够表示没有嵌套的简单 SQL 语句（“单块”查询）。多块查询表示为一组子图，子图中的边代表跨查询块的谓词（和量词）。相比之下，Exodus [22] 及其衍生产品在优化的所有阶段统一使用查询树和运算符树。
-
-![image-20211025090957328](index_files/image-20211025090957328.png)
-
-## 交换算子
-
-利用算子之间的交换性的一个大而重要的转换类。在本节中，我们将看到此类转换的示例。
-
-### 归纳关联顺序
-
-在许多系统中，连接操作的序列在语法上受到限制以限制搜索空间。例如，在 System R 项目中，只考虑连接操作的线性序列，关系之间的笛卡尔积被推迟到所有连接之后。
-由于连接操作是可交换的和关联的，操作符树中的连接序列不需要是线性的。特别地，由关系 R1、R2、R3、R4 之间的连接组成的查询可以代数表示和评估为 Join(Join(A,B),Join(C,D))。这种查询树被称为灌木丛，如图 2(b) 所示。 Bushy join 序列需要实现中间关系。虽然浓密的树可能会导致更便宜的查询计划，但它们会大大增加枚举搜索空间的成本（最昂贵的并不是生成语法连接命令的成本。 相反，选择物理运算符和计算每个替代计划的成本的任务是计算密集型的。）。尽管已经有一些关于探索丛集连接序列的优点的研究，但总的来说，大多数系统仍然关注线性连接序列并且仅关注丛集连接树的受限子集。
-推迟笛卡尔积也可能导致性能不佳。在查询图形成星形的许多决策支持查询中，已经观察到适当节点之间的笛卡尔积（OLAP 术语 [7] 中的“维”表）导致成本显着降低。
-在一个可扩展的系统中，连接枚举器的行为可以在每个查询的基础上进行调整，以限制连接树的“密集”性，并允许或禁止笛卡尔积[46]。然而，先验地确定这种调整对搜索质量和成本的影响是很重要的。
-
-### 外连接和连接
-
-单边外连接是 SQL 中的一种非对称运算符，它保留一个关系的所有元组。对称外连接保留了操作数关系。因此，(R LOJ S)，其中 LOJ 指定 R 和 S 之间的左外连接，保留了 R 的所有元组。它们的 S 属性为 NULL）。与自然连接不同，外连接和连接的序列不能自由交换。但是，当连接谓词在 (R,S) 之间并且外连接谓词在 (S,T) 之间时，以下恒等式成立：
-加入（R，S LOJ T）=加入（R，S）LOJ T
-如果上面的关联规则可以重复应用，我们得到一个等效的表达式，其中“连接块”的评估在“外连接块”之前。随后，连接可以在它们之间自由地重新排序。与其他转换一样，此标识的使用需要基于成本。 [53] 中的标识定义了一类查询，其中连接和外连接可以重新排序。
-
-### 分组和关联
-
-![image-20211027090806077](index_files/image-20211027090806077.png)
-
-在使用 group-by 执行 SPJ 查询的传统中，对查询的 SPJ 组件的评估先于 group-by。本节中描述的一组转换使 group by 操作能够在连接之前进行。这些转换适用于使用 SELECT DISTINCT 的查询，因为后者是 group-by 的特殊情况。对 group-by 运算符的评估可能会导致元组数量的显着减少，因为 group-by 运算符导致的关系的每个分区只生成一个元组。因此，在某些情况下，通过先进行 group-by，可能会显着降低 join 的成本。此外，在存在适当索引的情况下，可以廉价地评估分组操作。此类转换的对偶对应于 group-by 运算符可以通过连接被拉起的情况。这些转换在 [5,60,25,6] 中有描述（有关概述，请参见 [4]）。
-在本节中，我们将简要讨论在联接之前进行早期分组的转换可能适用的特定实例。考虑图 4(a) 中的查询树。让 R1 和 R2 之间的连接是一个外键连接，让 G 的聚合列来自 R1 中的列，并且 group-by 列的集合是 R1 的外键列的超集。对于这样的查询，让我们考虑图 4(b) 中相应的运算符树，其中 G1=G。在该树中，与 R2 的最终连接只能消除 G1 创建的 R1 的一组潜在分区，但不会影响分区，也不会影响 G1 为分区计算的聚合，因为 R1 中的每个元组将与最多一个元组连接R2。因此，我们可以下推 group-by，如图 4(b) 所示，并保留任意无副作用聚合函数的等效性。图 4(c) 说明了一个示例，其中转换引入了 group-by，并表示了 group-by 操作分阶段完成的一类有用示例。例如，假设在图 4(a) 中，应用聚合函数的所有列都来自 R1。在这些情况下，引入的 group-by 运算符 G1 对 R1 节点的投影列上的关系进行分区，并计算这些分区上的聚合值。然而，图 4(a) 中的真正分区可能需要将 G1 引入的多个分区组合成一个分区（多对一映射）。 group-by 运算符 G 确保了上述情况。由于 G1 的数据缩减效果，这种分阶段计算可能仍然有助于降低连接的成本。这种分阶段聚合需要聚合函数满足 Agg(S U S’) 可以从 Agg(S) 和 Agg(S’) 计算的属性。例如，为了计算每个部门所有产品的总销售额，我们可以使用图 4(c) 中的转换进行早期聚合并获得每个产品的总销售额。然后，我们需要一个后续的 group-by，它对属于每个部门的所有产品进行求和。
-
-## 减少多块查询到单块
-
-本节中描述的技术展示了如何在某些条件下将多块 SQL 查询折叠为单块 SQL 查询。
-
-### 合并视图
-
-让我们考虑一个使用 SELECT ANY 的连接查询。如果查询中的一个或多个关系是视图，但每个关系都是通过连接查询定义的，那么视图定义可以简单地“展开”以获得单个块 SQL 查询。例如，如果查询 Q = Join(R,V) 并且视图 V = Join(S,T)，则查询 Q 可以展开为 Join(R,Join(S,T)) 并且可以自由重新排序。这样的步骤可能需要对视图定义中的变量进行一些重命名。
-不幸的是，当视图比简单的 SPJ 查询更复杂时，这种简单的展开无法工作。当一个或多个视图包含 SELECT DISTINCT 时，移动或拉起 DISTINCT 的转换需要小心以正确保留重复的数量，[49]。更一般地，当视图包含 group by 运算符时，展开需要能够拉起 group-by 运算符，然后不仅可以自由地重新排序连接，而且还可以自由地重新排序 group-by 运算符以确保最优性。特别是，我们得到了一个查询，例如图 4(b) 中的查询，我们正在尝试考虑如何将其转换为图 4(a) 等形式，以便 R1 和 R2 可以自由重新排序.虽然第 4.1.3 节中的转换可用于此类情况，但它强调了问题的复杂性 [6]。
-
-### 合并嵌套子查询
-
-考虑以下来自 [13] 的嵌套查询示例，其中 Emp# 和 Dept# 是对应关系的键：
-
-```sql
-SELECT Emp.Name
-FROM Emp
-WHERE Emp.Dept#  IN
-	SELECT Dept.Dept#  FROM Dept
-	WHERE Dept.Loc=‘Denver’
-	AND Emp.Emp# = Dept.Mgr
+```
+Join(Join(A,B),C) = Join(Join(B,C),A)
 ```
 
-如果使用元组迭代语义来回答查询，则对 Dept 关系的每个元组评估一次内部查询。 当内部查询块不包含来自外部查询块（不相关）的变量时，明显的优化适用。 在这种情况下，内部查询块只需要评估一次。 但是，当确实存在来自外部块的变量时，我们说查询块是相关的。 例如，在上面的查询中，Emp.Emp# 充当相关变量。 Kim [35] 和随后的其他人 [16,13,44] 已经确定了取消相关嵌套 SQL 查询并将其“扁平化”为单个查询的技术。 例如，上面的嵌套查询简化为：
-
-```sql
-SELECT E.Name
-   FROM Emp E, Dept D
-   WHERE E.Dept# = D.Dept#
-AND D.Loc = ‘Denver’ AND E.Emp# = D.Mgr
-```
-
-Dayal [13] 是第一个提出取消嵌套的代数观点的人。 问题的复杂性取决于嵌套的结构，即嵌套子查询是否具有量词（例如，ALL、EXISTS）、聚合或两者都没有。 在最简单的情况下，上面的查询就是一个例子，[13] 观察到元组语义可以建模为 Semijoin(Emp,Dept, Emp.Dept# = Dept.Dept#)2。 以这种方式查看后，不难看出为什么可以合并查询，因为：
-
-```sql
-Semijoin(Emp,Dept,Emp.Dept# = Dept. Dept#) =
-Project(Join(Emp,Dept), Emp.*)
-```
-
-其中 Join(Emp,Dept) 在谓词 Emp.Dept# = Dept. Dept# 上。 Project operator3 的第二个参数指示必须保留关系 Emp 的所有列。
-当嵌套子查询中存在聚合时，问题会更加复杂，如下文 [44] 中的示例所示，因为现在合并查询块需要在不违反嵌套查询语义的情况下提取聚合：
-
-```sql
-SELECT Dept.name
-FROM Dept
-WHERE Dept.num-of-machines ≥
-(SELECT COUNT(Emp.*) FROM Emp
-WHERE Dept.name= Emp.Dept_name)
-```
-
-保留重复项和空值尤其棘手。 为了体会其中的微妙之处，请注意如果对于 Dept.name 的特定值（例如 d），没有与 Emp.Dept_name 匹配的元组，即，即使谓词 Dept.name= Emp.dept _ name 失败，那么 Dept 元组 d 仍然有一个输出元组。 但是，如果我们采用本节第一个查询中使用的转换，那么由于连接谓词失败，dept d 将没有输出元组。 因此，在存在聚合的情况下，我们必须通过左外连接保留外部查询块的所有元组。 特别是，上面的查询可以正确地转换为：
-
-```sql
-SELECT Dept.name  FROM Dept LEFT OUTER JOIN Emp
-ON (Dept.name= Emp.dept_name )
-GROUP BY Dept.name
-HAVING Dept. num-of-machines < COUNT (Emp.*)
-```
-
-因此，对于此类查询，合并的单块查询具有外连接。 如果查询块之间的嵌套结构是线性的，那么这种方法是适用的，并且转换会产生一个由连接和外连接的线性序列组成的单个块查询。 事实证明，连接和外连接的顺序是这样的，我们可以使用第 4.1.2 节中描述的关联规则先计算所有连接，然后按顺序执行所有外连接。 取消嵌套子查询的另一种方法是将查询转换为使用表表达式或视图的查询（因此，不是单块查询）。 这是 Kim 工作的方向 [35]，随后在 [44] 中进行了改进。
-
-## 使用类似半连接的技术优化多块查询
-
-在上一节中，我展示了如何在单个块中折叠多块查询的示例。 在本节中，我将讨论一种补充方法。 本节中描述的方法的目标是利用谓词跨块的选择性。4 它在概念上类似于使用半连接从站点 A 向远程站点 B 传播有关 A 的相关值的信息，以便 B 发送到 A 没有不必要的元组。 在多块查询的上下文中，A 和 B 位于不同的查询块中，但属于同一查询的一部分，因此传输成本不是问题。 相反，“从 A 接收”的信息用于减少 B 中所需的计算，并确保 B 产生的结果也与 A 相关。 这种技术需要引入新的表表达式和视图。 例如，考虑来自 [56] 的以下查询：
-
-```sql
-CREATE VIEW DepAvgSal As (
-SELECT E.did, Avg(E.Sal) AS avgsal
-FROM Emp E
-GROUP BY E.did)
-SELECT E.eid, E.sal
-FROM Emp E, Dept D, DepAvgSal V
-WHERE E.did  = D.did AND E.did = V.did
-AND E.age < 30 AND D.budget > 100k
-AND E.sal > V.avgsal
-```
-
-该技术认识到我们可以通过在上述查询中仅执行 E 和 D 之间的连接并投影唯一的 E.did 来创建相关 E.did 的集合。 该集合可以传递给视图 DepAvgSal 以限制其计算。 这是通过以下三个视图完成的。
-
-```sql
-CREATE VIEW partialresult AS
-(SELECT E.id, E.sal, E.did
- FROM Emp E, Dept D
- WHERE E.did=D.did AND E.age < 30
- AND D.budget > 100k)
-CREATE VIEW Filter AS
-(SELECT DISTINCT P.did FROM PartialResult P)
-CREATE VIEW LimitedAvgSal AS
-(SELECT E.did, Avg(E.Sal) AS avgsal
-FROM Emp E, Filter F
-WHERE E.did = F.did GROUP BY E.did)
-```
-
-下一页上重新制定的查询利用上述视图来限制计算。
-
-```sql
-SELECT P.eid, P.sal
-FROM PartialResult P, LimitedDepAvgSal V
-WHERE P.did = V.did AND P.sal > V.avgsal
-```
-
-上述技术可用于包含视图（包括递归视图）定义或嵌套子查询的多块查询 [42,43,56,57]。 在每种情况下，目标都是避免视图或嵌套子查询中的冗余计算。 认识到计算视图的成本（上面示例中的视图 PartialResult）与使用此类视图来降低计算成本之间的权衡也很重要。
-
-上述转换到半连接的正式关系最近已在 [56] 中提出，并且可能构成将此策略集成到基于成本的优化器中的基础。 请注意，此技术的退化应用程序是跨查询块而不是视图结果传递谓词。 这种更简单的技术已用于分布式和异构数据库，并在 [36] 中进行了推广。
-
-## 统计和成本估算
-
-给定一个查询，有许多逻辑上等价的代数表达式，对于每个表达式，有很多方法可以将它们实现为运算符。 即使我们忽略枚举可能性空间的计算复杂性，仍然存在决定哪个算子树消耗最少资源的问题。 资源可以是 CPU 时间、I/O 成本、内存、通信带宽或这些的组合。 因此，给定查询的运算符树（部分或完整），能够准确有效地评估其成本至关重要。 成本估算必须准确，因为优化的效果取决于其成本估算。 成本估算必须是高效的，因为它处于查询优化的内循环中并被重复调用。 基本估算框架源自 System-R 方法：
-
-1. Collect statistical summaries of data that has been stored.
-
-2. Given an operator and the statistical summary for each of its input data streams, determine the:
-
-   (a). Statistical summary of the output data stream
-   (b). Estimated cost of executing the operation
-
-步骤 2 可以迭代地应用于任意深度的算子树，以推导出其每个算子的成本。 一旦我们获得了每个算子节点的成本，就可以通过组合树中每个算子节点的成本来获得计划的成本。 在第 5.1 节中，我们讨论了用于成本优化的存储数据的统计参数以及获取此类统计信息的有效方法。 我们还讨论了如何传播此类统计信息。 第 5.2 节讨论了估算物理运营商成本的问题。
-
-认识到统计属性的性质与计划成本之间的差异很重要。 一个计划的输出数据流的统计属性与同一查询的任何其他计划的统计属性相同，但其成本可以与其他计划不同。 换句话说，统计摘要是一个逻辑属性，而计划的成本是一个物理属性。
-
-### 数据统计摘要
-
-#### 基础数据统计信息
-
-对于每个表，必要的统计信息包括数据流中元组的数量，因为该参数决定了数据扫描、连接及其内存要求的成本。 除了元组的数量，表使用的物理页的数量也很重要。 数据流列的统计信息很重要，因为这些统计信息可用于估计该列上谓词的选择性。 此类信息是为有一个或多个索引的列创建的，尽管也可以根据需要为任何其他列创建。
-
-在许多系统中，有关列上数据分布的信息由直方图提供。直方图将列上的值划分为 k 个桶。在许多情况下，k 是一个常数，决定了直方图的准确程度。但是，k 也决定了内存使用情况，因为在优化查询时，直方图的相关列会加载到内存中。值的“桶化”有多种选择。在许多数据库系统中，等深（也称为等高）直方图用于表示列上的数据分布。如果表有 n 条记录并且直方图有 k 个桶，则等深度直方图将该列上的一组值划分为 k 个范围，以便每个范围具有相同数量的值，即 n/k。压缩直方图将频繁出现的值放在单例桶中。可以调整此类单例存储桶的数量。在 [52] 中已经表明，这种直方图对于高或低偏斜数据都是有效的。与优化相关的直方图的一个方面是对桶中的值所做的假设。例如，在等深度直方图中，可以假设桶端点内的值以均匀分布出现。对上述假设以及直方图的广泛分类和直方图结构对准确性的影响的讨论出现在 [52] 中。在没有直方图的情况下，可以使用诸如列中值的最小值和最大值之类的信息。然而，在实践中，使用次低和次高的值，因为 min 和 max 很可能是离群值。直方图信息由参数信息补充，例如该列上不同值的数量。
-
-尽管直方图提供有关单个列的信息，但它们不提供有关列之间相关性的信息。 为了捕捉相关性，我们需要值的联合分布。 一种选择是考虑二维直方图 [45,51]。 不幸的是，可能性的空间非常大。 在许多系统中，不提供详细的联合分布，而只使用汇总信息，例如不同值对的数量。 例如，与多列索引相关联的统计信息可能包括前导列上的直方图和数据中存在的列值的不同组合的总数。
-
-#### 估计基础数据的统计量
-
-企业级数据库通常具有大型架构，也具有大量数据。因此，要具有获取统计量的灵活性以提高准确性，重要的是能够准确有效地估计统计参数。采样数据提供了一种可能的方法。然而，挑战在于限制估计中的误差。在 [48] 中，Shapiro 和 Connell 表明，对于给定的查询，只需要一个小样本来估计对给定查询具有很高准确率的直方图。然而，这没有抓住重点，因为目标是为大量查询构建一个相当准确的直方图。我们最近的工作已经解决了这个问题[11]。我们还表明，估计不同值的任务很容易出错，即对于任何估计方案，都存在一个错误显着的数据库。这个结果解释了过去在估计不同值 [50,27] 数量方面的困难。最近的工作还解决了以增量方式维护统计数据的问题 [18]。
-
-#### 统计信息的传播
-
-仅使用基本数据的信息是不够的，因为查询通常包含许多运算符。因此，重要的是能够通过运营商传播统计信息。这种运算符的最简单情况是选择。如果 A 列上有直方图，并且查询是 A 列上的简单选择，则可以修改直方图以反映选择的效果。由于需要在存储桶内进行均匀分布等假设，此步骤会导致一些不准确。此外，无法捕捉相关性是错误的关键来源。在上面的例子中，这将反映在没有修改表上其他属性的分布（A 除外），从而导致后续操作符中潜在的重大错误。同样，如果存在多个谓词，则进行独立性假设并考虑选择性的乘积。然而，有些系统只使用最具选择性的谓词的选择性，也可以识别潜在的相关性[17]。在连接谓词中涉及的列上存在直方图时，直方图可能是“连接的”。然而，这引发了对齐相应桶的问题。最后，当直方图信息不可用时，则使用临时常数来估计选择性，如 [55] 中所述。
-
-### 成本计算
-
-成本估算步骤试图确定操作的成本。成本计算模块估计 CPU、I/O 以及（在并行或分布式系统的情况下）通信成本。在大多数系统中，这些参数被组合成一个整体指标，用于比较备选计划。选择合适的集合来确定成本的问题需要相当小心。一项早期研究 [40] 确定，除了输入数据流的物理和统计特性以及选择性计算之外，建模缓冲区利用率在准确估计中也起着关键作用。这需要根据索引级别使用不同的缓冲池命中率，并通过考虑连接方法的属性来调整缓冲区利用率，例如，索引扫描中索引嵌套循环连接[17]的相对显着的引用局部性。成本模型考虑了物理设计的相关方面，例如数据和索引页的协同定位。然而，对数据流进行准确的成本估算和传播统计信息的能力仍然是查询优化中困难的开放问题之一。
-
-## 枚举架构
-
-枚举算法必须通过探索搜索空间为给定的查询选择一个廉价的执行计划。 我们在第 3 节中讨论的 System-R 连接枚举器旨在仅选择最佳线性连接顺序。 软件工程的一个考虑是构建枚举器，以便它可以优雅地适应由于添加新转换、添加新物理运算符（例如，新的连接实现）和成本估算技术的变化而导致的搜索空间的变化 . 最近的优化架构已使用此范例构建，称为可扩展优化器。 构建一个可扩展的优化器是一项艰巨的任务，因为它不仅仅是想出一个更好的枚举算法。 相反，它们为优化器设计的演变提供了基础设施。 然而，架构中的通用性必须与枚举效率的需求相平衡。
-
-我们主要关注此类可扩展优化器的两个代表性示例：Starburst 和 Volcano/Cascades。 尽管存在差异，但我们可以总结其中的一些共性： (a) 使用广义成本函数和算子节点的物理属性。 (b) 使用允许转换来修改查询表达式或运算符树的规则引擎。 此类规则引擎还提供了直接搜索以实现效率的能力。 (c) 许多暴露的“旋钮”可用于调整系统的行为。 不幸的是，设置这些旋钮以获得最佳性能是一项艰巨的任务。
-
-### Starburst
-
-IBM Almaden 的 Starburst 项目 [26] 中的查询优化从 SQL 查询的结构表示开始，该查询在优化的整个生命周期中使用。这种表示称为查询图模型 (QGM)。在 QGM 中，一个框代表一个查询块，框之间标记的弧代表跨块的表引用。每个框都包含有关谓词结构以及数据流是否有序的信息。在优化的查询重写阶段 [49]，规则用于将 QGM 转换为另一个等效的 QGM。规则被建模为任意函数对。第一个检查适用性的条件，第二个执行转换。前向链接规则引擎管理规则。规则可以分组在规则类中，并且可以调整规则类的评估顺序以聚焦搜索。由于规则的任何应用都会产生有效的 QGM，因此任何一组规则应用都保证查询等效（假设规则本身有效）。查询重写阶段没有可用的成本信息。这迫使该模块要么保留通过规则应用获得的替代方案，要么以启发式方式使用规则（从而妥协最优性）。
-
-查询优化的第二阶段称为计划优化。在这个阶段，给定一个 QGM，选择一个执行计划（算子树）。在 Starburst 中，物理运算符（称为 LOLEPOP）可以通过多种方式组合以实现更高级别的运算符。在 Starburst 中，这种组合是用一种类似语法产生式的语言来表达的 [37]。更高层操作的实现是通过其在物理运算符方面的推导来表达的。在计算此类推导时，表示相同物理和逻辑属性但成本更高的可比较计划将被修剪。每个计划都有一个关系描述，对应于它所代表的代数表达式、估计成本和物理属性（例如，顺序）。这些属性随着计划的构建而传播。因此，对于每个物理算子，都关联了一个函数，该函数显示了物理算子对上述每个属性的影响。这个系统中的join枚举器类似于System-R的自底向上枚举方案。
-
-### 火山/瀑布
-
-Volcano [23] 和 Cascades 可扩展架构 [21] 从 Exodus [22] 演变而来。在这些系统中，规则被普遍用于表示搜索空间的知识。使用了两种规则。转换规则将一个代数表达式映射到另一个。实现规则将代数表达式映射到运算符树中。规则可能有适用条件。逻辑属性、物理属性和成本与计划相关。物理特性和成本取决于用于实现运算符及其输入数据流的算法。为了提高效率，Volcano/Cascades 以自上而下的方式（“记忆化”）使用动态编程。当遇到优化任务时，它会通过在过去优化过的计划表中查找其逻辑和物理属性来检查该任务是否已经完成。否则，它将应用逻辑转换规则、实施规则或使用执行器来修改数据流的属性。在每个阶段，它使用一个动作的承诺来确定下一步。承诺参数是可编程的并反映成本参数。
-
-Volcano/Cascades 框架在枚举方法上与 Starburst 不同：(a) 这些系统不使用两个不同的优化阶段，因为所有转换都是代数和基于成本的。 (b) 从代数到物理运算符的映射发生在一个步骤中。 (c) 不像在 Starburst 查询重写阶段那样以正向链接方式应用规则，Volcano/Cascades 执行目标驱动的规则应用。
-
-## 超越基础
-
-到目前为止，我已经介绍了优化器软件组件的基础知识。 在本节中，我将讨论一些更高级的问题。 这些问题中的每一个在商业系统中都相当重要。
-
-### 分布式和并行数据库
-
-分布式数据库引入了通信成本和扩大搜索空间的问题，因为在优化查询时可以移动数据和选择中间操作的站点。 虽然一些早期的工作几乎完全专注于降低通信成本 [1,3]（例如，使用半连接），但系统 R* 的结果指出了本地处理的主导作用 [39]（参见 [38] 的概述） . 随着时间的推移，分布式数据库架构已经演变为复制数据库来处理物理分布或并行数据库进行扩展。 在复制架构中，保持副本之间的一致性是一个重要问题，但超出了本文的范围。
-
-与分布式系统不同，并行数据库表现为单个系统，但利用多个处理元素来减少查询的响应时间 5。可以通过多种方式利用并行性的好处。例如，物理数据分布，其中表（通常是数据流）在节点之间进行分区或复制，使处理器能够处理独立的数据集。并行性也可以用于独立操作或流水线操作（通过将生产者和消费者节点放置在不同的处理器上）。处理器之间需要进行通信以交换数据（例如，在操作后需要重新分区数据时）抵消了并行性的优势。此外，处理器上物理运算符的有效调度为优化问题带来了新的维度。 XPRS 项目 [31,32] 提倡一种两阶段的方法，即在第一阶段使用传统的单处理器查询优化来生成执行计划。在第二阶段，确定处理器的调度。 XPRS 中的查询优化工作没有研究处理器通信的影响。 Hasan [28] 的工作证明了考虑通信成本的重要性。 Hasan 保留了 XPRS 中使用的两阶段优化框架，但在优化的第一阶段合并了数据重新分区的成本和收益，以确定连接顺序和使用的访问方法。数据流的分区属性被视为数据流的物理属性。第一阶段的输出是一个物理运算符树，它公开了优先约束（例如，用于排序）和流水线执行。对于优化的第二阶段，他提出了考虑通信成本的调度算法[28]。
-
-### 用户定义函数
-
-存储过程（也称为用户定义函数）已在关系系统中广泛使用。虽然它们的支持因产品而异，但它们提供了一种强大的机制来减少客户端-服务器通信，并提供将应用程序语义合并到查询中的方法。当此类存储过程在查询中被视为一阶公民时，就会出现新的优化问题。确定用户定义函数的成本模型的问题仍然是一个难题。在枚举算法的上下文中也出现了有趣的问题。例如，考虑存储过程在查询的 WHERE 子句中充当用户定义的谓词的情况。与其他谓词不同，此类谓词可能很昂贵（例如，因为它们可能是基于 BLOB 的谓词，例如图像），因此尽早评估此类谓词不再是一种合理的启发式方法。使用用户定义的谓词优化查询的问题在 [12,29] 中提出。从动态查询优化的角度来看，[12] 中采用的方法是将用户定义的谓词视为一种关系。 [29,30] 中的方法利用观察结果，如果没有连接，那么昂贵的谓词可以通过它们的等级有效地排序，根据它们的选择性和每个元组的评估成本计算。不幸的是，他们尝试将等级的使用扩展到带有连接的查询可能会导致次优计划。这个缺点在 [8] 中得到解决，通过将用户定义谓词的应用表示为计划的物理属性，以便基于动态规划的枚举算法保证最优性。此外，对于成本模型的现实假设，表明问题是用户定义谓词数量的多项式。
-
-解决优化用户定义谓词的问题只是在查询系统中表示 ADT 语义和优化 ADT 查询的更广泛问题的第一步。 这个问题也与语义查询优化领域密切相关。
-
-## 物化视图
-
-物化视图是由查询子系统缓存并由优化器透明使用的视图（即查询）的结果。优化问题如下：给定一组物化视图和一个查询，目标是优化查询同时考虑到存在的物化视图。这个问题引入了两个基本挑战。首先，必须解决重新制定查询以使其可以使用一个或多个物化视图的问题。由于 SQL 的复杂性，一般问题是不可判定的，甚至确定有效的充分条件也很重要。此问题仅在单块 SQL 查询的上下文中得到解决 [15,61,59,9]，并且必须针对复杂查询进行扩展。接下来，将优化问题作为两步过程来处理，其中生成所有逻辑上等效的表达式，并单独优化它们中的每一个，可能会增加优化的成本，因为子表达式没有以基于成本的方式修剪。在 [9] 中，我们展示了在存在物化视图的情况下枚举和生成等效表达式的步骤是如何重叠的。
-
-## 其他优化问题
-
-在本文中，我只能触及查询优化中的一些基本问题。有很多重要的领域我没有讨论。一个有趣的方向是能够根据运行时信息的可用性推迟完整计划的生成 [19,33]。此外，在确定执行计划时考虑其他资源（尤其是内存）的问题仍然是一个悬而未决的问题。 [58] 中的工作解决了在查询优化中优化顺序使用的问题。面向对象系统中的优化器技术是一个值得单独讨论的重要领域。此外，随着数据库系统在多媒体和网络环境中得到使用，能够解决模糊（不精确）查询是一个有趣的工作方向 [14,10]。最近对决策支持系统的重视也引发了 SQL 扩展方面的工作。与 CUBE [24] 一样，此类工作并非出于对表达能力的需求，而是寻求扩展语言，以便优化器可以使用这些构造更好地优化决策支持系统。
-
-## 总结
-
-优化不仅仅是转换和查询等价。 优化的基础设施很重要。 设计有效且正确的 SQL 转换是困难的，开发健壮的成本指标是难以捉摸的，而构建可扩展的枚举架构是一项重大任务。 尽管进行了多年的工作，但仍然存在重大的开放性问题。 然而，了解现有工程框架对于对查询优化领域做出有效贡献是必要的。
-
-## 致谢
-
-我与 Umesh Dayal、Goetz Graefe、Waqar Hasan、Ravi Krishnamurthy、Guy Lohman、Hamid Pirahesh、Kyuseok Shim 和 Jeff Ullman 的多次非正式讨论极大地帮助我加深了对 SQL 优化的理解。 他们中的许多人还通过他们的评论帮助我改进了这个草案。 我也非常感谢 Latha Colby、William McKenna、Vivek Narasayya 和 Janet Wiener 对草案的深刻评论。 一如既往，我感谢 Debjani 的耐心。
-
-## 引用
-
-[1]
-Apers, P.M.G., Hevner, A.R., Yao, S.B. Optimization
-Algorithms for Distributed Queries. IEEE Transactions on
-Software Engineering, Vol 9:1, 1983.
-[2]
-Bancilhon, F., Maier, D., Sagiv, Y., Ullman, J.D. Magic sets and
-other strange ways to execute logic programs. In Proc. of ACM
-PODS, 1986.
-[3]
-Bernstein, P.A., Goodman, N., Wong, E., Reeve, C.L, Rothnie,
-J. Query Processing in a System for Distributed Databases
-(SDD-1), ACM TODS 6:4 (Dec 1981).
-[4]
-Chaudhuri, S., Shim K. An Overview of Cost-based
-Optimization of Queries with Aggregates. IEEE DE Bulletin,
-Sep. 1995. (Special Issue on Query Processing).
-[5]
-Chaudhuri, S., Shim K. Including Group-By in Query
-Optimization. In Proc. of VLDB, Santiago, 1994.
-[6]
-Chaudhuri, S., Shim K. Query Optimization with aggregate
-views: In Proc. of EDBT, Avignon, 1996.
-[7]
-Chaudhuri, S., Dayal, U. An Overview of Data Warehousing and
-OLAP Technology. In ACM SIGMOD Record, March 1997.
-[8]
-Chaudhuri, S., Shim K. Optimization of Queries with User-
-defined Predicates. In Proc. of VLDB, Mumbai, 1996.
-[9]
-Chaudhuri, S., Krishnamurthy, R., Potamianos, S., Shim K.
-Optimizing Queries with Materialized Views. In Proc. of IEEE
-Data Engineering Conference, Taipei, 1995.
-[10]
-Chaudhuri, S., Gravano, L. Optimizing Queries over Multimedia
-Repositories. In Proc. of ACM SIGMOD, Montreal, 1996.
-[11]
-Chaudhuri, S., Motwani, R., Narasayya, V. Random Sampling
-for Histogram Construction: How much is enough? In Proc. of
-ACM SIGMOD, Seattle, 1998.
-[12]
-Chimenti D., Gamboa R., Krishnamurthy R. Towards an Open
-Architecture for LDL. In Proc. of VLDB, Amsterdam, 1989.
-[13]
-Dayal, U. Of Nests and Trees: A Unified Approach to
-Processing Queries That Contain Nested Subqueries, Aggregates
-and Quantifiers. In Proc. of VLDB, 1987.
-[14]
-Fagin, R. Combining Fuzzy Information from Multiple Systems.
-In Proc. of ACM PODS, 1996.
-[15]
-Finkelstein S., Common Expression Analysis in Database
-Applications. In Proc. of ACM SIGMOD, Orlando, 1982.
-[16]
-Ganski, R.A., Long, H.K.T. Optimization of Nested SQL
-Queries Revisited. In Proc. of ACM SIGMOD, San Francisco,
-1987.
-[17]
-Gassner, P., Lohman, G., Schiefer, K.B. Query Optimization in
-the IBM DB2 Family. IEEE Data Engineering Bulletin, Dec.
-1993.
-[18]
-Gibbons, P.B., Matias, Y., Poosala, V. Fast Incremental
-Maintenance of Approximate Histograms. In Proc. of VLDB,
-Athens, 1997.
-[19]
-Graefe, G., Ward K. Dynamic Query Evaluation Plans. In Proc.
-of ACM SIGMOD, Portland, 1989.
-[20]
-Graefe G. Query Evaluation Techniques for Large Databases. In
-ACM Computing Surveys: Vol 25, No 2., June 1993.
-[21]
-Graefe, G. The Cascades Framework for Query Optimization. In
-Data Engineering Bulletin. Sept. 1995.
-[22]
-Graefe, G., Dewitt D.J. The Exodus Optimizer Generator. In
-Proc. of ACM SIGMOD, San Francisco, 1987.
-
-
-
-
-
+* 对于一个给定的代数表示，可能有许多实现代数表达式的算子树，例如：数据库系统通常支持多种连接算法。
+
+此外，执行这些计划的吞吐量或响应时间可能大不相同，因此，优化器对执行计划的明智选择是极其重要的。我们可以将查询优化看作是一个困难的搜索问题。为了解决这个问题，我们需要提供：
+
+* 执行计划空间（搜索空间）；
+* 成本估算技术，以便为每个搜索空间中的执行计划分配成本（`cost`）。直观地说，这是对执行计划所需资源的估算；
+* 枚举算法，用来搜索整个执行计划空间。
+
+一个理想的优化器通常是这样的：（1）搜索空间包含低成本的执行计划；（2）成本计算技术是准确的；（3）枚举算法是有效的。这三个任务中的每一个都不是轻而易举的，这就是为什么构建一个好的优化器是一个巨大的任务。
+
+我们首先讨论 `System-R` 优化框架，因为这是一种非常优雅的优化方法，有助于推动后续的优化工作。在第 4 节中，我们将讨论优化器所要考虑的搜索空间。这节将会提供一个版块，用来介绍搜索空间中包含的重要代数变换。在第 5 节中，我们将讨论成本估算的问题。在第 6 节中，我们将讨论枚举搜索空间的主题。这些小节就完成了对基本优化框架的讨论。在第 7 节中，我们将讨论查询优化方面的一些最新进展。
+
+## SYSTEM-R 优化器
+
+TODO
+
+## 参考文献
+
+[^1]: Apers, P.M.G., Hevner, A.R., Yao, S.B. Optimization Algorithms for Distributed Queries. IEEE Transactions on Software Engineering, Vol 9:1, 1983.
+[^2]: Bancilhon, F., Maier, D., Sagiv, Y., Ullman, J.D. Magic sets and other strange ways to execute logic programs. In Proc. of ACM PODS, 1986.
+[^3]: Bernstein, P.A., Goodman, N., Wong, E., Reeve, C.L, Rothnie, J. Query Processing in a System for Distributed Databases (SDD-1), ACM TODS 6:4 (Dec 1981).
+[^4]: Chaudhuri, S., Shim K. An Overview of Cost-based Optimization of Queries with Aggregates. IEEE DE Bulletin, Sep. 1995. (Special Issue on Query Processing).
+[^5]: Chaudhuri, S., Shim K. Including Group-By in Query Optimization. In Proc. of VLDB, Santiago, 1994.
+[^6]: Chaudhuri, S., Shim K. Query Optimization with aggregate views: In Proc. of EDBT, Avignon, 1996.
+[^7]: Chaudhuri, S., Dayal, U. An Overview of Data Warehousing and OLAP Technology. In ACM SIGMOD Record, March 1997.
+[^8]: Chaudhuri, S., Shim K. Optimization of Queries with User-defined Predicates. In Proc. of VLDB, Mumbai, 1996.
+[^9]: Chaudhuri, S., Krishnamurthy, R., Potamianos, S., Shim K. Optimizing Queries with Materialized Views. In Proc. of IEEE Data Engineering Conference, Taipei, 1995.
+[^10]: Chaudhuri, S., Gravano, L. Optimizing Queries over Multimedia Repositories. In Proc. of ACM SIGMOD, Montreal, 1996.
+[^11]: Chaudhuri, S., Motwani, R., Narasayya, V. Random Sampling for Histogram Construction: How much is enough? In Proc. of ACM SIGMOD, Seattle, 1998.
+[^12]: Chimenti D., Gamboa R., Krishnamurthy R. Towards an Open Architecture for LDL. In Proc. of VLDB, Amsterdam, 1989.
+[^13]: Dayal, U. Of Nests and Trees: A Unified Approach to Processing Queries That Contain Nested Subqueries, Aggregates and Quantifiers. In Proc. of VLDB, 1987.
+[^14]: Fagin, R. Combining Fuzzy Information from Multiple Systems. In Proc. of ACM PODS, 1996.
+[^15]: Finkelstein S., Common Expression Analysis in Database Applications. In Proc. of ACM SIGMOD, Orlando, 1982.
+[^16]: Ganski, R.A., Long, H.K.T. Optimization of Nested SQL Queries Revisited. In Proc. of ACM SIGMOD, San Francisco, 1987.
+[^17]: Gassner, P., Lohman, G., Schiefer, K.B. Query Optimization in the IBM DB2 Family. IEEE Data Engineering Bulletin, Dec. 1993.
+[^18]: Gibbons, P.B., Matias, Y., Poosala, V. Fast Incremental Maintenance of Approximate Histograms. In Proc. of VLDB, Athens, 1997.
+[^19]: Graefe, G., Ward K. Dynamic Query Evaluation Plans. In Proc. of ACM SIGMOD, Portland, 1989.
+[^20]: Graefe G. Query Evaluation Techniques for Large Databases. In ACM Computing Surveys: Vol 25, No 2., June 1993.
+[^21]: Graefe, G. The Cascades Framework for Query Optimization. In Data Engineering Bulletin. Sept. 1995.
+[^22]: Graefe, G., Dewitt D.J. The Exodus Optimizer Generator. In Proc. of ACM SIGMOD, San Francisco, 1987.
+[^23]: Graefe, G., McKenna, W.J. The Volcano Optimizer Generator: Extensibility and Efficient Search. In Proc. of the IEEE Conference on Data Engineering, Vienna, 1993.
+[^24]: Gray, J., Bosworth, A., Layman A., Pirahesh H. Data Cube: A Relational Aggregation Operator Generalizing Group-by, Cross-Tab, and Sub-Totals. In Proc. of IEEE Conference on Data Engineering, New Orleans, 1996.
+[^25]: Gupta A., Harinarayan V., Quass D. Aggregate-query processing in data warehousing environments. In Proc. of VLDB, Zurich, 1995.
+[^26]: Haas, L., Freytag, J.C., Lohman, G.M., Pirahesh, H. Extensible Query Processing in Starburst. In Proc. of ACM SIGMOD, Portland, 1989.
+[^27]: Haas, P.J., Naughton, J.F., Seshadri, S., Stokes, L. Sampling-Based Estimation of the Number of Distinct Values of an Attribute. In Proc. of VLDB, Zurich, 1995.
+[^28]: Hasan, W. Optimization of SQL Queries for Parallel Machines. LNCS 1182, Springer-Verlag, 1996.
+[^29]: Hellerstein J.M., Stonebraker, M. Predicate Migration: Optimization queries with expensive predicates. In Proc. of ACM SIGMOD, Washington D.C., 1993.
+[^30]: Hellerstein, J.M. Predicate Migration placement. In Proc. of ACM SIGMOD, Minneapolis, 1994.
+[^31]: Hong, W., Stonebraker, M. Optimization of Parallel Query Execution Plans in XPRS. In Proc. of Conference on Parallel and Distributed Information Systems. 1991.
+[^32]: Hong, W. Parallel Query Processing Using Shared Memory Multiprocessors and Disk Arrays. Ph.D. Thesis, University of California, Berkeley, 1992.
+[^33]: Ioannidis, Y., Ng, R.T., Shim, K., Sellis, T. Parametric Query Optimization. In Proc. of VLDB, Vancouver, 1992.
+[^34]: Ioannidis, Y.E. Universality of Serial Histograms. In Proc. of VLDB, Dublin, Ireland, 1993.
+[^35]: Kim, W. On Optimizing an SQL-like Nested Query. ACM TODS, Vol 9, No. 3, 1982.
+[^36]: Levy, A., Mumick, I.S., Sagiv, Y. Query Optimization by Predicate Move-Around. In Proc. of VLDB, Santiago, 1994.
+[^37]: Lohman, G.M. Grammar-like Functional Rules for Representing Query Optimization Alternatives. In Proc. of ACM SIGMOD, 1988.
+[^38]: Lohman. G., Mohan, C., Haas, L., Daniels, D., Lindsay, B., Selinger, P., Wilms, P. Query Processing in R*. In Query Processing in Database Systems. Springer Verlag, 1985.
+[^39]: Mackert, L.F., Lohman, G.M. R* Optimizer Validation and Performance Evaluation For Distributed Queries. In Readings in Database Systems. Morgan Kaufman.
+[^40]: Mackert, L.F., Lohman, G.M. R* Optimizer Validation and Performance Evaluation for Local Queries. In Proc. of ACM SIGMOD, 1986.
+[^41]: Melton, J., Simon A. Understanding The New SQL: A Complete Guide. Morgan Kaufman.
+[^42]: Mumick, I.S., Finkelstein, S., Pirahesh, H., Ramakrishnan, R.Magic is Relevant. In Proc. of ACM SIGMOD, Atlantic City, 1990.
+[^43]: Mumick, I.S., Pirahesh, H. Implementation of Magic Sets in a Relational Database System. In Proc. of ACM SIGMOD, Montreal, 1994.
+[^44]: Muralikrishna, M. Improved Unnesting Algorithms for Join Aggregate SQL Queries. In Proc. of VLDB, Vancouver, 1992.
+[^45]: Muralikrishna M., Dewitt D.J. Equi-Depth Histograms for Estimating Selectivity Factors for Multi-Dimensional Queries, Proc. of ACM SIGMOD, Chicago, 1988.
+[^46]: Ono, K., Lohman, G.M. Measuring the Complexity of Join Enumeration in Query Optimization. In Proc. of VLDB, Brisbane, 1990.
+[^47]: Ozsu M.T., Valduriez, P. Principles of Distributed Database Systems. Prentice-Hall, 1991.
+[^48]: Piatetsky-Shapiro, G., Connell, C. Accurate Estimation of the Number of Tuples Satisfying a Condition. In Proc. of ACM SIGMOD, 1984.
+[^49]: Pirahesh, H., Hellerstein J.M., Hasan, W. Extensible/Rule Based Query Rewrite Optimization in Starburst. In Proc. of ACM SIGMOD 1992.
+[^50]: Poosala, V., Ioannidis, Y., Haas, P., Shekita, E. Improved Histograms for Selectivity Estimation. In Proc. of ACM SIGMOD, Montreal, Canada 1996.
+[^51]: Poosala, V., Ioannidis, Y.E. Selectivity Estimation Without the Attribute Value Independence Assumption. In Proc. of VLDB, Athens, 1997.
+[^52]: Poosala, V., Ioannidis, Y.E., Haas, P.J., Shekita, E.J. Improved Histograms for Selectivity Estimation of Range Predicates In Proc. of ACM SIGMOD, Montreal, 1996.
+[^53]: Rosenthal, A., Galindo-Legaria, C. Query Graphs, Implementing Trees, and Freely Reorderable Outerjoins. In Proc. of ACM SIGMOD, Atlantic City, 1990.
+[^54]: Schneider, D.A. Complex Query Processing in Multiprocessor Database Machines. Ph.D. thesis, University of Wisconsin, Madison, Sept. 1990. Computer Sciences Technical Report 965.
+[^55]: Selinger, P.G., Astrahan, M.M., Chamberlin, D.D., Lorie, R.A., Price T.G. Access Path Selection in a Relational Database System. In Readings in Database Systems. Morgan Kaufman.
+[^56]: Seshadri P., et al. Cost Based Optimization for Magic: Algebra and Implementation. In Proc. of ACM SIGMOD, Montreal, 1996.
+[^57]: Seshadri, P., Pirahesh, H., Leung, T.Y.C. Decorrelating complex queries. In Proc. of the IEEE International Conference on Data Engineering, 1996.
+[^58]: Simmen, D., Shekita E., Malkemus T. Fundamental Techniques for Order Optimization. In Proc. of ACM SIGMOD, Montreal, 1996.
+[^59]: Srivastava D., Dar S., Jagadish H.V., Levy A.: Answering Queries with Aggregation Using Views. Proc. of VLDB, Mumbai, 1996.
+[^60]: Yan, Y.P., Larson P.A. Eager aggregation and lazy aggregation. In Proc. of VLDB Conference, Zurich, 1995.
+[^61]: Yang, H.Z., Larson P.A. Query Transformation for PSJ-Queries. In Proc. of VLDB, 1987.
