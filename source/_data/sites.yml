@@ -7,3 +7,8 @@ online_tools:
       screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799035.png
       avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799163.jpg
       description: 表格生成器
+    - title: Profile Readme Generator
+      url: https://rahuldkjain.github.io/gh-profile-readme-generator/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/24/1648122007.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/24/1648122186.jpg
+      description: Github 主页生成器
