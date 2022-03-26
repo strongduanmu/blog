@@ -6,6 +6,7 @@ sidebar:
     more: '[关于](/about/)'
   # Sidebar widgets
   widgets:
+    default_layout: [welcome, recent]
     # Recent update
     recent:
       layout: recent
