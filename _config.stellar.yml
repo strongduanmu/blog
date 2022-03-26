@@ -48,3 +48,19 @@ footer:
       url: https://unsplash.com/@strongduanmu
     - icon: '<img src="https://cdn.jsdelivr.net/gh/cdn-x/placeholder@1.0.3/social/942ebbf1a4b91.svg"/>'
       url: /about/#comments
+  sitemap:
+    '博客':
+      - '[近期](/)'
+      - '[分类](/categories)'
+      - '[标签](/tags)'
+      - '[归档](/archives)'
+    '文档':
+      - '[Calcite](/wiki/calcite/background.html)'
+      - '[JDBC](/wiki/jdbc/preface.html)'
+    '社交':
+      - '[Twitter](https://twitter.com/strongduanmu)'
+      - '[GitHub](https://github.com/strongduanmu)'
+      - '[留言板](/about/#comments)'
+    '更多':
+      - '[便签](/notes)'
+      - '[关于](/about)'
