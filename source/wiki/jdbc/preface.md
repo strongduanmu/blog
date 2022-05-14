@@ -3,6 +3,7 @@ layout: wiki
 wiki: JDBC 4.2 规范中文版
 order: 001
 title: 前言
+date: 2022-02-29 11:15:27
 comment_id: 'jdbc_4.2_specification'
 ---
 

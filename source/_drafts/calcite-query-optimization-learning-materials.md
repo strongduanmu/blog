@@ -40,3 +40,4 @@ Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、S
 * [Apache Calcite: A Foundational Framework for Optimized
   Query Processing Over Heterogeneous Data Sources](https://arxiv.org/pdf/1802.10233.pdf)
 * https://github.com/strongduanmu/awesome-database-learning
+* Cascades Optimizer：https://zhuanlan.zhihu.com/p/73545345
