@@ -1,5 +1,20 @@
+tech:
+  title: 技术论坛
+  description:
+  items:
+    - title: HeapDump
+      url: https://heapdump.cn/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538181.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538235.jpg
+      description: HeapDump 性能社区
+    - title: 并发编程网
+      url: http://ifeve.com/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538293.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538316.jpg
+      description: 并发编程网
+
 online_tools:
-  title: 在线工具
+  title: 工具网站
   description:
   items:
     - title: Tables Generator
