@@ -260,45 +260,45 @@ private QueryResult createQueryResult(final ResultSet resultSet, final Connectio
 schemaName: sbtest_sharding
 dataSources:
   ds_0:
-    url: jdbc:mysql://10.16.9.12:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
+    url: jdbc:mysql://127.0.0.1:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
     username: root
-    password: sphereEx@2021
+    password: 123456
     connectionTimeoutMilliseconds: 10000
     idleTimeoutMilliseconds: 60000
     maxLifetimeMilliseconds: 1800000
     maxPoolSize: 50
     minPoolSize: 1
   ds_1:
-    url: jdbc:mysql://10.16.9.62:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
+    url: jdbc:mysql://127.0.0.1:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
     username: root
-    password: sphereEx@2021
+    password: 123456
     connectionTimeoutMilliseconds: 10000
     idleTimeoutMilliseconds: 60000
     maxLifetimeMilliseconds: 1800000
     maxPoolSize: 50
     minPoolSize: 1
   ds_2:
-    url: jdbc:mysql://10.16.9.192:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
+    url: jdbc:mysql://127.0.0.1:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
     username: root
-    password: sphereEx@2021
+    password: 123456
     connectionTimeoutMilliseconds: 10000
     idleTimeoutMilliseconds: 60000
     maxLifetimeMilliseconds: 1800000
     maxPoolSize: 50
     minPoolSize: 1
   ds_3:
-    url: jdbc:mysql://10.16.9.120:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
+    url: jdbc:mysql://127.0.0.1:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
     username: root
-    password: sphereEx@2021
+    password: 123456
     connectionTimeoutMilliseconds: 10000
     idleTimeoutMilliseconds: 60000
     maxLifetimeMilliseconds: 1800000
     maxPoolSize: 50
     minPoolSize: 1
   ds_4:
-    url: jdbc:mysql://10.16.9.16:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
+    url: jdbc:mysql://127.0.0.1:3306/sbtest?useSSL=false&useServerPrepStmts=true&cachePrepStmts=true&prepStmtCacheSize=8192&prepStmtCacheSqlLimit=1024
     username: root
-    password: sphereEx@2021
+    password: 123456
     connectionTimeoutMilliseconds: 10000
     idleTimeoutMilliseconds: 60000
     maxLifetimeMilliseconds: 1800000
@@ -479,7 +479,7 @@ public class QueryOptimizationTest {
 
     @Setup(Level.Trial)
     public void setup() throws Exception {
-        Connection connection = DriverManager.getConnection("jdbc:mysql://10.16.9.201:3307/sharding_db?useSSL=false", "root", "root");
+        Connection connection = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3307/sharding_db?useSSL=false", "root", "123456");
         // CASE 1
         unionAllForCaseOneStatement = connection.prepareStatement("SELECT COUNT(k) AS countK FROM sbtest1 WHERE id < ?;");
         // CASE 2
