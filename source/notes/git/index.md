@@ -10,6 +10,9 @@ order: 20
 ## 常用 Git 命令
 
 ```bash
+# 添加远程仓库
+git remote add upstream https://github.com/apache/shardingsphere.git
+
 # 查看远程仓库信息
 git remote -v
 # origin	https://github.com/strongduanmu/shardingsphere.git (fetch)
@@ -21,5 +24,8 @@ git remote -v
 git fetch upstream pull/11150/head:dev-0705
 # From https://github.com/apache/shardingsphere
 # * [new ref]               refs/pull/11150/head -> dev-0705
+
+# 批量删除 dev* 分支
+git branch -a | grep "^  dev*" | xargs git branch -D
 ```
 
