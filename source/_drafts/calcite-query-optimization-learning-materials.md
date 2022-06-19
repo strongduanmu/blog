@@ -34,6 +34,7 @@ Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、S
 * [静水流深总结 Calcite 学习系列](https://www.zhihu.com/column/c_1110245426124554240)
 * [Calcite 学习与总结](https://github.com/wangzzu/awesome/issues/27)
 * [Apache Calcite学习资料](https://zhuanlan.zhihu.com/p/76510053)
+* [calcite 概念和架构](https://www.cnblogs.com/nightbreeze/p/14486935.html)
 
 ## 论文
 

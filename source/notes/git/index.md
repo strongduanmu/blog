@@ -27,5 +27,11 @@ git fetch upstream pull/11150/head:dev-0705
 
 # 批量删除 dev* 分支
 git branch -a | grep "^  dev*" | xargs git branch -D
+
+# 恢复误删除分支
+## 查看被删除分支对应的 commit id
+git log -g
+## 根据 commit id 创建 recover_branch 分支
+git branch recover_branch 34fd566205a34a2842111331449b47c39ef7fa6e
 ```
 

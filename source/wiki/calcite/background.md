@@ -37,7 +37,7 @@ connection.close();
 
 数据库在哪里？其实根本没有数据库。这个连接也完全是空的，直到 `new ReflectiveSchema` 注册了一个 Java 对象作为 `schema`， 并将它的集合字段 `emps` 和 `depts` 作为表，这时连接才有了数据。
 
-Calcite 不想拥有数据，它甚至没有一个最喜欢的数据格式。这个示例使用了内存数据集，并使用 `linq4j` 库中的 `groupBy` 和 `join` 运算符处理这些数据。但是 Calcite 也可以处理其他数据格式的数据，例如 JDBC。在第一个示例中，将
+Calcite 不想拥有数据，它甚至没有一个最喜欢的数据格式。这个示例使用了内存数据集，并使用 `linq4j` 库中的 `groupBy` 和 `join` 算子处理这些数据。但是 Calcite 也可以处理其他数据格式的数据，例如 JDBC。在第一个示例中，将
 
 ```java
 Schema schema = new ReflectiveSchema(new HrSchema());
@@ -54,7 +54,7 @@ dataSource.setPassword("password");
 Schema schema = JdbcSchema.create(rootSchema, "hr", dataSource, null, "name");
 ```
 
-Calcite 将在 JDBC 中执行相同的查询。对应用来说，数据和 API 是一样的，但背后的实现方式却大不相同。Calcite 使用优化器规则将 `JOIN` 和 `GROUP BY` 操作推送到源数据库。
+Calcite 将在 JDBC 中执行相同的查询。对应用来说，数据和 API 是一样的，但背后的实现方式却大不相同。Calcite 使用优化器规则将 `JOIN` 和 `GROUP BY` 运算推送到源数据库。
 
 内存和 JDBC 只是两个常见的例子。Calcite 可以处理任何数据源和数据格式。为了添加一个数据源，你需要编写一个适配器，来告诉 Calcite 应该将数据源中的哪些集合作为表。
 
