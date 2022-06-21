@@ -12,6 +12,11 @@ tech:
       screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538293.png
       avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/05/14/1652538316.jpg
       description: 并发编程网
+    - title: 即时通讯网
+      url: http://www.52im.net/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/06/20/1655708134.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/06/20/1655708310.jpg
+      description: 即时通讯网
 
 online_tools:
   title: 实用工具
