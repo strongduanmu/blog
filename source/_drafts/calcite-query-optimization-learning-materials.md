@@ -27,6 +27,7 @@ Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、S
 * [Apache Calcite中的基本概念](https://zhuanlan.zhihu.com/p/144129698?utm_source=wechat_session&utm_medium=social&utm_oi=985120462346670080&utm_campaign=shareopn)
 * [Apache Calcite 论文学习笔记](https://juejin.cn/post/6844903891482476552)
 * [feeling的技术笔记](https://www.zhihu.com/column/c_1248979752058482688)——写的很赞，可以深入学习下
+* [深入浅出Calcite与SQL CBO（Cost-Based Optimizer）优化](https://zhuanlan.zhihu.com/p/248796415)
 * [idea断点调试Spark SQL生成代码](https://zhuanlan.zhihu.com/p/160286556)
 * [Apache Calcite 框架 50 倍性能优化实践](https://cloud.tencent.com/developer/article/1781262)
 * [Calcite 中新增的 Top-down 优化器](https://zhuanlan.zhihu.com/p/428729068)
@@ -35,6 +36,7 @@ Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、S
 * [Calcite 学习与总结](https://github.com/wangzzu/awesome/issues/27)
 * [Apache Calcite学习资料](https://zhuanlan.zhihu.com/p/76510053)
 * [calcite 概念和架构](https://www.cnblogs.com/nightbreeze/p/14486935.html)
+* [TiDB 社区分享火山模型](https://asktug.com/t/topic/693579)
 
 ## 论文
 
