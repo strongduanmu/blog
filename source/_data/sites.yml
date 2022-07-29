@@ -22,6 +22,11 @@ online_tools:
   title: 实用工具
   description:
   items:
+    - title: SlideShare Downloader
+      url: https://www.slidesharedownload.net/
+      screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/29/1659056546.png
+      avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/29/1659056716.jpg
+      description: SlideShare 文件下载器
     - title: Tables Generator
       url: https://www.tablesgenerator.com/
       screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799035.png

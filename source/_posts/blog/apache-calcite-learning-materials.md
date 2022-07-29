@@ -1,5 +1,5 @@
 ---
-title: Calcite 学习资料整理
+title: Apache Calcite 学习资料整理
 tags: [Calcite, Query Optimization]
 categories: [Calcite]
 top: 1
