@@ -79,6 +79,10 @@ LogicalProject
 | RelOptPlanner | A RelOptPlanner is a query optimizer: it transforms a relational expression into a semantically equivalent relational expression, according to a given set of rules and a cost model. | 也就是**优化器**，Calcite 支持RBO（Rule-Based Optimizer） 和 CBO（Cost-Based Optimizer）。Calcite 的 RBO （HepPlanner）称为启发式优化器（heuristic implementation ），它简单地按 AST 树结构匹配所有已知规则，直到没有规则能够匹配为止；Calcite 的 CBO 称为火山式优化器（VolcanoPlanner）成本优化器也会匹配并应用规则，当整棵树的成本降低趋于稳定后，优化完成，成本优化器依赖于比较准确的成本估算。RelOptCost 和 Statistic 与成本估算相关； |
 | RelOptCost    | defines an interface for optimizer cost in terms of number of rows processed, CPU cost, and I/O cost. | 优化器成本模型会依赖；                                       |
 
+
+
+
+
 BindableConvention EnumerableConvention 和 InterpretableConvention 区别：
 
 <img src="index_files/image-20220711092633495.png" alt="image-20220711092633495" style="zoom:50%;" />
@@ -86,6 +90,10 @@ BindableConvention EnumerableConvention 和 InterpretableConvention 区别：
 参考：https://lists.apache.org/thread/4wsbjcclslpszbp7c4n28lrdb4pww5op、https://issues.apache.org/jira/browse/CALCITE-584
 
 Calcite 根据 enableBindable 参数决定使用 BindableConvention 解释执行还是 EnumerableConvention 编译执行。EnumerableConvention 编译执行最后会转换成 BindableConvention，BindableConvention 使用访问 AST 树（RelNode）的方式，去执行关系表达式树。
+
+
+
+
 
 # 参考文档
 
