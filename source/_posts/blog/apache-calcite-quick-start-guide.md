@@ -10,7 +10,7 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780
 
 Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`SQL 校验`、`SQL 查询优化`、`SQL 生成`以及`数据连接查询`等典型数据库管理功能。Calcite 的目标是 [One Size Fits All](http://www.slideshare.net/julianhyde/apache-calcite-one-planner-fits-all)，即一种方案适应所有需求场景，希望能为不同计算平台和数据源提供统一的查询引擎，并以类似传统数据库的访问方式（SQL 和高级查询优化）来访问不同计算平台和数据源上的数据。下图展示了 Calcite 的架构以及 Calcite 和数据处理系统的交互关系，从图中我们可以看出 Calcite 具有 4 种类型的组件。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/31/1659246792.png width:550px padding:10px bg:white %}
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/31/1659246792.png width:500px padding:10px bg:white %}
 
 * 最外层是 `JDBC Client` 和数据处理系统（`Data Processing System`），JDBC Client 提供给用户，用于连接 Calcite 的 JDBC Server，数据处理系统则用于对接不同的数据存储引擎；
 
@@ -86,7 +86,176 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 看到这里大家不禁会问，Calcite 是如何基于 CSV 格式的数据存储，来提供完善的 SQL 查询能力呢？下面我们将结合 Calcite 源码，针对一些典型的 SQL 查询语句，初步学习下 Calcite 内部的实现原理。
 
-## 原理分析
+## 源码分析
+
+在 Caclite 集成 CSV 示例中，我们主要关注两个部分：一是 Calcite 元数据的定义，二是优化规则的管理。元数据的定义是通过 `!connect jdbc:calcite:model=src/test/resources/model.json admin admin` 命令，指定 model 属性对应的配置文件 `model.json` 来注册元数据，具体内容如下：
+
+```json
+{
+    "version":"1.0",
+  	// 默认 schema
+    "defaultSchema":"SALES",
+    "schemas":[
+        {
+            // schema 名称
+            "name":"SALES",
+          	// type 定义数据模型的类型，custom 表示自定义数据模型
+            "type":"custom",
+          	// schema 工厂类
+            "factory":"org.apache.calcite.adapter.csv.CsvSchemaFactory",
+            "operand":{
+                "directory":"sales"
+            }
+        }
+    ]
+}
+```
+
+CsvSchemaFactory 类负责创建 Calcite 元数据 CsvSchema，`operand` 用于指定参数，`directory` 代表 CSV 文件的路径，`flavor` 则代表 Calcite 的表类型，包含了 `SCANNABLE`、`FILTERABLE` 和 `TRANSLATABLE` 三种类型。
+
+```java
+/**
+ * Factory that creates a {@link CsvSchema}.
+ *
+ * <p>Allows a custom schema to be included in a <code><i>model</i>.json</code>
+ * file.
+ */
+@SuppressWarnings("UnusedDeclaration")
+public class CsvSchemaFactory implements SchemaFactory {
+    /**
+     * Public singleton, per factory contract.
+     */
+    public static final CsvSchemaFactory INSTANCE = new CsvSchemaFactory();
+    
+    private CsvSchemaFactory() {
+    }
+    
+    @Override
+    public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
+        final String directory = (String) operand.get("directory");
+        final File base = (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+        File directoryFile = new File(directory);
+        if (base != null && !directoryFile.isAbsolute()) {
+            directoryFile = new File(base, directory);
+        }
+        String flavorName = (String) operand.get("flavor");
+        CsvTable.Flavor flavor;
+        if (flavorName == null) {
+            flavor = CsvTable.Flavor.SCANNABLE;
+        } else {
+            flavor = CsvTable.Flavor.valueOf(flavorName.toUpperCase(Locale.ROOT));
+        }
+        return new CsvSchema(directoryFile, flavor);
+    }
+}
+```
+
+CsvSchema 类的定义如下，它继承了 AbstractSchema 并实现了 getTableMap 方法，getTableMap 方法根据 flavor 参数创建不同类型的表。
+
+```java
+/**
+ * Schema mapped onto a directory of CSV files. Each table in the schema
+ * is a CSV file in that directory.
+ */
+public class CsvSchema extends AbstractSchema {
+    private final File directoryFile;
+    private final CsvTable.Flavor flavor;
+    private Map<String, Table> tableMap;
+    
+    /**
+     * Creates a CSV schema.
+     *
+     * @param directoryFile Directory that holds {@code .csv} files
+     * @param flavor Whether to instantiate flavor tables that undergo
+     * query optimization
+     */
+    public CsvSchema(File directoryFile, CsvTable.Flavor flavor) {
+        super();
+        this.directoryFile = directoryFile;
+        this.flavor = flavor;
+    }
+    
+    /**
+     * Looks for a suffix on a string and returns
+     * either the string with the suffix removed
+     * or the original string.
+     */
+    private static String trim(String s, String suffix) {
+        String trimmed = trimOrNull(s, suffix);
+        return trimmed != null ? trimmed : s;
+    }
+    
+    /**
+     * Looks for a suffix on a string and returns
+     * either the string with the suffix removed
+     * or null.
+     */
+    private static String trimOrNull(String s, String suffix) {
+        return s.endsWith(suffix) ? s.substring(0, s.length() - suffix.length()) : null;
+    }
+    
+    @Override
+    protected Map<String, Table> getTableMap() {
+        if (tableMap == null) {
+            tableMap = createTableMap();
+        }
+        return tableMap;
+    }
+    
+    private Map<String, Table> createTableMap() {
+        // Look for files in the directory ending in ".csv", ".csv.gz", ".json",
+        // ".json.gz".
+        final Source baseSource = Sources.of(directoryFile);
+        File[] files = directoryFile.listFiles((dir, name) -> {
+            final String nameSansGz = trim(name, ".gz");
+            return nameSansGz.endsWith(".csv") || nameSansGz.endsWith(".json");
+        });
+        if (files == null) {
+            System.out.println("directory " + directoryFile + " not found");
+            files = new File[0];
+        }
+        // Build a map from table name to table; each file becomes a table.
+        final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
+        for (File file : files) {
+            Source source = Sources.of(file);
+            Source sourceSansGz = source.trim(".gz");
+            final Source sourceSansJson = sourceSansGz.trimOrNull(".json");
+            if (sourceSansJson != null) {
+                final Table table = new JsonScannableTable(source);
+                builder.put(sourceSansJson.relative(baseSource).path(), table);
+            }
+            final Source sourceSansCsv = sourceSansGz.trimOrNull(".csv");
+            if (sourceSansCsv != null) {
+                final Table table = createTable(source);
+                builder.put(sourceSansCsv.relative(baseSource).path(), table);
+            }
+        }
+        return builder.build();
+    }
+    
+    /**
+     * Creates different sub-type of table based on the "flavor" attribute.
+     */
+    private Table createTable(Source source) {
+        switch (flavor) {
+            case TRANSLATABLE:
+                return new CsvTranslatableTable(source, null);
+            case SCANNABLE:
+                return new CsvScannableTable(source, null);
+            case FILTERABLE:
+                return new CsvFilterableTable(source, null);
+            default:
+                throw new AssertionError("Unknown flavor " + this.flavor);
+        }
+    }
+}
+```
+
+我们来看下这三种类型的表的区别：
+
+* CsvTranslatableTable：
+* CsvScannableTable：
+* CsvFilterableTable：
 
 
 
