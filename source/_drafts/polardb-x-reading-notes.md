@@ -40,3 +40,11 @@ mvn install -D maven.test.skip=true -D env=release
 
 FastsqlParser#parse——提供Fast SQL Parser AST到Calcite AST的转换 Calcite Parser based on FastSql Parser
 
+
+
+## 参考文档
+
+* [PolarDB-X 本地 debug 环境搭建](https://u01f1kqxrl.feishu.cn/docs/doccnPOyXLhQadDfvYIUDWfD9gg)
+
+
+
