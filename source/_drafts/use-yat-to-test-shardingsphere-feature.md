@@ -12,11 +12,11 @@ YAT 安装:
 
 下周 OG 3.0 驱动：https://mvnrepository.com/artifact/org.opengauss/opengauss-jdbc/3.0.0 并放到 lib 目录下：
 
-![image-20220624135716215](index_files/image-20220624135716215.png)
+<img src="index_files/image-20220811104300879.png" alt="image-20220811104300879" style="zoom:50%;" />
 
 在 testcase 目录下添加测试用例：
 
-![image-20220624135822022](index_files/image-20220624135822022.png)
+<img src="index_files/image-20220811104334077.png" alt="image-20220811104334077" style="zoom:50%;" />
 
 在 schedule 目录下创建调度文件 SHARDINGSPHERE_SHARDING_SQL.schd，指定要执行的 CASE：
 
@@ -37,6 +37,7 @@ mkdir /home/core
 chmod -R 777 /home/core
 echo "/home/core/core-%e-%u-%s-%t-%h">/proc/sys/kernel/core_pattern
 ulimit -c unlimited
+chown root:root /root/openGaussBase/log
 ```
 
 然后安装 JDBC 驱动，我们使用全局安装的方式。
@@ -58,6 +59,7 @@ source ~/.bashrc
 ```
 yat suite -s /root/openGaussBase/schedule/SHARDINGSPHERE_SHARDING_SQL.schd
 yat suite -s /root/openGaussBase/schedule/SHARDINGSPHERE_READWRITE_SPLITTING_SQL.schd
+yat suite -s /root/openGaussBase/schedule/OPENGAUSS_DQL.schd
 ```
 
 将 result 目录下生成的结果，复制到 expect 对应目录下，并检查是否和测试期望值一直（YAT 测试程序返回的结果集格式和 OG 不同）。

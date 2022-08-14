@@ -42,7 +42,10 @@ TODO
 * [Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)
 * [Cascades Optimizer](https://zhuanlan.zhihu.com/p/73545345)
 
-### 执行模型
+### 执行器
+
+* [Calcite分析——Implement](https://www.cnblogs.com/fxjwind/p/15403929.html)
+* [Calcite分析——Linq4j](https://www.cnblogs.com/fxjwind/p/15379068.html)
 
 * [TiDB 社区分享火山模型](https://asktug.com/t/topic/693579)
 * [SQL 优化之火山模型](https://zhuanlan.zhihu.com/p/219516250)
