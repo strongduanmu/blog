@@ -25,7 +25,7 @@ header: false
 
 <!-- node 2022/11/14 亚马逊云科技中国峰会 Dev Day -->
 
-参与 [亚马逊云科技中国峰会 Dev Day](https://aws.amazon.com/cn/about-aws/events/summit2022/index/)，分享 `Apache ShardingSphere 分布式数据库生态的云原生实践` 主题演讲，介绍了 Apache ShardingSphere 和 AWS Aurora 联合打造的分布式数据库生态，以及 ShardingSphere 的云原生实践。[PPT 下载地址](https://strongduanmu.com/share/Apache ShardingSphere 分布式数据库生态的云原生实践.pdf)，视频观看地址。
+参与 [亚马逊云科技中国峰会 Dev Day](https://aws.amazon.com/cn/about-aws/events/summit2022/index/)，分享 `Apache ShardingSphere 分布式数据库生态的云原生实践` 主题演讲，介绍了 Apache ShardingSphere 和 AWS Aurora 联合打造的分布式数据库生态，以及 ShardingSphere 的云原生实践。[PPT 下载地址](https://strongduanmu.com/share/Apache%20ShardingSphere%20%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%94%9F%E6%80%81%E7%9A%84%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5.pdf)，视频观看地址。
 
 <!-- node 2021/12/14~17 PostgresConf.CN & PGConf.Asia2021 -->
 
