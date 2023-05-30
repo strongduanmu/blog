@@ -1,10 +1,53 @@
 ---
-title: hep-planer
-tags: []
-categories: []
-date: 2022-07-25 19:32:33
-cover:
+title: 深入理解 Calcite HepPlanner 优化器原理
+tags: [Calcite]
+categories: [Calcite]
+date: 2023-02-12 19:32:33
+cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 ---
+
+## 什么是 RBO
+
+
+
+## Calcite 中的 RBO 规则
+
+
+
+## HepPlanner 中的基础概念
+
+* `HepPlanner`：基于规则的启发式优化器，实现了 RelOptPlanner 优化器接口；
+* `HepProgram`：提供了维护各种类型 HepInstruction 的容器，并支持指定 HepInstruction 被 HepPlanner 优化时处理的顺序；
+* `HepProgramBuilder`：用于创建 HepProgram；
+* `HepInstruction`：代表了 HepProgram 中的一个指令，目前包含了许多实现类，具体实现类的用途如下表所示：
+
+
+
+
+
+## HepPlanner 优化器原理
+
+
+
+代码版本：HEAD is now at 413eded69 [CALCITE-5275] Release Calcite 1.32.0 
+
+https://github.com/apache/calcite/commit/413eded693a9087402cc1a6eefeca7a29445d337	
+
+
+
+setRoot: 
+
+```java
+  //~ Methods ----------------------------------------------------------------
+
+  @Override public void setRoot(RelNode rel) {
+    将 RelNode 转换为 DAG HepRelVertex root
+    root = addRelToGraph(rel);
+    dumpGraph();
+  }
+```
+
+
 
 findBestExp:
 
@@ -81,3 +124,16 @@ HepMatchOrder 代表了基于规则优化的顺序，包含了 ARBITRARY（任�
     } while (!fixedPoint);
 ```
 
+
+
+
+
+
+
+## 参考文档
+
+* [Calcite RBO 简介](https://zhuanlan.zhihu.com/p/65673329)
+
+* [Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)
+
+* [Calcite 启发式 Planner（HepPlanner）](https://zhuanlan.zhihu.com/p/61661909)
