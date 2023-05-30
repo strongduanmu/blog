@@ -82,3 +82,36 @@ docker run --privileged=true -d -e GS_PASSWORD=Sphere@123 -p 5432:5432 --name op
 docker run --rm -it enmotech/opengauss gsql -U sharding -d sharding_db -W'sharding' -h host.docker.internal -p 3307
 ```
 
+### Oracle
+
+```bash
+# 查找 Oracle 镜像
+docker search oracle-19c
+# 拉取 Oracle 镜像
+docker pull doctorkirk/oracle-19c
+# 创建数据文件目录
+mkdir -p /Users/strongduanmu/softs/oracle/oracle_19c_data
+# 授权
+chmod 777 /Users/strongduanmu/softs/oracle/oracle_19c_data
+# 运行容器
+docker run -d  \
+-p 1521:1521 -p 5500:5500 \
+-e ORACLE_SID=ORCLSID \
+-e ORACLE_PDB=ORCLPDB \
+-e ORACLE_PWD=123456 \
+-e ORACLE_EDITION=standard \
+-e ORACLE_CHARACTERSET=AL32UTF8 \
+-v /Users/strongduanmu/softs/oracle/oracle_19c_data \
+--name oracle_19c doctorkirk/oracle-19c
+# 查看运行日志
+docker logs -ft oracle_19c
+# 在容器中执行命令，连接 Oracle
+docker exec -it oracle_19c /bin/bash
+sqlplus / as sysdba
+show pdbs;
+
+# GUI 连接账号
+# username：sys as sysdba
+# password：123456
+# sid：ORCLSID
+```
