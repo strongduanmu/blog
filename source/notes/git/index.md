@@ -25,6 +25,9 @@ git fetch upstream pull/11150/head:dev-0705
 # From https://github.com/apache/shardingsphere
 # * [new ref]               refs/pull/11150/head -> dev-0705
 
+# 拉取远程库 TAG 代码到 5.3.0-test 分支
+git fetch upstream refs/tags/5.3.0:5.3.0-test
+
 # 根据指定 commitId 创建新分支
 git checkout commitId -b branchName
 
