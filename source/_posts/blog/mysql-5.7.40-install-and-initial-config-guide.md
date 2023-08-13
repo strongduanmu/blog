@@ -10,7 +10,8 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/12/25/1640431841
 
 MySQL 是当前主流的开源关系型数据库，学习 MySQL 能够帮助我们更好地理解关系型数据库的实现原理，在日常工作实践中也能更加从容地面对各种数据库层面的问题。本文是 MySQL 系列的第一篇，主要记录了 `MySQL 5.7.40` 安装及初始化配置的步骤，MySQL 安装环境为 `CentOS 7`，可以参考 [CentOS 开发环境搭建笔记](https://strongduanmu.com/blog/centos-dev-environment-setup-note/)在 Virtual Box 虚拟机上搭建 CentOS 7 环境。
 
-## MySQL 下载
+1. ## MySQL 下载
+
 
 首先，需要从 [MySQL 官网](https://dev.mysql.com/downloads/mysql/)下载 `MySQL 5.7.40` 的通用二进制安装包，具体如下图所示，我们选择 64 位安装包：
 
