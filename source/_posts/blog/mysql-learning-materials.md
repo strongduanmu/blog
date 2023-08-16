@@ -12,3 +12,16 @@ MySQL 是当前最流行的开源数据库，国内外众多公司基本都使�
 
 ## 官方文档
 
+* [MySQL 8.0 Reference Manual](https://dev.mysql.com/doc/refman/8.0/en/)
+
+* [Planet MySQL](https://planet.mysql.com/)
+* [MySQL Blog Archive](https://dev.mysql.com/blog-archive/)
+* [Worklog Tasks](https://dev.mysql.com/worklog/)
+
+## MySQL 经典书籍
+
+* [MySQL技术内幕：InnoDB存储引擎（第2版）](https://weread.qq.com/web/reader/611329b059346e611427f1c)
+
+* 事务处理概念与技术
+* [高性能MySQL（第4版）](https://weread.qq.com/web/bookDetail/00a32b70813ab746fg018ec7)
+
