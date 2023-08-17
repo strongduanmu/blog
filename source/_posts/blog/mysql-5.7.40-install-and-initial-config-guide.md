@@ -10,7 +10,7 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/12/25/1640431841
 
 MySQL 是当前主流的开源关系型数据库，学习 MySQL 能够帮助我们更好地理解关系型数据库的实现原理，在日常工作实践中也能更加从容地面对各种数据库层面的问题。本文是 MySQL 系列的第一篇，主要记录了 `MySQL 5.7.40` 安装及初始化配置的步骤，MySQL 安装环境为 `CentOS 7`，可以参考 [CentOS 开发环境搭建笔记](https://strongduanmu.com/blog/centos-dev-environment-setup-note/)在 Virtual Box 虚拟机上搭建 CentOS 7 环境。
 
-1. ## MySQL 下载
+## MySQL 下载
 
 
 首先，需要从 [MySQL 官网](https://dev.mysql.com/downloads/mysql/)下载 `MySQL 5.7.40` 的通用二进制安装包，具体如下图所示，我们选择 64 位安装包：
@@ -56,7 +56,7 @@ tar zxvf mysql-5.7.40-linux-glibc2.12-x86_64.tar.gz
 | `share`         | 错误消息、字典和用于数据库安装的 SQL                         |
 | `support-files` | 其他支持文件                                                 |
 
-## MySQL 单实例安装
+## MySQL 安装
 
 参考 MySQL 官方文档 [Installing MySQL on Unix/Linux Using Generic Binaries](https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html) 进行安装，安装之前需要先确保系统上没有安装过 MySQL，并且需要删除 `/etc/my.cnf` 和 `/etc/mysql` 目录中的配置。可以使用如下命令检查是否已安装 MySQL：
 
@@ -89,22 +89,67 @@ rm -rf /etc/mysql
 # search for info
 yum search libaio
 yum search numa
+yum search ncurses
 # install library
 yum install libaio.x86_64 -y
 yum install numactl.x86_64 -y
+yum install ncurses-libs.x86_64 -y
 ```
 
-由于 MySQL 5.7.19 开始，通用二进制安装包的 tar 包格式变为了 EL6，因此需要 MySQL 客户端 **bin/mysql** needs `libtinfo.so.5` 库，需要在 64 位系统上创建一个链接来解决：
+由于 MySQL 5.7.19 开始，通用二进制安装包的 tar 包格式变为了 EL6，因此 MySQL 客户端 **bin/mysql** 需要 `libtinfo.so.5` 库，需要在 64 位系统上创建一个链接来解决：
 
 ```bash
-ln -sf libncurses.so.5.6 /lib64/libtinfo.so.5
+ln -sf /usr/lib64/libncurses.so.5.9 /lib64/libtinfo.so.5
 ```
 
+安装 MySQL 的操作步骤如下：
 
+```bash
+# 添加 mysql 用户组
+$> groupadd mysql
+# 添加 mysql 用户，并指定用户组为 mysql
+$> useradd -r -g mysql -s /bin/false mysql
+$> cd /usr/local
+# 解压 mysql 安装包，前文已经操作
+$> tar zxvf /path/to/mysql-VERSION-OS.tar.gz
+# 创建链接 ln -s /usr/local/mysql-5.7.40-linux-glibc2.12-x86_64 mysql
+$> ln -s full-path-to-mysql-VERSION-OS mysql
+$> cd mysql
+$> mkdir mysql-files
+# 将 mysql-files 拥有者修改为 mysql:mysql（具体参考：https://www.runoob.com/linux/linux-comm-chown.html）
+$> chown mysql:mysql mysql-files
+# 赋予用户 mysql-files 执行权限（具体参考：https://www.runoob.com/linux/linux-comm-chmod.html）
+$> chmod 750 mysql-files
+# 初始化 mysql，该步骤会生成临时密码
+$> bin/mysqld --initialize --user=mysql
+# 可能会出现 Could not find OpenSSL on the system，需要安装 OpenSSL
+# yum install openssl-devel -y
+$> bin/mysql_ssl_rsa_setup
+# 使用 mysqld_safe 守护进程启动 mysql
+$> bin/mysqld_safe --user=mysql &
+# Next command is optional
+$> cp support-files/mysql.server /etc/init.d/mysql.server
+```
 
-## MySQL 多实例安装
+以上步骤执行完成后，需要检查如下几点确保 MySQL 已经安装成功：
 
+* 生成了 data 目录，data 目录下 `ib*` 等数据文件；
+* 查看安装过程中输出的日志，默认在 data 目录下的 `${HOSTNAME}.err` 文件中，日志中不能包含 `ERROR` 信息；
+* 通过 mysql 客户端登录成功；
 
+下图展示了 mysql 客户端登录成功的界面，我们需要通过 `SET PASSWORD = "123456";` 语句重置密码。
+
+![1692234209](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/17/1692234209.png)
+
+此外，为了简化操作，我们可以将 MySQL 二进制程序的路径添加到 PATH 中，建议将 MySQL 路径添加在最左侧，避免操作系统自带的 MySQL 程序影响。
+
+```bash
+# vim /etc/profile
+export PATH=/usr/local/mysql/bin:$PATH
+source /etc/profile
+echo $PATH
+# /usr/local/mysql/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+```
 
 ## MySQL 配置及初始化
 
