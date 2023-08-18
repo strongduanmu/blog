@@ -17,7 +17,7 @@ MySQL 是当前主流的开源关系型数据库，学习 MySQL 能够帮助我�
 
 > 选择通用二进制安装包，主要是考虑到这种安装方式较为简单，并且在不同的 Linux 发行版上具有很好的通用性，此外还可以灵活地指定安装路径，在一台机器上安装多个 MySQL 实例。
 
-![1669080676](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/11/22/1669080676.png)
+![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/11/22/1669080676.png)
 
 下载完成后，我们使用 `scp` 命令将二进制安装包拷贝到服务器的 `/usr/local` 目录下。
 
@@ -83,7 +83,7 @@ rm -rf /etc/my.cnf
 rm -rf /etc/mysql
 ```
 
-此外，MySQL 依赖 libaio 和 libnuma 库，需要在安装 MySQL 前进行安装：
+此外，MySQL 依赖 libaio、libnuma 和 ncurses 库，需要在安装 MySQL 前进行安装：
 
 ```bash
 # search for info
@@ -135,11 +135,13 @@ $> cp support-files/mysql.server /etc/init.d/mysql.server
 
 * 生成了 data 目录，data 目录下 `ib*` 等数据文件；
 * 查看安装过程中输出的日志，默认在 data 目录下的 `${HOSTNAME}.err` 文件中，日志中不能包含 `ERROR` 信息；
-* 通过 mysql 客户端登录成功；
+* 通过 MySQL 客户端登录成功；
 
-下图展示了 mysql 客户端登录成功的界面，我们需要通过 `SET PASSWORD = "123456";` 语句重置密码。
+下图展示了 MySQL 客户端登录成功的界面，我们需要通过 `SET PASSWORD = "123456";` 语句重置密码。
 
-![1692234209](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/17/1692234209.png)
+> MySQL 支持本地 Socket 登录和远程 TCP/IP 登录，本地 Socket 登录使用 `mysql -S /tmp/mysql.sock -uroot -p` 登录，远程 TCP/IP 使用 `mysql -h 127.0.0.1 -P 3306 -uroot -p` 登录。
+
+![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/17/1692234209.png)
 
 此外，为了简化操作，我们可以将 MySQL 二进制程序的路径添加到 PATH 中，建议将 MySQL 路径添加在最左侧，避免操作系统自带的 MySQL 程序影响。
 
@@ -149,6 +151,23 @@ export PATH=/usr/local/mysql/bin:$PATH
 source /etc/profile
 echo $PATH
 # /usr/local/mysql/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin
+```
+
+关于 MySQL 的启动，前文我们使用了 `bin/mysqld_safe --user=mysql &` 进行启动，`mysqld_safe` 是一个守护进程，它会监控 `mysqld` 进程的运行情况，当 `mysqld` 进程意外停止时，`mysqld_safe` 会重新启动 `mysqld` 进程。下图中，我们通过 `kill -9 pid` 手动杀死了 `mysqld` 进程，可以看到 `mysqld_safe` 立即检测到并对 `mysqld` 进行了重启。
+
+![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/18/1692319030.png)
+
+除了使用 `mysqld_safe` 启动 MySQL 外，还可以通过 Linux 启动项实现开机自启动，在前面的安装步骤中，我们执行了 `cp support-files/mysql.server /etc/init.d/mysql.server` 命令，`mysql.server` 脚本中提供了 `start`、`stop`、`restart`、`status` 等命令。
+
+![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/18/1692319672.png)
+
+可以通过 `chkconfig` 实现 `mysql.server` 自启动，执行如下脚本，然后重启服务器测试配置是否生效。
+
+```bash
+chkconfig --add mysql.server
+chkconfig --list | grep mysql
+# mysql.server   	0:关	1:关	2:开	3:开	4:开	5:开	6:关
+# chkconfig 使用说明：https://wangchujiang.com/linux-command/c/chkconfig.html
 ```
 
 ## MySQL 配置及初始化
