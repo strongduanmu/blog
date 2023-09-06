@@ -14,7 +14,7 @@ Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`S
 
 * 最外层是 `JDBC Client` 和数据处理系统（`Data Processing System`），JDBC Client 提供给用户，用于连接 Calcite 的 JDBC Server，数据处理系统则用于对接不同的数据存储引擎；
 
-* 内层是 Calcite 核心架构的流程性组件，包括负责接收 JDBC 请求的 `JDBC Server`，负责解析 SQL 语法的 `SQL Parser`，负责校验 SQL 语义的 `SQL Validator`，以及负责构建算子表达式的 `Expression Builder`；
+* 内层是 Calcite 核心架构的流程性组件，包括负责接收 JDBC 请求的 `JDBC Server`，负责解析 SQL 语法的 `SQL Parser`，负责校验 SQL 语义的 `SQL Validator`，以及负责构建算子表达式的 `Expression Builder`（可以通过 SQL 转换为关系代数，也可以通过 Expression Builder 直接构建）；
 
 * 算子表达式（`Operator Expressions`）、元数据提供器（`Metadata Providers`）、可插拔优化规则（`Pluggable Rules`） 是用于适配不同逻辑的适配器，这些适配器都可以进行灵活地扩展；
 
@@ -22,7 +22,7 @@ Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`S
 
 另外，Calcite 还具有灵活性（`Flexible`）、组件可插拔（`Embeddable`）和可扩展（`Extensible`）3 大核心特性，Calcite 的解析器、优化器都可以作为独立的组件使用。目前，Calcite 作为 SQL 解析与优化引擎，已经广泛使用在 Hive、Drill、Flink、Phoenix 和 Storm 等项目中。
 
-## 快速入门
+## Calcite 入门示例
 
 在了解了 Calcite 的基本架构和特点之后，我们以 Calcite 官方经典的 CSV 案例作为入门示例，来展示下 Calcite 强大的功能。首先，从 github 下载 calcite 项目源码，`git clone https://github.com/apache/calcite.git`，然后执行 `cd calcite/example/csv` 进入 csv 目录。
 
@@ -86,7 +86,7 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 看到这里大家不禁会问，Calcite 是如何基于 CSV 格式的数据存储，来提供完善的 SQL 查询能力呢？下面我们将结合 Calcite 源码，针对一些典型的 SQL 查询语句，初步学习下 Calcite 内部的实现原理。
 
-## 源码分析
+## Calcite 元数据定义
 
 在 Caclite 集成 CSV 示例中，我们主要关注两个部分：一是 Calcite 元数据的定义，二是优化规则的管理。元数据的定义是通过 `!connect jdbc:calcite:model=src/test/resources/model.json admin admin` 命令，指定 model 属性对应的配置文件 `model.json` 来注册元数据，具体内容如下：
 
@@ -251,11 +251,37 @@ public class CsvSchema extends AbstractSchema {
 }
 ```
 
-我们来看下这三种类型的表的区别：
+`CsvSchema#createTable` 方法中定义了三种表类型，让我们来看下这三种类型的区别：
 
-* CsvTranslatableTable：
-* CsvScannableTable：
-* CsvFilterableTable：
+* `CsvTranslatableTable`：实现了 `QueryableTable` 和 `TranslatableTable` 接口，QueryableTable 接口会实现 `asQueryable` 方法，将表转化成 Queryable 实现类，从而具有 `groupBy`、`count` 等查询能力，具体可以参考 `ExtendedQueryable`。TranslatableTable 则用于将 RelOptTable 对象转换为 RelNode，此案例中为 CsvTableScan，后续可以使用优化规则对 CsvTableScan 进行变换从而实现下推等优化；
+* `CsvScannableTable`：实现了 `ScannableTable` 接口，用于扫描全部数据记录，Calcite 会调用 scan 获取 csv 文件中的全部数据；
+* `CsvFilterableTable`：实现了 `FilterableTable` 接口，可以在扫描数据过程中，根据 scan 方法传入的 `List<RexNode> filters` 参数进行数据过滤。
+
+前面介绍 `CsvSchemaFactory` 和 `CsvSchema` 中的元数据初始化逻辑，会在 Calcite JDBC 创建 Connection 进行初始化，具体是调用 ModelHandler 解析 JSON 格式的配置文件，然后调用 CsvSchemaFactory 创建 CsvSchema。
+
+```java
+public void visit(JsonCustomSchema jsonSchema) {
+    try {
+        final SchemaPlus parentSchema = currentMutableSchema("sub-schema");
+        final SchemaFactory schemaFactory =
+            AvaticaUtils.instantiatePlugin(SchemaFactory.class,
+                jsonSchema.factory);
+        final Schema schema =
+            schemaFactory.create(
+                parentSchema, jsonSchema.name, operandMap(jsonSchema, jsonSchema.operand));
+        final SchemaPlus schemaPlus = parentSchema.add(jsonSchema.name, schema);
+        populateSchema(jsonSchema, schemaPlus);
+    } catch (Exception e) {
+        throw new RuntimeException("Error instantiating " + jsonSchema, e);
+    }
+}
+```
+
+初始化完成后，元数据对象的结构如下，注册了 `metadata` 和 `SALES` 两个 schema。
+
+![元数据对象结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/06/1693962395.png)
+
+## Calcite 优化规则
 
 
 
