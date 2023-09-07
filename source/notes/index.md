@@ -1,10 +1,17 @@
 ---
 robots: noindex,nofollow
 sitemap: false
-menu_id: notes
 layout: wiki
+wiki: Notes
+menu_id: notes
 ---
 
 {% navbar [Docker](docker) [Git](git) [IDAE](idea) [VirtualBox](virtualbox) %}
 
-{% sites %}
+## 技术论坛
+
+{% sites 技术论坛 %}
+
+## 实用工具
+
+{% sites 实用工具 %}
