@@ -4,6 +4,7 @@ tags: [Linux, VirtualBox, CentOS]
 categories: [Linux]
 date: 2021-11-07 20:37:44
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/14/1636874726.jpg
+banner: nanjing
 ---
 
 ## 前言
