@@ -33,9 +33,9 @@ comments:
   # https://giscus.app/zh-CN
   giscus:
     data-repo: strongduanmu/blog
-    data-repo-id: 374009768
-    data-category: announcements
-    data-category-id:
+    data-repo-id: MDEwOlJlcG9zaXRvcnkzNzQwMDk3Njg=
+    data-category: Announcements
+    data-category-id: DIC_kwDOFkrvqM4CZIsa
     data-mapping: pathname
     data-strict: 0
     data-reactions-enabled: 1
