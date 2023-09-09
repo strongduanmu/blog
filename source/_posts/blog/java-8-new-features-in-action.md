@@ -4,7 +4,7 @@ tags: [Java8]
 categories: [Java]
 date: 2020-01-12 09:00:00
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/10/1644493506.jpg
-banner: nanjing
+banner: china
 ---
 
 ## 前言

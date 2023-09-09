@@ -1,6 +1,9 @@
 ---
 title: {{ title }}
 date: {{ date }}
-tags:
-banner: nanjing
+tags: []
+categories: []
+cover: 
+banner: china
 ---
+

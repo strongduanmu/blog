@@ -1,6 +1,6 @@
 ---
 title: BenchmarkSQL & ShardingSphere-JDBC 性能测试实战
-banner: nanjing
+banner: china
 date: 2023-09-07 18:07:01
 tags: [In Action, ShardingSphere]
 categories: [ShardingSphere]
