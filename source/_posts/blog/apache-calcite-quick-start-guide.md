@@ -284,7 +284,11 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ## Calcite 优化规则
 
+TODO
 
+> Calcite 从入门到精通知识星球现已创建，欢迎感兴趣的同学扫码加入。
+
+![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
 
 ## 参考文档
 
