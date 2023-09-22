@@ -5,6 +5,18 @@ categories: [Calcite]
 date: 2022-07-10 14:46:43
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
+references:
+  - title: 'Calcite 入门使用 - I (CSV Example)'
+    url: https://zhuanlan.zhihu.com/p/53725382
+  - title: 'Apache Calcite 官方文档之 Tutorial 英文版'
+    url: https://calcite.apache.org/docs/tutorial.html
+  - title: 'Apache Calcite 官方文档之 Tutorial 中文版'
+    url: https://strongduanmu.com/wiki/calcite/tutorial.html
+  - title: 'Apache Calcite：Hadoop 中新型大数据查询引擎'
+    url: https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite
+  - title: 'Apache Calcite: A Foundational Framework for Optimized Query Processing Over Heterogeneous Data Sources'
+    url: https://arxiv.org/pdf/1802.10233.pdf
+
 ---
 
 ## Calcite 简介
@@ -286,18 +298,19 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 TODO
 
-> Calcite 从入门到精通知识星球现已创建，欢迎感兴趣的同学扫码加入。
+
+
+
+
+
+
+
+
+
+
+{% quot 写在最后 %}
+
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了`Calcite 从入门到精通`知识星球，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+{% note color:green 目前星球刚创建，内部积累的资料还很有限，因此暂时不收费，感兴趣的同学可以联系我，免费邀请进入星球。 %}
 
 ![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
-
-## 参考文档
-
-* [Calcite 入门使用 - I (CSV Example)](https://zhuanlan.zhihu.com/p/53725382)
-
-* [Apache Calcite 官方文档之 Tutorial 英文版](https://calcite.apache.org/docs/tutorial.html)
-
-* [Apache Calcite 官方文档之 Tutorial 中文版](https://strongduanmu.com/wiki/calcite/tutorial.html)
-
-* [Apache Calcite：Hadoop 中新型大数据查询引擎](https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite)
-
-* [Apache Calcite: A Foundational Framework for Optimized Query Processing Over Heterogeneous Data Sources](https://arxiv.org/pdf/1802.10233.pdf)

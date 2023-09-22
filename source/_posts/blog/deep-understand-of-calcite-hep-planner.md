@@ -5,6 +5,13 @@ categories: [Calcite]
 date: 2023-02-12 19:32:33
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
+references:
+  - title: 'Calcite RBO 简介'
+    url: https://zhuanlan.zhihu.com/p/65673329
+  - title: 'Apache Calcite 优化器详解（二）'
+    url: http://matt33.com/2019/03/17/apache-calcite-planner/
+  - title: 'Calcite 启发式 Planner（HepPlanner）'
+    url: https://zhuanlan.zhihu.com/p/61661909
 ---
 
 ## 什么是 RBO
@@ -352,10 +359,11 @@ HepMatchOrder 代表了基于规则优化的顺序，包含了 ARBITRARY（任�
 
 
 
-## 参考文档
 
-* [Calcite RBO 简介](https://zhuanlan.zhihu.com/p/65673329)
 
-* [Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)
+{% quot 写在最后 %}
 
-* [Calcite 启发式 Planner（HepPlanner）](https://zhuanlan.zhihu.com/p/61661909)
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了`Calcite 从入门到精通`知识星球，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+{% note color:green 目前星球刚创建，内部积累的资料还很有限，因此暂时不收费，感兴趣的同学可以联系我，免费邀请进入星球。 %}
+
+![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
