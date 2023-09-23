@@ -14,3 +14,5 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310
 * [BenchmarkSQL ShardingSphere Proxy 分片性能测试](https://shardingsphere.apache.org/document/current/cn/test-manual/performance-test/benchmarksql-proxy-sharding-test/)
 
 * [TPC-C 基准性能测试](https://book.tidb.io/session4/chapter3/tpc-c.html)
+
+* [BenchmarkSQL 性能测试（openGauss）](https://www.modb.pro/db/44107)
