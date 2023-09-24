@@ -101,7 +101,11 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 ## Calcite 元数据定义
 
-在 Caclite 集成 CSV 示例中，我们主要关注两个部分：一是 Calcite 元数据的定义，二是优化规则的管理。元数据的定义是通过 `!connect jdbc:calcite:model=src/test/resources/model.json admin admin` 命令，指定 model 属性对应的配置文件 `model.json` 来注册元数据，具体内容如下：
+在 Caclite 集成 CSV 示例中，我们主要关注三个部分：一是 Calcite 元数据的定义，二是优化规则的管理，三是最优计划的执行。这三个部分是 Calcite 执行流程的核心，元数据主要用于对 SqlNode 语法树进行校验，并为 CBO 优化中代价的计算提供统计信息。优化规则被 Calcite 优化器使用，用来对逻辑计划进行改写，并生成最优的执行计划。最终，执行器会基于最优的执行计划，在不同的存储引擎上进行执行。
+
+![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/24/1695513880.png)
+
+我们先关注 Calcite 元数据的定义，元数据的定义是通过 `!connect jdbc:calcite:model=src/test/resources/model.json admin admin` 命令，指定 model 属性对应的配置文件 `model.json` 来注册元数据，具体内容如下：
 
 ```json
 {
@@ -294,15 +298,13 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ![元数据对象结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/06/1693962395.png)
 
-## Calcite 优化规则
+## Calcite 优化规则管理
 
 TODO
 
 
 
-
-
-
+## Calcite 最优计划执行
 
 
 
