@@ -300,7 +300,7 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ## Calcite 优化规则管理
 
-下面我们再来看看 Calcite 是如何管理优化规则的，在 CSV 示例中我们定义了 `CsvProjectTableScanRule`，用于匹配在 `CsvTableScan` 之上的 `Project` 并将投影下推到 CsvTableScan 中。刚接触 Calcite 的朋友可能很难理解在 `CsvTableScan` 之上的 `Project` 是什么含义？我们通过一条 SQL 来进行理解，假设我们执行的 SQL 为 `select name from EMPS`（读者可以使用 CsvTest#testSelectSingleProjectGz 自行测试）。
+下面我们再来看看 Calcite 是如何管理优化规则的，在 CSV 示例中我们定义了 `CsvProjectTableScanRule`，用于匹配在 `CsvTableScan` 之上的 `Project` 投影，并将 Project 投影下推到 CsvTableScan 中。刚接触 Calcite 的朋友可能很难理解在 `CsvTableScan` 之上的 `Project` 是什么含义？我们通过一条 SQL 来进行理解，假设我们执行的 SQL 为 `select name from EMPS`（读者可以使用 CsvTest#testSelectSingleProjectGz 自行测试）。
 
 ```java
 // CsvTest
@@ -310,7 +310,7 @@ void testSelectSingleProjectGz() throws SQLException {
 }
 ```
 
-Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过前文介绍的语法校验、逻辑计划生成得到一颗逻辑计划树，
+Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过前文介绍的语法校验，逻辑计划生成得到如下的逻辑计划树，LogicalProject 默认会查询表中的所有投影字段，LogicalProject 需要从 LogicalTableScan 中获取记录
 
 ![Calcite 逻辑计划树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/25/1695605453.png)
 
