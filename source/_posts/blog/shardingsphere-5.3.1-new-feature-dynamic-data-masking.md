@@ -7,15 +7,15 @@ date: 2023-01-17 10:27:56
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
 ---
 
-# 背景
+## 背景
 
 随着《网络安全法》的颁布施行，对个人隐私数据的保护已经上升到法律层面。传统的应用系统普遍缺少对个人隐私数据的保护措施。数据脱敏，可以实现在不需要对生产数据库中的数据进行任何改变的情况下，依据用户的角色、职责和其他定义规则，对生产数据库返回的数据进行专门的屏蔽、加密、隐藏和审计，确保业务用户、外包用户、运维人员、兼职雇员、合作伙伴、数据分析师、研发、测试和顾问，都能够恰如其分地访问生产环境的敏感数据。
 
 根据业界的相关经验，数据脱敏通常可以分为静态脱敏和动态脱敏。静态脱敏是指通过脱敏任务，针对数据库系统使用脱敏算法对敏感数据进行遮盖、加密或替换，并将脱敏后的数据保存到目标位置。动态脱敏相对于静态脱敏则更加灵活，可以针对每次查询的数据进行脱敏，脱敏数据不需要落地保存。ShardingSphere 5.3.1 版本提供了动态数据脱敏功能，用户通过 ShardingSphere 进行查询，ShardingSphere 会根据用户预先配置的脱敏规则，在返回结果前根据脱敏算法进行处理，再将脱敏后的数据返回给用户。
 
-# 实现方案
+## 实现方案
 
-## 脱敏与微内核
+### 脱敏与微内核
 
 基于 ShardingSphere 微内核及可插拔架构，数据脱敏功能只需要实现结果归并引擎 SPI 就可以实现功能的灵活扩展。如下图所示，ShardingSphere 微内核中已经包含了 `SQL 解析`、`SQL 路由`、`SQL 执行`等核心逻辑，ShardingSphere 5.3.1 版本提供的动态脱敏功能，只是对其他功能查询结果的增强处理，因此只需要实现归并引擎中的 ResultDecoratorEngine 和 ResultDecorator 即可实现脱敏功能。
 
@@ -33,7 +33,7 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310
 
 ![ShardingSphere 内核功能分层](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309251037711.png)
 
-## 脱敏 YAML API & DistSQL
+### 脱敏 YAML API & DistSQL
 
 介绍完脱敏和微内核的关系后，我们再来了解下脱敏功能的 API 和 DistSQL，用户可以基于 YAML 配置或者使用 DistSQL 进行脱敏规则的配置。首先，我们来了解下 YAML API 的配置方式，用户只需要在 `- !MASK` 下的 tables 中配置脱敏列及脱敏算法即可，maskAlgorithm 定义的脱敏算法名称，需要与 maskAlgorithms 中的名称保持一致。
 
@@ -123,7 +123,7 @@ SHOW MASK RULES FROM mask_db;
 
 更多详细的 DistSQL 语法说明，请参考[数据脱敏 DistSQL 文档](https://shardingsphere.apache.org/document/5.3.1/cn/user-manual/shardingsphere-proxy/distsql/syntax/rdl/rule-definition/mask/create-mask-rule/)。
 
-## 内置脱敏算法
+### 内置脱敏算法
 
 ShardingSphere 5.3.1 本次发布也包含了大量内置的脱敏算法，算法基于 MaskAlgorithm SPI 接口实现，用户可以根据自己的业务需求进行灵活扩展。
 
@@ -205,7 +205,7 @@ public interface MaskAlgorithm<I, O> {
 
 脱敏算法目前还在不断完善中，更多关于算法参数的说明，请参考[脱敏算法文档](https://shardingsphere.apache.org/document/5.3.1/cn/user-manual/common-config/builtin-algorithm/mask/#哈希脱敏算法)，也欢迎大家积极参与贡献，一起完善脱敏算法。
 
-# 脱敏实战
+## 脱敏实战
 
 在最后一个部分，我们通过一个实战来具体了解下数据脱敏功能。通常对于企业内部的敏感数据，我们会选择数据脱敏和数据加密配合使用，Database 层存储数据时采用数据加密进行保护，避免数据丢失造成安全问题。在数据查询阶段，则会根据规则进行数据解密和数据脱敏，避免敏感数据直接展示。因此，本文实战部分选择了数据脱敏和数据加密叠加使用的场景，通过 DistSQL 进行动态更新，向大家展示下数据脱敏功能的实际效果。
 
@@ -425,6 +425,6 @@ mysql> SELECT * FROM t_user WHERE user_id = 10;
 1 row in set (0.00 sec)
 ```
 
-# 结语
+## 结语
 
 Apache ShardingSphere 5.3.1 新增的动态数据脱敏功能，是对 ShardingSphere 数据安全方案的进一步补充和完善，未来数据脱敏将会尝试和用户权限、SQL 审计等功能进行结合，根据企业内部的角色划分，进行不同维度的数据脱敏处理。欢迎社区的同学积极参与进来，共同提升 Apache ShardingSphere 的脱敏功能，为社区提供更好的使用体验。
