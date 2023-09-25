@@ -300,7 +300,90 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ## Calcite 优化规则管理
 
-TODO
+下面我们再来看看 Calcite 是如何管理优化规则的，在 CSV 示例中我们定义了 `CsvProjectTableScanRule`，用于匹配在 `CsvTableScan` 之上的 `Project` 并将投影下推到 CsvTableScan 中。刚接触 Calcite 的朋友可能很难理解在 `CsvTableScan` 之上的 `Project` 是什么含义？我们通过一条 SQL 来进行理解，假设我们执行的 SQL 为 `select name from EMPS`（读者可以使用 CsvTest#testSelectSingleProjectGz 自行测试）。
+
+```java
+// CsvTest
+@Test
+void testSelectSingleProjectGz() throws SQLException {
+    sql("smart", "select name from EMPS").ok();
+}
+```
+
+Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过前文介绍的语法校验、逻辑计划生成得到一颗逻辑计划树，
+
+![Calcite 逻辑计划树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/25/1695605453.png)
+
+
+
+
+
+```java
+/**
+ * Planner rule that projects from a {@link CsvTableScan} scan just the columns
+ * needed to satisfy a projection. If the projection's expressions are trivial,
+ * the projection is removed.
+ *
+ * @see CsvRules#PROJECT_SCAN
+ */
+@Value.Enclosing
+public class CsvProjectTableScanRule
+        extends RelRule<CsvProjectTableScanRule.Config> {
+    
+    /**
+     * Creates a CsvProjectTableScanRule.
+     */
+    protected CsvProjectTableScanRule(Config config) {
+        super(config);
+    }
+    
+    @Override
+  	// 
+    public void onMatch(RelOptRuleCall call) {
+        final LogicalProject project = call.rel(0);
+        final CsvTableScan scan = call.rel(1);
+        int[] fields = getProjectFields(project.getProjects());
+        if (fields == null) {
+            // Project contains expressions more complex than just field references.
+            return;
+        }
+        call.transformTo(new CsvTableScan(scan.getCluster(), scan.getTable(), scan.csvTable, fields));
+    }
+    
+    private static int[] getProjectFields(List<RexNode> exps) {
+        final int[] fields = new int[exps.size()];
+        for (int i = 0; i < exps.size(); i++) {
+            final RexNode exp = exps.get(i);
+            if (exp instanceof RexInputRef) {
+                fields[i] = ((RexInputRef) exp).getIndex();
+            } else {
+                return null; // not a simple projection
+            }
+        }
+        return fields;
+    }
+    
+    /**
+     * Rule configuration.
+     */
+    @Value.Immutable(singleton = false)
+    public interface Config extends RelRule.Config {
+        Config DEFAULT = ImmutableCsvProjectTableScanRule.Config.builder()
+                .withOperandSupplier(b0 ->
+                        b0.operand(LogicalProject.class).oneInput(b1 ->
+                                b1.operand(CsvTableScan.class).noInputs())).build();
+        
+        @Override
+        default CsvProjectTableScanRule toRule() {
+            return new CsvProjectTableScanRule(this);
+        }
+    }
+}
+```
+
+
+
+
 
 ## Calcite 最优计划执行
 
