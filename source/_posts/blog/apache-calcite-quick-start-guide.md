@@ -5,6 +5,7 @@ categories: [Calcite]
 date: 2022-07-10 14:46:43
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
+mermaid: true
 references:
   - title: 'Calcite 入门使用 - I (CSV Example)'
     url: https://zhuanlan.zhihu.com/p/53725382
@@ -379,6 +380,29 @@ public class CsvProjectTableScanRule
         }
     }
 }
+```
+
+```mermaid
+graph LR
+A(Section A) -->|option 1| B(Section A)
+B -->|option 2| C(Section C)
+```
+
+```mermaid
+classDiagram
+direction BT
+class CsvProjectTableScanRule {
+  + onMatch(RelOptRuleCall) void
+  - getProjectFields(List~RexNode~) int[]
+}
+class RelOptRule {
+  + onMatch(RelOptRuleCall) void
+  + matches(RelOptRuleCall) boolean
+}
+class RelRule~C~
+
+CsvProjectTableScanRule  -->  RelRule~C~ 
+RelRule~C~  -->  RelOptRule 
 ```
 
 
