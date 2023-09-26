@@ -312,11 +312,7 @@ void testSelectSingleProjectGz() throws SQLException {
 
 Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过前文介绍的语法校验，逻辑计划生成得到如下的逻辑计划树，LogicalProject 默认会查询表中的所有投影字段，LogicalProject 需要从 LogicalTableScan 中获取记录
 
-![Calcite 逻辑计划树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/25/1695605453.png)
-
-
-
-
+![Calcite 逻辑计划树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/26/1695687869.png)
 
 ```java
 /**
