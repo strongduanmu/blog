@@ -109,6 +109,7 @@ inject:
   script:
     - <!-- Chatra {literal} --><script>(function(d, w, c) {w.ChatraID = 'PHWnu7Bamcwtbnx2d'; var s = d.createElement('script'); w[c] = w[c] || function() {(w[c].q = w[c].q || []).push(arguments);}; s.async = true; s.src = 'https://call.chatra.io/chatra.js'; if (d.head) d.head.appendChild(s);})(document, window, 'Chatra');</script><!-- /Chatra {/literal} -->
     - <script src='https://cdn.jsdelivr.net/npm/mermaid@v9/dist/mermaid.min.js'></script><script>if(window.mermaid){mermaid.initialize(JSON.stringify({{mermaid.options}}))}</script>
+    - <script>$(".mermaid").css("text-align", "center");</script>
 
 # Extensions
 ## Plugins: https://hexo.io/plugins/
