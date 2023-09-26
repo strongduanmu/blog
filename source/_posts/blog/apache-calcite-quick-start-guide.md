@@ -310,9 +310,13 @@ void testSelectSingleProjectGz() throws SQLException {
 }
 ```
 
-Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过前文介绍的语法校验，逻辑计划生成得到如下的逻辑计划树，LogicalProject 默认会查询表中的所有投影字段，LogicalProject 需要从 LogicalTableScan 中获取记录
+Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过语法校验、逻辑计划生成等阶段得到如下的逻辑计划树。`LogicalProject` 代表了逻辑投影，会查询 SQL 中指定的投影字段 name 对应的**数据列**。而 LogicalProject 想要获取投影字段对应的数据，需要向下调用 `CsvTableScan`，CsvTableScan 则会对 EMPS 表进行扫描获取**数据行**，逻辑计划树中 CsvTableScan 会获取数据行中的所有行、所有列，再将数据传递给上层的 LogicalProject 按投影列进行过滤。
 
-![Calcite 逻辑计划树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/26/1695687869.png)
+![Calcite 逻辑优化](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309260913430.png)
+
+细心的读者可能已经发现，为什么我们指定的 SQL 中只需要查询 name 列，而逻辑计划树中的 CsvTableScan 却要扫描所有列？为了避免 CsvTableScan 扫描无用的数据列，CSV 案例中定义了 CsvProjectTableScanRule 优化规则，**主要用于将 Projection 下推到 TableScan 中，在数据扫描阶段就过滤无用的数据列，从而达到减少数据传输，降低计算时占用内存的目的**。可以看到，经过 CsvProjectTableScanRule 优化后，逻辑计划树中只有一个 CsvTableScan 算子，内部包含了 table 和 fields，可以在数据扫描时过滤投影列（和 Projection 下推类似，我们也可以将 Filter 下推到 TableScan 中，减少加载到内存的数据行，Filter 下推读者可以自行尝试下）。
+
+下面是 CsvProjectTableScanRule 规则的实现，它继承了 RelRule 抽象类，
 
 ```java
 /**
