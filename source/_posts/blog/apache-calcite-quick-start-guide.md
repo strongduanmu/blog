@@ -316,7 +316,7 @@ Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过语法校验、�
 
 细心的读者可能已经发现，为什么我们指定的 SQL 中只需要查询 name 列，而逻辑计划树中的 CsvTableScan 却要扫描所有列？为了避免 CsvTableScan 扫描无用的数据列，CSV 案例中定义了 CsvProjectTableScanRule 优化规则，**主要用于将 Projection 下推到 TableScan 中，在数据扫描阶段就过滤无用的数据列，从而达到减少数据传输，降低计算时占用内存的目的**。可以看到，经过 CsvProjectTableScanRule 优化后，逻辑计划树中只有一个 CsvTableScan 算子，内部包含了 table 和 fields，可以在数据扫描时过滤投影列（和 Projection 下推类似，我们也可以将 Filter 下推到 TableScan 中，减少加载到内存的数据行，Filter 下推读者可以自行尝试下）。
 
-下面是 CsvProjectTableScanRule 规则的实现，它继承了 RelRule 抽象类，
+下面展示的是 CsvProjectTableScanRule 规则的实现，它继承了 RelRule 抽象类，CsvProjectTableScanRule 构造方法会将 config 传给父类进行初始化。config 类则是由 CsvProjectTableScanRule 类的内部 `Config` 接口，通过 `@Value.Immutable` 注解动态生成的实现类，其核心逻辑定义了优化规则需要匹配的逻辑计划树结构，**此处的结构为 LogicalProject 节点，下方包含一个 CsvTableScan 输入节点，而 CsvTableScan 节点则没有输入节点**。
 
 ```java
 /**
@@ -337,8 +337,8 @@ public class CsvProjectTableScanRule
         super(config);
     }
     
+    // 匹配 config 中定义的规则后，对逻辑计划树进行 transformTo 变换
     @Override
-  	// 
     public void onMatch(RelOptRuleCall call) {
         final LogicalProject project = call.rel(0);
         final CsvTableScan scan = call.rel(1);
@@ -381,21 +381,41 @@ public class CsvProjectTableScanRule
 }
 ```
 
-```mermaid
-classDiagram
-direction BT
-class CsvProjectTableScanRule {
-  + onMatch(RelOptRuleCall) void
-  - getProjectFields(List~RexNode~) int[]
-}
-class RelOptRule {
-  + onMatch(RelOptRuleCall) void
-  + matches(RelOptRuleCall) boolean
-}
-class RelRule~C~
+CsvProjectTableScanRule 继承了 RelRule 抽象类，而 RelRule 抽象类又继承 RelOptRule 抽象类，继承关系如下图所示。Calcite 优化器会调用 `matches` 方法判断当前优化规则是否匹配，匹配则继续调用 `onMatch` 方法对逻辑计划树进行变换，通过代码可以看出，CSV 示例中会将投影列 fields 下推到 CsvTableScan 中。
 
-CsvProjectTableScanRule  -->  RelRule~C~ 
-RelRule~C~  -->  RelOptRule 
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309270817769.png RelOptRule 继承关系 width:250px padding:25px bg:white %}
+
+了解了 CsvProjectTableScanRule 大致的优化逻辑后，我们再来看下 Calcite 是如何注册和执行优化规则的。在 CsvTableScan 中定义了一个 `register` 方法，用于注册和当前关系代数节点相关的优化规则，`CsvRules.PROJECT_SCAN` 是调用 `toRule` 方法得到的优化规则对象。入参 `RelOptPlanner` 是 Calcite 中的优化器对象，目前提供了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，HepPlanner 采用 RBO 模型，基于已知的优化规则进行优化，而 VolcanoPlanner 则采用 CBO 模型，基于执行计划的代价进行选择。
+
+```java
+// CsvTableScan
+@Override
+public void register(RelOptPlanner planner) {
+    planner.addRule(CsvRules.PROJECT_SCAN);
+}
+
+/**
+ * Planner rules relating to the CSV adapter.
+ */
+public abstract class CsvRules {
+    
+    private CsvRules() {
+    }
+    
+    /**
+     * Rule that matches a {@link org.apache.calcite.rel.core.Project} on
+     * a {@link CsvTableScan} and pushes down projects if possible.
+     */
+    public static final CsvProjectTableScanRule PROJECT_SCAN = CsvProjectTableScanRule.Config.DEFAULT.toRule();
+}
+```
+
+注册完成优化规则后，Calcite 在执行阶段会调用优化器的 `setRoot` 和 `findBestExp` 方法，优化器内部会根据优化规则以及执行计划的代价选择最有的执行计划。
+
+```java
+// 将关系代数设置到 planner 中, findBestExp 获取最有执行计划
+planner.setRoot(rel);
+planner.findBestExp();
 ```
 
 
