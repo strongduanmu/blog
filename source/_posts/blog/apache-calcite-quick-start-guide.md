@@ -2,7 +2,7 @@
 title: Apache Calcite 快速入门指南
 tags: [Calcite]
 categories: [Calcite]
-date: 2022-07-10 14:46:43
+date: 2023-09-24 14:46:43
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
 references:
@@ -327,8 +327,7 @@ Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过语法校验、�
  * @see CsvRules#PROJECT_SCAN
  */
 @Value.Enclosing
-public class CsvProjectTableScanRule
-        extends RelRule<CsvProjectTableScanRule.Config> {
+public class CsvProjectTableScanRule extends RelRule<CsvProjectTableScanRule.Config> {
     
     /**
      * Creates a CsvProjectTableScanRule.
@@ -385,7 +384,7 @@ CsvProjectTableScanRule 继承了 RelRule 抽象类，而 RelRule 抽象类又�
 
 {% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309270817769.png RelOptRule 继承关系 width:250px padding:25px bg:white %}
 
-了解了 CsvProjectTableScanRule 大致的优化逻辑后，我们再来看下 Calcite 是如何注册和执行优化规则的。在 CsvTableScan 中定义了一个 `register` 方法，用于注册和当前关系代数节点相关的优化规则，`CsvRules.PROJECT_SCAN` 是调用 `toRule` 方法得到的优化规则对象。入参 `RelOptPlanner` 是 Calcite 中的优化器对象，目前提供了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，HepPlanner 采用 RBO 模型，基于已知的优化规则进行优化，而 VolcanoPlanner 则采用 CBO 模型，基于执行计划的代价进行选择。
+了解了 CsvProjectTableScanRule 大致的优化逻辑后，我们再来看下 Calcite 是如何注册和执行优化规则的。在 CsvTableScan 中定义了一个 `register` 方法，用于注册和当前关系代数节点相关的优化规则，`CsvRules.PROJECT_SCAN` 是调用 `toRule` 方法得到的优化规则对象。入参 `RelOptPlanner` 是 Calcite 中的优化器对象，目前提供了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，HepPlanner 采用 RBO 模型，基于已知的优化规则进行优化，而 VolcanoPlanner 则采用 CBO 模型，基于执行计划的代价进行选择。本文由于篇幅原因，先从优化器的外部接口了解其功能，暂时不做过多的探究，在后续的文章中，我们将深入学习这两种优化器的内部实现。
 
 ```java
 // CsvTableScan
@@ -410,7 +409,28 @@ public abstract class CsvRules {
 }
 ```
 
-注册完成优化规则后，Calcite 在执行阶段会调用优化器的 `setRoot` 和 `findBestExp` 方法，优化器内部会根据优化规则以及执行计划的代价选择最有的执行计划。
+在注册完成优化规则后，Calcite JDBC 程序会在 SQL 执行阶段，封装多个 Program 实现类，Program 接口提供了如下的 `run` 方法，用于对关系代数表达式 RelNode 进行变换。
+
+```java
+/**
+ * Program that transforms a relational expression into another relational
+ * expression.
+ *
+ * <p>A planner is a sequence of programs, each of which is sometimes called
+ * a "phase".
+ * The most typical program is an invocation of the volcano planner with a
+ * particular {@link org.apache.calcite.tools.RuleSet}.</p>
+ */
+public interface Program {
+    RelNode run(RelOptPlanner planner, RelNode rel, RelTraitSet requiredOutputTraits, List<RelOptMaterialization> materializations, List<RelOptLattice> lattices);
+}
+```
+
+如下图所示，Calcite Prepare 类中默认注册了 5 个 Program，内部封装了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，以及相关子查询消除等改写逻辑，可以对查询 SQL 进行比较全面的查询优化。
+
+![Calcite JDBC 默认提供的 Program](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/28/1695901517.png)
+
+调用 `program.run` 方法会触发 `SequenceProgram` 内部逻辑， 依次触发 programs 对象的 run 方法。我们以第一个 Program 为例，内部会调用 HepPlanner 优化器的 `setRoot` 和 `findBestExp` 方法，setRoot 方法用于将关系代数设置到 planner 中，而 findBestExp 方法则会调用优化器的逻辑，根据优化规则或者代价选择最优的执行计划。
 
 ```java
 // 将关系代数设置到 planner 中, findBestExp 获取最有执行计划
@@ -418,9 +438,9 @@ planner.setRoot(rel);
 planner.findBestExp();
 ```
 
+优化完成后我们就得到了最优的执行计划，使用 `RelOptUtil.toString(root.rel)` 查看其结果为 `CsvTableScan(table=[[SALES, EMPS]], fields=[[1]])`，下一步我们将看看最优执行计划是如何执行得到结果的。
 
-
-
+![最优执行计划](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/28/1695902416.png)
 
 ## Calcite 最优计划执行
 
