@@ -444,7 +444,7 @@ planner.findBestExp();
 
 ## Calcite 最优计划执行
 
-Calcite JDBC 执行的入口是在 `Prepare#implement` 方法，入参是最优的执行计划 RelRoot 类（该类对 RelNode 进行了一些包装，可以用于记录排序字段，以及投影别名处理，具体可以参考 RelRoot 类 的 JavaDoc 文档），返回的结果是 PreparedResult 接口的实现类。
+Calcite JDBC 执行的入口是在 `Prepare#implement` 方法，入参是最优的执行计划 RelRoot 类（该类对 RelNode 进行了一些包装，可以用于记录排序字段，以及投影别名处理，具体可以参考 RelRoot 类的 JavaDoc 文档），返回的结果是 PreparedResult 接口的实现类。
 
 ```java
 /**
@@ -456,7 +456,7 @@ Calcite JDBC 执行的入口是在 `Prepare#implement` 方法，入参是最优�
 protected abstract PreparedResult implement(RelRoot root);
 ```
 
-PreparedResult 接口具有如下公有方法，`getFieldOrigins` 方法用于返回每一个投影列的完整属性 `database, schema, table, column`，`getParameterRowType` 方法则返回一行记录的类型信息，`getBindable` 是整个接口的核心，它返回一个可执行的类，调用 `bind` 方法可以获取一个 Enumerable 迭代器，从而遍历获取最终的结果。
+PreparedResult 接口具有如下公有方法，`getFieldOrigins` 方法用于返回每一个投影列的完整属性 `database, schema, table, column`，`getParameterRowType` 方法则返回行记录的类型信息，`getBindable` 是整个接口的核心，它返回一个可执行的类，调用 `bind` 方法可以获取一个 Enumerable 迭代器，从而遍历获取最终的结果。
 
 ```java
 /**
@@ -506,7 +506,7 @@ public interface PreparedResult {
 
 ![Calcite 执行生成代码](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/30/1696061406.png)
 
-最终返回的 PreparedResultImpl 实现类如下，getBindable 接口会返回 Janino 动态生成的 Java 对象，而 Bindable 接口调用 bind 方法即可返回 Enumerable 迭代器，Calcite JDBC 从迭代器中遍历结果，最终通过 JDBC 接口返回给应用程序。
+最终返回的 PreparedResultImpl 实现类如下，getBindable 接口会返回 Janino 动态生成的 Java 对象，而 Bindable 接口调用 bind 方法即可返回 Enumerable 迭代器，Calcite JDBC 从迭代器中遍历出记录，再通过 JDBC 接口封装返回给应用程序。
 
 ```java
 return new PreparedResultImpl(resultType, requireNonNull(parameterRowType, "parameterRowType"), 
@@ -548,7 +548,7 @@ public interface Bindable<T> {
 }
 ```
 
-TODO
+以上就是 Calcite 最优计划执行的大致流程，后面的文章中我将深入分析 Calcite 执行器代码生成的逻辑和 Enumerable 接口的具体实现。此外，我还将和大家一起探究 Presto、Drill、PolarDB-X 等框架的执行引擎逻辑，看看生产级别的执行引擎是如何高效实现的。
 
 
 
