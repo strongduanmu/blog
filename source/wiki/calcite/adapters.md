@@ -4,14 +4,13 @@ wiki: Calcite 官方文档中文版
 order: 004
 title: 适配器
 date: 2021-12-12 11:15:27
-comment_id: 'calcite_chinese_doc'
 ---
 
 > 原文链接：https://calcite.apache.org/docs/adapter.html
 
 ## 模式适配器
 
-模式适配器允许 `Calcite` 读取特定类型的数据，并将数据表现为模式中的表。
+模式适配器允许 `Calcite` 读取特定类型的数据，并将这些数据显示为模式中的表。	
 
 - [Cassandra 适配器](https://calcite.apache.org/docs/cassandra_adapter.html)（[calcite-cassandra](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/package-summary.html)）；
 - CSV 适配器（[示例/csv](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/csv/package-summary.html)）；
@@ -25,7 +24,7 @@ comment_id: 'calcite_chinese_doc'
 - [操作系统适配器](https://calcite.apache.org/docs/os_adapter.html)（[calcite-os](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/os/package-summary.html)）；
 - [Pig 适配器](https://calcite.apache.org/docs/pig_adapter.html)（[calcite-pig](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/pig/package-summary.html)）；
 - [Redis 适配器](https://calcite.apache.org/docs/redis_adapter.html)（[calcite-redis](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/redis/package-summary.html)）；
-- Solr 云模式适配器（[solr-sql](https://github.com/bluejoe2008/solr-sql)）；
+- Solr cloud 适配器（[solr-sql](https://github.com/bluejoe2008/solr-sql)）；
 - Spark 适配器（[calcite-spark](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/spark/package-summary.html)）；
 - Splunk 适配器（[calcite-splunk](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/splunk/package-summary.html)）；
 - Eclipse 内存分析器 (MAT) 适配器（[mat-calcite-plugin](https://github.com/vlsi/mat-calcite-plugin)）；
@@ -34,6 +33,8 @@ comment_id: 'calcite_chinese_doc'
 ### 其他语言接口
 
 - Piglet（[calcite-piglet](https://calcite.apache.org/javadocAggregate/org/apache/calcite/piglet/package-summary.html)）在 [Pig Latin](https://pig.apache.org/docs/r0.7.0/piglatin_ref1.html) 的子集中运行查询；
+
+TODO
 
 ## 引擎
 

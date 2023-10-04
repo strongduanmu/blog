@@ -4,7 +4,6 @@ wiki: Calcite 官方文档中文版
 order: 001
 title: 背景
 date: 2021-11-11 11:15:27
-comment_id: 'calcite_chinese_doc'
 ---
 
 > 原文链接：https://calcite.apache.org/docs/
