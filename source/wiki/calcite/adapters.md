@@ -32,13 +32,11 @@ date: 2021-12-12 11:15:27
 
 ### 其他语言接口
 
-- Piglet（[calcite-piglet](https://calcite.apache.org/javadocAggregate/org/apache/calcite/piglet/package-summary.html)）在 [Pig Latin](https://pig.apache.org/docs/r0.7.0/piglatin_ref1.html) 的子集中运行查询；
-
-TODO
+- Piglet（[calcite-piglet](https://calcite.apache.org/javadocAggregate/org/apache/calcite/piglet/package-summary.html)）在 [Pig Latin](https://pig.apache.org/docs/latest/basic.html) 的子集中运行查询；
 
 ## 引擎
 
-许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化`、`数据联合查询` 和 `物化视图重写`。他们中的一些列在 [由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html) 页面上。
+许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询` 和 `物化视图重写`。他们中的一些列在了 [由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html) 页面上。
 
 ## 驱动
 
@@ -46,7 +44,7 @@ TODO
 
 - [JDBC 驱动程序](https://calcite.apache.org/javadocAggregate/org/apache/calcite/jdbc/package-summary.html)；
 
-JDBC 驱动由 [Avatica](https://calcite.apache.org/avatica/docs/) 提供支持。连接可以是本地连接或远程连接（基于 HTTP 传输的 `JSON` 或 `Protobuf`）。
+JDBC 驱动由 [Avatica](https://calcite.apache.org/avatica/docs/) 提供支持。连接可以是本地连接或远程连接（基于 HTTP 协议传输的 `JSON` 或 `Protobuf`）。
 
 JDBC 连接字符串的基本格式如下：
 
@@ -54,17 +52,17 @@ JDBC 连接字符串的基本格式如下：
 jdbc:calcite:property=value;property2=value2
 ```
 
-其中 `property`，`property2` 是下面描述的这些属性。连接字符串符合 `OLE DB` 连接字符串语法，由 Avatica 的 [ConnectStringParser](https://calcite.apache.org/avatica/apidocs/org/apache/calcite/avatica/ConnectStringParser.html) 实现。
+其中 `property`，`property2` 是下面描述的这些属性。连接字符串遵循 `OLE DB` 连接字符串语法，由 Avatica 的 [ConnectStringParser](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/ConnectStringParser.html) 实现。
 
 ## JDBC 连接字符串参数
 
 | 属性                                                         | 描述                                                         |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| approximateDecimal                                           | `DECIMAL` 类型聚合函数的近似结果是否可以接受。               |
-| approximateDistinctCount                                     | `COUNT(DISTINCT ...)` 聚合函数的近似结果是否可以接受。       |
-| approximateTopN                                              | 前 N 个查询（`ORDER BY aggFun() DESC LIMIT n`）的近似结果是否可以接受。 |
-| caseSensitive                                                | 标识符是否区分大小写。如果未指定，将会使用 `lex` 中的值。    |
-| conformance                                                  | SQL 的一致性级别。包含如下值：`DEFAULT`（默认值，类似于 `PRAGMATIC_2003`）、`LENIENT`、`MYSQL_5`、`ORACLE_10`、`ORACLE_12`、`PRAGMATIC_99`、`PRAGMATIC_2003`、`STRICT_92`、`STRICT_99`、`STRICT_2003`、`SQL_8SERVER_200`。 |
+| [approximateDecimal](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#APPROXIMATE_DECIMAL) | 是否可以接受 `DECIMAL` 类型聚合函数返回近似结果。            |
+| [approximateDistinctCount](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#APPROXIMATE_DISTINCT_COUNT) | 是否可以接受 `COUNT(DISTINCT ...)` 聚合函数返回近似结果。    |
+| [approximateTopN](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#APPROXIMATE_TOP_N) | 是否可以接受 Top N 查询（`ORDER BY aggFun() DESC LIMIT n`）返回近似结果。 |
+| [caseSensitive](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CASE_SENSITIVE) | 标识符匹配是否区分大小写。如果未指定，将会使用 `lex` 中的值。 |
+| [conformance](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CONFORMANCE) | SQL 一致性级别。包含如下值：`DEFAULT`（默认值，类似于 `PRAGMATIC_2003`）、`LENIENT`、`MYSQL_5`、`ORACLE_10`、`ORACLE_12`、`PRAGMATIC_99`、`PRAGMATIC_2003`、`STRICT_92`、`STRICT_99`、`STRICT_2003`、`SQL_8SERVER_200`。 |
 | createMaterializations                                       | Calcite 是否应该创建物化实体。默认为 false。                 |
 | defaultNullCollation                                         | 如果查询中既未指定 `NULLS FIRST` 也未指定 `NULLS LAST`，应该如何对 `NULL` 值进行排序。默认值为 HIGH，对 NULL 值的排序与 Oracle 相同。 |
 | [德鲁伊获取](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#DRUID_FETCH) | 执行 SELECT 查询时，德鲁伊适配器应一次获取多少行。           |
