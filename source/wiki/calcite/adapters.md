@@ -167,36 +167,34 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 ## 可扩展性
 
-TODO
-
 还有许多其他 API 允许你扩展 Calcite 的功能。
 
-在本节中，我们将简要介绍这些 API，让你了解哪些是可能的。要充分使用这些 API，你需要阅读其他文档，例如接口的 javadoc，并可能查找我们为它们编写的测试。
+在本节中，我们将简要描述这些 API，让你了解可能发生的情况。要充分使用这些 API，你需要阅读其他文档，例如接口的 javadoc，并可能查找我们为它们编写的测试。
 
 ### 函数和运算符
 
 有多种方法可以向 Calcite 添加运算符或函数。我们将首先描述最简单的（也是最不强大的）。
 
-*用户定义的函数*是最简单的（但最不强大的）。它们编写起来很简单（你只需编写一个 Java 类并将其注册到你的模式中），但在参数的数量和类型、解析重载函数或派生返回类型方面没有提供很大的灵活性。
+用户定义的函数是最简单的（但功能最弱的）。它们编写起来很简单（你只需编写一个 Java 类并将其注册到你的模式中），但在参数的数量和类型、解析重载函数或派生的返回类型方面没有提供太多灵活性。
 
-如果你想要这种灵活性，你可能需要编写一个 *用户定义的运算符* （请参阅 参考资料[`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html)）。
+如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html) ）。
 
-如果你的运算符不遵守标准 SQL 函数语法“ `f(arg1, arg2, ...)`”，那么你需要 [扩展解析器](https://calcite.apache.org/docs/adapter.html#extending-the-parser)。
+如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去 [扩展解析器](https://calcite.apache.org/docs/adapter.html#extending-the-parser)。
 
-测试中有很多很好的例子： [`class UdfTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/UdfTest.java) 测试用户定义的函数和用户定义的聚合函数。
+测试中有很多好的例子：[`class UdfTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/UdfTest.java) 测试了用户定义函数和用户定义聚合函数。
 
 ### 聚合函数
 
-*用户定义的聚合函数*类似于用户定义的函数，但每个函数都有几个对应的 Java 方法，一个用于聚合生命周期中的每个阶段：
+用户定义的聚合函数与用户定义的函数类似，但每个函数都有几个相应的 Java 方法，用于聚合生命周期中的每个阶段：
 
 - `init` 创建一个累加器；
-- `add` 将一行的值添加到累加器；
+- `add` 将一行的值添加到累加器中；
 - `merge` 将两个累加器合二为一；
 - `result` 完成累加器并将其转换为结果。
 
-例如，方法（伪代码）`SUM(int)`如下：
+举个例子，`SUM(int)` 的方法（伪代码）如下：
 
-```
+```java
 struct Accumulator {
   final int sum;
 }
@@ -216,7 +214,7 @@ int result(Accumulator a) {
 
 以下是计算列值为 4 和 7 的两行之和的调用序列：
 
-```
+```java
 a = init()    # a = {0}
 a = add(a, 4) # a = {4}
 a = add(a, 7) # a = {11}
@@ -224,6 +222,8 @@ return result(a) # returns 11
 ```
 
 ### 窗口函数
+
+TODO
 
 窗口函数类似于聚合函数，但它应用于由`OVER`子句而不是子句收集的一组行`GROUP BY`。每个聚合函数都可以用作窗口函数，但有一些关键的区别。窗口函数看到的行可能是有序的，依赖于顺序的窗口函数（`RANK`例如）不能用作聚合函数。
 
