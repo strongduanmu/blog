@@ -3,7 +3,7 @@ title: Apache Calcite 学习资料整理
 tags: [Calcite, Query Optimization]
 categories: [Calcite]
 top: 1
-date: 2022-02-18 08:39:23
+date: 2023-09-18 08:39:23
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
 ---
@@ -14,13 +14,13 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 
 ## 个人整理
 
-TODO
+* [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html)
 
 ## 官方文档
 
 * [Calcite 官方文档](https://calcite.apache.org/docs/)
 
-* [Calcite 官方文档中文版](http://localhost:4000/wiki/calcite/background.html)
+* [Calcite 官方文档中文版](https://strongduanmu.com/wiki/calcite/background.html)
 * [Calcite 社区](https://calcite.apache.org/community/)
 * [Calcite Jira](https://issues.apache.org/jira/projects/CALCITE/issues/CALCITE-4589?filter=allopenissues)
 * [Calcite StackOverflow](https://stackoverflow.com/questions/tagged/apache-calcite?tab=Newest)

@@ -73,33 +73,33 @@ jdbc:calcite:property=value;property2=value2
 | [model](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#MODEL) | JSON/YAML 模型文件的 URI 或内联的 JSON（例如：`inline:{...}`） 、内联的 YAML（例如： `inline:...`）。 |
 | [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY) | 解析器工厂。实现 [`interface SqlParserImplFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/parser/SqlParserImplFactory.html) 并具有公共默认构造函数或 `INSTANCE` 常量的类的名称。 |
 | [quoting](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#QUOTING) | 如何引用标识符。值为 DOUBLE_QUOTE、BACK_TICK、BACK_TICK_BACKSLASH、BRACKET。如果未指定，则使用 `lex` 中的值。 |
-| [引用大小写](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#QUOTED_CASING) | 如果标识符被引用，则如何存储标识符。值为 UNCHANGED、TO_UPPER、TO_LOWER。如果未指定，`lex`则使用值 from 。 |
-| [模式](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA) | 初始模式的名称。                                             |
-| [模式工厂](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA_FACTORY) | 模式工厂。实现[`interface SchemaFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html)并具有公共默认构造函数或`INSTANCE`常量的类的名称。如果`model`指定则忽略。 |
-| [模式类型](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA_TYPE) | 架构类型。值必须是“MAP”（默认值）、“JDBC”或“CUSTOM”（如果`schemaFactory`指定则为隐式）。如果`model`指定则忽略。 |
-| [火花](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SPARK) | 指定是否应将 Spark 用作处理无法推送到源系统的引擎。如果为 false（默认值），Calcite 会生成实现 Enumerable 接口的代码。 |
-| [时区](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TIME_ZONE) | 时区，例如“gmt-3”。默认是 JVM 的时区。                       |
-| [类型系统](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_SYSTEM) | 类型系统。实现[`interface RelDataTypeSystem`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/type/RelDataTypeSystem.html)并具有公共默认构造函数或`INSTANCE`常量的类的名称。 |
-| [不带引号的大小写](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#UNQUOTED_CASING) | 如果没有引用标识符，它们是如何存储的。值为 UNCHANGED、TO_UPPER、TO_LOWER。如果未指定，`lex`则使用值 from 。 |
-| [类型强制](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_COERCION) | sql节点验证时类型不匹配时是否进行隐式类型强制，默认为true。  |
+| [quotedCasing](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#QUOTED_CASING) | 如果标识符被引用，设置如何存储标识符。值为 UNCHANGED、TO_UPPER、TO_LOWER。如果未指定，则使用 `lex` 中的值。 |
+| [schema](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA) | 初始模式的名称。                                             |
+| [schemaFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA_FACTORY) | 模式工厂。实现 [`interface SchemaFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html) 并具有公共默认构造函数或 `INSTANCE` 常量的类的名称。如果指定了 `model` 则忽略该参数。 |
+| [schemaType](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SCHEMA_TYPE) | 模式类型。值必须是 `MAP`（默认值）、`JDBC` 或 `CUSTOM`（如果指定了 `schemaFactory` 则隐式设置为 CUSTOM）。如果指定了 `model` 则忽略该参数。 |
+| [spark](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SPARK) | 指定是否应使用 Spark 作为引擎来处理无法推送到源系统的处理。如果为 false（默认值），Calcite 会生成实现 Enumerable 接口的代码。 |
+| [timeZone](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TIME_ZONE) | 时区，例如 `gmt-3`。默认是 JVM 的时区。                      |
+| [typeSystem](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_SYSTEM) | 类型系统。实现 [`interface RelDataTypeSystem`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/type/RelDataTypeSystem.html) 并具有公共默认构造函数或 `INSTANCE` 常量的类的名称。 |
+| [unquotedCasing](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#UNQUOTED_CASING) | 如果标识符未加引号，则如何存储标识符。值为 `UNCHANGED`、`TO_UPPER`、`TO_LOWER`。如果未指定，则使用 `lex` 中的值。 |
+| [typeCoercion](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_COERCION) | sql 节点校验时，如果类型不匹配是否进行隐式类型强转，默认为 true。 |
 
-要根据内置架构类型连接到单个架构，你无需指定模型。例如，
+要基于内置模式类型连接到单个模式，你不需要指定模型。例如：
 
 ```
 jdbc:calcite:schemaType=JDBC; schema.jdbcUser=SCOTT; schema.jdbcPassword=TIGER; schema.jdbcUrl=jdbc:hsqldb:res:foodmart
 ```
 
-使用通过 JDBC 模式适配器映射到 foodmart 数据库的模式创建连接。
+使用通过 JDBC 模式适配器映射到 foodmart 数据库的模式创建一个连接。
 
-同样，你可以基于用户定义的架构适配器连接到单个架构。例如，
+同样，你可以基于用户定义的模式适配器连接到单个模式。例如：
 
 ```
 jdbc:calcite:schemaFactory=org.apache.calcite.adapter.cassandra.CassandraSchemaFactory; schema.host=localhost; schema.keyspace=twissandra
 ```
 
-与 Cassandra 适配器建立连接，相当于编写以下模型文件：
+与 Cassandra 适配器建立连接，可以通过编写如下的模型文件实现：
 
-```
+```json
 {
   "version": "1.0",
   "defaultSchema": "foodmart",
@@ -117,27 +117,27 @@ jdbc:calcite:schemaFactory=org.apache.calcite.adapter.cassandra.CassandraSchemaF
 }
 ```
 
-请注意该`operand`部分中的每个键如何`schema.`在连接字符串中带有前缀。
+请注意 `operand` 部分中的每个键，在连接字符串中使用都需要加上 `schema.` 前缀。
 
 ## 服务器
 
-Calcite 的核心模块 ( `calcite-core`) 支持 SQL 查询 ( `SELECT`) 和 DML 操作 ( `INSERT`, `UPDATE`, `DELETE`, `MERGE`)，但不支持`CREATE SCHEMA`或等 DDL 操作`CREATE TABLE`。正如我们将看到的，DDL 使存储库的状态模型复杂化并使解析器更难以扩展，因此我们将 DDL 排除在核心之外。
+Calcite 的核心模块 (`calcite-core`) 支持 SQL 查询 (`SELECT`) 和 DML 操作 (`INSERT`， `UPDATE`， `DELETE`， `MERGE`)，但不支持 `CREATE SCHEMA` 或 `CREATE TABLE` 等 DDL 操作。正如我们将看到的，DDL 使元数据库中的状态模型变得复杂，并使解析器更难以扩展，因此我们将 DDL 排除在核心之外。
 
-服务器模块 ( `calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器， [使用与子项目相同的机制](https://calcite.apache.org/docs/adapter.html#extending-the-parser)，添加了一些 DDL 命令：
+服务器模块 (`calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器，[使用与子项目相同的机制](https://calcite.apache.org/docs/adapter.html#extending-the-parser)，添加了一些 DDL 命令：
 
-- `CREATE` 和 `DROP SCHEMA`
-- `CREATE` 和 `DROP FOREIGN SCHEMA`
-- `CREATE`和`DROP TABLE`（包括`CREATE TABLE ... AS SELECT`）
-- `CREATE` 和 `DROP MATERIALIZED VIEW`
-- `CREATE` 和 `DROP VIEW`
-- `CREATE` 和 `DROP FUNCTION`
-- `CREATE` 和 `DROP TYPE`
+- `CREATE` 和 `DROP SCHEMA`；
+- `CREATE` 和 `DROP FOREIGN SCHEMA`；
+- `CREATE` 和 `DROP TABLE`（包括 `CREATE TABLE ... AS SELECT`）；
+- `CREATE` 和 `DROP MATERIALIZED VIEW`；
+- `CREATE` 和 `DROP VIEW`；
+- `CREATE` 和 `DROP FUNCTION`；
+- `CREATE` 和 `DROP TYPE`。
 
-[SQL 参考](https://calcite.apache.org/docs/reference.html#ddl-extensions)中描述了命令。
+[SQL 参考](https://calcite.apache.org/docs/reference.html#ddl-extensions)中描述了这些命令。
 
-要启用，请包含`calcite-server.jar`在你的类路径中，并添加 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。这是一个使用`sqlline`shell的示例。
+要启用 Calite 服务器模块，请将 `calcite-server.jar` 包含在你的类路径中，并添加 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。下面是一个使用 `sqlline` shell 的示例。
 
-```
+```sql
 $ ./sqlline
 sqlline version 1.3.0
 > !connect jdbc:calcite:parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY sa ""
@@ -157,15 +157,17 @@ No rows affected (0.072 seconds)
 > !quit
 ```
 
-该`calcite-server`模块是可选的。它的目标之一是使用你可以从 SQL 命令行尝试的简洁示例来展示 Calcite 的功能（例如物化视图、外部表和生成的列）。使用的所有功能`calcite-server`都可以通过 `calcite-core`.
+`calcite-server` 模块是可选的。它的目标之一是使用可以从 SQL 命令行尝试的简明示例，来展示 Calcite 的功能（例如物化视图、外部表和生成的列）。 `calcite-server` 使用的所有功能都可以通过 `calcite-core` 中的 API 获得。
 
-如果你是子项目的作者，你的语法扩展不太可能与 中的匹配`calcite-server`，因此我们建议你通过[扩展核心解析器来](https://calcite.apache.org/docs/adapter.html#extending-the-parser)添加 SQL 语法扩展；如果你需要 DDL 命令，你可以将其复制粘贴`calcite-server` 到你的项目中。
+如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](https://calcite.apache.org/docs/adapter.html#extending-the-parser)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
 
-目前，存储库未持久化。当你执行 DDL 命令时，你正在通过添加和删除可从 root 访问的对象来修改内存存储库 [`Schema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html)。同一 SQL 会话中的所有命令都会看到这些对象。你可以通过执行 SQL 命令的相同脚本在以后的会话中创建相同的对象。
+目前，元数据库尚未持久化。当你执行 DDL 命令时，你正在通过添加和删除可从根 [`Schema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html) 访问的对象，来修改内存元数据库。同一 SQL 会话中的所有命令都将看到这些对象。你可以通过执行相同的 SQL 命令脚本在将来的会话中创建相同的对象。
 
-Calcite 还可以充当数据虚拟化或联合服务器：Calcite 管理多个外部模式中的数据，但对于客户端而言，这些数据似乎都在同一个地方。Calcite 选择应在何处进行处理，以及是否创建数据副本以提高效率。该`calcite-server`模块是朝着该目标迈出的一步；行业实力的解决方案需要进一步的包装（使 Calcite 可作为服务运行）、存储库持久性、授权和安全性。
+Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管理多个外部模式中的数据，但对于客户端而言，这些数据似乎都在同一个地方。Calcite 选择应在何处进行处理，以及是否创建数据副本以提高效率。`calcite-server` 模块是朝着这一目标迈出的一步；行业级解决方案需要进一步打包（使 Calcite 作为服务运行）、元数据库持久性、授权和安全性。
 
 ## 可扩展性
+
+TODO
 
 还有许多其他 API 允许你扩展 Calcite 的功能。
 

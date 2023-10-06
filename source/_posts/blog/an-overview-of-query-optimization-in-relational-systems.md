@@ -1,7 +1,7 @@
 ---
-title: 关系系统查询优化概述
+title: 关系系统查询优化概述论文学习
 tags: [Query Optimization,Paper]
-categories: [Query Optimization]
+categories: [Paper]
 date: 2022-01-18 08:39:23
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/17/1647475423.jpg
 banner: china
