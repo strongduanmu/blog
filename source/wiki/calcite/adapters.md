@@ -28,7 +28,7 @@ date: 2021-12-12 11:15:27
 - Spark 适配器（[calcite-spark](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/spark/package-summary.html)）；
 - Splunk 适配器（[calcite-splunk](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/splunk/package-summary.html)）；
 - Eclipse 内存分析器 (MAT) 适配器（[mat-calcite-plugin](https://github.com/vlsi/mat-calcite-plugin)）；
-- [Apache Kafka 适配器](https://calcite.apache.org/docs/kafka_adapter.html)；
+- [Apache Kafka 适配器](https://calcite.apache.org/docs/kafka_adapter.html)。
 
 ### 其他语言接口
 
@@ -62,7 +62,7 @@ jdbc:calcite:property=value;property2=value2
 | [approximateDistinctCount](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#APPROXIMATE_DISTINCT_COUNT) | 是否可以接受 `COUNT(DISTINCT ...)` 聚合函数返回近似结果。    |
 | [approximateTopN](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#APPROXIMATE_TOP_N) | 是否可以接受 Top N 查询（`ORDER BY aggFun() DESC LIMIT n`）返回近似结果。 |
 | [caseSensitive](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CASE_SENSITIVE) | 标识符匹配是否区分大小写。如果未指定，将会使用 `lex` 中的值。 |
-| [conformance](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CONFORMANCE) | SQL 一致性级别。包含如下值：`DEFAULT`（默认值，类似于 `PRAGMATIC_2003`）、`LENIENT`、`MYSQL_5`、`ORACLE_10`、`ORACLE_12`、`PRAGMATIC_99`、`PRAGMATIC_2003`、`STRICT_92`、`STRICT_99`、`STRICT_2003`、`SQL_8SERVER_200`。 |
+| [conformance](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CONFORMANCE) | SQL 一致性级别。包含如下值：`DEFAULT`（默认值，类似于 `PRAGMATIC_2003`）、`LENIENT`、`MYSQL_5`、`ORACLE_10`、`ORACLE_12`、`PRAGMATIC_99`、`PRAGMATIC_2003`、`STRICT_92`、`STRICT_99`、`STRICT_2003`、`SQL_SERVER_2008`。 |
 | [createMaterializations](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#CREATE_MATERIALIZATIONS) | Calcite 是否应该创建物化视图。默认为 false。                 |
 | [defaultNullCollation](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#DEFAULT_NULL_COLLATION) | 如果查询中既未指定 `NULLS FIRST` 也未指定 `NULLS LAST`，应该如何对 `NULL` 值进行排序。默认值为 HIGH，对 NULL 值的排序与 Oracle 相同。 |
 | [druidFetch](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#DRUID_FETCH) | 执行 SELECT 查询时，Druid 适配器应当一次获取多少行记录。     |
@@ -80,16 +80,14 @@ jdbc:calcite:property=value;property2=value2
 | [spark](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#SPARK) | 指定是否应使用 Spark 作为引擎来处理无法推送到源系统的处理。如果为 false（默认值），Calcite 会生成实现 Enumerable 接口的代码。 |
 | [timeZone](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TIME_ZONE) | 时区，例如 `gmt-3`。默认是 JVM 的时区。                      |
 | [typeSystem](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_SYSTEM) | 类型系统。实现 [`interface RelDataTypeSystem`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/type/RelDataTypeSystem.html) 并具有公共默认构造函数或 `INSTANCE` 常量的类的名称。 |
-| [unquotedCasing](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#UNQUOTED_CASING) | 如果标识符未加引号，则如何存储标识符。值为 `UNCHANGED`、`TO_UPPER`、`TO_LOWER`。如果未指定，则使用 `lex` 中的值。 |
+| [unquotedCasing](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#UNQUOTED_CASING) | 如果标识符未加引号，设置如何存储标识符。值为 `UNCHANGED`、`TO_UPPER`、`TO_LOWER`。如果未指定，则使用 `lex` 中的值。 |
 | [typeCoercion](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#TYPE_COERCION) | sql 节点校验时，如果类型不匹配是否进行隐式类型强转，默认为 true。 |
 
-要基于内置模式类型连接到单个模式，你不需要指定模型。例如：
+要基于内置模式类型连接到单个模式，你不需要指定 model 参数。例如，通过映射到 foodmart 数据库的 JDBC 模式适配器创建一个模式，并使用这个模式创建一个数据库连接。
 
 ```
 jdbc:calcite:schemaType=JDBC; schema.jdbcUser=SCOTT; schema.jdbcPassword=TIGER; schema.jdbcUrl=jdbc:hsqldb:res:foodmart
 ```
-
-使用通过 JDBC 模式适配器映射到 foodmart 数据库的模式创建一个连接。
 
 同样，你可以基于用户定义的模式适配器连接到单个模式。例如：
 
@@ -157,7 +155,7 @@ No rows affected (0.072 seconds)
 > !quit
 ```
 
-`calcite-server` 模块是可选的。它的目标之一是使用可以从 SQL 命令行尝试的简明示例，来展示 Calcite 的功能（例如物化视图、外部表和生成的列）。 `calcite-server` 使用的所有功能都可以通过 `calcite-core` 中的 API 获得。
+`calcite-server` 模块是可选的。它的目标之一是使用可以从 SQL 命令行尝试的简单示例，来展示 Calcite 的功能（例如物化视图、外部表和自动生成列）。 `calcite-server` 使用的所有功能都可以通过 `calcite-core` 中的 API 获得。
 
 如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](https://calcite.apache.org/docs/adapter.html#extending-the-parser)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
 
@@ -175,7 +173,7 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 有多种方法可以向 Calcite 添加运算符或函数。我们将首先描述最简单的（也是最不强大的）。
 
-用户定义的函数是最简单的（但功能最弱的）。它们编写起来很简单（你只需编写一个 Java 类并将其注册到你的模式中），但在参数的数量和类型、解析重载函数或派生的返回类型方面没有提供太多灵活性。
+用户定义的函数是最简单的（但功能最弱）。它们编写起来很简单（你只需编写一个 Java 类并将其注册到你的模式中），但在参数的数量和类型、解析重载函数或派生的返回类型方面没有提供太多灵活性。
 
 如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html) ）。
 
@@ -225,7 +223,7 @@ return result(a) # returns 11
 
 TODO
 
-窗口函数类似于聚合函数，但它应用于由`OVER`子句而不是子句收集的一组行`GROUP BY`。每个聚合函数都可以用作窗口函数，但有一些关键的区别。窗口函数看到的行可能是有序的，依赖于顺序的窗口函数（`RANK`例如）不能用作聚合函数。
+窗口函数类似于聚合函数，但它应用于由 `OVER` 子句而不是 `GROUP BY` 子句收集的一组行。每个聚合函数都可以用作窗口函数，但存在一些关键区别。窗口函数看到的行可能是有序的，并且依赖于顺序的窗口函数（例如 `RANK` ）不能用作聚合函数。
 
 另一个区别是窗口是*不相交的*：特定行可以出现在多个窗口中。例如，10:37 出现在 9:00-10:00 和 9:15-9:45 小时。
 
