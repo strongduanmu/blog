@@ -51,10 +51,6 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * [TiDB 社区分享火山模型](https://asktug.com/t/topic/693579)
 * [SQL 优化之火山模型](https://zhuanlan.zhihu.com/p/219516250)
 
-### 数据库相关
-
-* [awesome-database-learning](https://github.com/strongduanmu/awesome-database-learning)
-
 
 
 {% quot 写在最后 %}
