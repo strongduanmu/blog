@@ -8,4 +8,4 @@ Disallow: /vendors/
 Disallow: /css/
 Disallow: /fancybox/
 Sitemap: /sitemap.xml
-Sitemap: /baidu_sitemap.xml
+Sitemap: /baidusitemap.xml
