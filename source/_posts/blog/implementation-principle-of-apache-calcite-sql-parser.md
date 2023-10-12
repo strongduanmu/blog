@@ -59,7 +59,7 @@ production ::= javacode_production
 
 了解了 JavaCC 语法描述的基本结构后，我们结合 Calcite `Parser.jj` 文件，来具体看下这些规则应该如何配置，以及在 Calcite SQL Parser 中起到了什么作用。
 
-* javacc_options：
+* **javacc_options**：
 
 用于定义 JavaCC 解析配置项，格式为 `key=value`，例如：`IGNORE_CASE = true;`，声明在解析阶段忽略大小写。`STATIC = false` 用于控制 JavaCC 生成的代码，成员变量和方法是否为静态方法，通常都是设置为 false。
 
@@ -72,7 +72,7 @@ options {
 }
 ```
 
-* java_compilation_unit：
+* **java_compilation_unit**：
 
 用于定义 JavaCC 生成解析器类的定义，该代码块包含在 `PARSER_BEGIN` 和 `PARSER_END` 中。Calcite 中使用 `Freemarker` 模板引擎，解析器类名由参数传入，然后继承 SqlAbstractParserImpl 抽象类，该类提供了如 `createCall` 等基础方法，以及 `getMetadata`、`getPos`、`parseSqlStmtEof` 等抽象方法。
 
@@ -91,11 +91,11 @@ public class ${parser.class} extends SqlAbstractParserImpl
 PARSER_END(${parser.class})
 ```
 
-* `production`：
+* **production**：
 
 用于定义解析中关键的词法和语法规则，JavaCC 将词法规则（如保留字、表达式）和语法规则（BNF）都统一写在一个文件中，并支持使用正则表达式，使语法描述文件易读且易于维护。`production` 语法规则中包含了 `javacode_production`、`regular_expr_production` 和 `bnf_production` 几个重要的子规则，我们结合 Calcite 的示例来学习下这些规则的使用。
 
-* `javacode_production`：
+* **javacode_production**：
 
 用于编写供解析器调用的通用 Java 代码，例如：`getPos` 方法获取 Token 的位置，该部分代码以 `JAVACODE` 关键字开始。
 
@@ -111,7 +111,7 @@ JAVACODE protected SqlParserPos getPos()
 }
 ```
 
-* `regular_expr_production`：
+* **regular_expr_production**：
 
 用于描述词法规则，可以通过 `SKIP` 指定要忽略的内容（空格、换行等），通过 `TOKEN` 定义语法中的保留字。
 
@@ -127,7 +127,7 @@ JAVACODE protected SqlParserPos getPos()
 }
 ```
 
-* `bnf_production`：
+* **bnf_production**：
 
 用于描述语法规则，能够支持复杂的语法描述，可以使用正则表达式中 `[]`、`()` 和 `|` 表示可选、必选和分支。
 
