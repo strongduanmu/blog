@@ -165,13 +165,11 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 
 TODO
 
-## Calcite SqlNode 体系 & SQL 生成
+## Calcite SQL Parser 扩展
 
 TODO
 
-
-
-## Calcite SQL Parser 扩展
+## Calcite SqlNode 体系 & SQL 生成
 
 TODO
 
