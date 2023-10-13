@@ -14,11 +14,15 @@ references:
     url: https://alphahinex.github.io/2022/05/01/javacc-in-action/
   - title: 'Calcite - 看懂 Parser.jj 中的 SqlSelect'
     url: https://www.jianshu.com/p/ddb5e4788500
+  - title: 'Apache Calcite SQL 解析及语法扩展'
+    url: https://zhuanlan.zhihu.com/p/509681717
 ---
 
 ## 前言
 
-在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中，我们介绍了 Caclite 的执行流程，包括了：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。Calcite SQL 解析采用的是 JavaCC 框架，本文首先会简要介绍 JavaCC 的使用规范，再结合 Calcite 源码对 SQL 解析引擎进行深入的探究学习。 
+在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中，我们介绍了 Caclite 的执行流程，包括：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。
+
+Calcite SQL 解析采用的是 `JavaCC` 框架，本文首先会简要介绍 JavaCC 的使用规范，并结合 Calcite 源码对 JavaCC 的使用方式进行学习，然后我们会关注 Calcite SQL Parser 的实现以及 SqlNode 体系，最后我们会了解如何使用 `Freemarker` 模板对 Caclite 解析进行扩展，期望通过这些内容能够帮助大家深刻理解 Caclite SQL 解析。
 
 ![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/13/1697156972.png)
 
@@ -61,7 +65,7 @@ production ::= javacode_production
 
 * **javacc_options**：
 
-用于定义 JavaCC 解析配置项，格式为 `key=value`，例如：`IGNORE_CASE = true;`，声明在解析阶段忽略大小写。`STATIC = false` 用于控制 JavaCC 生成的代码，成员变量和方法是否为静态方法，通常都是设置为 false。
+用于定义 JavaCC 解析配置项，格式为 `key=value`，例如：`IGNORE_CASE = true;`，声明在解析阶段忽略大小写。`STATIC = false` 用于控制 JavaCC 生成的代码，成员变量和方法是否为静态方法，通常都是设置为 false。`UNICODE_INPUT = true` 则用于设置包括中文在内的各种字符解析。
 
 ```java
 options {
@@ -113,17 +117,14 @@ JAVACODE protected SqlParserPos getPos()
 
 * **regular_expr_production**：
 
-用于描述词法规则，可以通过 `SKIP` 指定要忽略的内容（空格、换行等），通过 `TOKEN` 定义语法中的保留字。
+用于描述词法规则，可以通过 `SKIP` 指定要忽略的内容（空格、换行等），通过 `TOKEN` 定义语法中的关键字，每个 Token 用尖括号标识，多个 Token 之间用竖线分隔。尖括号里面用冒号分隔，冒号前面是变量名，后面是对应的正则表达式。
 
 ```java
 // 词法规则
 <DEFAULT, DQID, BTID, BQID, BQHID> TOKEN :
 {
-    < UNICODE_QUOTED_ESCAPE_CHAR:
-    <QUOTE>
-    (~["0"-"9","a"-"f","A"-"F","+","\""," ","\t","\n","\r","\f"])
-    <QUOTE>
-    >
+    < HINT_BEG: "/*+">
+|   < COMMENT_END: "*/" >
 }
 ```
 
@@ -165,6 +166,12 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 TODO
 
 ## Calcite SqlNode 体系 & SQL 生成
+
+TODO
+
+
+
+## Calcite SQL Parser 扩展
 
 TODO
 
