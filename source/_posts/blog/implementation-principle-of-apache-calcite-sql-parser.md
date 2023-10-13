@@ -18,9 +18,9 @@ references:
 
 ## 前言
 
-在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中我们介绍了 Caclite 的执行流程，包括了：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。Calcite SQL 解析采用的是 JavaCC 框架，本文首先会简要介绍 JavaCC 的使用规范，再结合 Calcite 源码对 SQL 解析引擎进行深入的探究学习。
+在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中，我们介绍了 Caclite 的执行流程，包括了：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。Calcite SQL 解析采用的是 JavaCC 框架，本文首先会简要介绍 JavaCC 的使用规范，再结合 Calcite 源码对 SQL 解析引擎进行深入的探究学习。 
 
-![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/24/1695513880.png)
+![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/13/1697156972.png)
 
 ## JavaCC 简介
 

@@ -49,10 +49,10 @@ comments:
 article:
   auto_excerpt: 200
   # npm i hexo-related-popular-posts
-  related_posts:
-    enable: true
-    title: 您可能感兴趣的文章
-    max_count: 5
+  # related_posts:
+    # enable: true
+    # title: 您可能感兴趣的文章
+    # max_count: 5
 
 # 文章搜索
 search:
