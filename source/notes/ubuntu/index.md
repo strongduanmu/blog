@@ -9,7 +9,7 @@ order: 50
 
 ## Ubuntu 22.04 显示白屏解决方案
 
-解决方案来源：https://askubuntu.com/questions/1437167/ubuntu-22-04-1-lts-white-screen-after-boot
+解决方案来源：[ubuntu-22-04-1-lts-white-screen-after-boot](https://askubuntu.com/questions/1437167/ubuntu-22-04-1-lts-white-screen-after-boot)
 
 * 使用 `gedit` 编辑 `grub` 文件：
 

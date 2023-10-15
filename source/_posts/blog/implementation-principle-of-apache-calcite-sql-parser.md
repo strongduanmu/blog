@@ -22,7 +22,7 @@ references:
 
 在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中，我们介绍了 Caclite 的执行流程，包括：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。
 
-Calcite SQL 解析采用的是 `JavaCC` 框架，本文首先会简要介绍 JavaCC 的使用规范，并结合 Calcite 源码对 JavaCC 的使用方式进行学习，然后我们会关注 Calcite SQL Parser 的实现以及 SqlNode 体系，最后我们会了解如何使用 `Freemarker` 模板对 Caclite 解析进行扩展，期望通过这些内容能够帮助大家深刻理解 Caclite SQL 解析。
+Calcite SQL 解析采用的是 `JavaCC` 框架，本文首先会简要介绍 JavaCC 的使用规范，并结合 Calcite 源码对 JavaCC 的使用方式进行学习。然后我们会关注 Calcite SQL Parser 的实现，以及如何使用 `Freemarker` 模板对 Caclite 解析进行扩展。最后我们再学习下解析后的 AST 对象——`SqlNode` 体系，以及基于 SqlNode 的 SQL 生成，期望通过这些内容能够帮助大家深刻理解 Caclite SQL 解析。
 
 ![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/13/1697156972.png)
 
@@ -61,9 +61,9 @@ production ::= javacode_production
              | bnf_production
 ```
 
-了解了 JavaCC 语法描述的基本结构后，我们结合 Calcite `Parser.jj` 文件，来具体看下这些规则应该如何配置，以及在 Calcite SQL Parser 中起到了什么作用。
+大致了解 JavaCC 语法描述的基本结构后，我们结合 Calcite `Parser.jj` 文件，来具体看下这些规则应该如何配置，以及在 Calcite SQL Parser 中起到了什么作用。
 
-* **javacc_options**：
+* **javacc_options** 规则：
 
 用于定义 JavaCC 解析配置项，格式为 `key=value`，例如：`IGNORE_CASE = true;`，声明在解析阶段忽略大小写。`STATIC = false` 用于控制 JavaCC 生成的代码，成员变量和方法是否为静态方法，通常都是设置为 false。`UNICODE_INPUT = true` 则用于设置包括中文在内的各种字符解析。
 
@@ -76,7 +76,7 @@ options {
 }
 ```
 
-* **java_compilation_unit**：
+* **java_compilation_unit** 规则：
 
 用于定义 JavaCC 生成解析器类的定义，该代码块包含在 `PARSER_BEGIN` 和 `PARSER_END` 中。Calcite 中使用 `Freemarker` 模板引擎，解析器类名由参数传入，然后继承 SqlAbstractParserImpl 抽象类，该类提供了如 `createCall` 等基础方法，以及 `getMetadata`、`getPos`、`parseSqlStmtEof` 等抽象方法。
 
@@ -95,11 +95,11 @@ public class ${parser.class} extends SqlAbstractParserImpl
 PARSER_END(${parser.class})
 ```
 
-* **production**：
+* **production** 规则：
 
 用于定义解析中关键的词法和语法规则，JavaCC 将词法规则（如保留字、表达式）和语法规则（BNF）都统一写在一个文件中，并支持使用正则表达式，使语法描述文件易读且易于维护。`production` 语法规则中包含了 `javacode_production`、`regular_expr_production` 和 `bnf_production` 几个重要的子规则，我们结合 Calcite 的示例来学习下这些规则的使用。
 
-* **javacode_production**：
+* **javacode_production** 规则：
 
 用于编写供解析器调用的通用 Java 代码，例如：`getPos` 方法获取 Token 的位置，该部分代码以 `JAVACODE` 关键字开始。
 
@@ -115,11 +115,43 @@ JAVACODE protected SqlParserPos getPos()
 }
 ```
 
-* **regular_expr_production**：
+* **regular_expr_production** 规则：
 
 用于描述词法规则，可以通过 `SKIP` 指定要忽略的内容（空格、换行等），通过 `TOKEN` 定义语法中的关键字，每个 Token 用尖括号标识，多个 Token 之间用竖线分隔。尖括号里面用冒号分隔，冒号前面是变量名，后面是对应的正则表达式。
 
+`DEFAULT`, `DQID`, `BTID`, `BQID`，`BQHID` 是 5 种词法状态，其中 `DEFAULT`, `DQID`, `BTID`, `BQID` 是 4 种正常状态，除了如何识别带引号的标识符之外，他们的行为相同。`BQHID` 状态仅存在于表名的开头（例如紧接在从或插入），一旦遇到标识符，词法状态就会转移回来至 BTID。
+
 ```java
+/*
+Lexical states:
+
+DEFAULT: Identifiers are quoted in brackets, e.g. [My Identifier]
+DQID:    Identifiers are double-quoted, e.g. "My Identifier"
+BTID:    Identifiers are enclosed in back-ticks, escaped using back-ticks,
+         e.g. `My ``Quoted`` Identifier`
+BQID:    Identifiers are enclosed in back-ticks, escaped using backslash,
+         e.g. `My \`Quoted\` Identifier`,
+         and with the potential to shift into BQHID in contexts where table
+         names are expected, and thus allow hyphen-separated identifiers as
+         part of table names
+BQHID:   Identifiers are enclosed in back-ticks, escaped using backslash,
+         e.g. `My \`Quoted\` Identifier`
+         and unquoted identifiers may contain hyphens, e.g. foo-bar
+IN_SINGLE_LINE_COMMENT:
+IN_FORMAL_COMMENT:
+IN_MULTI_LINE_COMMENT:
+
+DEFAULT, DQID, BTID, BQID are the 4 'normal states'. Behavior is identical
+except for how quoted identifiers are recognized.
+
+The BQHID state exists only at the start of a table name (e.g. immediately after
+FROM or INSERT INTO). As soon as an identifier is seen, the state shifts back
+to BTID.
+
+After a comment has completed, the lexer returns to the previous state, one
+of the 'normal states'.
+*/
+
 // 词法规则
 <DEFAULT, DQID, BTID, BQID, BQHID> TOKEN :
 {
@@ -128,7 +160,7 @@ JAVACODE protected SqlParserPos getPos()
 }
 ```
 
-* **bnf_production**：
+* **bnf_production** 规则：
 
 用于描述语法规则，能够支持复杂的语法描述，可以使用正则表达式中 `[]`、`()` 和 `|` 表示可选、必选和分支。
 
