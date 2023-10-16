@@ -119,7 +119,7 @@ JAVACODE protected SqlParserPos getPos()
 
 用于描述词法规则，可以通过 `SKIP` 指定要忽略的内容（空格、换行等），通过 `TOKEN` 定义语法中的关键字，每个 Token 用尖括号标识，多个 Token 之间用竖线分隔。尖括号里面用冒号分隔，冒号前面是变量名，后面是对应的正则表达式。
 
-`DEFAULT`, `DQID`, `BTID`, `BQID`，`BQHID` 是 5 种词法状态，其中 `DEFAULT`, `DQID`, `BTID`, `BQID` 是 4 种正常状态，除了如何识别带引号的标识符之外，他们的行为相同。`BQHID` 状态仅存在于表名的开头（例如紧接在从或插入），一旦遇到标识符，词法状态就会转移回来至 BTID。
+`DEFAULT`, `DQID`, `BTID`, `BQID`，`BQHID` 等是词法状态，其中 `DEFAULT`, `DQID`, `BTID`, `BQID` 是 4 种正常状态，除了如何识别带引号的标识符之外，他们的行为相同。`BQHID` 状态仅存在于表名的开头（例如紧靠在 `FROM` 或 `INSERT INTO` 后面），一旦遇到标识符，词法状态就会转移至 `BTID`。
 
 ```java
 /*
@@ -162,7 +162,9 @@ of the 'normal states'.
 
 * **bnf_production** 规则：
 
-用于描述语法规则，能够支持复杂的语法描述，可以使用正则表达式中 `[]`、`()` 和 `|` 表示可选、必选和分支。
+用于描述语法规则，能够支持复杂的语法描述，语法规则大体上类似于 Java 代码，首先是方法声明 `SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext)`，后面紧跟着冒号 `:` 和两对花括号，第一对花括号用于声明变量，第二对花括号则用于编写解析逻辑。
+
+JavaCC 语法规则很灵活，可以使用正则表达式中 `[]`、`()` 和 `|` 表示可选、必选和分支。在解析分支语法时，可能需要通过大量的回溯操作才能完成分支的选择，JavaCC 为了优化回溯带来的性能问题，默认只向前查看一个 `TOKEN`（可满足大部分解析需求），可以通过 `LOOKAHEAD(2)` 指定向前查看的 `TOKEN` 数，从而做出最好的选择。
 
 ```java
 // 语法规则和 Java 处理逻辑
@@ -193,7 +195,26 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 }
 ```
 
+以上大致介绍了 Calcite SQL Parser 使用到的 JavaCC 相关知识，如果读者对 JavaCC 感兴趣，可以查看参考资料中的官方资料以及 JavaCC 博文进行学习。下面让我们再来学习下 Calcite SQL Parser 的整体实现，如何通过 Java 代码调用解析逻辑，实现 SQL 字符串到 AST 的解析。
+
 ## Calcite SQL Parser 实现
+
+Calcite SQL Parser 的核心实现在 `calcite-core` 模块，在 `src/main` 下包含了 `codegen` 目录，`Parser.jj` 文件是 SQL Parser 相关的词法和语法规则文件，并且为了实现 SQL Parser 的扩展，Calcite 采用了 Freemarker 模板引擎，`config.fmpp` 和 `default_config.fmpp` 用于定义 Freemarker 模板的属性。
+
+![Calcite SQL Parser 解析文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160859394.png)
+
+Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可以快速创建解析对象，然后进行 SQL 解析。`SPAN`  类是 `SqlParserPos` 的构建器，`SqlAbstractParserImpl` 是解析的抽象类，Calcite 中生成的 `SqlParserImpl`、`SqlBabelParserImpl` 和 `SqlDdlParserImpl` 都继承了该抽象类。
+
+![Calcite SQL Parser 核心类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160913074.png)
+
+Calcite SQL Parser 调用非常简单，按照如下示例调用即可快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
+
+```java
+String sql = "SELECT * FROM t_order WHRE order_id = 1";
+SqlParser sqlParser = SqlParser.create(sql, Config.DEFAULT);
+SqlNode sqlNode = sqlParser.parseQuery();
+System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
+```
 
 TODO
 
