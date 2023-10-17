@@ -207,7 +207,7 @@ Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可�
 
 ![Calcite SQL Parser 核心类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160913074.png)
 
-Calcite SQL Parser 调用非常简单，按照如下示例调用即可快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
+Calcite SQL Parser 调用非常简单，按照如下示例可以快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
 
 ```java
 String sql = "SELECT * FROM t_order WHRE order_id = 1";
@@ -216,7 +216,170 @@ SqlNode sqlNode = sqlParser.parseQuery();
 System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
 ```
 
-TODO
+Config 对象是通过 `Immutable` 注解自动生成的实现类，它实现的接口方法定义了解析相关的配置，例如：包含引号的标识符如何处理大小写、不包含引号的标识符如何处理大小写以及是否大小写敏感等（更多 Config 配置读者可以参考 [Config 类源码](https://github.com/apache/calcite/blob/a0e119ea42def418957f214f539469f1aba76c18/core/src/main/java/org/apache/calcite/sql/parser/SqlParser.java#L266)）。
+
+```java
+Config withQuotedCasing(Casing casing);
+Config withUnquotedCasing(Casing casing);
+Config withCaseSensitive(boolean caseSensitive);
+...
+```
+
+Calcite 解析器核心的 SqlParser 类除了提供静态 `create` 方法创建解析器对象外，还提供了如下的解析方法，用于处理不同场景下的 SQL 解析。
+
+```java
+// 解析 SQL 表达式
+public SqlNode parseExpression() throws SqlParseException {...}
+// 解析 SQL 查询语句
+public SqlNode parseQuery() throws SqlParseException {...}
+// 解析 SQL 查询语句
+public SqlNode parseQuery(String sql) throws SqlParseException {...}
+// 解析 SQL 语句
+public SqlNode parseStmt() throws SqlParseException {...}
+// 解析分号分隔的 SQL 语句
+public SqlNodeList parseStmtList() throws SqlParseException {...}
+```
+
+我们以常用的 `parseQuery()` 方法为例，再来看下方法内部调用了哪些 JavaCC 生成的方法。parseQuery 方法首先调用了 parser 对象的 `parseSqlStmtEof` 方法，而 parser 对象是 `SqlAbstractParserImpl` 抽象类的实现类，此处我们先关注 `SqlParserImpl` 实现类。
+
+```java
+/**
+ * Parses a <code>SELECT</code> statement.
+ *
+ * @return A {@link org.apache.calcite.sql.SqlSelect} for a regular <code>
+ * SELECT</code> statement; a {@link org.apache.calcite.sql.SqlBinaryOperator}
+ * for a <code>UNION</code>, <code>INTERSECT</code>, or <code>EXCEPT</code>.
+ * @throws SqlParseException if there is a parse error
+ */
+public SqlNode parseQuery() throws SqlParseException {
+    try {
+        return parser.parseSqlStmtEof();
+    } catch (Throwable ex) {
+        throw handleException(ex);
+    }
+}
+```
+
+SqlParserImpl 类是通过 JavaCC 动态生成的实现类，内部的 parseSqlStmtEof 方法定义如下，会继续调用内部的 `SqlStmtEof` 方法。而 SqlStmtEof 方法会调用 `SqlStmt` 方法，在该方法内部会判断当前 SQL 的首个 Token，查询语句会调用 `OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)` 方法。
+
+```java
+// org/apache/calcite/sql/parser/impl/SqlParserImpl.java:205
+public SqlNode parseSqlStmtEof() throws Exception {
+    return SqlStmtEof();
+}
+
+/**
+ * Parses an SQL statement followed by the end-of-file symbol.
+ */
+final public SqlNode SqlStmtEof() throws ParseException {
+    SqlNode stmt;
+    stmt = SqlStmt();
+    jj_consume_token(0); {
+        if (true) return stmt;
+    }
+    throw new Error("Missing return statement in function");
+}
+
+/**
+ * Parses an SQL statement.
+ */
+final public SqlNode SqlStmt() throws ParseException {
+    SqlNode stmt;
+    switch ((jj_ntk == -1) ? jj_ntk() : jj_ntk) {
+        case RESET:
+        case SET:
+            stmt = SqlSetOption(Span.of(), null);
+            break;
+        case ALTER:
+            stmt = SqlAlter();
+            break;
+        case A:
+				// ...
+        case SELECT:
+				// ...
+  	    case UNICODE_QUOTED_IDENTIFIER:
+            stmt = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY);
+            break;
+        case EXPLAIN:
+            stmt = SqlExplain();
+            break;
+        case DESCRIBE:
+            stmt = SqlDescribe();
+            break;
+        case INSERT:
+        case UPSERT:
+            stmt = SqlInsert();
+            break;
+        case DELETE:
+            stmt = SqlDelete();
+            break;
+        case UPDATE:
+            stmt = SqlUpdate();
+            break;
+        case MERGE:
+            stmt = SqlMerge();
+            break;
+        case CALL:
+            stmt = SqlProcedureCall();
+            break;
+        default:
+            jj_la1[27] = jj_gen;
+            jj_consume_token(-1);
+            throw new ParseException();
+    } {
+        if (true) return stmt;
+    }
+    throw new Error("Missing return statement in function");
+}
+```
+
+OrderedQueryOrExpr 方法的定义如下，该方法主要用于处理行表达式以及包含可选 `ORDER BY` 的 SELECT 语句。从方法实现逻辑可以看出，首先调用 QueryOrExpr 方法构造了 SqlSelect 对象，然后再调用 OrderByLimitOpt 方法包装成 SqlOrderBy 对象。
+
+```java
+/**
+ * Parses either a row expression or a query expression with an optional
+ * ORDER BY.
+ *
+ * <p>Postgres syntax for limit:
+ *
+ * <blockquote><pre>
+ *    [ LIMIT { count | ALL } ]
+ *    [ OFFSET start ]</pre>
+ * </blockquote>
+ *
+ * <p>Trino syntax for limit:
+ *
+ * <blockquote><pre>
+ *    [ OFFSET start ]
+ *    [ LIMIT { count | ALL } ]</pre>
+ * </blockquote>
+ *
+ * <p>MySQL syntax for limit:
+ *
+ * <blockquote><pre>
+ *    [ LIMIT { count | start, count } ]</pre>
+ * </blockquote>
+ *
+ * <p>SQL:2008 syntax for limit:
+ *
+ * <blockquote><pre>
+ *    [ OFFSET start { ROW | ROWS } ]
+ *    [ FETCH { FIRST | NEXT } [ count ] { ROW | ROWS } ONLY ]</pre>
+ * </blockquote>
+ */
+final public SqlNode OrderedQueryOrExpr(ExprContext exprContext) throws ParseException {
+    SqlNode e;
+    e = QueryOrExpr(exprContext);
+    e = OrderByLimitOpt(e); {
+        if (true) return e;
+    }
+    throw new Error("Missing return statement in function");
+}
+```
+
+QueryOrExpr 方法内部会依次调用 `LeafQueryOrExpr`、`LeafQuery` 和 `SqlSelect` 方法，在 `SqlSelect` 方法内部，则会对查询语句的每个语法片段依次进行初始化，最终返回 SqlSelect 对象。SqlSelect 对象初始化的调用链路如下图所示。
+
+![SqlSelect 初始化调用链路](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/17/1697506744.png)
 
 ## Calcite SQL Parser 扩展
 
