@@ -379,11 +379,183 @@ final public SqlNode OrderedQueryOrExpr(ExprContext exprContext) throws ParseExc
 
 QueryOrExpr 方法内部会依次调用 `LeafQueryOrExpr`、`LeafQuery` 和 `SqlSelect` 方法，在 `SqlSelect` 方法内部，则会对查询语句的每个语法片段依次进行初始化，最终返回 SqlSelect 对象。SqlSelect 对象初始化的调用链路如下图所示。
 
-![SqlSelect 初始化调用链路](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/17/1697506744.png)
+![SqlSelect 初始化调用链路](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697586335.png)
 
 ## Calcite SQL Parser 扩展
 
-TODO
+尽管 Calcite SQL Parser 已经支持了主流数据库的 DML 语句解析，但是考虑到数据库生态的多样性，大多数据库都提供了特有的 SQL 方言。为了能够灵活地支持数据库方言，Calcite SQL Parser 支持用户扩展，通过 Freemarker 模板可以将 Calcite 内置的解析文件和用户自定义的解析文件整合到一个 JavaCC 文件中，从而实现 SQL 解析能力的扩展。
+
+Calcite SQL Parser 语法扩展流程如下图所示，Calcite 在 templates 目录提供了内置的 `Parser.jj` 模板，在 includes 目录提供了扩展的 `compoundIdentifier.ftl` 和 `parserImpls.ftl` 模板。这些模板通过 `FMPP`（FreeMarker Preprocessor）可以生成最终的解析文件 `Parser.jj`，再交由 JavaCC 编译工具生成 SqlParserImpl 类。
+
+![Calcite SQL Parser 语法扩展流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697590210.png)
+
+`core` 模块 `build.gradle.kts` 中的脚本也印证了以上的处理流程，先执行 `FmppTask`，再执行 `JavaCCTask`。
+
+```kotlin
+val fmppMain by tasks.registering(org.apache.calcite.buildtools.fmpp.FmppTask::class) {
+    config.set(file("src/main/codegen/config.fmpp"))
+    templates.set(file("src/main/codegen/templates"))
+}
+
+val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCTask::class) {
+    dependsOn(fmppMain)
+    val parserFile = fmppMain.map {
+        it.output.asFileTree.matching { include("**/Parser.jj") }
+    }
+    inputFile.from(parserFile)
+    packageName.set("org.apache.calcite.sql.parser.impl")
+}
+```
+
+了解了 Calcite SQL Parser 语法扩展的流程后，我们再来看一个语法扩展的例子。在 `server` 模块，Calcite 使用相同的扩展方法，增加了对 DDL 语句的支持。下图展示了 `server` 模块语法扩展使用到的文件——`config.fmpp` 和 `parserImpls.ftl`。
+
+![Server 模块语法扩展文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697604159.png)
+
+`config.fmpp` 文件定义了 `Parser.jj` 模板中需要使用的参数，如果未配置则默认会使用 `default_config.fmpp` 中的参数。`parser` 下的 `package`、`class` 和 `imports` 用于定义生成的解析器类的`包名`、`类名`和`引入的包`。`keywords` 用于定义扩展语法中的关键字，`nonReservedKeywordsToAdd` 用于定义非保留的关键字。`createStatementParserMethods`、`dropStatementParserMethods ` 和 `truncateStatementParserMethods` 分别用于定义 DDL 语句中 `CREATE`、`DROP` 和 `TRUNCATE` 语句的初始化方法。`implementationFiles` 用于定义这些方法的实现文件。
+
+```json
+data: {
+  # Data declarations for this parser.
+  #
+  # Default declarations are in default_config.fmpp; if you do not include a
+  # declaration ('imports' or 'nonReservedKeywords', for example) in this file,
+  # FMPP will use the declaration from default_config.fmpp.
+  parser: {
+    # Generated parser implementation class package and name
+    package: "org.apache.calcite.sql.parser.ddl",
+    class: "SqlDdlParserImpl",
+
+    # List of import statements.
+    imports: [
+      "org.apache.calcite.schema.ColumnStrategy"
+      "org.apache.calcite.sql.SqlCreate"
+      "org.apache.calcite.sql.SqlDrop"
+      "org.apache.calcite.sql.SqlTruncate"
+      "org.apache.calcite.sql.ddl.SqlDdlNodes"
+    ]
+
+    # List of new keywords. Example: "DATABASES", "TABLES". If the keyword is
+    # not a reserved keyword, add it to the 'nonReservedKeywords' section.
+    keywords: [
+      "IF"
+      "MATERIALIZED"
+      "STORED"
+      "VIRTUAL"
+      "JAR"
+      "FILE"
+      "ARCHIVE"
+    ]
+
+    # List of non-reserved keywords to add;
+    # items in this list become non-reserved
+    nonReservedKeywordsToAdd: [
+      # not in core, added in server
+      "IF"
+      "MATERIALIZED"
+      "STORED"
+      "VIRTUAL"
+      "JAR"
+      "FILE"
+      "ARCHIVE"
+    ]
+
+    # List of methods for parsing extensions to "CREATE [OR REPLACE]" calls.
+    # Each must accept arguments "(SqlParserPos pos, boolean replace)".
+    # Example: "SqlCreateForeignSchema".
+    createStatementParserMethods: [
+      "SqlCreateForeignSchema"
+      "SqlCreateMaterializedView"
+      "SqlCreateSchema"
+      "SqlCreateTable"
+      "SqlCreateType"
+      "SqlCreateView"
+      "SqlCreateFunction"
+    ]
+
+    # List of methods for parsing extensions to "DROP" calls.
+    # Each must accept arguments "(SqlParserPos pos)".
+    # Example: "SqlDropSchema".
+    dropStatementParserMethods: [
+      "SqlDropMaterializedView"
+      "SqlDropSchema"
+      "SqlDropTable"
+      "SqlDropType"
+      "SqlDropView"
+      "SqlDropFunction"
+    ]
+
+    # List of methods for parsing extensions to "TRUNCATE" calls.
+    # Each must accept arguments "(SqlParserPos pos)".
+    # Example: "SqlTruncateTable".
+    truncateStatementParserMethods: [
+      "SqlTruncateTable"
+    ]
+
+    # List of files in @includes directory that have parser method
+    # implementations for parsing custom SQL statements, literals or types
+    # given as part of "statementParserMethods", "literalParserMethods" or
+    # "dataTypeParserMethods".
+    # Example: "parserImpls.ftl".
+    implementationFiles: [
+      "parserImpls.ftl"
+    ]
+  }
+}
+
+# 定义引入 Freemarker 文件的路径
+freemarkerLinks: {
+  includes: includes/
+}
+```
+
+以 `SqlCreateForeignSchema` 方法为例，它的实现逻辑在 `parserImpls.ftl` 中，和 Calcite 内置的语法解析逻辑类似，遵循同样的编写规则。
+
+```java
+SqlCreate SqlCreateForeignSchema(Span s, boolean replace) :
+{
+    final boolean ifNotExists;
+    final SqlIdentifier id;
+    SqlNode type = null;
+    SqlNode library = null;
+    SqlNodeList optionList = null;
+}
+{
+    <FOREIGN> <SCHEMA> ifNotExists = IfNotExistsOpt() id = CompoundIdentifier()
+    (
+         <TYPE> type = StringLiteral()
+    |
+         <LIBRARY> library = StringLiteral()
+    )
+    [ optionList = Options() ]
+    {
+        return SqlDdlNodes.createForeignSchema(s.end(this), replace,
+            ifNotExists, id, type, library, optionList);
+    }
+}
+```
+
+`server` 模块 `build.gradle.kts` 文件定义的 FMPP 任务稍有不同，它会指定 `core` 模块 `templates` 目录下的 `Parser.jj` 作为模板，扩展的语法定义会被整合到模板中，统一输出最终的 `Parser.jj` 文件。
+
+```kotlin
+val fmppMain by tasks.registering(org.apache.calcite.buildtools.fmpp.FmppTask::class) {
+    inputs.dir("src/main/codegen").withPathSensitivity(PathSensitivity.RELATIVE)
+    config.set(file("src/main/codegen/config.fmpp"))
+    templates.set(file("$rootDir/core/src/main/codegen/templates"))
+}
+
+val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCTask::class) {
+    dependsOn(fmppMain)
+    val parserFile = fmppMain.map {
+        it.output.asFileTree.matching { include("**/Parser.jj") }
+    }
+    inputFile.from(parserFile)
+    packageName.set("org.apache.calcite.sql.parser.ddl")
+}
+```
+
+想观察整个过程的读者，可以尝试执行 `ServerParserTest#testCreateForeignSchema` 单元测试，可以看到 `build` 目录生成了统一的 `Parser.jj` 文件。然后经过 JavaCC 编译生成了 `SqlDdlParserImpl` 类。
+
+![执行 DDL 单测编译生成 SqlDdlParserImpl](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697605707.png)
 
 ## Calcite SqlNode 体系 & SQL 生成
 
