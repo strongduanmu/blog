@@ -1,7 +1,7 @@
 ---
 title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
-categories: [SQLancer]
+categories: [ShardingSphere]
 banner: china
 date: 2023-10-12 17:24:20
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/sqlancer-logo.png

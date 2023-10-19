@@ -210,7 +210,7 @@ Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可�
 Calcite SQL Parser 调用非常简单，按照如下示例可以快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
 
 ```java
-String sql = "SELECT * FROM t_order WHRE order_id = 1";
+String sql = "SELECT * FROM t_order WHERE order_id = 1";
 SqlParser sqlParser = SqlParser.create(sql, Config.DEFAULT);
 SqlNode sqlNode = sqlParser.parseQuery();
 System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
@@ -567,11 +567,45 @@ SqlNode 是所有解析节点的父类，Calcite 中目前有 70 多个实现类
 
 下面我们再来具体了解下 `SqlCall`、`SqlLiteral` 和 `SqlIdentifier` 这 3 类 SqlNode 分别包含了哪些子类，以及他们的具体作用。
 
-* SqlCall：
+* `SqlCall`：代表了对 SqlOperator 的调用，Calcite 中每个操作都可以对应一个 SqlCall，例如查询操作是 SqlSelectOperator，对应的 SqlNode 是 `SqlSelect`。常用的 SqlCall 实现类如下图所示，包含了`SqlSelect`、`SqlDelete`、`SqlUpdate`、`SqlInsert` 和 `SqlMerge` 等。
 
 {% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
 
-TODO
+以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列表，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段基本也都和查询语句的子句能够一一对应。
+
+```java
+/**
+ * A <code>SqlSelect</code> is a node of a parse tree which represents a select
+ * statement. It warrants its own node type just because we have a lot of
+ * methods to put somewhere.
+ */
+public class SqlSelect extends SqlCall {
+    //~ Static fields/initializers ---------------------------------------------
+
+    // constants representing operand positions
+    public static final int FROM_OPERAND = 2;
+    public static final int WHERE_OPERAND = 3;
+    public static final int HAVING_OPERAND = 5;
+    public static final int QUALIFY_OPERAND = 7;
+
+    SqlNodeList keywordList;
+    SqlNodeList selectList;@
+    Nullable SqlNode from;@
+    Nullable SqlNode where;@
+    Nullable SqlNodeList groupBy;@
+    Nullable SqlNode having;
+    SqlNodeList windowDecls;@
+    Nullable SqlNode qualify;@
+    Nullable SqlNodeList orderBy;@
+    Nullable SqlNode offset;@
+    Nullable SqlNode fetch;@
+    Nullable SqlNodeList hints;
+}
+```
+
+前文示例中展示的 `SELECT * FROM t_order WHERE order_id = 1` 语句，经过 Calcite SQL Parser 解析，最终生成的 AST 结构如下（SqlNode 树）：
+
+
 
 * SqlLiteral：
 
