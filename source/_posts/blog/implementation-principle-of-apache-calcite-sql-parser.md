@@ -559,6 +559,28 @@ val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCT
 
 ## Calcite SqlNode 体系 & SQL 生成
 
+前面我们学习了 Calcite SQL Parser 的实现和扩展，在最后一个部分，我们再来了解下 Calcite SQL Parser 的最终产物——SqlNode。SqlNode 是 Calcite 中负责封装语义信息的基础类，除了在解析阶段使用外，它还在校验（`validate`）、转换 RelNode（`convert`）以及生成不同方言的 SQL（`toSqlString`）等阶段都发挥了重要作用。
+
+SqlNode 是所有解析节点的父类，Calcite 中目前有 70 多个实现类，这些类共同组成了 SqlNode 体系。SqlNode 体系总体上可以分为 3 大类：`SqlCall`、`SqlLiteral` 和 `SqlIdentifier`。从下图中可以看出 `SqlNode` 抽象类定义了 `validate`、`unparse` 和 `accept` 等抽象方法，各实现类负责实现当前节点的处理逻辑，从而保证 SqlNode 体系能够完成元数据校验、SQL 方言生成等功能。
+
+![SqlNode 体系分类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697676145.png)
+
+下面我们再来具体了解下 `SqlCall`、`SqlLiteral` 和 `SqlIdentifier` 这 3 类 SqlNode 分别包含了哪些子类，以及他们的具体作用。
+
+* SqlCall：
+
+{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
+
+TODO
+
+* SqlLiteral：
+
+![SqlLiteral 子类体系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677850.png)
+
+TODO
+
+* SqlIdentifier：
+
 TODO
 
 
