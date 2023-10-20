@@ -19,6 +19,8 @@ references:
 
 ---
 
+> 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
+
 ## Calcite 简介
 
 Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`SQL 校验`、`SQL 查询优化`、`SQL 生成`以及`数据连接查询`等典型数据库管理功能。Calcite 的目标是 [One Size Fits All](http://www.slideshare.net/julianhyde/apache-calcite-one-planner-fits-all)，即一种方案适应所有需求场景，希望能为不同计算平台和数据源提供统一的查询引擎，并以类似传统数据库的访问方式（SQL 和高级查询优化）来访问不同计算平台和数据源上的数据。下图展示了 Calcite 的架构以及 Calcite 和数据处理系统的交互关系，从图中我们可以看出 Calcite 具有 4 种类型的组件。
@@ -55,7 +57,7 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 连接成功后，我们可以执行一些语句来测试 SQL 执行，`!tables` 用于查询表相关的元数据，`!columns depts` 用于查询列相关的元数据。
 
-```bash
+```sql
 0: jdbc:calcite:model=src/test/resources/mode> !tables
 +-----------+-------------+------------+--------------+---------+----------+------------+-----------+---------------------------+----------------+
 | TABLE_CAT | TABLE_SCHEM | TABLE_NAME |  TABLE_TYPE  | REMARKS | TYPE_CAT | TYPE_SCHEM | TYPE_NAME | SELF_REFERENCING_COL_NAME | REF_GENERATION |
@@ -77,7 +79,7 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 我们再来执行一些复杂的查询语句，看看 Calcite 是否能够真正地提供完善的查询引擎功能。通过下面的查询结果可以看出，Calcite 能够完美支持复杂的 SQL 语句。
 
-```bash
+```sql
 0: jdbc:calcite:model=src/test/resources/mode> SELECT * FROM DEPTS;
 +--------+-----------+
 | DEPTNO |   NAME    |

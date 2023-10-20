@@ -18,6 +18,8 @@ references:
     url: https://zhuanlan.zhihu.com/p/509681717
 ---
 
+> 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
+
 ## 前言
 
 在 [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html) 一文中，我们介绍了 Caclite 的执行流程，包括：`Parse`、`Validate`、`Optimize` 和 `Execute` 四个主要阶段。`Parse` 阶段是整个流程的基础，负责将用户输入的 SQL 字符串解析为 SqlNode 语法树，为后续的元数据校验、逻辑优化、物理优化和计划执行打好基础。
@@ -210,7 +212,7 @@ Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可�
 Calcite SQL Parser 调用非常简单，按照如下示例可以快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
 
 ```java
-String sql = "SELECT * FROM t_order WHERE order_id = 1";
+String sql = "select name from EMPS";
 SqlParser sqlParser = SqlParser.create(sql, Config.DEFAULT);
 SqlNode sqlNode = sqlParser.parseQuery();
 System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
@@ -571,7 +573,7 @@ SqlNode 是所有解析节点的父类，Calcite 中目前有 70 多个实现类
 
 {% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
 
-以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列表，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段基本也都和查询语句的子句能够一一对应。
+以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列表，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段基本也都和查询语句中的子句能够一一对应。
 
 ```java
 /**
@@ -589,31 +591,45 @@ public class SqlSelect extends SqlCall {
     public static final int QUALIFY_OPERAND = 7;
 
     SqlNodeList keywordList;
-    SqlNodeList selectList;@
-    Nullable SqlNode from;@
-    Nullable SqlNode where;@
-    Nullable SqlNodeList groupBy;@
-    Nullable SqlNode having;
-    SqlNodeList windowDecls;@
-    Nullable SqlNode qualify;@
-    Nullable SqlNodeList orderBy;@
-    Nullable SqlNode offset;@
-    Nullable SqlNode fetch;@
-    Nullable SqlNodeList hints;
+    SqlNodeList selectList;
+    @Nullable SqlNode from;
+    @Nullable SqlNode where;
+    @Nullable SqlNodeList groupBy;
+    @Nullable SqlNode having;
+    SqlNodeList windowDecls;
+    @Nullable SqlNode qualify;
+    @Nullable SqlNodeList orderBy;
+    @Nullable SqlNode offset;
+    @Nullable SqlNode fetch;
+    @Nullable SqlNodeList hints;
 }
 ```
 
-前文示例中展示的 `SELECT * FROM t_order WHERE order_id = 1` 语句，经过 Calcite SQL Parser 解析，最终生成的 AST 结构如下（SqlNode 树）：
+前文示例中的 `select name from EMPS` 语句，经过 Calcite SQL Parser 解析，最终能够得到如下的 AST 结构（SqlNode 树）：
 
+![AST 抽象语法树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/20/1697762396.png)
 
-
-* SqlLiteral：
+* `SqlLiteral`：主要用于封装 SQL 中的常量，通常也叫做字面量。
 
 ![SqlLiteral 子类体系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677850.png)
 
-TODO
+Calcite 支持了众多类型的常量，下表展示了常量类型及其含义，可供读者学习参考。
 
-* SqlIdentifier：
+| 类型名称                                                 | 类型含义                                              | 值类型                            |
+| -------------------------------------------------------- | ----------------------------------------------------- | --------------------------------- |
+| SqlTypeName.NULL                                         | 空值。                                                | null                              |
+| SqlTypeName.BOOLEAN                                      | Boolean 类型，包含：`TRUE`，`FALSE` 或者 `UNKNOWN`。  | Boolean 类型，null 代表 UNKNOWN。 |
+| SqlTypeName.DECIMAL                                      | 精确数值，例如：`0`，`-.5`，`12345`。                 | BigDecimal                        |
+| SqlTypeName.DOUBLE                                       | 近似数值，例如：`6.023E-23`。                         | BigDecimal                        |
+| SqlTypeName.DATE                                         | 日期，例如：`DATE '1969-04'29'`。                     | Calendar                          |
+| SqlTypeName.TIME                                         | 时间，例如：`TIME '18:37:42.567'`。                   | Calendar                          |
+| SqlTypeName.TIMESTAMP                                    | 时间戳，例如：`TIMESTAMP '1969-04-29 18:37:42.567'`。 | Calendar                          |
+| SqlTypeName.CHAR                                         | 字符常量，例如：`'Hello, world!'`。                   | NlsString                         |
+| SqlTypeName.BINARY                                       | 二进制常量，例如：`X'ABC', X'7F'`。                   | BitString                         |
+| SqlTypeName.SYMBOL                                       | 符号是一种特殊类型，用于简化解析。                    | An Enum                           |
+| SqlTypeName.INTERVAL_YEAR .. SqlTypeName.INTERVAL_SECOND | 时间间隔，例如：`INTERVAL '1:34' HOUR`。              | SqlIntervalLiteral.IntervalValue. |
+
+* `SqlIdentifier`：代表 SQL 中的标识符，例如 SQL 语句中的表名、字段名。
 
 TODO
 
