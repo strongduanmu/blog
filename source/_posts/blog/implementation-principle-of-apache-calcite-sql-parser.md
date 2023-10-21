@@ -218,7 +218,7 @@ SqlNode sqlNode = sqlParser.parseQuery();
 System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
 ```
 
-Config 对象是通过 `Immutable` 注解自动生成的实现类，它实现的接口方法定义了解析相关的配置，例如：包含引号的标识符如何处理大小写、不包含引号的标识符如何处理大小写以及是否大小写敏感等（更多 Config 配置读者可以参考 [Config 类源码](https://github.com/apache/calcite/blob/a0e119ea42def418957f214f539469f1aba76c18/core/src/main/java/org/apache/calcite/sql/parser/SqlParser.java#L266)）。
+Config 对象则是通过 `Immutable` 注解自动生成的实现类，它实现了接口方法定义的解析相关配置。例如：包含引号的标识符如何处理大小写、不包含引号的标识符如何处理大小写以及是否大小写敏感等（更多 Config 配置读者可以参考 [Config 类源码](https://github.com/apache/calcite/blob/a0e119ea42def418957f214f539469f1aba76c18/core/src/main/java/org/apache/calcite/sql/parser/SqlParser.java#L266)）。
 
 ```java
 Config withQuotedCasing(Casing casing);
@@ -242,7 +242,7 @@ public SqlNode parseStmt() throws SqlParseException {...}
 public SqlNodeList parseStmtList() throws SqlParseException {...}
 ```
 
-我们以常用的 `parseQuery()` 方法为例，再来看下方法内部调用了哪些 JavaCC 生成的方法。parseQuery 方法首先调用了 parser 对象的 `parseSqlStmtEof` 方法，而 parser 对象是 `SqlAbstractParserImpl` 抽象类的实现类，此处我们先关注 `SqlParserImpl` 实现类。
+我们以常用的 `parseQuery()` 方法为例，来看下方法内部调用了哪些 JavaCC 生成的方法。parseQuery 方法首先调用了 parser 对象的 `parseSqlStmtEof` 方法，而 parser 对象是 `SqlAbstractParserImpl` 抽象类的实现类，此处我们先关注 `SqlParserImpl` 实现类。
 
 ```java
 /**
@@ -262,7 +262,7 @@ public SqlNode parseQuery() throws SqlParseException {
 }
 ```
 
-SqlParserImpl 类是通过 JavaCC 动态生成的实现类，内部的 parseSqlStmtEof 方法定义如下，会继续调用内部的 `SqlStmtEof` 方法。而 SqlStmtEof 方法会调用 `SqlStmt` 方法，在该方法内部会判断当前 SQL 的首个 Token，查询语句会调用 `OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)` 方法。
+SqlParserImpl 类是通过 JavaCC 动态生成的实现类，内部的 parseSqlStmtEof 方法定义如下，会继续调用内部的 `SqlStmtEof` 方法。而 SqlStmtEof 方法会调用 `SqlStmt` 方法，在该方法内部会判断当前 SQL 的首个 Token 的类型，查询语句会调用 `OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)` 方法。
 
 ```java
 // org/apache/calcite/sql/parser/impl/SqlParserImpl.java:205
@@ -335,7 +335,7 @@ final public SqlNode SqlStmt() throws ParseException {
 }
 ```
 
-OrderedQueryOrExpr 方法的定义如下，该方法主要用于处理行表达式以及包含可选 `ORDER BY` 的 SELECT 语句。从方法实现逻辑可以看出，首先调用 QueryOrExpr 方法构造了 SqlSelect 对象，然后再调用 OrderByLimitOpt 方法包装成 SqlOrderBy 对象。
+OrderedQueryOrExpr 方法的定义如下，该方法主要用于处理行表达式以及包含可选 `ORDER BY` 的 SELECT 语句。从方法实现逻辑可以看出，它首先调用 QueryOrExpr 方法构造了 SqlSelect 对象，然后再调用 OrderByLimitOpt 方法包装成 SqlOrderBy 对象。
 
 ```java
 /**
@@ -413,7 +413,7 @@ val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCT
 
 ![Server 模块语法扩展文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697604159.png)
 
-`config.fmpp` 文件定义了 `Parser.jj` 模板中需要使用的参数，如果未配置则默认会使用 `default_config.fmpp` 中的参数。`parser` 下的 `package`、`class` 和 `imports` 用于定义生成的解析器类的`包名`、`类名`和`引入的包`。`keywords` 用于定义扩展语法中的关键字，`nonReservedKeywordsToAdd` 用于定义非保留的关键字。`createStatementParserMethods`、`dropStatementParserMethods ` 和 `truncateStatementParserMethods` 分别用于定义 DDL 语句中 `CREATE`、`DROP` 和 `TRUNCATE` 语句的初始化方法。`implementationFiles` 用于定义这些方法的实现文件。
+`config.fmpp` 文件（如下所示）定义了 `Parser.jj` 模板中需要使用的参数，如果未配置则默认会使用 `default_config.fmpp` 中的参数。`parser` 下的 `package`、`class` 和 `imports` 用于定义生成的解析器类的`包名`、`类名`和`引入的包`。`keywords` 用于定义扩展语法中的关键字，`nonReservedKeywordsToAdd` 用于定义非保留的关键字。`createStatementParserMethods`、`dropStatementParserMethods ` 和 `truncateStatementParserMethods` 分别用于定义 DDL 语句中 `CREATE`、`DROP` 和 `TRUNCATE` 语句的初始化方法。`implementationFiles` 则用于定义这些方法的实现文件。
 
 ```json
 data: {
@@ -573,7 +573,7 @@ SqlNode 是所有解析节点的父类，Calcite 中目前有 70 多个实现类
 
 {% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
 
-以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列表，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段基本也都和查询语句中的子句能够一一对应。
+以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段也都和查询语句中的子句能够一一对应。
 
 ```java
 /**
@@ -613,7 +613,7 @@ public class SqlSelect extends SqlCall {
 
 ![SqlLiteral 子类体系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677850.png)
 
-Calcite 支持了众多类型的常量，下表展示了常量类型及其含义，可供读者学习参考。
+Calcite 支持了众多类型的常量，下表展示了常量类型及其含义，可供大家学习参考。
 
 | 类型名称                                                 | 类型含义                                              | 值类型                            |
 | -------------------------------------------------------- | ----------------------------------------------------- | --------------------------------- |
@@ -637,7 +637,7 @@ TODO
 
 {% quot 写在最后 %}
 
-笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了`Calcite 从入门到精通`知识星球，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 {% note color:green 目前星球刚创建，内部积累的资料还很有限，因此暂时不收费，感兴趣的同学可以联系我，免费邀请进入星球。 %}
 
 ![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
