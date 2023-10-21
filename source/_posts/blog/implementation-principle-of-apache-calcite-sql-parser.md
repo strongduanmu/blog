@@ -609,6 +609,7 @@ public class SqlSelect extends SqlCall {
 
 ![AST 抽象语法树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/20/1697762396.png)
 
+* `SqlIdentifier`：代表 SQL 中的标识符，例如 SQL 语句中的表名、字段名。
 * `SqlLiteral`：主要用于封装 SQL 中的常量，通常也叫做字面量。
 
 ![SqlLiteral 子类体系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677850.png)
@@ -629,9 +630,231 @@ Calcite 支持了众多类型的常量，下表展示了常量类型及其含义
 | SqlTypeName.SYMBOL                                       | 符号是一种特殊类型，用于简化解析。                    | An Enum                           |
 | SqlTypeName.INTERVAL_YEAR .. SqlTypeName.INTERVAL_SECOND | 时间间隔，例如：`INTERVAL '1:34' HOUR`。              | SqlIntervalLiteral.IntervalValue. |
 
-* `SqlIdentifier`：代表 SQL 中的标识符，例如 SQL 语句中的表名、字段名。
+通过 SqlNode 体系的介绍，我们大致了解了不同类型 SqlNode 的用途，在 Calcite 中 SqlNode 还有一个强大的功能——SQL 生成。因为 Calcite 的目标是适配各种不同的存储引擎，提供统一的查询引擎，因此 Calcite 需要通过 SqlNode 语法树，生成不同存储引擎对应的 SQL 方言或者 DSL 语言。
 
-TODO
+在 SqlNode 中提供了 `toSqlString` 方法，允许用户传入不同的数据库方言，将 SqlNode 语法树转换为对应方言的 SQL 字符串。
+
+```java
+String sql = "select name from EMPS";
+SqlParser sqlParser = SqlParser.create(sql, Config.DEFAULT);
+SqlNode sqlNode = sqlParser.parseQuery();
+System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
+```
+
+`toSqlString` 方法实现逻辑如下，它会调用重载方法并且额外传入参数 `forceParens`，该参数用于控制表达式是否需要使用括号。
+
+```java
+public SqlString toSqlString(@Nullable SqlDialect dialect) {
+    return toSqlString(dialect, false);
+}
+
+public SqlString toSqlString(@Nullable SqlDialect dialect, boolean forceParens) {
+    return toSqlString(c - >
+        c.withDialect(Util.first(dialect, AnsiSqlDialect.DEFAULT))
+        .withAlwaysUseParentheses(forceParens)
+        .withSelectListItemsOnSeparateLines(false)
+        .withUpdateSetListNewline(false)
+        .withIndentation(0));
+}
+```
+
+在 toSqlString 重载方法内部，会初始化 `SqlWriterConfig` 参数，该参数用于控制 SQL 翻译过程中的换行、是否添加标识符引号等行为。参数初始化完成后，会将参数设置作为 Lambda 函数传递到另一个重载方法中。在该重载方法内部，会创建 `SqlPrettyWriter` 作为 SQL 生成的容器，它会记录 SQL 生成过程中的 SQL 字符片段。SQL 生成的核心逻辑是 `unparse` 方法，调用时会传入容器 writer 类。
+
+```java
+public SqlString toSqlString(UnaryOperator < SqlWriterConfig > transform) {
+    final SqlWriterConfig config = transform.apply(SqlPrettyWriter.config());
+    SqlPrettyWriter writer = new SqlPrettyWriter(config);
+    unparse(writer, 0, 0);
+    return writer.toSqlString();
+}
+```
+
+示例中最外层 SqlNode 为 SqlSelect，因此调用的方法为 [SqlSelect#unparse](https://github.com/apache/calcite/blob/2af15496511c151b3e166f0300af386f38b459ef/core/src/main/java/org/apache/calcite/sql/SqlSelect.java#L286)，具体逻辑如下。该方法会判断当前查询是否为子查询，是子查询则创建一个新的 `SqlWriter.Frame`，然后调用不同方言的 unparseCall 方法生成 SQL，如果不是子查询，则直接调用不同方言的 unparseCall 方法生成 SQL。
+
+```java
+// Override SqlCall, to introduce a sub-query frame.
+@Override
+public void unparse(SqlWriter writer, int leftPrec, int rightPrec) {
+    if (!writer.inQuery() || getFetch() != null && (leftPrec > SqlInternalOperators.FETCH.getLeftPrec() || rightPrec > SqlInternalOperators.FETCH.getLeftPrec()) || getOffset() != null && (leftPrec > SqlInternalOperators.OFFSET.getLeftPrec() || rightPrec > SqlInternalOperators.OFFSET.getLeftPrec()) || getOrderList() != null && (leftPrec > SqlOrderBy.OPERATOR.getLeftPrec() || rightPrec > SqlOrderBy.OPERATOR.getRightPrec())) {
+        // If this SELECT is the topmost item in a sub-query, introduce a new
+        // frame. (The topmost item in the sub-query might be a UNION or
+        // ORDER. In this case, we don't need a wrapper frame.)
+        final SqlWriter.Frame frame = writer.startList(SqlWriter.FrameTypeEnum.SUB_QUERY, "(", ")");
+        writer.getDialect().unparseCall(writer, this, 0, 0);
+        writer.endList(frame);
+    } else {
+        writer.getDialect().unparseCall(writer, this, leftPrec, rightPrec);
+    }
+}
+```
+
+由于我们示例中生成的是 MySQL 的方言，因此调用的是 [MysqlSqlDialect#unparseCall](https://github.com/apache/calcite/blob/362cc566ed745b0be895cb290dd55c7164f6099f/core/src/main/java/org/apache/calcite/sql/dialect/MysqlSqlDialect.java#L218) 方法，具体实现逻辑如下。前文我们介绍了 SqlCall 的用于，它代表了对 SqlOperator 的调用，此处为 SqlSelectOperator，它对应的 SqlKind 为 `SELECT`，因此会先调用 `super.unparseCall` 方法。可以看到，除了 default 分支外，其他分支在处理不同方言的差异，例如：将 `POSITION` 操作转换成 MySQL 中的 `INSTR`，将 `LISTAGG` 转换为 MySQL 中的 `GROUP_CONCAT`。
+
+```java
+@Override
+public void unparseCall(SqlWriter writer, SqlCall call,
+    int leftPrec, int rightPrec) {
+    switch (call.getKind()) {
+        case POSITION:
+            final SqlWriter.Frame frame = writer.startFunCall("INSTR");
+            writer.sep(",");
+            call.operand(1).unparse(writer, leftPrec, rightPrec);
+            writer.sep(",");
+            call.operand(0).unparse(writer, leftPrec, rightPrec);
+            writer.endFunCall(frame);
+            break;
+        case FLOOR:
+            if (call.operandCount() != 2) {
+                super.unparseCall(writer, call, leftPrec, rightPrec);
+                return;
+            }
+
+            unparseFloor(writer, call);
+            break;
+
+        case WITHIN_GROUP:
+            final List < SqlNode > operands = call.getOperandList();
+            if (operands.size() <= 0 || operands.get(0).getKind() != SqlKind.LISTAGG) {
+                super.unparseCall(writer, call, leftPrec, rightPrec);
+                return;
+            }
+            unparseListAggCall(writer, (SqlCall) operands.get(0),
+                operands.size() == 2 ? operands.get(1) : null, leftPrec, rightPrec);
+            break;
+
+        case LISTAGG:
+            unparseListAggCall(writer, call, null, leftPrec, rightPrec);
+            break;
+
+        default:
+            super.unparseCall(writer, call, leftPrec, rightPrec);
+    }
+}
+```
+
+`super.unparseCall` 方法调用的是 [SqlDialect#unparseCall](https://github.com/apache/calcite/blob/9600147e7dcbb062d69a7277d7ba8304b27f5ca1/core/src/main/java/org/apache/calcite/sql/SqlDialect.java#L446)，由于 SqlKind 不是 `ROW`，逻辑会走到 `operator.unparse` 中，即 [SqlSelectOperator#unparse](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/sql/SqlSelectOperator.java#L134)。
+
+```java
+public void unparseCall(SqlWriter writer, SqlCall call, int leftPrec,
+    int rightPrec) {
+    SqlOperator operator = call.getOperator();
+    switch (call.getKind()) {
+        case ROW:
+            // Remove the ROW keyword if the dialect does not allow that.
+            if (!getConformance().allowExplicitRowValueConstructor()) {
+                if (writer.isAlwaysUseParentheses()) {
+                    // If writer always uses parentheses, it will have started parentheses
+                    // that we now regret. Use a special variant of the operator that does
+                    // not print parentheses, so that we can use the ones already started.
+                    operator = SqlInternalOperators.ANONYMOUS_ROW_NO_PARENTHESES;
+                } else {
+                    // Use an operator that prints "(a, b, c)" rather than
+                    // "ROW (a, b, c)".
+                    operator = SqlInternalOperators.ANONYMOUS_ROW;
+                }
+            }
+            // fall through
+        default:
+            operator.unparse(writer, call, leftPrec, rightPrec);
+    }
+}
+```
+
+[SqlSelectOperator#unparse](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/sql/SqlSelectOperator.java#L134) 方法会对 SELECT 语句按照顺序进行 SQL 生成，包括：Hint 注释、投影列、表、查询条件、分组条件等。在投影列、查询条件生成的过程中，会调用其他 SqlNode 的 unparse 方法，通过遍历语法树逐层调用，最终 writer 类获取了全部的 SQL   信息，通过 `toSqlString` 方法转换为最终的 SQL 字符串。SqlNode 生成不同方言的 SQL 调用的节点很多，本文限于篇幅就不一一介绍了，感兴趣的朋友可以自行 DEBUG 探究一下。
+
+```java
+@SuppressWarnings("deprecation")
+@Override
+public void unparse(SqlWriter writer, SqlCall call, int leftPrec, int rightPrec) {
+    SqlSelect select = (SqlSelect) call;
+    final SqlWriter.Frame selectFrame = writer.startList(SqlWriter.FrameTypeEnum.SELECT);
+  	// 向 writer 容器中输出 SELECT 关键字
+    writer.sep("SELECT");
+    if (select.hasHints()) {
+        writer.sep("/*+");
+        castNonNull(select.hints).unparse(writer, 0, 0);
+        writer.print("*/");
+        writer.newlineAndIndent();
+    }
+    for (int i = 0; i < select.keywordList.size(); i++) {
+        final SqlNode keyword = select.keywordList.get(i);
+        keyword.unparse(writer, 0, 0);
+    }
+    writer.topN(select.fetch, select.offset);
+    final SqlNodeList selectClause = select.selectList;
+    // 向 writer 容器中输出投影列
+    writer.list(SqlWriter.FrameTypeEnum.SELECT_LIST, SqlWriter.COMMA, selectClause);
+    // 向 writer 容器中输出 FROM 关键字及表名
+    if (select.from != null) {
+        // Calcite SQL requires FROM but MySQL does not.
+        writer.sep("FROM");
+        // for FROM clause, use precedence just below join operator to make
+        // sure that an un-joined nested select will be properly
+        // parenthesized
+        final SqlWriter.Frame fromFrame = writer.startList(SqlWriter.FrameTypeEnum.FROM_LIST);
+        select.from.unparse(writer, SqlJoin.COMMA_OPERATOR.getLeftPrec() - 1, SqlJoin.COMMA_OPERATOR.getRightPrec() - 1);
+        writer.endList(fromFrame);
+    }
+    // 向 writer 容器中输出 WHERE 关键字及查询条件
+    SqlNode where = select.where;
+    if (where != null) {
+        writer.sep("WHERE");
+        if (!writer.isAlwaysUseParentheses()) {
+            SqlNode node = where;
+            // decide whether to split on ORs or ANDs
+            SqlBinaryOperator whereSep = SqlStdOperatorTable.AND;
+            if ((node instanceof SqlCall) && node.getKind() == SqlKind.OR) {
+                whereSep = SqlStdOperatorTable.OR;
+            }
+            // unroll whereClause
+            final List < SqlNode > list = new ArrayList < > (0);
+            while (node.getKind() == whereSep.kind) {
+                assert node instanceof SqlCall;
+                final SqlCall call1 = (SqlCall) node;
+                list.add(0, call1.operand(1));
+                node = call1.operand(0);
+            }
+            list.add(0, node);
+            // unparse in a WHERE_LIST frame
+            writer.list(SqlWriter.FrameTypeEnum.WHERE_LIST, whereSep,
+                new SqlNodeList(list, where.getParserPosition()));
+        } else {
+            where.unparse(writer, 0, 0);
+        }
+    }
+    // 向 writer 容器中输出分组查询条件
+    if (select.groupBy != null) {
+        SqlNodeList groupBy = select.groupBy.size() == 0 ? SqlNodeList.SINGLETON_EMPTY : select.groupBy;
+        // if the DISTINCT keyword of GROUP BY is present it can be the only item
+        if (groupBy.size() == 1 && groupBy.get(0) != null && groupBy.get(0).getKind() == SqlKind.GROUP_BY_DISTINCT) {
+            writer.sep("GROUP BY DISTINCT");
+            List < SqlNode > operandList = ((SqlCall) groupBy.get(0)).getOperandList();
+            groupBy = new SqlNodeList(operandList, groupBy.getParserPosition());
+        } else {
+            writer.sep("GROUP BY");
+        }
+        writer.list(SqlWriter.FrameTypeEnum.GROUP_BY_LIST, SqlWriter.COMMA, groupBy);
+    }
+    if (select.having != null) {
+        writer.sep("HAVING");
+        select.having.unparse(writer, 0, 0);
+    }
+    if (select.windowDecls.size() > 0) {
+        writer.sep("WINDOW");
+        writer.list(SqlWriter.FrameTypeEnum.WINDOW_DECL_LIST, SqlWriter.COMMA, select.windowDecls);
+    }
+    if (select.qualify != null) {
+        writer.sep("QUALIFY");
+        select.qualify.unparse(writer, 0, 0);
+    }
+    if (select.orderBy != null && select.orderBy.size() > 0) {
+        writer.sep("ORDER BY");
+        writer.list(SqlWriter.FrameTypeEnum.ORDER_BY_LIST, SqlWriter.COMMA, select.orderBy);
+    }
+    writer.fetchOffset(select.fetch, select.offset);
+    writer.endList(selectFrame);
+}
+```
 
 
 
