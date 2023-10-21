@@ -166,7 +166,7 @@ of the 'normal states'.
 
 用于描述语法规则，能够支持复杂的语法描述，语法规则大体上类似于 Java 代码，首先是方法声明 `SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext)`，后面紧跟着冒号 `:` 和两对花括号，第一对花括号用于声明变量，第二对花括号则用于编写解析逻辑。
 
-JavaCC 语法规则很灵活，可以使用正则表达式中 `[]`、`()` 和 `|` 表示可选、必选和分支。在解析分支语法时，可能需要通过大量的回溯操作才能完成分支的选择，JavaCC 为了优化回溯带来的性能问题，默认只向前查看一个 `TOKEN`（可满足大部分解析需求），可以通过 `LOOKAHEAD(2)` 指定向前查看的 `TOKEN` 数，从而做出最好的选择。
+JavaCC 语法规则很灵活，可以使用正则表达式， `[]`、`()` 和 `|` 分别表示可选、必选和分支。在解析分支语法时，可能需要通过大量的回溯操作才能完成分支的选择，JavaCC 为了优化回溯带来的性能问题，默认只向前查看一个 `TOKEN`（可满足大部分解析需求），可以通过 `LOOKAHEAD(2)` 指定向前查看的 `TOKEN` 数，从而做出最好的选择。
 
 ```java
 // 语法规则和 Java 处理逻辑
@@ -197,7 +197,7 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 }
 ```
 
-以上大致介绍了 Calcite SQL Parser 使用到的 JavaCC 相关知识，如果读者对 JavaCC 感兴趣，可以查看参考资料中的官方资料以及 JavaCC 博文进行学习。下面让我们再来学习下 Calcite SQL Parser 的整体实现，如何通过 Java 代码调用解析逻辑，实现 SQL 字符串到 AST 的解析。
+以上大致介绍了 Calcite SQL Parser 使用到的 JavaCC 相关知识，如果读者对 JavaCC 感兴趣，可以查看参考资料中的官方文档以及 JavaCC 博文进行学习。下面让我们再来学习下 Calcite SQL Parser 的整体实现，如何通过 Java 代码调用解析逻辑，实现 SQL 字符串到 AST 的解析。
 
 ## Calcite SQL Parser 实现
 
@@ -205,7 +205,7 @@ Calcite SQL Parser 的核心实现在 `calcite-core` 模块，在 `src/main` 下
 
 ![Calcite SQL Parser 解析文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160859394.png)
 
-Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可以快速创建解析对象，然后进行 SQL 解析。`SPAN`  类是 `SqlParserPos` 的构建器，`SqlAbstractParserImpl` 是解析的抽象类，Calcite 中生成的 `SqlParserImpl`、`SqlBabelParserImpl` 和 `SqlDdlParserImpl` 都继承了该抽象类。
+Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可以快速创建解析对象，然后进行 SQL 解析。`SPAN`  类是 `SqlParserPos` 的构建器，构建的 `SqlParserPos` 对象主要用来记录 `TOKEN` 在 SQL 中的位置。`SqlAbstractParserImpl` 是解析的抽象类，Calcite 中生成的 `SqlParserImpl`、`SqlBabelParserImpl` 和 `SqlDdlParserImpl` 都继承了该抽象类。
 
 ![Calcite SQL Parser 核心类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160913074.png)
 
