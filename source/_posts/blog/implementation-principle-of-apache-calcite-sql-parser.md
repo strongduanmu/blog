@@ -639,6 +639,9 @@ String sql = "select name from EMPS";
 SqlParser sqlParser = SqlParser.create(sql, Config.DEFAULT);
 SqlNode sqlNode = sqlParser.parseQuery();
 System.out.println(sqlNode.toSqlString(MysqlSqlDialect.DEFAULT));
+// SELECT *
+// FROM `T_ORDER`
+// WHERE `ORDER_ID` = 1
 ```
 
 `toSqlString` 方法实现逻辑如下，它会调用重载方法并且额外传入参数 `forceParens`，该参数用于控制表达式是否需要使用括号。
@@ -760,7 +763,7 @@ public void unparseCall(SqlWriter writer, SqlCall call, int leftPrec,
 }
 ```
 
-[SqlSelectOperator#unparse](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/sql/SqlSelectOperator.java#L134) 方法会对 SELECT 语句按照顺序进行 SQL 生成，包括：Hint 注释、投影列、表、查询条件、分组条件等。在投影列、查询条件生成的过程中，会调用其他 SqlNode 的 unparse 方法，通过遍历语法树逐层调用，最终 writer 类获取了全部的 SQL   信息，通过 `toSqlString` 方法转换为最终的 SQL 字符串。SqlNode 生成不同方言的 SQL 调用的节点很多，本文限于篇幅就不一一介绍了，感兴趣的朋友可以自行 DEBUG 探究一下。
+[SqlSelectOperator#unparse](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/sql/SqlSelectOperator.java#L134) 方法会对 SELECT 语句按照顺序进行 SQL 生成，包括：Hint 注释、投影列、表、查询条件、分组条件等。在投影列、查询条件生成的过程中，会调用其他 SqlNode 的 unparse 方法，通过遍历语法树逐层调用，最终 writer 类获取了全部的 SQL   信息，通过 `toSqlString` 方法转换为最终的 SQL 字符串。SqlNode 生成 SQL 调用的节点很多，本文限于篇幅就不一一介绍了，感兴趣的朋友可以自行 DEBUG 探究一下。
 
 ```java
 @SuppressWarnings("deprecation")
