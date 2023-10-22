@@ -225,23 +225,21 @@ return result(a) # returns 11
 
 另一个区别是窗口可以是相交的（`non-disjoint`）：特定行可以出现在多个窗口中。例如，`10:37` 既可以出现在 `9:00-10:00` 时间段，也可以出现在 `9:15-9:45` 时间段。
 
-TODO
-
-窗口函数是递增计算的：当时钟从 `10:14` 跳转到 `10:15` 时，可能有两行进入窗口，而三行离开。为此，窗口函数有一个额外的生命周期操作：
+窗口函数是动态计算的：当时钟从 `10:14` 跳转到 `10:15` 时，可能有两行进入窗口，而三行离开。为此，窗口函数有一个额外的生命周期操作：
 
 - `remove` 从累加器中删除一个值。
 
-它的伪代码`SUM(int)`是：
+它的伪代码 `SUM(int)` 是：
 
-```
+```java
 Accumulator remove(Accumulator a, int x) {
   return new Accumulator(a.sum - x);
 }
 ```
 
-以下是计算前 2 行的移动总和的调用序列，其中 4 行的值为 4、7、2 和 3：
+以下是计算前 2 行动态求和（`SUM`）的调用顺序，其中 4 行的数值为 4、7、2 和 3：
 
-```
+```java
 a = init()       # a = {0}
 a = add(a, 4)    # a = {4}
 emit result(a)   # emits 4
@@ -257,53 +255,55 @@ emit result(a)   # emits 5
 
 ### 分组窗口函数
 
-分组窗口函数是操作`GROUP BY`子句将记录聚集成集合的函数。内置的分组窗口函数是`HOP`、`TUMBLE`和`SESSION`。你可以通过实现来定义附加功能 [`interface SqlGroupedWindowFunction`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/fun/SqlGroupedWindowFunction.html)。
+分组窗口函数是操作 `GROUP BY` 子句并将记录聚集成集合的函数。内置的分组窗口函数是 `HOP`、`TUMBLE` 和 `SESSION`。你可以通过实现 [`interface SqlGroupedWindowFunction`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlGroupedWindowFunction.html) 来定义其他函数。
 
 ### 表函数和表宏
 
-*用户定义表函数* 的定义方式与常规“标量”用户定义函数类似，但用于`FROM`查询子句中。以下查询使用名为 的表函数`Ramp`：
+用户自定义表函数的定义方式，与常用的**标量**用户自定义函数类似，但在查询的 `FROM` 子句中使用。以下查询使用名为 `Ramp` 的表函数：
 
-```
+```sql
 SELECT * FROM TABLE(Ramp(3, 4))
 ```
 
-*用户定义的表宏*使用与表函数相同的 SQL 语法，但定义不同。它们不是生成数据，而是生成关系表达式。在查询准备期间调用表宏，然后可以优化它们生成的关系表达式。（Calcite 的视图实现使用表宏。）
+用户自定义表宏使用与表函数相同的 SQL 语法，但定义不同。它们不是生成数据，而是生成关系表达式。在查询准备期间调用表宏，然后可以优化它们生成的关系表达式。（Calcite 的视图实现使用表宏）
 
-[`class TableFunctionTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/TableFunctionTest.java) 测试表函数并包含几个有用的示例。
+[`class TableFunctionTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/TableFunctionTest.java) 测试了表函数并包含几个有用的示例。
 
 ### 扩展解析器
 
-假设你需要以与将来对语法的更改兼容的方式扩展 Calcite 的 SQL 语法。`Parser.jj`在你的项目中复制语法文件 将是愚蠢的，因为语法经常被编辑。
+假设你需要在保持语法兼容的情况下，扩展 Calcite 的 SQL 语法。在你的项目中复制 `Parser.jj` 语法文件将是愚蠢的，因为语法经常被编辑。
 
-幸运的是，`Parser.jj`实际上是一个 [Apache FreeMarker](https://freemarker.apache.org/) 模板，其中包含可以替换的变量。解析器`calcite-core`使用变量的默认值（通常为空）实例化模板，但你可以覆盖。如果你的项目需要不同的解析器，你可以提供自己的`config.fmpp`和`parserImpls.ftl`文件，从而生成扩展解析器。
+幸运的是，`Parser.jj` 实际上是一个 [Apache FreeMarker](https://freemarker.apache.org/) 模板，其中包含可以替换的变量。`calcite-core` 中的解析器使用变量的默认值（通常为空）实例化模板，但你也可以覆盖这些变量。如果你的项目需要不同的解析器，你可以提供自己的 `config.fmpp` 和 `parserImpls.ftl` 文件，从而生成扩展解析器。
 
-该`calcite-server`模块在 [ [CALCITE-707](https://issues.apache.org/jira/browse/CALCITE-707) ] 中创建并添加了 DDL 语句，例如`CREATE TABLE`，是你可以遵循的示例。另见 [`class ExtensionSqlParserTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/sql/parser/parserextensiontesting/ExtensionSqlParserTest.java)。
+`calcite-server` 模块是在 [CALCITE-707](https://issues.apache.org/jira/browse/CALCITE-707) 中创建的，并添加了 DDL 语句，例如 `CREATE TABLE`，是你可以参考的示例。另外可以参考 [`class ExtensionSqlParserTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/sql/parser/parserextensiontesting/ExtensionSqlParserTest.java)。
 
 ### 自定义接受和生成的 SQL 方言
 
-要自定义解析器应接受、实现 [`interface SqlConformance`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html) 或使用 [`enum SqlConformanceEnum`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformanceEnum.html).
+要自定义解析器应接受的 SQL 扩展，请实现 [`interface SqlConformance`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html) 或使用 [`enum SqlConformanceEnum`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformanceEnum.html).
 
-要控制如何为外部数据库生成 SQL（通常通过 JDBC 适配器），请使用 [`class SqlDialect`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlDialect.html). 方言还描述了引擎的功能，例如它是否支持`OFFSET`和`FETCH`子句。
+要控制如何为外部数据库生成 SQL（通常通过 JDBC 适配器），请使用 [`class SqlDialect`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlDialect.html)。方言还描述了引擎的功能，例如它是否支持 `OFFSET` 和 `FETCH` 子句。
 
-### 定义自定义架构
+### 定义自定义模式
 
-要定义自定义架构，你需要实现 [`interface SchemaFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html).
+要定义自定义模式，你需要实现 [`interface SchemaFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html)。
 
-在查询准备期间，Calcite 将调用此接口以找出你的架构包含哪些表和子架构。当查询中引用架构中的表时，Calcite 将要求你的架构创建 [`interface Table`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Table.html).
+在查询准备期间，Calcite 将调用此接口，来查找自定义模式包含哪些表和子模式。当查询引用了模式中的表时，Calcite 将要求自定义模式创建 [`interface Table`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Table.html)。
 
-该表将被包装在 a 中 [`TableScan`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableScan.html) ，并将进行查询优化过程。
+表将被包装在 [`TableScan`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableScan.html) 中，并将经历查询优化过程。
 
-### 反思模式
+### 反射模式
 
-反射模式 ( [`class ReflectiveSchema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/java/ReflectiveSchema.html)) 是一种包装 Java 对象以使其显示为模式的方法。其集合值字段将显示为表格。
+反射模式（[`class ReflectiveSchema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/java/ReflectiveSchema.html)）是一种包装 Java 对象以使其显示为模式的方法。其中的集合字段将展示为表格。
 
-它不是一个模式工厂，而是一个实际的模式；你必须创建对象并通过调用 API 将其包装在架构中。
+它不是一个模式工厂，而是一个实际的模式。你必须创建对象并通过调用 API 将其包装在模式中。
 
-见 [`class ReflectiveSchemaTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/ReflectiveSchemaTest.java)。
+参考 [`class ReflectiveSchemaTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/ReflectiveSchemaTest.java)。
 
 ### 定义自定义表
 
-要定义自定义表，你需要实现 [`interface TableFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TableFactory.html). 模式工厂是一组命名表，而表工厂在绑定到具有特定名称（以及可选的一组额外操作数）的模式时会生成单个表。
+TODO
+
+要定义自定义表，你需要实现 [`interface TableFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TableFactory.html)。模式工厂是一组命名表，而表工厂在绑定到具有特定名称（以及可选的一组额外操作数）的模式时会生成单个表。
 
 ### 修改数据
 
