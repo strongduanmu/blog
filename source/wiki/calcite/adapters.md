@@ -301,45 +301,45 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 ### 定义自定义表
 
-TODO
-
 要定义自定义表，你需要实现 [`interface TableFactory`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TableFactory.html)。模式工厂是一组命名表，而表工厂在绑定到具有特定名称（以及可选的一组额外操作数）的模式时会生成单个表。
 
 ### 修改数据
 
-如果你的表要支持 DML 操作（INSERT、UPDATE、DELETE、MERGE），则你的实现`interface Table`必须实现 [`interface ModifiableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ModifiableTable.html).
+如果你的表要支持 DML 操作（INSERT、UPDATE、DELETE、MERGE），则你的 `interface Table` 实现类必须同时实现 [`interface ModifiableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ModifiableTable.html)。
 
-### 流媒体
+### 流式操作
 
-如果你的表支持流式查询，则你的实现`interface Table`必须实现 [`interface StreamableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/StreamableTable.html).
+如果你的表支持流式查询，则你的 `interface Table` 实现类必须实现 [`interface StreamableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/StreamableTable.html)。
 
-参见 [`class StreamTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/StreamTest.java) 示例。
+请参考 [`class StreamTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/StreamTest.java) 示例。
 
-### 将操作推到你的桌子上
+### 将操作下推到你的表中
 
-如果你希望将处理下推到自定义表的源系统，请考虑实现 [`interface FilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/FilterableTable.html) 或 [`interface ProjectableFilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ProjectableFilterableTable.html)。
+如果你希望将处理逻辑下推到自定义表的源系统，请考虑实现 [`interface FilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/FilterableTable.html) 或 [`interface ProjectableFilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ProjectableFilterableTable.html)。
 
-如果你想要更多的控制，你应该写一个[计划规则](https://calcite.apache.org/docs/adapter.html#planner-rule)。这将允许你下推表达式，做出关于是否下推处理的基于成本的决定，以及下推更复杂的操作，例如连接、聚合和排序。
+如果你想要更多的控制，你应该写一个[优化规则](https://calcite.apache.org/docs/adapter.html#planner-rule)。这将允许你下推表达式，并基于代价做出关于是否下推处理的决定，以及下推更复杂的操作，例如：连接、聚合和排序。
 
 ### 类型系统
 
-你可以通过实现 [`interface RelDataTypeSystem`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/type/RelDataTypeSystem.html).
+你可以通过实现 [`interface RelDataTypeSystem`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/type/RelDataTypeSystem.html) 来自定义类型系统的某些方面。
 
 ### 关系运算符
 
-所有关系运算符都实现 [`interface RelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/RelNode.html) 并扩展了 [`class AbstractRelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/AbstractRelNode.html). 核心运营商（使用 [`SqlToRelConverter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql2rel/SqlToRelConverter.html) 和覆盖常规关系代数）是 [`TableScan`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableScan.html)， [`TableModify`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableModify.html)， [`Values`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Values.html)， [`Project`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Project.html)， [`Filter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Filter.html)， [`Aggregate`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Aggregate.html)， [`Join`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Join.html)， [`Sort`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Sort.html)， [`Union`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Union.html)， [`Intersect`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Intersect.html)， [`Minus`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Minus.html)， [`Window`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Window.html)和 [`Match`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Match.html)。
+所有关系运算符都实现 [`interface RelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/RelNode.html)，并且大多数扩展了 [`class AbstractRelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/AbstractRelNode.html)。最核心的运算符（被 [`SqlToRelConverter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql2rel/SqlToRelConverter.html) 使用并覆盖了常规的关系代数）是 [`TableScan`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableScan.html)， [`TableModify`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/TableModify.html)， [`Values`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Values.html)， [`Project`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Project.html)， [`Filter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Filter.html)， [`Aggregate`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Aggregate.html)， [`Join`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Join.html)， [`Sort`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Sort.html)， [`Union`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Union.html)， [`Intersect`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Intersect.html)， [`Minus`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Minus.html)， [`Window`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Window.html) 和 [`Match`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Match.html)。
 
-其中每一个都有一个“纯”逻辑子类， [`LogicalProject`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/logical/LogicalProject.html) 依此类推。任何给定的适配器都有对应的引擎可以有效实现的操作；例如，Cassandra 适配器有 [`CassandraProject`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/cassandra/CassandraProject.html) 但没有`CassandraJoin`.
+其中每一个都有一个**纯**逻辑子类， [`LogicalProject`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/logical/LogicalProject.html) 等。任何给定的适配器都会有对应的操作，其引擎可以有效地实现。例如，Cassandra 适配器有 [`CassandraProject`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/cassandra/CassandraProject.html) 但没有 `CassandraJoin`。
 
-你可以定义自己的子类`RelNode`以添加新运算符，或在特定引擎中实现现有运算符。
+你可以定义自己的 `RelNode` 子类来添加新运算符，或在特定引擎中添加现有运算符实现。
 
-为了使运算符有用且强大，你需要 [规划器规则](https://calcite.apache.org/docs/adapter.html#planner-rule)将其与现有运算符相结合。（并且还提供元数据，见[下文](https://calcite.apache.org/docs/adapter.html#statistics-and-cost)）。这是代数，效果是组合的：你编写一些规则，但它们组合起来处理指数数量的查询模式。
+为了使运算符有用且强大，你需要将[优化器规则](https://calcite.apache.org/docs/adapter.html#planner-rule)与现有运算符相结合（并且还提供元数据，见[下文](https://calcite.apache.org/docs/adapter.html#statistics-and-cost)）。这些是关系代数，它们的效果是组合的：你虽然编写了少量的规则，但它们组合起来能够处理指数数量的查询模式。
 
-如果可能，让你的运营商成为现有运营商的子类；那么你就可以重新使用或调整其规则。更好的是，如果你的运算符是一个可以根据现有运算符重写（再次通过规划器规则）的逻辑运算，那么你应该这样做。你将无需额外工作即可重复使用这些运算符的规则、元数据和实现。
+如果可能，让你的运算符成为现有运算符的子类；那么你也许就可以重新使用或调整他们对应的规则。更好的是，如果你的运算符是一个可以根据现有运算符重写（再次通过优化器规则）的逻辑运算符，那么你应该这样做。你将无需额外工作即可重复使用这些运算符的规则、元数据和实现。
 
-### 计划规则
+### 优化规则
 
-规划器规则 ( [`class RelOptRule`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/RelOptRule.html)) 将关系表达式转换为等效的关系表达式。
+优化器规则 ( [`class RelOptRule`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/RelOptRule.html)) 将关系表达式转换为等效的关系表达式。
+
+TODO
 
 规划器引擎注册了许多规划器规则并触发它们以将输入查询转换为更有效的内容。因此，规划器规则是优化过程的核心，但令人惊讶的是，每个规划器规则本身并不关心成本。计划引擎负责按顺序触发规则以产生最佳计划，但每个单独的规则只关心自己的正确性。
 
