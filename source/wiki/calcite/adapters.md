@@ -339,35 +339,33 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 优化器规则 ( [`class RelOptRule`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/RelOptRule.html)) 将关系表达式转换为等效的关系表达式。
 
-TODO
+优化器引擎注册了许多优化器规则，并触发它们从而将输入的查询转换为更有效的查询。因此，优化器规则是优化过程的核心，但令人惊讶的是，每个优化器规则本身并不关心代价。优化器引擎负责按顺序触发规则以产生最佳计划，但每个单独的规则只关心自己的正确性。
 
-规划器引擎注册了许多规划器规则并触发它们以将输入查询转换为更有效的内容。因此，规划器规则是优化过程的核心，但令人惊讶的是，每个规划器规则本身并不关心成本。计划引擎负责按顺序触发规则以产生最佳计划，但每个单独的规则只关心自己的正确性。
-
-Calcite 有两个内置的规划器引擎： [`class VolcanoPlanner`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/volcano/VolcanoPlanner.html) 使用动态规划，适用于穷举搜索，而 [`class HepPlanner`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/hep/HepPlanner.html) 以更固定的顺序触发一系列规则。
+Calcite 有两个内置的优化器引擎：[`class VolcanoPlanner`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/volcano/VolcanoPlanner.html) 使用动态规划，它适用于穷举搜索，而 [`class HepPlanner`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/hep/HepPlanner.html) 以更固定的顺序触发一系列规则。
 
 ### 调用约定
 
-调用约定是特定数据引擎使用的协议。例如，卡桑德拉发动机具有关系运算符的集合， `CassandraProject`，`CassandraFilter`等等，并且这些操作符可以被相互连接，而无需从一个格式转换成另一种的数据。
+调用约定是特定数据引擎使用的协议。例如，Cassandra 引擎有一组关系运算符，`CassandraProject`，`CassandraFilter` 等，并且这些运算符可以相互连接，而无需将数据从一种格式转换成另一种格式。
 
-如果数据需要从一种调用约定转换为另一种调用约定，Calcite 使用称为转换器的特殊关系表达式子类（请参阅 参考资料[`interface Converter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/convert/Converter.html)）。但是当然转换数据有运行时成本。
+如果数据需要从一种调用约定转换为另一种调用约定，Calcite 使用称为转换器的特殊关系表达式子类（请参阅 [`interface Converter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/convert/Converter.html)）。但当然，转换数据有运行时的成本。
 
-在规划使用多个引擎的查询时，Calcite 根据其调用约定为关系表达式树的区域“着色”。规划器通过触发规则将操作推送到数据源中。如果引擎不支持特定操作，则不会触发规则。有时一项操作可能会发生在多个地方，最终会根据成本选择最佳方案。
+在优化器使用多个引擎进行查询时，Calcite 根据调用约定对关系表达式树的区域进行**着色**。优化器通过触发规则将操作推送到数据源中。如果引擎不支持特定操作，则不会触发规则。有时一项操作可能会发生在多个地方，最终会根据代价选择最佳方案。
 
-调用约定是一个实现 的类 [`interface Convention`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/Convention.html)、一个辅助接口（例如 [`interface CassandraRel`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/CassandraRel.html)），以及[`class RelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/RelNode.html) 为核心关系运算符（[`Project`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Project.html)、 [`Filter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Filter.html)、 [`Aggregate`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Aggregate.html)等）实现该接口的一组子类 。
+调用约定是一个实现 [`interface Convention`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/Convention.html) 的类 、一个辅助接口（例如 [`interface CassandraRel`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/CassandraRel.html)），以及一组为核心关系运算符而实现 [`class RelNode`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/RelNode.html) 接口的子类（[`Project`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Project.html)、 [`Filter`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Filter.html)、 [`Aggregate`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/core/Aggregate.html) 等）。
 
 ### 内置 SQL 实现
 
 如果适配器没有实现所有核心关系运算符，Calcite 如何实现 SQL？
 
-答案是特定的内置调用约定 [`EnumerableConvention`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/enumerable/EnumerableConvention.html). 可枚举约定的关系表达式被实现为“内置”：Calcite 生成 Java 代码，编译它，并在它自己的 JVM 中执行。Enumerable 约定不如运行在面向列的数据文件上的分布式引擎那么有效，但它可以实现所有核心关系运算符和所有内置 SQL 函数和运算符。如果数据源无法实现关系运算符，则可枚举约定是一种后备。
+答案是特定的内置调用约定 [`EnumerableConvention`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/enumerable/EnumerableConvention.html)。Enumerable 约定的关系表达式作为内置实现：Calcite 生成 Java 代码，对其进行编译，并在其自己的 JVM 中执行。Enumerable 约定的效率低于运行在面向列的数据文件上的分布式引擎，但它可以实现所有核心关系运算符以及所有内置 SQL 函数和运算符。如果数据源无法实现关系运算符，则可以使用枚举约定。
 
-### 统计和成本
+### 统计和代价
 
-Calcite 有一个元数据系统，允许你定义有关关系运算符的成本函数和统计信息，统称为*元数据*。每种元数据都有一个接口（通常）一个方法。例如，选择性由[`class RelMdSelectivity`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSelectivity.html) 和 方法 定义 [`getSelectivity(RelNode rel, RexNode predicate)`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMetadataQuery.html#getSelectivity-org.apache.calcite.rel.RelNode-org.apache.calcite.rex.RexNode-)。
+Calcite 有一个元数据系统，允许你定义有关关系运算符的代价函数和统计信息，统称为**元数据**。每种元数据都有一个单方法的接口（通常）。例如，选择性由[`class RelMdSelectivity`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSelectivity.html) 和 [`getSelectivity(RelNode rel, RexNode predicate)`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMetadataQuery.html#getSelectivity-org.apache.calcite.rel.RelNode-org.apache.calcite.rex.RexNode-) 方法定义。
 
-有许多内置的元数据，包括 [排序规则](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdCollation.html)、 [列起源](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnOrigins.html)、 [列唯一性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnUniqueness.html)、 [不同行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistinctRowCount.html)、 [分布](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistribution.html)、 [解释可见性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExplainVisibility.html)、 [表达式谱系](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExpressionLineage.html)、 [最大行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdMaxRowCount.html)、 [节点类型](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdNodeTypes.html)、 [并行度](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdParallelism.html)、 [原始行百分比](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPercentageOriginalRows.html)、 [人口大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPopulationSize.html)、 [谓词](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPredicates.html)、 [行计数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdRowCount.html)、 [选择性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSelectivity.html)、 [大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSize.html)、 [表引用](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdTableReferences.html)和 [唯一键](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdUniqueKeys.html)；你也可以定义你自己的。
+有许多种内置的元数据，包括：[排序规则](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdCollation.html)、 [列来源](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnOrigins.html)、 [列唯一性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnUniqueness.html)、 [唯一行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistinctRowCount.html)、 [分布](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistribution.html)、 [执行计划可见性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExplainVisibility.html)、 [表达式血缘](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExpressionLineage.html)、 [最大行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdMaxRowCount.html)、 [节点类型](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdNodeTypes.html)、 [并行度](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdParallelism.html)、 [原始行百分比](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPercentageOriginalRows.html)、 [总体大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPopulationSize.html)、 [谓词](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPredicates.html)、 [行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdRowCount.html)、 [选择性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSelectivity.html)、 [大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSize.html)、 [表引用](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdTableReferences.html) 和 [唯一键](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdUniqueKeys.html)。你也可以定义自己的元数据。
 
-然后，你可以提供一个*元数据提供程序*，该*提供程序*为`RelNode`. 元数据提供程序可以处理内置和扩展元数据类型，以及内置和扩展`RelNode`类型。在准备查询时，Calcite 结合了所有适用的元数据提供者并维护一个缓存，以便给定的元数据（例如`x > 10`特定`Filter`运算符中条件的选择性）仅计算一次。
+然后，你可以提供一个**元数据提供**程序，为 `RelNode` 的特定子类计算此类元数据。元数据提供程序可以处理内置和扩展元数据类型，以及内置和扩展 `RelNode` 类型。在准备查询时，Calcite 结合了所有适用的元数据提供者并维护一个缓存，以便给定的元数据（例如特定 `Filter` 运算符中条件 `x > 10` 的选择性）仅计算一次。
 
 
 
