@@ -1,7 +1,7 @@
 ---
 layout: wiki
 wiki: Calcite 官方文档中文版
-order: 002
+order: 1
 title: 教程
 date: 2021-12-05 11:15:27
 ---
