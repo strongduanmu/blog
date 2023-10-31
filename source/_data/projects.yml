@@ -8,6 +8,18 @@ Calcite 官方文档中文版:
     '高级主题': [100, 199]
     '参考指南': [200, 299]
 
+CMU 15-445/645 学习笔记:
+  cover: true
+  logo:
+    src: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/31/1698714330.png
+  description: CMU 15-445/645 是卡内基梅隆大学 Andy Pavlo 教授推出的基础数据库课程，主要介绍数据库管理系统的设计和实现，具体包括：数据模型、存储模型、查询语言、索引、事务处理等数据库核心内容。此外，课程中还安排了多个编码实验，可以有效提升工程实践能力。
+
+CMU 15-721 学习笔记:
+  cover: true
+  logo:
+    src: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/31/1698714330.png
+  description: CMU 15-721 是卡内基梅隆大学 Andy Pavlo 教授推出的高级数据库课程，主要介绍数据库管理系统中的高级话题，例如：数据库压缩、查询编译代码、向量化执行等。同时，课程中还会关注很多新的技术研究方向与话题，适合有一定数据库基础想要继续深入研究的同学学习。
+
 JDBC 4.2 规范中文版:
   cover: true
   logo:

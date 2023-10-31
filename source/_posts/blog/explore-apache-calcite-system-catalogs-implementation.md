@@ -14,7 +14,7 @@ references:
 
 ## 前言
 
-在上一篇 [Apache Calcite SQL Parser 原理剖析](http://localhost:4000/blog/implementation-principle-of-apache-calcite-sql-parser.html)一文中，我们详细介绍了 Apache Calcite SQL 解析引擎的实现原理，从基础的 JavaCC 使用，再到 Caclite SQL 解析引擎的内部实现，最后介绍了 Calcite SqlNode 体系和 SQL 生成。Calcite 在完成基础的 SQL 解析后，第二个关键的步骤就是 SQL 校验，而 SQL 校验则依赖于用户向 Calcite 注册的**系统目录**（`System Catalogs`），今天我们先关注 Calcite 系统目录的实现，下一篇再深入探究 Calcite 校验器的实现机制。
+在上一篇 [Apache Calcite SQL Parser 原理剖析](http://localhost:4000/blog/implementation-principle-of-apache-calcite-sql-parser.html)一文中，我们详细介绍了 Apache Calcite SQL 解析引擎的实现原理，从基础的 JavaCC 使用，再到 Caclite SQL 解析引擎的内部实现，最后介绍了 Calcite SqlNode 体系和 SQL 生成。Calcite 在完成基础的 SQL 解析后，第二个关键的步骤就是 SQL 校验，而 SQL 校验则依赖用户向 Calcite 注册的系统目录（`System Catalogs`），本文会先重点关注 Calcite 系统目录的实现，下一篇再深入探究 Calcite 校验器的实现机制。
 
 ## 什么是 System Catalogs
 
@@ -23,6 +23,12 @@ references:
 TODO
 
 ## Calcite System Catalogs 实现
+
+TODO
+
+
+
+## 结语
 
 TODO
 
