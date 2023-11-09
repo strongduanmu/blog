@@ -14,6 +14,8 @@ references:
     url: https://15445.courses.cs.cmu.edu/fall2019/slides/04-storage2.pdf
   - title: 'CMU 15-445 Query Planning & Optimization I'
     url: https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf
+  - title: 'Calcite 介绍'
+    url: https://www.cnblogs.com/ulysses-you/p/9358186.html
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
@@ -34,9 +36,48 @@ Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是
 
 ## Calcite System Catalog 实现
 
+在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现类是 `CalciteSchema`（如下所示）。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的作用和内部实现。
+
+```java
+public abstract class CalciteSchema {
+    private final @Nullable CalciteSchema parent;
+    public final Schema schema;
+    public final String name;
+    /**
+     * Tables explicitly defined in this schema. Does not include tables in
+     * {@link #schema}.
+     */
+    protected final NameMap<TableEntry> tableMap;
+    protected final NameMultimap<FunctionEntry> functionMap;
+    protected final NameMap<TypeEntry> typeMap;
+    protected final NameMap<LatticeEntry> latticeMap;
+    protected final NameSet functionNames;
+    protected final NameMap<FunctionEntry> nullaryFunctionMap;
+    protected final NameMap<CalciteSchema> subSchemaMap;
+    private @Nullable List<? extends List<String>> path;
+```
+
+* **Schema**
+
+根据 SQL 标准定义，Schema 是一个描述符的持久命名集合（`a persistent, named collection of descriptors`），Schema 中通常包含了`表`、`列`、`数据类型`、`视图`、`存储过程`、`关系`、`主键`和`外键`等对象。而 Schema 在 Calcite 中，则是针对数据库 Database 或 Catalog 的抽象，Schema 中可以包含子 Schema，也可以包含若干个表。
+
+如下图所示，Calcite Schema 支持任意层级的嵌套，可以很方便地适配不同的数据库，借助 Schema 的嵌套结构，Calcite 衍生出了 `NameSpace` 概念，通过 NameSpace 可以对不同 Schema 下的对象进行有效地隔离。例如在最底层 SubSchema 中定义的表、函数等对象，只能在当前的 Schema 中使用，如果想要在多个 Schema 中共享对象，则可以考虑在共同的父 Schema 中进行定义。
+
+![Calcite Schema 嵌套结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/11/09/1699492678.png)
+
 TODO
 
+* **Table**
 
+TODO
+
+* **RelDataType**
+
+TODO
+
+* **Function**
+
+TODO
 
 ## 结语
 
