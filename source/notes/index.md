@@ -6,7 +6,7 @@ wiki: Notes
 menu_id: notes
 ---
 
-{% navbar [Docker](docker) [Git](git) [IDAE](idea) [VirtualBox](virtualbox) [Ubuntu](ubuntu) %}
+{% navbar [Docker](docker) [Git](git) [IDAE](idea) [VirtualBox](virtualbox) [Mac](mac) %}
 
 ## 技术论坛
 
