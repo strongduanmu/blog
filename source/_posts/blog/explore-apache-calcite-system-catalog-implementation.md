@@ -22,7 +22,7 @@ references:
 
 ## 前言
 
-在上一篇 [Apache Calcite SQL Parser 原理剖析](http://localhost:4000/blog/implementation-principle-of-apache-calcite-sql-parser.html)一文中，我们详细介绍了 Apache Calcite SQL 解析引擎的实现原理，从基础的 JavaCC 使用，再到 Caclite SQL 解析引擎的内部实现，最后介绍了 Calcite SqlNode 体系和 SQL 生成。Calcite 在完成基础的 SQL 解析后，第二个关键的步骤就是 SQL 校验，而 SQL 校验则依赖用户向 Calcite 注册的系统目录（`System Catalog`），本文会先重点关注 Calcite 系统目录的实现，下一篇再深入探究 Calcite 校验器的内部机制。
+在上一篇 [Apache Calcite SQL Parser 原理剖析](https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html)一文中，我们详细介绍了 Apache Calcite SQL 解析引擎的实现原理，从基础的 JavaCC 使用，再到 Caclite SQL 解析引擎的内部实现，最后介绍了 Calcite SqlNode 体系和 SQL 生成。Calcite 在完成基础的 SQL 解析后，第二个关键的步骤就是 SQL 校验，而 SQL 校验则依赖用户向 Calcite 注册的系统目录（`System Catalog`），本文会先重点关注 Calcite 系统目录的实现，下一篇再深入探究 Calcite 校验器的内部机制。
 
 ## 什么是 System Catalog
 
@@ -64,6 +64,32 @@ public abstract class CalciteSchema {
 如下图所示，Calcite Schema 支持任意层级的嵌套，可以很方便地适配不同的数据库，借助 Schema 的嵌套结构，Calcite 衍生出了 `NameSpace` 概念，通过 NameSpace 可以对不同 Schema 下的对象进行有效地隔离。例如在最底层 SubSchema 中定义的表、函数等对象，只能在当前的 Schema 中使用，如果想要在多个 Schema 中共享对象，则可以考虑在共同的父 Schema 中进行定义。
 
 ![Calcite Schema 嵌套结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/11/09/1699492678.png)
+
+[Schema](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/schema/Schema.java) 接口定义如下，可以看到它提供了 `getTable`、`getType`、`getFunctions` 和 `getSubSchema` 等访问方法，常见的 Schema 接口实现类有 AbstractSchema、CsvSchema、JdbcCatalogSchema 等。AbstractSchema 对 Schema 接口的方法进行了实现，并提供了可重写的 `getTableMap`、`getFunctionMultimap` 和 `getSubSchemaMap` 方法，用于向 Schema 中注册表、函数和子 Schema。CsvSchema 和 JdbcCatalogSchema 都是继承了 AbstractSchema 完成 Schema 注册，大家也可以参考该方式简化注册 Schema 的流程。
+
+```java
+public interface Schema {
+
+    @Nullable Table getTable(String name);
+
+    Set<String> getTableNames();
+    
+    @Nullable RelProtoDataType getType(String name);
+    
+    Set<String> getTypeNames();
+    
+    Collection<Function> getFunctions(String name);
+    
+    Set<String> getFunctionNames();
+    
+    @Nullable Schema getSubSchema(String name);
+    
+    Set<String> getSubSchemaNames();
+  	...
+}
+```
+
+通过上面介绍的方式，我们可以实现 Schema 的初识注册及查询，但如果我们需要在运行过程中对 Schema 进行修改，那又该如何操作呢？Calcite 提供了 Schema 的子接口 `SchemaPlus`，它对 Schema 接口进行了扩展，能够支持添加表、函数及 Schema 等操作。
 
 TODO
 
