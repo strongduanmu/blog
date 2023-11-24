@@ -89,7 +89,31 @@ public interface Schema {
 }
 ```
 
-通过上面介绍的方式，我们可以实现 Schema 的初识注册及查询，但如果我们需要在运行过程中对 Schema 进行修改，那又该如何操作呢？Calcite 提供了 Schema 的子接口 `SchemaPlus`，它对 Schema 接口进行了扩展，能够支持添加表、函数及 Schema 等操作。
+通过上面介绍的方式，我们可以实现 Schema 的初始注册及查询，但如果我们需要在运行过程中对 Schema 进行修改，那又该如何操作呢？Calcite 提供了 Schema 的子接口 `SchemaPlus`，它对 Schema 接口进行了扩展，能够支持表、函数及 Schema 的添加和删除操作。用户通常无需直接实例化 SchemaPlus 的子类，Calcite 内部提供了 SchemaPlus 的生成方法，例如：`CalciteSchema#plus()` 方法。
+
+```java
+public interface SchemaPlus extends Schema {
+    
+    SchemaPlus add(String name, Schema schema);
+    
+    void add(String name, Table table);
+    
+    /**
+     * Removes a table from this schema, used e.g. to clean-up temporary tables.
+     */
+    default boolean removeTable(String name) {
+        // Default implementation provided for backwards compatibility, to be removed before 2.0
+        return false;
+    }
+    
+    void add(String name, Function function);
+    
+    void add(String name, RelProtoDataType type);
+    
+    void add(String name, Lattice lattice);
+  	...
+}
+```
 
 TODO
 
