@@ -1,5 +1,5 @@
 ---
-title: 深入理解 Calcite HepPlanner 优化器原理
+title: 深入理解 Apache Calcite HepPlanner 优化器
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-02-12 19:32:33
