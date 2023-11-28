@@ -164,3 +164,65 @@ RelSubset subset = addRelToSet(rel, set);
 ```
 
 ## findBestExp 流程
+
+findBestExp 方法会根据 setRoot 阶段生成的匹配规则以及 RelSubset 中记录的 cost，寻找最有执行计划。
+
+```java
+  /**
+   * Finds the most efficient expression to implement the query given via
+   * {@link org.apache.calcite.plan.RelOptPlanner#setRoot(org.apache.calcite.rel.RelNode)}.
+   *
+   * @return the most efficient RelNode tree found for implementing the given
+   * query
+   */
+  @Override public RelNode findBestExp() {
+    assert root != null : "root must not be null";
+    // 确保所有等价集都包含 AbstractConverter，能够在获取最优 plan 后转换为 root
+    ensureRootConverters();
+    registerMaterializations();
+    // 寻找最优 plan，即 cost 最小的 plan，先找到每个节点的最有 plan，然后构建全局最优 plan
+    // ruleDriver 包括 IterativeRuleDriver 和 TopDownRuleDriver 两种，后续再深入分析对应的使用场景
+    ruleDriver.drive();
+    dumpRuleAttemptsInfo();
+    // 构建全局最优 plan
+    RelNode cheapest = root.buildCheapestPlan(this);
+    return cheapest;
+  }
+```
+
+IterativeRuleDriver#drive 方法使用了一个死循环，会不断地从 ruleQueue 中获取规则，当 ruleQueue 中没有规则时，或者抛出 VolcanoTimeoutException 时，此时会中断循环。onMatch 方法会不断地进行关系代数的转换，
+
+```java
+  @Override public void drive() {
+    while (true) {
+      assert planner.root != null : "RelSubset must not be null at this point";
+      LOGGER.debug("Best cost before rule match: {}", planner.root.bestCost);
+
+      VolcanoRuleMatch match = ruleQueue.popMatch();
+      if (match == null) {
+        break;
+      }
+
+      assert match.getRule().matches(match);
+      try {
+        match.onMatch();
+      } catch (VolcanoTimeoutException e) {
+        LOGGER.warn("Volcano planning times out, cancels the subsequent optimization.");
+        planner.canonize();
+        break;
+      }
+
+      // The root may have been merged with another
+      // subset. Find the new root subset.
+      planner.canonize();
+    }
+
+  }
+```
+
+ruleQueue 中包含的规则：
+
+![image-20231128130927611](/Users/duanzhengqiang/blog/source/_posts/blog/image-20231128130927611.png)
+
+onMatch 方法逻辑：
+
