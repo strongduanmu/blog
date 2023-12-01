@@ -16,6 +16,14 @@ references:
     url: https://aaaaaaron.github.io/2020/02/09/Calcite-Volcano-Planner/
   - title: 'Calcite 分析 - Volcano 模型'
     url: https://www.cnblogs.com/fxjwind/p/11325753.html
+  - title: 'Traditional Query Optimization'
+    url: https://note.youdao.com/s/2FGoKAwV
+  - title: '揭秘 TiDB 新优化器：Cascades Planner 原理解析'
+    url: https://cn.pingcap.com/blog/tidb-cascades-planner/
+  - title: 'The Volcano Optimizer Generator: Extensibility and Efficient Search'
+    url: https://15721.courses.cs.cmu.edu/spring2019/papers/22-optimizer1/graefe-icde1993.pdf
+  - title: 'The Cascades Framework for Query Optimization'
+    url: https://15721.courses.cs.cmu.edu/spring2018/papers/15-optimizer1/graefe-ieee1995.pdf
 ---
 
 重要概念：
