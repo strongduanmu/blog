@@ -12,6 +12,8 @@ references:
     url: https://zhuanlan.zhihu.com/p/640328243
   - title: 'Apache Calcite VolcanoPlanner 优化过程解析'
     url: https://zhuanlan.zhihu.com/p/283362100
+  - title: 'Calcite 处理一条SQL - III (Find Best Rel)'
+    url: https://zhuanlan.zhihu.com/p/60223655
   - title: 'Calcite Volcano Planner'
     url: https://aaaaaaron.github.io/2020/02/09/Calcite-Volcano-Planner/
   - title: 'Calcite 分析 - Volcano 模型'
@@ -26,11 +28,33 @@ references:
     url: https://15721.courses.cs.cmu.edu/spring2018/papers/15-optimizer1/graefe-ieee1995.pdf
 ---
 
+## 前言
+
+在上一篇[深入理解 Apache Calcite HepPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html)一文中，我们介绍了查询优化器的基本概念和用途，并结合 Calcite `HepPlanner` 深入分析了`启发式优化器`的实现原理。启发式优化器使用相对简单，它直接对逻辑执行计划进行等价变换从而实现 SQL 优化，常见的启发式优化包含了：`列裁剪`、`谓词下推`等。启发式优化器实现简单，自然也存在一些缺陷，例如：它对执行的顺序有要求，不同的执行顺序可能会导致优化规则的失效，使得优化达不到预期的效果。正是由于启发式优化器存在的这些问题，使得它无法适应所有的 SQL 场景，在当前主流的数据库系统中更多地则是使用`基于代价的优化器`，或者将两者结合使用。基于代价的优化器能够为多个等价的执行计划生成代价 `Cost` 信息，然后选择代价最小的执行计划作为最终的执行计划，从而达到提升 SQL 执行效率的目的。本文将重点为大家介绍 Calcite 中基于代价的优化器——`VolcanoPlanner`，首先我们会了解 VolcanoPlanner 的理论基础，然后介绍 VolcanoPlanner 核心概念以及执行流程，最后再深入 Calcite 源码细节，结合一些实际的 SQL 优化案例，期望能够让大家完全理解 VolcanoPlanner 并在 SQL 引擎开发中熟练使用。
+
+## VolcanoPlanner 理论基础
+
+ TODO
+
+## VolcanoPlanner 核心概念
+
 重要概念：
 
 - **RelNode**: 关系表达式
 - **RelSet** ：关系表达式的等价集合，他们之间具有相同语义。我们通常对具有最低代价的表达式感兴趣
 - **RelSubset** ：RelSet 中包含 RelSubset，等价类的子集（记录了最有 best plan 和 best cost，也是一个 RelNode），其中所有关系表达式都具有相同的物理属性。包括调用 convention 和排序规则（排序顺序）等特征。
+
+> 前面提到过像calcite这类查询优化器最核心的两个问题之一是怎么把优化规则应用到关系代数相关的RelNode Tree上。所以在阅读calicite的代码时就得带着这个问题去看看它的实现过程，然后才能判断它的代码实现得是否优雅。
+> calcite的每种规则实现类(RelOptRule的子类)都会声明自己应用在哪种RelNode子类上，每个RelNode子类其实都可以看成是一种operator(中文常翻译成算子)。
+> VolcanoPlanner就是优化器，用的是动态规划算法，在创建VolcanoPlanner的实例后，通过calcite的标准jdbc接口执行sql时，默认会给这个VolcanoPlanner的实例注册将近90条优化规则(还不算常量折叠这种最常见的优化)，所以看代码时，知道什么时候注册可用的优化规则是第一步(调用VolcanoPlanner.addRule实现)，这一步比较简单。
+> 接下来就是如何筛选规则了，当把语法树转成RelNode Tree后是没有必要把前面注册的90条优化规则都用上的，所以需要有个筛选的过程，因为每种规则是有应用范围的，按RelNode Tree的不同节点类型就可以筛选出实际需要用到的优化规则了。这一步说起来很简单，但在calcite的代码实现里是相当复杂的，也是非常关键的一步，是从调用VolcanoPlanner.setRoot方法开始间接触发的，如果只是静态的看代码不跑起来跟踪调试多半摸不清它的核心流程的。筛选出来的优化规则会封装成VolcanoRuleMatch，然后扔到RuleQueue里，而这个RuleQueue正是接下来执行动态规划算法要用到的核心类。筛选规则这一步的代码实现很晦涩。
+> 第三步才到VolcanoPlanner.findBestExp，本质上就是一个动态规划算法的实现，但是最值得关注的还是怎么用第二步筛选出来的规则对RelNode Tree进行变换，变换后的形式还是一棵RelNode Tree，最常见的是把LogicalXXX开头的RelNode子类换成了EnumerableXXX或BindableXXX，总而言之，看看具体优化规则的实现就对了，都是繁琐的体力活。
+> 一个优化器，理解了上面所说的三步基本上就抓住重点了。
+> —— 来自【zhh-4096 】的微博
+
+## VolcanoPlanner 处理流程
+
+关于 Volcano 理论内容建议先看下相关理论知识，否则直接看实现的话可能会有一些头大。从 Volcano 模型的理论落地到实践是有很大区别的，这里先看一张 VolcanoPlanner 整体实现图，如下所示（图片来自 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://www.slideshare.net/julianhyde/costbased-query-optimization-in-apache-phoenix-using-apache-calcite?qid=b7a1ca0f-e7bf-49ad-bc51-0615ec8a4971&v=&b=&from_search=4)）
 
 ![Calcite Volcano Planner 处理流程](https://matt33.com/images/calcite/12-VolcanoPlanner.png)
 
@@ -41,7 +65,9 @@ LogicalProject(NAME=[$1])
   CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-## setRoot 流程
+## VolcanoPlanner 源码分析
+
+### setRoot 流程
 
 setRoot 流程：进行初始化处理，并将 RelNode 转换为 RelSubset。如下是 setRoot 的代码清单，registerImpl 是其核心逻辑。
 
@@ -174,7 +200,11 @@ RelSubset subset = addRelToSet(rel, set);
   }
 ```
 
-## findBestExp 流程
+### 代价计算
+
+
+
+### findBestExp 流程
 
 findBestExp 方法会根据 setRoot 阶段生成的匹配规则以及 RelSubset 中记录的 cost，寻找最优执行计划。
 
@@ -392,6 +422,10 @@ replacer.visit 实现逻辑如下：
     }
   }
 ```
+
+
+
+## 结语
 
 
 
