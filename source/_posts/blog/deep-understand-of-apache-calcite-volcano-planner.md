@@ -30,13 +30,25 @@ references:
 
 ## 前言
 
-在上一篇[深入理解 Apache Calcite HepPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html)一文中，我们介绍了查询优化器的基本概念和用途，并结合 Calcite `HepPlanner` 深入分析了`启发式优化器`的实现原理。启发式优化器使用相对简单，它直接对逻辑执行计划进行等价变换从而实现 SQL 优化，常见的启发式优化包含了：`列裁剪`、`谓词下推`等。启发式优化器实现简单，自然也存在一些缺陷，例如：它对执行的顺序有要求，不同的执行顺序可能会导致优化规则的失效，使得优化达不到预期的效果。正是由于启发式优化器存在的这些问题，使得它无法适应所有的 SQL 场景，在当前主流的数据库系统中更多地则是使用`基于代价的优化器`，或者将两者结合使用。基于代价的优化器能够为多个等价的执行计划生成代价 `Cost` 信息，然后选择代价最小的执行计划作为最终的执行计划，从而达到提升 SQL 执行效率的目的。本文将重点为大家介绍 Calcite 中基于代价的优化器——`VolcanoPlanner`，首先我们会了解 VolcanoPlanner 的理论基础，然后介绍 VolcanoPlanner 核心概念以及执行流程，最后再深入 Calcite 源码细节，结合一些实际的 SQL 优化案例，期望能够让大家完全理解 VolcanoPlanner 并在 SQL 引擎开发中熟练使用。
+在上一篇[深入理解 Apache Calcite HepPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html)一文中，我们介绍了查询优化器的基本概念和用途，并结合 Calcite `HepPlanner` 深入分析了`启发式优化器`的实现原理。启发式优化器使用相对简单，它直接对逻辑执行计划进行等价变换从而实现 SQL 优化，常见的启发式优化包含了：`列裁剪`、`谓词下推`等。启发式优化器实现简单，自然也存在一些缺陷，例如：它对执行的顺序有要求，不同的执行顺序可能会导致优化规则的失效，使得优化达不到预期的效果。
 
-## VolcanoPlanner 理论基础
+正是由于启发式优化器存在这些问题，使得它无法适应所有的 SQL 场景，因此当前主流的数据库系统更多是使用`基于代价的优化器`，或者将两者结合使用。基于代价的优化器能够为多个等价的执行计划生成代价 `Cost` 信息，然后选择代价最小的选项作为最终的执行计划，从而达到提升 SQL 执行效率的目的。
+
+本文将重点为大家介绍 Calcite 中基于代价的优化器——`VolcanoPlanner`，首先我们会了解 VolcanoPlanner 背后的理论基础——`Volcano/Cascades Optimizer`，然后会介绍 VolcanoPlanner 的核心概念以及执行流程，最后再深入探究 Calcite VolcanoPlanner 的源码细节，结合一些实际的 SQL 优化案例，期望能够让大家彻底搞懂 VolcanoPlanner 优化器。
+
+## Volcano/Cascades 优化器
+
+### Volcano 优化器生成器
 
  TODO
 
-## VolcanoPlanner 核心概念
+### Cascades 优化器
+
+ TODO
+
+## VolcanoPlanner 基础介绍
+
+### 核心概念
 
 重要概念：
 
@@ -52,7 +64,7 @@ references:
 > 一个优化器，理解了上面所说的三步基本上就抓住重点了。
 > —— 来自【zhh-4096 】的微博
 
-## VolcanoPlanner 处理流程
+### 处理流程
 
 关于 Volcano 理论内容建议先看下相关理论知识，否则直接看实现的话可能会有一些头大。从 Volcano 模型的理论落地到实践是有很大区别的，这里先看一张 VolcanoPlanner 整体实现图，如下所示（图片来自 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://www.slideshare.net/julianhyde/costbased-query-optimization-in-apache-phoenix-using-apache-calcite?qid=b7a1ca0f-e7bf-49ad-bc51-0615ec8a4971&v=&b=&from_search=4)）
 
@@ -65,7 +77,7 @@ LogicalProject(NAME=[$1])
   CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-## VolcanoPlanner 源码分析
+## VolcanoPlanner 源码探秘
 
 ### setRoot 流程
 
@@ -422,6 +434,8 @@ replacer.visit 实现逻辑如下：
     }
   }
 ```
+
+## VolcanoPlanner 优化示例
 
 
 
