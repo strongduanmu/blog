@@ -14,6 +14,8 @@ references:
     url: https://zhuanlan.zhihu.com/p/61661909
 ---
 
+> 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
+
 ## 什么是 RBO
 
 
