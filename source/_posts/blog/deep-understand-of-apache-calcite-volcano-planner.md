@@ -56,37 +56,35 @@ Calcite VolcanoPlanner 优化器是基于 `Goetz Graefe` 的两篇经典优化�
 
 ### Cascades 优化器
 
-Cascades Optimizer 是 Volcano Optimizer 的后续作品，其对 Volcano Optimizer 做了进一步的优化，下面介绍一些 Cascades Optimizer 中的基本概念。
+`Cascades Optimizer` 是对 `Volcano Optimizer` 的进一步优化，Cascades Optimizer 提出了 `Memo`、`Rule`、`Pattern` 和 `Search Algorithm` 等基本概念，下面我们将围绕这些概念一一进行介绍。
 
-#### Memo
+#### Memo 数据结构
 
-Cascades Optimizer 在搜索的过程中，其搜索的空间是一个关系代数算子树所组成的森林，而保存这个森林的数据结构就是 Memo。Memo 中两个最基本的概念就是 Expression Group（下文简称 Group） 以及 Group Expression（对应关系代数算子）。每个 Group 中保存的是逻辑等价的 Group Expression，而 Group Expression 的子节点是由 Group 组成。下图是由五个 Group 组成的 Memo：
+Cascades Optimizer 在搜索的过程中，它的搜索空间是一个关系代数算子树所组成的森林，而保存这个森林的数据结构就是 `Memo`。Memo 包含了两个最基本的概念：`Expression Group`（下文简称 `Group`） 和 `Group Expression`（对应关系代数算子）。每个 Group 中保存的是逻辑等价的 Group Expression，而 Group Expression 的子节点是由 Group 组成。下图是由五个 Group 组成的 Memo：
 
-![2-Memo](https://img1.www.pingcap.com/prod/2_Memo_3754a27552.png)
+![Memo 组成结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/08/1701996404.png)
 
-我们可以通过上面的 Memo 提取出以下两棵等价的算子树，使用 Memo 存储下面两棵树，可以避免存储冗余的算子（如 Scan A 以及 Scan B）。
+通过上面的 Memo 结构，我们可以提取出以下两棵等价的算子树，使用 Memo 结构存储下面两棵树，可以避免存储冗余的算子（如 `Scan A` 以及 `Scan B`）。
 
-![3-等价算子树](https://img1.www.pingcap.com/prod/3_5d0f533150.png)
+![等价算子树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/08/1701996456.png)
 
-#### Rule
+#### Rule 的改进
 
-在 Volcano Optimizer 中，Rule 被分为了 Transformation Rule 和 Implementation Rule 两种。其中 Transformation Rule 用来在 Memo 中添加逻辑等价的 Group Expression。Transformation Rule 具有原子性，只作用于算子树的一个局部小片段，每个 Transformation Rule 都有自己的匹配条件，应用某个 Transformation Rule，通过不停的应用可以匹配上的 Transformation Rule 来扩展搜索的空间，寻找可能的最优解。Implementation Rule 则是为 Group Expression 选择物理算子。
+在 Volcano Optimizer 中，Rule 被分为了 `Transformation Rule` 和 `Implementation Rule` 两种。其中 Transformation Rule 用来在 Memo 中添加等价的关系代数算子。Transformation Rule 具有原子性，只作用于算子树的一个局部小片段，每个 Transformation Rule 都有自己的匹配条件，通过不停的应用匹配上的 Transformation Rule 来扩展搜索空间，寻找可能的最优解。Implementation Rule 则是为 Group Expression 选择物理算子。在 Cascades Optimizer 中，不再区分这两类 Rule。
 
-而在 Cascades Optimizer 中，不再对这两类 Rule 做区分。
+#### Pattern 匹配规则
 
-#### Pattern
+`Pattern` 用于描述 Group Expression 的局部特征。每个 Rule 都有自己的 Pattern，只有满足了相应 Pattern 的 Group Expression 才能够应用该 Rule。下图中左侧定义了一个 `Selection->Projection` 的 Pattern，并在右侧 Memo 中红色虚线内匹配上了 Group Expression。
 
-Pattern 用于描述 Group Expression 的局部特征。每个 Rule 都有自己的 Pattern，只有满足了相应 Pattern 的 Group Expression 才能够应用该 Rule。下图中左侧定义了一个 `Selection->Projection` 的 Pattern，并在右侧 Memo 中红色虚线内出现了匹配的 Group Expression。
-
-![4-Pattern](https://img1.www.pingcap.com/prod/4_Pattern_c53614e357.png)
+![Pattern 匹配关系代数算子](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/08/1701996507.png)
 
 #### Searching Algorithm
 
-Cascades Optimizer 为 Rule 的应用顺序做了很细致的设计，例如每个 Rule 都有 promise 和 condition 两个方法，其中 promise 用来表示 Rule 在当前搜索过程中的重要性，promise 值越高，则该规则越可能有用，当 promise 值小于等于 0 时，这个 Rule 就不会被执行；而 condition 直接通过返回一个布尔值决定一个 Rule 是否可以在当前过程中被应用。当一个 Rule 被成功应用之后，会计算下一步有可能会被应用的 Rule 的集合。
+Cascades Optimizer 为 Rule 的应用顺序做了细致的设计，例如每个 Rule 都有 `promise` 和 `condition` 两个方法，其中 `promise` 用来表示 Rule 在当前搜索过程中的重要性，`promise` 值越高，则该规则越可能有用，当 `promise` 值小于等于 0 时，这个 Rule 就不会被执行。而 `condition` 直接通过返回一个布尔值决定一个 Rule 是否可以在当前过程中被应用。当一个 Rule 被成功应用之后，会计算下一步有可能会被应用的 Rule 的集合。
 
-Cascades Optimizer 的搜索算法与 Volcano Optimizer 有所不同，Volcano Optimizer 将搜索分为两个阶段，在第一个阶段枚举所有逻辑等价的 Logical Algebra，而在第二阶段运用动态规划的方法自顶向下地搜索代价最小的 Physical Algebra。Cascades Optimizer 则将这两个阶段融合在一起，通过提供一个 Guidance 来指导 Rule 的执行顺序，在枚举逻辑等价算子的同时也进行物理算子的生成，这样做可以避免枚举所有的逻辑执行计划，但是其弊端就是错误的 Guidance 会导致搜索在局部收敛，因而搜索不到最优的执行计划。
+Cascades Optimizer 的搜索算法与 Volcano Optimizer 有所不同，Volcano Optimizer 将搜索分为两个阶段，在第一个阶段枚举所有逻辑等价的 Logical Algebra，而在第二阶段运用动态规划的方法自顶向下地搜索代价最小的 Physical Algebra。Cascades Optimizer 则将这两个阶段融合在一起，通过提供一个 `Guidance` 来指导 Rule 的执行顺序，**在枚举逻辑等价算子的同时也进行物理算子的生成**，这样做可以避免枚举所有的逻辑执行计划，但是**其弊端就是错误的 Guidance 会导致搜索在局部收敛，因而搜索不到最优的执行计划**。
 
-Volcano/Cascades Optimzier 都使用了 Branch-And-Bound 的方法对搜索空间进行剪枝。由于两者都采用了自顶向下的搜索，在搜索的过程中可以为算子设置其 Cost Upper Bound，如果在向下搜索的过程中还没有搜索到叶子节点就超过了预设的 Cost Upper Bound，就可以对这个搜索分支预先进行剪枝。
+Volcano/Cascades Optimzier 都使用了 `Branch-And-Bound` 方法对搜索空间进行剪枝。由于两者都采用了自顶向下的搜索，在搜索的过程中可以为算子设置其 `Cost Upper Bound`，如果在向下搜索的过程中还没有搜索到叶子节点就超过了预设的 Cost Upper Bound，就可以对这个搜索分支预先进行剪枝。
 
 ## VolcanoPlanner 基础介绍
 
