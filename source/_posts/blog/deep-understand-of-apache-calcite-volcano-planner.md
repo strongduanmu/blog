@@ -12,8 +12,6 @@ references:
     url: https://zhuanlan.zhihu.com/p/640328243
   - title: 'Apache Calcite VolcanoPlanner 优化过程解析'
     url: https://zhuanlan.zhihu.com/p/283362100
-  - title: 'Calcite 处理一条SQL - III (Find Best Rel)'
-    url: https://zhuanlan.zhihu.com/p/60223655
   - title: 'Calcite Volcano Planner'
     url: https://aaaaaaron.github.io/2020/02/09/Calcite-Volcano-Planner/
   - title: 'Calcite 分析 - Volcano 模型'
@@ -88,27 +86,105 @@ Volcano/Cascades Optimzier 都使用了 `Branch-And-Bound` 方法对搜索空间
 
 ## VolcanoPlanner 基础介绍
 
+前面部分我们介绍了 Volcano/Cascades 优化器的理论基础，想必大家已经对优化器的原理有了一些基础的认识。为了避免陷入代码细节，我们学习 VolcanoPlanner 之前，先来了解下 VolcanoPlanner 中涉及到的核心概念，理解这些概念会让我们阅读源码更加轻松。然后我们会从整体角度，再来学习下 VolcanoPlanner 的处理流程，看看 Calcite 逻辑计划是如何优化并转换为物理执行计划的。
+
 ### 核心概念
 
-重要概念：
+#### RelNode
 
-- **RelNode**: 关系表达式
-- **RelSet** ：关系表达式的等价集合，他们之间具有相同语义。我们通常对具有最低代价的表达式感兴趣
-- **RelSubset** ：RelSet 中包含 RelSubset，等价类的子集（记录了最有 best plan 和 best cost，也是一个 RelNode），其中所有关系表达式都具有相同的物理属性。包括调用 convention 和排序规则（排序顺序）等特征。
+Caclite 源码中对 RelNode 的定义为 `A RelNode is a relational expression`，即关系代数表达式，RelNode 继承 RelOptNode 接口，表示可以被优化器优化。关系代数表达式用于处理数据，所以他们通常使用动词命名，例如：`Sort`、`Join`、`Project`、`Filter`、`Scan` 等。
 
-> 前面提到过像calcite这类查询优化器最核心的两个问题之一是怎么把优化规则应用到关系代数相关的RelNode Tree上。所以在阅读calicite的代码时就得带着这个问题去看看它的实现过程，然后才能判断它的代码实现得是否优雅。
-> calcite的每种规则实现类(RelOptRule的子类)都会声明自己应用在哪种RelNode子类上，每个RelNode子类其实都可以看成是一种operator(中文常翻译成算子)。
-> VolcanoPlanner就是优化器，用的是动态规划算法，在创建VolcanoPlanner的实例后，通过calcite的标准jdbc接口执行sql时，默认会给这个VolcanoPlanner的实例注册将近90条优化规则(还不算常量折叠这种最常见的优化)，所以看代码时，知道什么时候注册可用的优化规则是第一步(调用VolcanoPlanner.addRule实现)，这一步比较简单。
-> 接下来就是如何筛选规则了，当把语法树转成RelNode Tree后是没有必要把前面注册的90条优化规则都用上的，所以需要有个筛选的过程，因为每种规则是有应用范围的，按RelNode Tree的不同节点类型就可以筛选出实际需要用到的优化规则了。这一步说起来很简单，但在calcite的代码实现里是相当复杂的，也是非常关键的一步，是从调用VolcanoPlanner.setRoot方法开始间接触发的，如果只是静态的看代码不跑起来跟踪调试多半摸不清它的核心流程的。筛选出来的优化规则会封装成VolcanoRuleMatch，然后扔到RuleQueue里，而这个RuleQueue正是接下来执行动态规划算法要用到的核心类。筛选规则这一步的代码实现很晦涩。
-> 第三步才到VolcanoPlanner.findBestExp，本质上就是一个动态规划算法的实现，但是最值得关注的还是怎么用第二步筛选出来的规则对RelNode Tree进行变换，变换后的形式还是一棵RelNode Tree，最常见的是把LogicalXXX开头的RelNode子类换成了EnumerableXXX或BindableXXX，总而言之，看看具体优化规则的实现就对了，都是繁琐的体力活。
-> 一个优化器，理解了上面所说的三步基本上就抓住重点了。
-> —— 来自【zhh-4096 】的微博
+RelNode 接口的核心方法如下：
+
+```java
+public interface RelNode extends RelOptNode, Cloneable {
+  
+    /**
+     * Returns the type of the rows returned by this relational expression.
+     */
+    @Override
+    RelDataType getRowType();
+
+    /**
+     * Returns an array of this relational expression's inputs. If there are no
+     * inputs, returns an empty list, not {@code null}.
+     *
+     * @return Array of this relational expression's inputs
+     */
+    @Override
+    List<RelNode> getInputs();
+
+    /**
+     * Returns an estimate of the number of rows this relational expression will
+     * return.
+     *
+     * <p>NOTE jvs 29-Mar-2006: Don't call this method directly. Instead, use
+     * {@link RelMetadataQuery#getRowCount}, which gives plugins a chance to
+     * override the rel's default ideas about row count.
+     *
+     * @param mq Metadata query
+     * @return Estimate of the number of rows this relational expression will
+     * return
+     */
+    double estimateRowCount(RelMetadataQuery mq);
+
+    /**
+     * Returns the cost of this plan (not including children). The base
+     * implementation throws an error; derived classes should override.
+     *
+     * <p>NOTE jvs 29-Mar-2006: Don't call this method directly. Instead, use
+     * {@link RelMetadataQuery#getNonCumulativeCost}, which gives plugins a
+     * chance to override the rel's default ideas about cost.
+     *
+     * @param planner Planner for cost calculation
+     * @param mq      Metadata query
+     * @return Cost of this plan (not including children)
+     */
+    @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq);
+
+    /**
+     * Registers any special rules specific to this kind of relational
+     * expression.
+     *
+     * <p>The planner calls this method this first time that it sees a
+     * relational expression of this class. The derived class should call
+     * {@link org.apache.calcite.plan.RelOptPlanner#addRule} for each rule, and
+     * then call {@code super.register}.
+     *
+     * @param planner Planner to be used to register additional relational
+     *                expressions
+     */
+    void register(RelOptPlanner planner);
+}
+```
+
+* `getRowType` 用于获取当前数据行的类型信息，RelNode 根节点的 RelDataType 可以代表最终查询结果的行记录类型信息；
+* `getInputs` 用于获取当前 RelNode 的子节点，RelNode 通过 inputs 组织成一个树形结构；
+* `estimateRowCount` 方法用于估计当前 RelNode 返回的行数，行数信息可以用来计算 RelNode 的代价 Cost；
+* `computeSelfCost` 方法用于计算当前 RelNode 的代价 Cost；
+* `register` 方法用于注册当前 RelNode 特有的优化规则，例如：`InnodbTableScan` 实现了 register 方法，注册了和 `InnodbTableScan` 这类 RelNode 相关的优化规则。
+
+
+
+#### RelSet
+
+
+
+#### RelSubset
+
+
 
 ### 处理流程
 
 关于 Volcano 理论内容建议先看下相关理论知识，否则直接看实现的话可能会有一些头大。从 Volcano 模型的理论落地到实践是有很大区别的，这里先看一张 VolcanoPlanner 整体实现图，如下所示（图片来自 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://www.slideshare.net/julianhyde/costbased-query-optimization-in-apache-phoenix-using-apache-calcite?qid=b7a1ca0f-e7bf-49ad-bc51-0615ec8a4971&v=&b=&from_search=4)）
 
-![Calcite Volcano Planner 处理流程](https://matt33.com/images/calcite/12-VolcanoPlanner.png)
+
+
+![Calcite Volcano Planner 处理流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/09/1702118316.png)
+
+
+
+## VolcanoPlanner 源码探秘
 
 以 testSelectSingleProjectGz 测试 Case 为例，Logical Plan 如下：Volcano Planner 优化流程如下：
 
@@ -116,8 +192,6 @@ Volcano/Cascades Optimzier 都使用了 `Branch-And-Bound` 方法对搜索空间
 LogicalProject(NAME=[$1])
   CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
-
-## VolcanoPlanner 源码探秘
 
 ### setRoot 流程
 
