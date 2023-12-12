@@ -92,79 +92,64 @@ Volcano/Cascades Optimzier 都使用了 `Branch-And-Bound` 方法对搜索空间
 
 #### RelNode
 
-Caclite 源码中对 RelNode 的定义为 `A RelNode is a relational expression`，即关系代数表达式，RelNode 继承 RelOptNode 接口，表示可以被优化器优化。关系代数表达式用于处理数据，所以他们通常使用动词命名，例如：`Sort`、`Join`、`Project`、`Filter`、`Scan` 等。
+Caclite 源码中对 RelNode 的定义为 `A RelNode is a relational expression`，即关系代数表达式，RelNode 继承 RelOptNode 接口，表示可以被优化器优化。关系代数表达式用于处理数据，所以他们通常使用动词命名，例如：`Sort`、`Join`、`Project`、`Filter`、`Scan` 等。在 Caclite 中，不建议直接实现 RelNode 接口，而是推荐继承 `AbstractRelNode` 抽象类。
 
-RelNode 接口的核心方法如下：
+AbstractRelNode 抽象类的核心属性和方法如下：
 
 ```java
-public interface RelNode extends RelOptNode, Cloneable {
+public abstract class AbstractRelNode implements RelNode {
+
+  	/**
+     * RelTraitSet that describes the traits of this RelNode.
+     */
+    protected RelTraitSet traitSet;
+
+    @Pure
+    @Override
+    public final @Nullable Convention getConvention(@UnknownInitialization AbstractRelNode this) {
+        return traitSet == null ? null : traitSet.getTrait(ConventionTraitDef.INSTANCE);
+    }
   
-    /**
-     * Returns the type of the rows returned by this relational expression.
-     */
     @Override
-    RelDataType getRowType();
+    public final RelDataType getRowType() {
+        if (rowType == null) {
+            rowType = deriveRowType();
+            assert rowType != null : this;
+        }
+        return rowType;
+    }
 
-    /**
-     * Returns an array of this relational expression's inputs. If there are no
-     * inputs, returns an empty list, not {@code null}.
-     *
-     * @return Array of this relational expression's inputs
-     */
     @Override
-    List<RelNode> getInputs();
+    public void register(RelOptPlanner planner) {
+        Util.discard(planner);
+    }
 
-    /**
-     * Returns an estimate of the number of rows this relational expression will
-     * return.
-     *
-     * <p>NOTE jvs 29-Mar-2006: Don't call this method directly. Instead, use
-     * {@link RelMetadataQuery#getRowCount}, which gives plugins a chance to
-     * override the rel's default ideas about row count.
-     *
-     * @param mq Metadata query
-     * @return Estimate of the number of rows this relational expression will
-     * return
-     */
-    double estimateRowCount(RelMetadataQuery mq);
+    @Override
+    public List<RelNode> getInputs() {
+        return Collections.emptyList();
+    }
 
-    /**
-     * Returns the cost of this plan (not including children). The base
-     * implementation throws an error; derived classes should override.
-     *
-     * <p>NOTE jvs 29-Mar-2006: Don't call this method directly. Instead, use
-     * {@link RelMetadataQuery#getNonCumulativeCost}, which gives plugins a
-     * chance to override the rel's default ideas about cost.
-     *
-     * @param planner Planner for cost calculation
-     * @param mq      Metadata query
-     * @return Cost of this plan (not including children)
-     */
-    @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq);
+    @Override
+    public double estimateRowCount(RelMetadataQuery mq) {
+        return 1.0;
+    }
 
-    /**
-     * Registers any special rules specific to this kind of relational
-     * expression.
-     *
-     * <p>The planner calls this method this first time that it sees a
-     * relational expression of this class. The derived class should call
-     * {@link org.apache.calcite.plan.RelOptPlanner#addRule} for each rule, and
-     * then call {@code super.register}.
-     *
-     * @param planner Planner to be used to register additional relational
-     *                expressions
-     */
-    void register(RelOptPlanner planner);
+    @Override
+    public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
+        // by default, assume cost is proportional to number of rows
+        double rowCount = mq.getRowCount(this);
+        return planner.getCostFactory().makeCost(rowCount, rowCount, 0);
+    }
 }
 ```
 
+* `traitSet` 用于记录当前 RelNode 的物理特征 `RelTrait`，Calcite 中提供了 `Convention` 、`RelCollation` 和 `RelDistribution` 3 种物理特征，分别表示调用约定（代表某一种数据源，不同数据源上的算子需要使用 Converter 进行转换）、排序和分布特征；
+* `getConvention` 方法是用于获取当前 RelNode 中记录的 Convention 特征；
 * `getRowType` 用于获取当前数据行的类型信息，RelNode 根节点的 RelDataType 可以代表最终查询结果的行记录类型信息；
 * `getInputs` 用于获取当前 RelNode 的子节点，RelNode 通过 inputs 组织成一个树形结构；
 * `estimateRowCount` 方法用于估计当前 RelNode 返回的行数，行数信息可以用来计算 RelNode 的代价 Cost；
 * `computeSelfCost` 方法用于计算当前 RelNode 的代价 Cost；
 * `register` 方法用于注册当前 RelNode 特有的优化规则，例如：`InnodbTableScan` 实现了 register 方法，注册了和 `InnodbTableScan` 这类 RelNode 相关的优化规则。
-
-
 
 #### RelSet
 
@@ -187,6 +172,15 @@ public interface RelNode extends RelOptNode, Cloneable {
 ## VolcanoPlanner 源码探秘
 
 以 testSelectSingleProjectGz 测试 Case 为例，Logical Plan 如下：Volcano Planner 优化流程如下：
+
+```java
+@Test
+void testSelectSingleProjectGz() throws SQLException {
+    sql("smart", "select * from EMPS where name = 'Alice'").ok();
+}
+```
+
+
 
 ```
 LogicalProject(NAME=[$1])
