@@ -26,7 +26,7 @@
     "hexo-renderer-markdown-it-plus": "^1.0.6",
     "hexo-renderer-stylus": "^3.0.0",
     "hexo-server": "^3.0.0",
-    "hexo-theme-stellar": "1.19.0",
+    "hexo-theme-stellar": "1.20.0",
     "hexo-util": "^3.1.0"
   }
 }
