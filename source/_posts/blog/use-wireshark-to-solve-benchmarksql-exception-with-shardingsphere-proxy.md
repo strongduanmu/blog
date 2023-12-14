@@ -60,7 +60,7 @@ public BindValue getBinding(int parameterIndex, boolean forLongData) {
 }
 ```
 
-### BenchmarkSQL 复现
+### BenchmarkSQL 分析
 
 大致了解了问题的可能方向后，先从 [benchmarksql](https://gitee.com/opengauss_sharding/benchmarksql) 仓库下载 BenchmarkSQL 程序，该程序目前支持了 ShardingSphere JDBC 和 Proxy 性能压测，本文暂时只关注 Proxy 压测出现的异常问题，JDBC 后续文章可以介绍使用方法。
 
@@ -104,7 +104,7 @@ osCollectorDevices=net_eth0 blk_sda
 
 
 
-### 最小化 Demo 复现
+### 最小化 Demo 分析
 
 
 

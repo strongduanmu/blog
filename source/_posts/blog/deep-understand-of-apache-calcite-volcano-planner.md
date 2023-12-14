@@ -153,21 +153,68 @@ public abstract class AbstractRelNode implements RelNode {
 
 #### RelSet
 
+Calcite 对 `RelSet` 的定义为 `A RelSet is an equivalence-set of expressions`，即一组等价的关系代数集合，同一个 RelSet 中的关系代数具有相同的调用规约（Calling Convention）。RelSet 类中的核心属性如下：
 
+```java
+class RelSet {
+    // 等价的关系代数集合
+    final List<RelNode> rels = new ArrayList<>();
+    // 物理属性相同的等价关系代数集合
+    final List<RelSubset> subsets = new ArrayList<>();
+    // 等价的 RelSet
+    @MonotonicNonNull RelSet equivalentSet;
+}
+```
+
+* RelSet 类是等价关系代数的集合类，不是 RelNode；
+* 等价的关系代数集合存储在 `rels` 中，他们具有相同的调用规约，但是其他物理属性可能不相同，例如：RelCollation 和 RelDistribution；
+* 物理属性相同的等价关系代数集合会存储在 `subsets` 中，`RelSubset` 对下会根据物理属性对关系代数进行归类，相同物理属性的关系代数会存储在同一个 RelSubset 中。
 
 #### RelSubset
 
+Caclite 对 `RelSubset` 的定义为 `Subset of an equivalence class where all relational expressions have the same physical properties.`，即 RelSet 等价类的子集，它会按照物理属性将关系代数 RelNode 进行分类，物理属性相同的 RelNode 会在同一个 RelSubSet 中。RelSubset 类中的核心属性如下：
 
+```java
+public class RelSubset extends AbstractRelNode {
+    
+    /**
+     * Cost of best known plan (it may have improved since).
+     */
+    RelOptCost bestCost;
+    
+    /**
+     * The set this subset belongs to.
+     */
+    final RelSet set;
+    
+    /**
+     * Best known plan.
+     */
+    @Nullable RelNode best;
+    
+    /**
+     * Returns the rel nodes in this rel subset.  All rels must have the same
+     * traits and are logically equivalent.
+     *
+     * @return all the rels in the subset
+     */
+    public Iterable<RelNode> getRels() {
+        return () -> Linq4j.asEnumerable(set.rels).where(v1 -> v1.getTraitSet().satisfies(traitSet)).iterator();
+    }
+}
+```
+
+* RelSubset 实现了 `AbstractRelNode`，是一个特殊的关系代数 RelNode；
+* RelSubSet 中记录了**物理属性相同的关系代数 RelNode**，并且这些关系代数不是直接存储在 RelSubSet 中，而是通过引用 RelSet 对象并通过 traitSet 过滤得到；
+* RelSubSet 会计算内部关系代数的**最优代价 bestCost**，并记录当前**最优的执行计划 best**，bestCost 和 best 会随着优化的执行而不断更新。
 
 ### 处理流程
 
-关于 Volcano 理论内容建议先看下相关理论知识，否则直接看实现的话可能会有一些头大。从 Volcano 模型的理论落地到实践是有很大区别的，这里先看一张 VolcanoPlanner 整体实现图，如下所示（图片来自 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://www.slideshare.net/julianhyde/costbased-query-optimization-in-apache-phoenix-using-apache-calcite?qid=b7a1ca0f-e7bf-49ad-bc51-0615ec8a4971&v=&b=&from_search=4)）
-
-
+介绍完 VolcanoPlanner 中的核心概念，让我们再来了解下 Calcite 优化器的处理流程，Julain 在 2016 年举办的 Hadoop Summit 大会上分享了 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://calcite.apache.org/community/#cost-based-query-optimization-in-apache-phoenix-using-apache-calcite)，其中介绍了 Caclite 优化器的处理流程，虽然已经过去了很久，但是仍然可以作为 VolcanoPlanner 的参考资料。
 
 ![Calcite Volcano Planner 处理流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/09/1702118316.png)
 
-
+TODO
 
 ## VolcanoPlanner 源码探秘
 
