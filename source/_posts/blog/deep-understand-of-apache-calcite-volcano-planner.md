@@ -157,11 +157,14 @@ Calcite 对 `RelSet` 的定义为 `A RelSet is an equivalence-set of expressions
 
 ```java
 class RelSet {
+  
     // 等价的关系代数集合
     final List<RelNode> rels = new ArrayList<>();
-    // 物理属性相同的等价关系代数集合
+
+  	// 物理属性相同的等价关系代数集合
     final List<RelSubset> subsets = new ArrayList<>();
-    // 等价的 RelSet
+    
+  	// 等价的 RelSet
     @MonotonicNonNull RelSet equivalentSet;
 }
 ```
@@ -214,11 +217,21 @@ public class RelSubset extends AbstractRelNode {
 
 ![Calcite Volcano Planner 处理流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/09/1702118316.png)
 
-TODO
+上图展示了 VolcanoPlanner 的处理流程，可以看到 SQL 语句被解析为 AST 后，通过 SqlToRelConverter 将 AST 转换为 RelNode 和 RexNode。RelNode Tree 就是我们常说的逻辑执行计划。方框内是 VolcanoPlanner 的核心流程，主要包含了如下几个关键步骤：
+
+* 将匹配的规则 Rule 添加到 `RuleQueue` 中，Calcite 提供了 `IterativeRuleQueue` 和 `TopDownRuleQueue`；
+
+* 应用匹配的规则 Rule，对 RelNode Tree 进行转换；
+
+* 进行相应的迭代，直到 RuleQueue 中的 Rule 全部迭代完成或者代价 Cost 不再变化；
+
+* 基于 RelNode 的代价和深度匹配 `Importance`，Importance 描述了 RuleMatch 的重要程度，Importance 大的优先处理，每一轮迭代都会实时调整。
+
+除了以上的几个关键步骤外，图中还描述了 VolcanoPlanner 中的重要组成部分：`计划树（Plan Tree）`、`优化规则（Rules）`、`代价模型（Cost Model）` 和 `元数据提供器（Metadata Providers）`。计划树通过前文介绍的 RelSet 和 RelSubset 维护了优化过程中所需的数据结构，优化规则用于对 RelNode 进行优化，以生成等价且更优的关系代数，代价模型用于计算 RelNode 的代价和累积代价，元数据提供器则提供了代价计算所需的一些统计信息，例如：Filter 选择性、Join 选择性等。这些组成部分在 VolcanoPlanner 中相互配合，共同完成了优化过程，在下面的源码探秘部分，我们将一一进行研究学习。
 
 ## VolcanoPlanner 源码探秘
 
-以 testSelectSingleProjectGz 测试 Case 为例，Logical Plan 如下：Volcano Planner 优化流程如下：
+介绍完 VolcanoPlanner 中的核心概念和基础流程，想必大家对 VolcanoPlanner 已经有了初步地认识，但是想要彻底理解 VolcanoPlanner，还需要结合一些案例，对源码进行深入学习理解，才能知其然知其所以然。本小节将以 `CsvTest#testSelectSingleProjectGz` 测试 Case 为例，和大家一起探秘 VolcanoPlanner 源码。
 
 ```java
 @Test
@@ -227,7 +240,7 @@ void testSelectSingleProjectGz() throws SQLException {
 }
 ```
 
-
+Logical Plan 如下：
 
 ```
 LogicalProject(NAME=[$1])
@@ -592,9 +605,11 @@ replacer.visit 实现逻辑如下：
 
 ## VolcanoPlanner 优化示例
 
-
+TODO
 
 ## 结语
+
+TODO
 
 
 
