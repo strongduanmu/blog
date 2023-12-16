@@ -34,7 +34,7 @@ references:
 
 正是由于启发式优化器存在这些问题，使得它无法适应所有的 SQL 场景，因此当前主流的数据库系统更多是使用`基于代价的优化器`，或者将两者结合使用。基于代价的优化器能够为多个等价的执行计划生成代价 `Cost` 信息，然后选择代价最小的选项作为最终的执行计划，从而达到提升 SQL 执行效率的目的。
 
-本文将重点为大家介绍 Calcite 中基于代价的优化器——`VolcanoPlanner`，首先我们会了解 VolcanoPlanner 背后的理论基础——`Volcano/Cascades Optimizer`，然后会介绍 VolcanoPlanner 的核心概念以及执行流程，最后再深入探究 Calcite VolcanoPlanner 的源码细节，结合一些实际的 SQL 优化案例，期望能够让大家彻底搞懂 VolcanoPlanner 优化器。
+本文将重点为大家介绍 Calcite 中基于代价的优化器 `VolcanoPlanner`，首先我们会了解 VolcanoPlanner 背后的理论基础——`Volcano/Cascades Optimizer`，然后会介绍 VolcanoPlanner 的核心概念以及执行流程，最后再深入探究 Calcite VolcanoPlanner 的源码细节，结合一些实际的 SQL 优化案例，期望能够让大家彻底搞懂 VolcanoPlanner 优化器。
 
 ## Volcano/Cascades 优化器
 
@@ -72,7 +72,7 @@ Cascades Optimizer 在搜索的过程中，它的搜索空间是一个关系代�
 
 #### Pattern 匹配规则
 
-`Pattern` 用于描述 Group Expression 的局部特征。每个 Rule 都有自己的 Pattern，只有满足了相应 Pattern 的 Group Expression 才能够应用该 Rule。下图中左侧定义了一个 `Selection->Projection` 的 Pattern，并在右侧 Memo 中红色虚线内匹配上了 Group Expression。
+`Pattern` 用于描述 Group Expression 的局部特征。每个 Rule 都有自己的 Pattern，只有满足了相应 Pattern 的 Group Expression 才能够应用该 Rule。下图中左侧定义了一个 `Selection -> Projection` 的 Pattern，并在右侧 Memo 中红色虚线内匹配上了 Group Expression。
 
 ![Pattern 匹配关系代数算子](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/08/1701996507.png)
 
@@ -171,7 +171,7 @@ class RelSet {
 
 * RelSet 类是等价关系代数的集合类，不是 RelNode；
 * 等价的关系代数集合存储在 `rels` 中，他们具有相同的调用规约，但是其他物理属性可能不相同，例如：RelCollation 和 RelDistribution；
-* 物理属性相同的等价关系代数集合会存储在 `subsets` 中，`RelSubset` 对下会根据物理属性对关系代数进行归类，相同物理属性的关系代数会存储在同一个 RelSubset 中。
+* 物理属性相同的等价关系代数集合会存储在 `subsets` 中，`RelSubset` 对象会根据物理属性对关系代数进行归类，相同物理属性的关系代数会存储在同一个 RelSubset 中。
 
 #### RelSubset
 
@@ -231,7 +231,7 @@ public class RelSubset extends AbstractRelNode {
 
 ## VolcanoPlanner 源码探秘
 
-介绍完 VolcanoPlanner 中的核心概念和基础流程，想必大家对 VolcanoPlanner 已经有了初步地认识，但是想要彻底理解 VolcanoPlanner，还需要结合一些案例，对源码进行深入学习理解，才能知其然知其所以然。本小节将以 `CsvTest#testSelectSingleProjectGz` 测试 Case 为例，和大家一起探秘 VolcanoPlanner 源码。
+介绍完 VolcanoPlanner 中的核心概念和基础流程，想必大家对 VolcanoPlanner 已经有了初步地认识，但是想要彻底理解 VolcanoPlanner，还需要结合一些案例，对源码进行深入学习理解，才能知其然知其所以然。本小节将以 `CsvTest#testSelectSingleProjectGz` 测试 Case 为例，和大家一起探秘 VolcanoPlanner 源码。如下展示了测试 Case，使用了 `smart` 模型，表示使用 `TranslatableTable` 进行优化处理。
 
 ```java
 @Test
@@ -240,6 +240,41 @@ void testSelectSingleProjectGz() throws SQLException {
 }
 ```
 
+### VolcanoPlanner 初始化
+
+首先，我们来跟踪下 VolcanoPlanner 初始化流程，看下在初始化阶段，优化器都做了哪些准备工作。执行示例程序，在 [CalcitePrepareImpl#createPlanner](https://github.com/apache/calcite/blob/967bb5acc5448bc8d6ee9b9f5fa3c5f0d71405c2/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L438) 方法中，我们可以看到如下初始化逻辑：
+
+```java
+/**
+ * Creates a query planner and initializes it with a default set of
+ * rules.
+ */
+protected RelOptPlanner createPlanner(final CalcitePrepare.Context prepareContext, @Nullable Context externalContext, @Nullable RelOptCostFactory costFactory) {
+    if (externalContext == null) {
+        externalContext = Contexts.of(prepareContext.config());
+    }
+  	// 初始化 VolcanoPlanner，允许用户传入代价工厂 costFactory，默认使用 VolcanoCost.FACTORY
+    final VolcanoPlanner planner = new VolcanoPlanner(costFactory, externalContext);
+  	// 设置标量表达式 scalar expressions 的执行器
+    planner.setExecutor(new RexExecutorImpl(DataContexts.EMPTY));
+    planner.addRelTraitDef(ConventionTraitDef.INSTANCE);
+    if (CalciteSystemProperty.ENABLE_COLLATION_TRAIT.value()) {
+        planner.addRelTraitDef(RelCollationTraitDef.INSTANCE);
+    }
+  	// 是否开启自顶向下优化，会根据该参数是否开启，初始化不同类型的 RuleDriver 和 RuleQueue
+    planner.setTopDownOpt(prepareContext.config().topDownOpt());
+  	// 注册默认优化规则
+    RelOptUtil.registerDefaultRules(planner, prepareContext.config().materializationsEnabled(), enableBindable);
+    return planner;
+}
+```
+
+创建 VolcanoPlanner 对象时，允许用户传入 `costFactory` 代价工厂，默认会使用 `VolcanoCost.FACTORY` 工厂类。初始化优化器时，同时会设置标量表达式（`scalar expressions`）执行器，负责计算表达式的结果。`setTopDownOpt` 方法会根据配置判断是否开启自顶向下优化，该配置默认为 false，同时会根据该参数初始化 `RuleDriver` 和 `RuleQueue`，本文先关注 Calcite 默认的 `IterativeRuleDriver` 和 `IterativeRuleQueue`，后续文章会再探讨 `Volcano & Cascades` 论文中提出的 `TopDownRuleDriver` 和 `TopDownRuleQueue`。
+
+`RelOptUtil.registerDefaultRules` 方法会注册默认的优化规则， 
+
+### setRoot 流程
+
 Logical Plan 如下：
 
 ```
@@ -247,7 +282,7 @@ LogicalProject(NAME=[$1])
   CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-### setRoot 流程
+
 
 setRoot 流程：进行初始化处理，并将 RelNode 转换为 RelSubset。如下是 setRoot 的代码清单，registerImpl 是其核心逻辑。
 
