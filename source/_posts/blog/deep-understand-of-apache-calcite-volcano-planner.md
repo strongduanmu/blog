@@ -271,32 +271,115 @@ protected RelOptPlanner createPlanner(final CalcitePrepare.Context prepareContex
 
 创建 VolcanoPlanner 对象时，允许用户传入 `costFactory` 代价工厂，默认会使用 `VolcanoCost.FACTORY` 工厂类。初始化优化器时，同时会设置标量表达式（`scalar expressions`）执行器，负责计算表达式的结果。`setTopDownOpt` 方法会根据配置判断是否开启自顶向下优化，该配置默认为 false，同时会根据该参数初始化 `RuleDriver` 和 `RuleQueue`，本文先关注 Calcite 默认的 `IterativeRuleDriver` 和 `IterativeRuleQueue`，后续文章会再探讨 `Volcano & Cascades` 论文中提出的 `TopDownRuleDriver` 和 `TopDownRuleQueue`。
 
-`RelOptUtil.registerDefaultRules` 方法会注册默认的优化规则， 
+`RelOptUtil.registerDefaultRules` 方法会注册默认的优化规则，内部调用 `planner.addRule` 方法，将规则记录在优化器父类 `AbstractRelOptPlanner` 的 `mapDescToRule` 属性中。
+
+```java 
+@Experimental
+public static void registerDefaultRules(RelOptPlanner planner, boolean enableMaterializations, boolean enableBindable) {
+    if (CalciteSystemProperty.ENABLE_COLLATION_TRAIT.value()) {
+        registerAbstractRelationalRules(planner);
+    }
+    registerAbstractRules(planner);
+    registerBaseRules(planner);
+    
+    if (enableMaterializations) {
+        registerMaterializationRules(planner);
+    }
+    if (enableBindable) {
+        for (RelOptRule rule : Bindables.RULES) {
+            planner.addRule(rule);
+        }
+    }
+    planner.addRule(Bindables.BINDABLE_TABLE_SCAN_RULE);
+    planner.addRule(CoreRules.PROJECT_TABLE_SCAN);
+    planner.addRule(CoreRules.PROJECT_INTERPRETER_TABLE_SCAN);
+    
+    if (CalciteSystemProperty.ENABLE_ENUMERABLE.value()) {
+        registerEnumerableRules(planner);
+        planner.addRule(EnumerableRules.TO_INTERPRETER);
+    }
+    
+    if (enableBindable && CalciteSystemProperty.ENABLE_ENUMERABLE.value()) {
+        planner.addRule(EnumerableRules.TO_BINDABLE);
+    }
+    
+    if (CalciteSystemProperty.ENABLE_STREAM.value()) {
+        for (RelOptRule rule : StreamRules.RULES) {
+            planner.addRule(rule);
+        }
+    }
+    
+    planner.addRule(CoreRules.FILTER_REDUCE_EXPRESSIONS);
+}
+```
+
+Calcite JDBC 默认注册了 101 个优化规则，这些优化规则的作用，我们后续文章会进行分类学习，在实际使用中可以选择自己需要的优化规则去使用。到这里，Calicte 就完成了 VolcanoPlanner 的优化，并默认注册了 101 个优化规则。
+
+![Calcite JDBC 默认注册的规则](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/17/1702769869.png)
 
 ### setRoot 流程
 
-Logical Plan 如下：
+VolcanoPlanner 初始化完成后，又会调用 SqlParser 进行 SQL 解析，并使用 SqlToRelConverter 将 AST 转换为 RelNode 逻辑执行计划，可以得到如下的 Logical Plan：
 
 ```
-LogicalProject(NAME=[$1])
-  CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
+LogicalProject(EMPNO=[$0], NAME=[$1], DEPTNO=[$2], GENDER=[$3], CITY=[$4], EMPID=[$5], AGE=[$6], SLACKER=[$7], MANAGER=[$8], JOINEDAT=[$9])
+  LogicalFilter(condition=[=($1, 'Alice')])
+    CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-
-
-setRoot 流程：进行初始化处理，并将 RelNode 转换为 RelSubset。如下是 setRoot 的代码清单，registerImpl 是其核心逻辑。
+Calcite JDBC 流程中将优化器的调用封装在了 `Program` 中，最核心的方式是 `setRoot` 和 `findBestExp`，本小节先关注 `setRoot` 方法的实现逻辑。
 
 ```java
-  @Override public void setRoot(RelNode rel) {
+/**
+ * Returns the standard program with user metadata provider.
+ */
+public static Program standard(RelMetadataProvider metadataProvider) {
+    final Program program1 = (planner, rel, requiredOutputTraits, materializations, lattices) -> {
+        for (RelOptMaterialization materialization : materializations) {
+            planner.addMaterialization(materialization);
+        }
+        for (RelOptLattice lattice : lattices) {
+            planner.addLattice(lattice);
+        }
+        
+        planner.setRoot(rel);
+        // 变换 trait 属性
+        final RelNode rootRel2 = rel.getTraitSet().equals(requiredOutputTraits)
+                ? rel : planner.changeTraits(rel, requiredOutputTraits);
+        assert rootRel2 != null;
+        // setRoot 设置 RelSubset 根节点
+        planner.setRoot(rootRel2);
+        final RelOptPlanner planner2 = planner.chooseDelegate();
+        // 查找最佳执行计划
+        final RelNode rootRel3 = planner2.findBestExp();
+        assert rootRel3 != null : "could not implement exp";
+        return rootRel3;
+    };
+    
+    return sequence(subQuery(metadataProvider), new Programs.DecorrelateProgram(),
+            new Programs.TrimFieldsProgram(), program1, calc(metadataProvider));
+}
+```
+
+`setRoot` 方法负责为将 RelNode Tree 转换为 RelSubset Tree，并设置到 VolcanoPlanner 中的 `root` 属性中。如下是 `setRoot` 的代码实现，`registerImpl` 是其核心逻辑。
+
+```java
+// RelSubset 根节点
+protected @MonotonicNonNull RelSubset root;
+
+@Override
+public void setRoot(RelNode rel) {
     this.root = registerImpl(rel, null);
     if (this.originalRoot == null) {
-      this.originalRoot = rel;
+        this.originalRoot = rel;
     }
-
+    
     rootConvention = this.root.getConvention();
     ensureRootConverters();
-  }
+}
 ```
+
+TODO
 
 registerImpl 用于注册新的关系代数表达式，并将待匹配规则加入到队列中。如果 set（等价集合） 参数不为 null，则将当前表达式加入到等价集合中，如果已经注册了相同的表达式，则无需将其加入到等价集合以及队列中。
 
@@ -414,10 +497,6 @@ RelSubset subset = addRelToSet(rel, set);
     }
   }
 ```
-
-### 代价计算
-
-
 
 ### findBestExp 流程
 
