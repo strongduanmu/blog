@@ -246,8 +246,7 @@ void testSelectSingleProjectGz() throws SQLException {
 
 ```java
 /**
- * Creates a query planner and initializes it with a default set of
- * rules.
+ * Creates a query planner and initializes it with a default set of rules.
  */
 protected RelOptPlanner createPlanner(final CalcitePrepare.Context prepareContext, @Nullable Context externalContext, @Nullable RelOptCostFactory costFactory) {
     if (externalContext == null) {
@@ -327,7 +326,7 @@ LogicalProject(EMPNO=[$0], NAME=[$1], DEPTNO=[$2], GENDER=[$3], CITY=[$4], EMPID
     CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-Calcite JDBC 流程中将优化器的调用封装在了 `Program` 中，最核心的方式是 `setRoot` 和 `findBestExp`，本小节先关注 `setRoot` 方法的实现逻辑。
+Calcite JDBC 流程中将优化器的调用封装在了 `Program` 中，如下示例展示了调用逻辑，最核心的方式是 `setRoot` 和 `findBestExp`，本小节先关注 `setRoot` 方法的实现逻辑，看看示例中的两次 setRoot 都进行了哪些处理。
 
 ```java
 /**
@@ -341,9 +340,9 @@ public static Program standard(RelMetadataProvider metadataProvider) {
         for (RelOptLattice lattice : lattices) {
             planner.addLattice(lattice);
         }
-        
+        // setRoot 设置 RelSubset 根节点        
         planner.setRoot(rel);
-        // 变换 trait 属性
+        // 变换 trait 属性，将 Convention NONE 变换为 ENUMERABLE
         final RelNode rootRel2 = rel.getTraitSet().equals(requiredOutputTraits)
                 ? rel : planner.changeTraits(rel, requiredOutputTraits);
         assert rootRel2 != null;
@@ -361,7 +360,9 @@ public static Program standard(RelMetadataProvider metadataProvider) {
 }
 ```
 
-`setRoot` 方法负责为将 RelNode Tree 转换为 RelSubset Tree，并设置到 VolcanoPlanner 中的 `root` 属性中。如下是 `setRoot` 的代码实现，`registerImpl` 是其核心逻辑。
+#### 第一次 setRoot 流程
+
+第一次调用 `setRoot` 方法，直接传递了原始的 RelNode，未进行 Trait 变换，`setRoot` 方法负责将 RelNode Tree 转换为 RelSubset Tree，并设置到 VolcanoPlanner 中的 `root` 属性中。如下是 `setRoot` 的代码实现，`registerImpl` 是其核心逻辑。
 
 ```java
 // RelSubset 根节点
@@ -369,6 +370,7 @@ protected @MonotonicNonNull RelSubset root;
 
 @Override
 public void setRoot(RelNode rel) {
+  	// 核心逻辑
     this.root = registerImpl(rel, null);
     if (this.originalRoot == null) {
         this.originalRoot = rel;
@@ -497,6 +499,10 @@ RelSubset subset = addRelToSet(rel, set);
     }
   }
 ```
+
+#### 第二次 setRoot 流程
+
+TODO
 
 ### findBestExp 流程
 
