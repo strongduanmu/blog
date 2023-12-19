@@ -381,71 +381,139 @@ public void setRoot(RelNode rel) {
 }
 ```
 
-TODO
-
-registerImpl 用于注册新的关系代数表达式，并将待匹配规则加入到队列中。如果 set（等价集合） 参数不为 null，则将当前表达式加入到等价集合中，如果已经注册了相同的表达式，则无需将其加入到等价集合以及队列中。
+`registerImpl` 方法用于注册新的关系代数表达式，并将匹配的规则加入到队列中。如果 `set`（等价集合） 参数不为 null，则将当前表达式加入到等价集合中，如果已经注册了相同的表达式，则无需将其加入到等价集合以及队列中。
 
 ```java
-  private RelSubset registerImpl(
-      RelNode rel,
-      @Nullable RelSet set) {
+private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
     // 如果 rel 已经是 RelSubset，则直接调用 registerSubset 注册
     if (rel instanceof RelSubset) {
-      return registerSubset(set, (RelSubset) rel);
+        return registerSubset(set, (RelSubset) rel);
     }
     ...
-      
     // Ensure that its sub-expressions are registered.
     // 监听该表达式将要注册的通知
     rel = rel.onRegister(this);
-  }
+  	...
+}
 ```
 
-getInputs 方法会获取子节点，并调用 ensureRegistered 方法，确保所有的节点都会进行注册。
+第一次调用 `setRoot` 方法时，`rel` 参数为 `LogicalProject`，因此会调用后续逻辑进行处理，`onRegister` 方法会确保 RelNode 的子节点也注册生成 RelSubset。`AbstractRelNode#onRegister` 方法实现逻辑如下，`getInputs` 方法会获取当前 RelNode 的子节点（返回 LogicalFilter 子节点），并调用 `VolcanoPlanner#ensureRegistered` 方法，确保所有的子节点都会进行注册，然后重新 copy 生成新的 RelNode。
 
 ```java
-  @Override public RelNode onRegister(RelOptPlanner planner) {
+@Override
+public RelNode onRegister(RelOptPlanner planner) {
+  	// 获取子节点
     List<RelNode> oldInputs = getInputs();
     List<RelNode> inputs = new ArrayList<>(oldInputs.size());
     for (final RelNode input : oldInputs) {
-      RelNode e = planner.ensureRegistered(input, null);
-      assert e == input || RelOptUtil.equal("rowtype of rel before registration",
-          input.getRowType(),
-          "rowtype of rel after registration",
-          e.getRowType(),
-          Litmus.THROW);
-      inputs.add(e);
+      	// 调用 VolcanoPlanner#ensureRegistered 注册子节点
+        RelNode e = planner.ensureRegistered(input, null);
+        assert e == input || RelOptUtil.equal("rowtype of rel before registration", input.getRowType(), "rowtype of rel after registration", e.getRowType(), Litmus.THROW);
+        inputs.add(e);
     }
+    RelNode r = this;
+    if (!Util.equalShallow(oldInputs, inputs)) {
+      	// 复制生成新的 RelNode
+        r = copy(getTraitSet(), inputs);
+    }
+  	// 重新计算 Digest 摘要信息，是 RelNode 的唯一标识
+    r.recomputeDigest();
+    return r;
+}
 ```
 
-ensureRegistered 方法会对当前子节点进行注册，register 方法会调用 registerImpl 对子节点 CsvTableScan 进行注册。
+`VolcanoPlanner#ensureRegistered` 方法会对当前子节点 LogicalFilter 进行注册，先调用 getSubset 从 `mapRel2Subset` 获取当前 RelNode 对应的 RelSubset，如果不存在则调用 `VolcanoPlanner#register` 方法进行注册。 
 
 ```java
-@Override public RelSubset ensureRegistered(RelNode rel, @Nullable RelNode equivRel) {
-  RelSubset result;
-  // 从 mapRel2Subset 中获取 RelSubset
-  final RelSubset subset = getSubset(rel);
-  if (subset != null) {
-    if (equivRel != null) {
-      final RelSubset equivSubset = getSubsetNonNull(equivRel);
-      // 如果当前节点的等价集合和已知的等价集合不同，则进行合并
-      if (subset.set != equivSubset.set) {
-        merge(equivSubset.set, subset.set);
-      }
-    }
-    result = canonize(subset);
-  } else {
-    // 如果 RelSubset 为空则进行注册
-    result = register(rel, equivRel);
-  }
-	...
-  return result;
-}
-
 // 维护已注册的 RelNode 和 RelSubset 映射关系
-private final IdentityHashMap<RelNode, RelSubset> mapRel2Subset =
-      new IdentityHashMap<>();
+private final IdentityHashMap<RelNode, RelSubset> mapRel2Subset = new IdentityHashMap<>();
+
+@Override
+public RelSubset ensureRegistered(RelNode rel, @Nullable RelNode equivRel) {
+    RelSubset result;
+    // 从 mapRel2Subset 中获取 RelSubset
+    final RelSubset subset = getSubset(rel);
+    if (subset != null) {
+        if (equivRel != null) {
+            final RelSubset equivSubset = getSubsetNonNull(equivRel);
+            // 如果当前节点的等价集合和已知的等价集合不同，则进行合并
+            if (subset.set != equivSubset.set) {
+                merge(equivSubset.set, subset.set);
+            }
+        }
+        result = canonize(subset);
+    } else {
+        // 如果 RelSubset 为空则进行注册
+        result = register(rel, equivRel);
+    }
+	...
+    return result;
+}
 ```
+
+`VolcanoPlanner#register` 方法会调用 `VolcanoPlanner#registerImpl` 对 LogicalFilter 节点进行注册，然后逻辑又重新回到了 `VolcanoPlanner#registerImpl` 方法。`onRegister` 方法会对 LogicalFilter 节点的子节点 `CsvTableScan` 进行注册，由于 CsvTableScan 节点没有子节点，因此在 onRegister 方法处理时会中断递归，此外，由于没有子节点，CsvTableScan 会返回当前 RelNode。
+
+```java
+@Override
+public RelNode onRegister(RelOptPlanner planner) {
+  	// 获取子节点
+    List<RelNode> oldInputs = getInputs();
+    List<RelNode> inputs = new ArrayList<>(oldInputs.size());
+    for (final RelNode input : oldInputs) {
+				...
+    }
+    RelNode r = this;
+    if (!Util.equalShallow(oldInputs, inputs)) {
+      	// 复制生成新的 RelNode
+        r = copy(getTraitSet(), inputs);
+    }
+  	// 重新计算 Digest 摘要信息，是 RelNode 的唯一标识
+    r.recomputeDigest();
+    return r;
+}
+```
+
+然后优化器会从双端队列 ruleCallStack 中获取首个元素，并记录到 `provenanceMap` 中，provenanceMap 用于记录 RelNode 的来源，包括 `UnknownProvenance`、`DirectProvenance` 和 `RuleProvenance`。如果当前参数的 RelSet 为 null，则会创建一个 RelSet 并添加到 `allSets` 中。`registerClass` 方法允许 RelNode 注册自己特有的优化规则，本案例中 `CsvTableScan` 注册了 `CsvRules.PROJECT_SCAN` 规则。完成规则注册后，优化器会调用 addRelToSet 和 fireRules 方法，这部分是 VolcanoPlanner 的核心逻辑，下面我们来一起深入分析下。
+
+```java
+private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
+    if (rel instanceof RelSubset) {
+        return registerSubset(set, (RelSubset) rel);
+    }
+    // Ensure that its sub-expressions are registered.
+    rel = rel.onRegister(this);
+    // Record its provenance. (Rule call may be null.)
+  	// 从双端队列中获取 VolcanoRuleCall，并记录到 provenanceMap 中
+    final VolcanoRuleCall ruleCall = ruleCallStack.peek();
+    if (ruleCall == null) {
+        provenanceMap.put(rel, Provenance.EMPTY);
+    } else {
+        provenanceMap.put(rel, new RuleProvenance(ruleCall.rule, ImmutableList.copyOf(ruleCall.rels), ruleCall.id));
+    }
+    ...
+    // Place the expression in the appropriate equivalence set.
+    // 如果当前 RelSet 为空，则创建一个 RelSet 并添加到 allSets 中
+    if (set == null) {
+        set = new RelSet(nextSetId++, Util.minus(RelOptUtil.getVariablesSet(rel), rel.getVariablesSet()), RelOptUtil.getVariablesUsed(rel));
+        this.allSets.add(set);
+    }
+		...
+    // Allow each rel to register its own rules.
+    // 触发当前 RelNode#register 方法，允许注册自己的优化规则
+    // CsvTableScan#register 方法注册了 CsvRules.PROJECT_SCAN 规则
+    registerClass(rel);
+		// 当前节点注册完成后，调用 addRelToSet 添加到等价集合中
+    RelSubset subset = addRelToSet(rel, set);
+		...
+    // Queue up all rules triggered by this relexp's creation.
+    // 对注册的规则进行匹配筛选
+    fireRules(rel);
+		...
+    return subset;
+}
+```
+
+TODO
 
 每个节点在注册完成后会调用 addRelToSet 添加到等价集中，并维护到 mapRel2Subset 中。然后重新计算每一个节点的代价，如果它的代价小于等价集合中的代价，则更新 RelSubset（记录了当前已知的最有 cost 和 plan）。
 
