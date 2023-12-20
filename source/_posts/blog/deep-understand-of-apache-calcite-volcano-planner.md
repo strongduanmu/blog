@@ -360,7 +360,7 @@ public static Program standard(RelMetadataProvider metadataProvider) {
 }
 ```
 
-#### 第一次 setRoot 流程
+#### 第一轮 setRoot
 
 第一次调用 `setRoot` 方法，直接传递了原始的 RelNode，未进行 Trait 变换，`setRoot` 方法负责将 RelNode Tree 转换为 RelSubset Tree，并设置到 VolcanoPlanner 中的 `root` 属性中。如下是 `setRoot` 的代码实现，`registerImpl` 是其核心逻辑。
 
@@ -446,7 +446,7 @@ public RelSubset ensureRegistered(RelNode rel, @Nullable RelNode equivRel) {
         // 如果 RelSubset 为空则进行注册
         result = register(rel, equivRel);
     }
-	...
+		...
     return result;
 }
 ```
@@ -483,7 +483,7 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
     // Ensure that its sub-expressions are registered.
     rel = rel.onRegister(this);
     // Record its provenance. (Rule call may be null.)
-  	// 从双端队列中获取 VolcanoRuleCall，并记录到 provenanceMap 中
+    // 从双端队列中获取 VolcanoRuleCall，并记录到 provenanceMap 中
     final VolcanoRuleCall ruleCall = ruleCallStack.peek();
     if (ruleCall == null) {
         provenanceMap.put(rel, Provenance.EMPTY);
@@ -497,35 +497,30 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
         set = new RelSet(nextSetId++, Util.minus(RelOptUtil.getVariablesSet(rel), rel.getVariablesSet()), RelOptUtil.getVariablesUsed(rel));
         this.allSets.add(set);
     }
-		...
+    ...
     // Allow each rel to register its own rules.
     // 触发当前 RelNode#register 方法，允许注册自己的优化规则
     // CsvTableScan#register 方法注册了 CsvRules.PROJECT_SCAN 规则
     registerClass(rel);
-		// 当前节点注册完成后，调用 addRelToSet 添加到等价集合中
+    // 当前节点注册完成后，调用 addRelToSet 添加到等价集合中
     RelSubset subset = addRelToSet(rel, set);
-		...
+    ...
     // Queue up all rules triggered by this relexp's creation.
     // 对注册的规则进行匹配筛选
     fireRules(rel);
-		...
+    ...
     return subset;
 }
 ```
 
-TODO
-
-每个节点在注册完成后会调用 addRelToSet 添加到等价集中，并维护到 mapRel2Subset 中。然后重新计算每一个节点的代价，如果它的代价小于等价集合中的代价，则更新 RelSubset（记录了当前已知的最有 cost 和 plan）。
+每个 RelNode 注册完成后会调用 `addRelToSet` 添加到等价集 RelSet 中，`set.add(rel)` 内部会调用 [RelSet#getOrCreateSubset](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/plan/volcano/RelSet.java#L261) 方法，该方法会根据特征 Trait  判断 RelSubset 是否已经存在，不存在则创建 RelSubset 实例，此时 bestCost 为 VolcanoCost.INFINITY。然后会将返回的 RelSubset 维护到 `mapRel2Subset` 中，方便后续复用。`propagateCostImprovements` 会重新计算节点的代价，如果它的代价小于 RelSubset 的代价，则更新 RelSubset 中的 `bestCost` 和 `best`。
 
 ```java
-RelSubset subset = addRelToSet(rel, set);
-
-  private RelSubset addRelToSet(RelNode rel, RelSet set) {
-    // 添加到等价集合中 RelSet 和 RelSubset 中
+private RelSubset addRelToSet(RelNode rel, RelSet set) {
+    // 添加到等价集合中 RelSet 和 RelSubset 中，并返回 RelSubset
     RelSubset subset = set.add(rel);
     // 维护 Rel 和 Subset 映射关系
     mapRel2Subset.put(rel, subset);
-
     // While a tree of RelNodes is being registered, sometimes nodes' costs
     // improve and the subset doesn't hear about it. You can end up with
     // a subset with a single rel of cost 99 which thinks its best cost is
@@ -533,19 +528,79 @@ RelSubset subset = addRelToSet(rel, set);
     // not established. So, give the subset another chance to figure out
     // its cost.
     try {
-      // 重新计算是否有更小的 cost，getCostOrInfinite 方法逻辑待研究
-      propagateCostImprovements(rel);
+        // 重新计算是否存在更小的 cost，存在则更新 RelSubset 中的 bestCost 和 best
+        propagateCostImprovements(rel);
     } catch (CyclicMetadataException e) {
-      // ignore
+        // ignore
     }
-
     if (ruleDriver != null) {
-      ruleDriver.onProduce(rel, subset);
+        ruleDriver.onProduce(rel, subset);
     }
-
     return subset;
-  }
+}
 ```
+
+`propagateCostImprovements` 方法的实现逻辑如下，方法内部定义了一个优先级队列，队列会根据 RelNode 的代价 RelOptCost 进行排序，从而方便获取最小代价的 RelNode。
+
+```java
+void propagateCostImprovements(RelNode rel) {
+    RelMetadataQuery mq = rel.getCluster().getMetadataQuery();
+  	// RelNode 和 RelOptCost 映射，方便后续获取 RelOptCost
+    Map<RelNode, RelOptCost> propagateRels = new HashMap<>();
+  	// 优先级队列，按照 RelOptCost 排序
+    PriorityQueue<RelNode> propagateHeap = new PriorityQueue<>((o1, o2) -> {...});
+  	// 获取 RelNode 对应的代价
+    propagateRels.put(rel, getCostOrInfinite(rel, mq));
+  	// 添加到队列中
+    propagateHeap.offer(rel);
+    RelNode relNode;
+  	// 从队列中弹出 RelNode
+    while ((relNode = propagateHeap.poll()) != null) {
+        RelOptCost cost = requireNonNull(propagateRels.get(relNode), "propagateRels.get(relNode)");
+      	// 遍历当前 RelNode 对应 RelSet 中的 RelSubset 集合（Trait 不同存储在不同 RelSubset 中）
+        for (RelSubset subset : getSubsetNonNull(relNode).set.subsets) {
+          	// 判断 Trait 是否相同
+            if (!relNode.getTraitSet().satisfies(subset.getTraitSet())) {
+                continue;
+            }
+          	// 判断代价是否小于已知最小代价
+            if (!cost.isLt(subset.bestCost)) {
+                continue;
+            }
+            // Update subset best cost when we find a cheaper rel or the current
+            // best's cost is changed
+            subset.timestamp++;
+            LOGGER.trace("Subset cost changed: subset [{}] cost was {} now {}",
+                    subset, subset.bestCost, cost);
+						// 更新最小代价和最优计划
+            subset.bestCost = cost;
+            subset.best = relNode;
+            // since best was changed, cached metadata for this subset should be removed
+            mq.clearCache(subset);
+						// 遍历 RelSubset 的父节点
+            for (RelNode parent : subset.getParents()) {
+                mq.clearCache(parent);
+              	// 计算父节点代价
+                RelOptCost newCost = getCostOrInfinite(parent, mq);
+                RelOptCost existingCost = propagateRels.get(parent);
+                if (existingCost == null || newCost.isLt(existingCost)) {
+                  	// 如果父节点代价更小，则加入 propagateHeap 重新计算
+                    propagateRels.put(parent, newCost);
+                    if (existingCost != null) {
+                        // Cost reduced, force the heap to adjust its ordering
+                        propagateHeap.remove(parent);
+                    }
+                    propagateHeap.offer(parent);
+                }
+            }
+        }
+    }
+}
+```
+
+TODO
+
+
 
 完成上述的代价计算后，调用 fireRules(rel); 方法，对队列中的规则进行匹配筛选，已匹配的规则会在 findBestExp 阶段寻找最优解。
 
@@ -568,7 +623,7 @@ RelSubset subset = addRelToSet(rel, set);
   }
 ```
 
-#### 第二次 setRoot 流程
+#### 第二轮 setRoot
 
 TODO
 
