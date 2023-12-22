@@ -397,6 +397,8 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
 }
 ```
 
+##### onRegister
+
 第一次调用 `setRoot` 方法时，`rel` 参数为 `LogicalProject`，因此会调用后续逻辑进行处理，`onRegister` 方法会确保 RelNode 的子节点也注册生成 RelSubset。`AbstractRelNode#onRegister` 方法实现逻辑如下，`getInputs` 方法会获取当前 RelNode 的子节点（返回 LogicalFilter 子节点），并调用 `VolcanoPlanner#ensureRegistered` 方法，确保所有的子节点都会进行注册，然后重新 copy 生成新的 RelNode。
 
 ```java
@@ -513,6 +515,8 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
 }
 ```
 
+##### addRelToSet
+
 每个 RelNode 注册完成后会调用 `addRelToSet` 添加到等价集 RelSet 中，`set.add(rel)` 内部会调用 [RelSet#getOrCreateSubset](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/plan/volcano/RelSet.java#L261) 方法，该方法会根据特征 Trait  判断 RelSubset 是否已经存在，不存在则创建 RelSubset 实例，此时 bestCost 为 VolcanoCost.INFINITY。然后会将返回的 RelSubset 维护到 `mapRel2Subset` 中，方便后续复用。`propagateCostImprovements` 会重新计算节点的代价，如果它的代价小于 RelSubset 的代价，则更新 RelSubset 中的 `bestCost` 和 `best`。
 
 ```java
@@ -540,7 +544,7 @@ private RelSubset addRelToSet(RelNode rel, RelSet set) {
 }
 ```
 
-`propagateCostImprovements` 方法的实现逻辑如下，方法内部定义了一个优先级队列，队列会根据 RelNode 的代价 RelOptCost 进行排序，从而方便获取最小代价的 RelNode。
+`propagateCostImprovements` 方法的实现逻辑如下，方法内部定义了一个优先级队列，队列会根据 RelNode 的代价 RelOptCost 进行排序，从而方便获取最小代价的 RelNode。然后从队列中弹出 RelNode，并遍历 RelNode 对应 RelSet 中的 RelSubset，判断当前计算的代价是否小于已知的最小代价，如果代价更小则更新最小代价 bestCost 和最优计划 best。
 
 ```java
 void propagateCostImprovements(RelNode rel) {
@@ -577,7 +581,7 @@ void propagateCostImprovements(RelNode rel) {
             subset.best = relNode;
             // since best was changed, cached metadata for this subset should be removed
             mq.clearCache(subset);
-						// 遍历 RelSubset 的父节点
+						// 遍历 RelSubset 的父节点（CsvTableScan 对应 RelSet 的父节点为空）
             for (RelNode parent : subset.getParents()) {
                 mq.clearCache(parent);
               	// 计算父节点代价
@@ -598,9 +602,117 @@ void propagateCostImprovements(RelNode rel) {
 }
 ```
 
+计算 RelNode 代价是通过 `VolcanoPlanner#getCostOrInfinite` 方法，如果 getCost 返回的代价为 null，则会返回无穷大代价 infCost。getCost 方法会先判断当前 RelNode 是否已经是 RelSubset，如果是则直接返回 bestCost。然后根据 `noneConventionHasInfiniteCost` 标记以及当前 RelNode 的 Trait 判断是否针对 None Convention 直接返回无穷大代价，noneConventionHasInfiniteCost 参数可以通过 `VolcanoPlanner#setNoneConventionHasInfiniteCost` 方法设置。当前节点的代价计算是调用 `RelMetadataQuery#getNonCumulativeCost` 方法获取，然后获取子节点的代价进行累加，即 `RelNode 总代价 = RelNode 自身代价 + 所有子节点代价`。
+
+```java
+private RelOptCost getCostOrInfinite(RelNode rel, RelMetadataQuery mq) {
+    RelOptCost cost = getCost(rel, mq);
+    return cost == null ? infCost : cost;
+}
+
+@Override
+public @Nullable RelOptCost getCost(RelNode rel, RelMetadataQuery mq) {
+  	// 如果已经是 RelSubset，直接返回 bestCost
+    if (rel instanceof RelSubset) {
+        return ((RelSubset) rel).bestCost;
+    }
+  	// 根据 noneConventionHasInfiniteCost 标记以及当前 RelNode 的 Trait 判断是否针对 None Convention 直接返回无穷大代价
+  	// noneConventionHasInfiniteCost 参数可以通过 VolcanoPlanner#setNoneConventionHasInfiniteCost 设置
+    if (noneConventionHasInfiniteCost
+            && rel.getTraitSet().getTrait(ConventionTraitDef.INSTANCE) == Convention.NONE) {
+        return costFactory.makeInfiniteCost();
+    }
+  	// 获取当前 RelNode 的代价
+    RelOptCost cost = mq.getNonCumulativeCost(rel);
+    if (cost == null) {
+        return null;
+    }
+  	// 判断代价是否为正数代价，不满足则返回最小代价
+    if (!zeroCost.isLt(cost)) {
+        // cost must be positive, so nudge it
+        cost = costFactory.makeTinyCost();
+    }
+  	// 获取子节点的代价进行累加，即 RelNode 总代价 = RelNode 自身代价 + 所有子节点代价
+    for (RelNode input : rel.getInputs()) {
+        RelOptCost inputCost = getCost(input, mq);
+        if (inputCost == null) {
+            return null;
+        }
+        cost = cost.plus(inputCost);
+    }
+    return cost;
+}
+```
+
+`RelMetadataQuery#getNonCumulativeCost` 方法如下，Calcite 会通过 Janino 动态生成 nonCumulativeCostHandler 对象，然后调用 `RelMdPercentageOriginalRows#getNonCumulativeCost` 方法，该方法会调用 RelNode#computeSelfCost 方法，此处为 CsvTableScan 实现的方法。CsvTableScan 会调用父类 TableScan 中的方法，此时会获取统计信息中获取行数信息 rowCount，然后使用优化器中的 CostFactory 计算代价。
+
+```java
+// RelMetadataQuery#getNonCumulativeCost 方法
+public @Nullable RelOptCost getNonCumulativeCost(RelNode rel) {
+    for (; ; ) {
+        try {
+            return nonCumulativeCostHandler.getNonCumulativeCost(rel, this);
+        } catch (MetadataHandlerProvider.NoHandler e) {
+            nonCumulativeCostHandler = revise(BuiltInMetadata.NonCumulativeCost.Handler.class);
+        }
+    }
+}
+
+// RelMdPercentageOriginalRows#getNonCumulativeCost 方法
+public @Nullable RelOptCost getNonCumulativeCost(RelNode rel, RelMetadataQuery mq) {
+    return rel.computeSelfCost(rel.getCluster().getPlanner(), mq);
+}
+
+// CsvTableScan#computeSelfCost 方法
+public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
+    // Multiply the cost by a factor that makes a scan more attractive if it
+    // has significantly fewer fields than the original scan.
+    //
+    // The "+ 2D" on top and bottom keeps the function fairly smooth.
+    //
+    // For example, if table has 3 fields, project has 1 field,
+    // then factor = (1 + 2) / (3 + 2) = 0.6
+    return super.computeSelfCost(planner, mq).multiplyBy(((double) fields.length + 2D) / ((double) table.getRowType().getFieldCount() + 2D));
+}
+
+// TableScan#computeSelfCost 方法
+@Override
+public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
+    double dRows = table.getRowCount();
+    double dCpu = dRows + 1; // ensure non-zero cost
+    double dIo = 0;
+    return planner.getCostFactory().makeCost(dRows, dCpu, dIo);
+}
+
+// RelOptTableImpl#getRowCount 方法
+@Override
+public double getRowCount() {
+    if (rowCount != null) {
+        return rowCount;
+    }
+    if (table != null) {
+      	// CSV 示例中未注册统计信息，默认为 Statistics.UNKNOWN，rowCount 为 null
+        final Double rowCount = table.getStatistic().getRowCount();
+        if (rowCount != null) {
+            return rowCount;
+        }
+    }
+  	// 默认返回 100d
+    return 100d;
+}
+```
+
+最终返回的 CsvTableScan VolcanoCost 对象如下图所示，记录了 `cpu`、`io` 和 `rowCount` 信息。
+
+![CsvTableScan VolcanoCost 对象](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/22/1703207948.png)
+
+`propagateCostImprovements` 方法会按照前文所述，将 RelSubset 中的代价和新计算的代价进行比较，如果发现更小代价，则会更新 bestCost 和 best 属性，RelSubset 更新后的对象如下图所示。
+
+![更新代价后的 RelSubset](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/22/1703208192.png)
+
 TODO
 
-
+##### fireRules
 
 完成上述的代价计算后，调用 fireRules(rel); 方法，对队列中的规则进行匹配筛选，已匹配的规则会在 findBestExp 阶段寻找最优解。
 
