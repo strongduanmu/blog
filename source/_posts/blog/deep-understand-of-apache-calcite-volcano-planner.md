@@ -549,25 +549,25 @@ private RelSubset addRelToSet(RelNode rel, RelSet set) {
 ```java
 void propagateCostImprovements(RelNode rel) {
     RelMetadataQuery mq = rel.getCluster().getMetadataQuery();
-  	// RelNode 和 RelOptCost 映射，方便后续获取 RelOptCost
+    // RelNode 和 RelOptCost 映射，方便后续获取 RelOptCost
     Map<RelNode, RelOptCost> propagateRels = new HashMap<>();
-  	// 优先级队列，按照 RelOptCost 排序
+    // 优先级队列，按照 RelOptCost 排序
     PriorityQueue<RelNode> propagateHeap = new PriorityQueue<>((o1, o2) -> {...});
-  	// 获取 RelNode 对应的代价
+    // 获取 RelNode 对应的代价
     propagateRels.put(rel, getCostOrInfinite(rel, mq));
-  	// 添加到队列中
+    // 添加到队列中
     propagateHeap.offer(rel);
     RelNode relNode;
-  	// 从队列中弹出 RelNode
+    // 从队列中弹出 RelNode
     while ((relNode = propagateHeap.poll()) != null) {
         RelOptCost cost = requireNonNull(propagateRels.get(relNode), "propagateRels.get(relNode)");
-      	// 遍历当前 RelNode 对应 RelSet 中的 RelSubset 集合（Trait 不同存储在不同 RelSubset 中）
+        // 遍历当前 RelNode 对应 RelSet 中的 RelSubset 集合（Trait 不同存储在不同 RelSubset 中）
         for (RelSubset subset : getSubsetNonNull(relNode).set.subsets) {
-          	// 判断 Trait 是否相同
+            // 判断 Trait 是否相同
             if (!relNode.getTraitSet().satisfies(subset.getTraitSet())) {
                 continue;
             }
-          	// 判断代价是否小于已知最小代价
+            // 判断代价是否小于已知最小代价
             if (!cost.isLt(subset.bestCost)) {
                 continue;
             }
@@ -576,19 +576,19 @@ void propagateCostImprovements(RelNode rel) {
             subset.timestamp++;
             LOGGER.trace("Subset cost changed: subset [{}] cost was {} now {}",
                     subset, subset.bestCost, cost);
-						// 更新最小代价和最优计划
+            // 更新最小代价和最优计划
             subset.bestCost = cost;
             subset.best = relNode;
             // since best was changed, cached metadata for this subset should be removed
             mq.clearCache(subset);
-						// 遍历 RelSubset 的父节点（CsvTableScan 对应 RelSet 的父节点为空）
+            // 遍历 RelSubset 的父节点（CsvTableScan 对应 RelSet 的父节点为空）
             for (RelNode parent : subset.getParents()) {
                 mq.clearCache(parent);
-              	// 计算父节点代价
+                // 计算父节点代价
                 RelOptCost newCost = getCostOrInfinite(parent, mq);
                 RelOptCost existingCost = propagateRels.get(parent);
                 if (existingCost == null || newCost.isLt(existingCost)) {
-                  	// 如果父节点代价更小，则加入 propagateHeap 重新计算
+                    // 如果父节点代价更小，则加入 propagateHeap 重新计算
                     propagateRels.put(parent, newCost);
                     if (existingCost != null) {
                         // Cost reduced, force the heap to adjust its ordering
@@ -710,30 +710,52 @@ public double getRowCount() {
 
 ![更新代价后的 RelSubset](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/22/1703208192.png)
 
-TODO
-
 ##### fireRules
 
-完成上述的代价计算后，调用 fireRules(rel); 方法，对队列中的规则进行匹配筛选，已匹配的规则会在 findBestExp 阶段寻找最优解。
+生成完 RelSubset 并计算 RelNode 的代价后，VolcanoPlanner 会调用 `fireRules` 方法，对队列中的规则进行匹配筛选，fireRules 实现逻辑如下。
 
 ```java
-  /**
-   * Fires all rules matched by a relational expression.
-   *
-   * @param rel      Relational expression which has just been created (or maybe
-   *                 from the queue)
-   */
-  void fireRules(RelNode rel) {
+/**
+ * Fires all rules matched by a relational expression.
+ *
+ * @param rel Relational expression which has just been created (or maybe
+ *            from the queue)
+ */
+void fireRules(RelNode rel) {
     for (RelOptRuleOperand operand : classOperands.get(rel.getClass())) {
-      // 判断当前 Rel 是否匹配规则
-      if (operand.matches(rel)) {
-        final VolcanoRuleCall ruleCall;
-        ruleCall = new DeferringRuleCall(this, operand);
-        ruleCall.match(rel);
-      }
+        // 判断当前 Rel 是否匹配规则
+        if (operand.matches(rel)) {
+            final VolcanoRuleCall ruleCall;
+            ruleCall = new DeferringRuleCall(this, operand);
+            ruleCall.match(rel);
+        }
     }
-  }
+}
 ```
+
+`classOperands` 中记录了 RelNode 和 RelOptRuleOperand 的对应关系，RelOptRuleOperand 用于判断 RelOptRule 是否可以用于某个关系代数。下图展示了 CsvTableScan 对应的 RelOptRuleOperand 集合，这些 RelOptRuleOperand 都是和 TableScan 相关的规则。
+
+![classOperands 存储的优化规则](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/23/1703298241.png)
+
+对于每一个 RelOptRuleOperand，都会调用其 `matches` 方法，方法内会判断 RelNode 是否是 RelOptRuleOperand 中记录的 clazz 实例，以及 RelNode 是否包含定义的 trait 特征，最后会使用 predicate 方法对 RelNode 进行匹配。
+
+```java
+public boolean matches(RelNode rel) {
+    if (!clazz.isInstance(rel)) {
+        return false;
+    }
+    if ((trait != null) && !rel.getTraitSet().contains(trait)) {
+        return false;
+    }
+    return predicate.test(rel);
+}
+```
+
+好奇的读者可能会问，RelOptRuleOperand 记录的这些信息是在什么时候初始化的？以 CsvProjectTableScanRule 为例，在该优化规则初始化时，会调用 `super(config)` 方法，使用 [OperandBuilderImpl.operand(config.operandSupplier())](https://github.com/apache/calcite/blob/bebe473fab2e242736614659ed6e5d04eeeb8bf5/core/src/main/java/org/apache/calcite/plan/RelRule.java#L123) 初始化 RelOptRuleOperand 类，感兴趣的朋友可以自行探究下。
+
+RelOptRuleOperand 匹配成功后，会创建一个 `DeferringRuleCall`，该类表示对 Rule 的调用，并且可以延迟执行。然后调用 `DeferringRuleCall#match` 方法应用当前匹配的规则。
+
+
 
 #### 第二轮 setRoot
 
