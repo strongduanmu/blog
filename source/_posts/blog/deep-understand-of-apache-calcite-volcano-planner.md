@@ -753,9 +753,45 @@ public boolean matches(RelNode rel) {
 
 好奇的读者可能会问，RelOptRuleOperand 记录的这些信息是在什么时候初始化的？以 CsvProjectTableScanRule 为例，在该优化规则初始化时，会调用 `super(config)` 方法，使用 [OperandBuilderImpl.operand(config.operandSupplier())](https://github.com/apache/calcite/blob/bebe473fab2e242736614659ed6e5d04eeeb8bf5/core/src/main/java/org/apache/calcite/plan/RelRule.java#L123) 初始化 RelOptRuleOperand 类，感兴趣的朋友可以自行探究下。
 
-RelOptRuleOperand 匹配成功后，会创建一个 `DeferringRuleCall`，该类表示对 Rule 的调用，并且可以延迟执行。然后调用 `DeferringRuleCall#match` 方法应用当前匹配的规则。
+RelOptRuleOperand 匹配成功后，会创建一个 `DeferringRuleCall`，该类表示对 Rule 的调用，并且可以延迟执行。然后调用 `DeferringRuleCall#match` 方法应用当前匹配的规则，match 方法会调用 `VolcanoRuleCall#matchRecurse` 方法，如果规则匹配则会调用 onMatch 方法。`DeferringRuleCall#onMatch` 方法会匹配规则以及 RelNode 封装成 VolcanoRuleMatch，然后添加到 RuleQueue 中。
 
+```java
+// VolcanoRuleCall#matchRecurse 方法
+private void matchRecurse(int solve) {
+    final List<RelOptRuleOperand> operands = getRule().operands;
+		// 当求解顺序参数等于操作数时，判断当前 Rule 是否
+    if (solve == operands.size()) {
+        // We have matched all operands. Now ask the rule whether it
+        // matches; this gives the rule chance to apply side-conditions.
+        // If the side-conditions are satisfied, we have a match.
+        if (getRule().matches(this)) {
+            onMatch();
+        }
+    } else {
+        ...
+    }
+}
 
+// DeferringRuleCall#onMatch 方法
+/**
+ * Rather than invoking the rule (as the base method does), creates a
+ * {@link VolcanoRuleMatch} which can be invoked later.
+ */
+protected void onMatch() {
+    final VolcanoRuleMatch match = new VolcanoRuleMatch(volcanoPlanner, getOperand0(), rels, nodeInputs);
+    volcanoPlanner.ruleDriver.getRuleQueue().addMatch(match);
+}
+```
+
+至此，setRoot 就完成了对 CsvTableScan 节点的处理，为 CsvTableScan 生成了 RelSet 和 RelSubset，并筛选了 CsvTableScan 匹配的规则。CsvTableScan 对应的 RelSubset 会以 inputs 的形式返回，提供给 LogicalFilter 作为子节点，LogicalFilter 仍然会按照前文介绍的 `onRegister` -> `addRelToSet` -> `fireRules` 的流程进行处理，并同样返回 RelSubset 作为 LogicalProject 的子节点。LogicalFilter 和 LogicalProject 由于 Convention 为 None，因此计算代价时，他们的代价为正无穷，执行完第一轮 setRoot 方法，最终会得到如下的 RelSubset 树。
+
+```
+LogicalProject(subset=[rel#14:RelSubset#2.NONE.[]], EMPNO=[$0], NAME=[$1], DEPTNO=[$2], GENDER=[$3], CITY=[$4], EMPID=[$5], AGE=[$6], SLACKER=[$7], MANAGER=[$8], JOINEDAT=[$9])
+  LogicalFilter(subset=[rel#12:RelSubset#1.NONE.[]], condition=[=($1, 'Alice')])
+    CsvTableScan(subset=[rel#10:RelSubset#0.ENUMERABLE.[]], table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
+```
+
+TODO
 
 #### 第二轮 setRoot
 
