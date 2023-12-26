@@ -791,9 +791,35 @@ LogicalProject(subset=[rel#14:RelSubset#2.NONE.[]], EMPNO=[$0], NAME=[$1], DEPTN
     CsvTableScan(subset=[rel#10:RelSubset#0.ENUMERABLE.[]], table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-TODO
+RelSubset 树是通过成员变量 `final RelSet set` 变量实现，RelSet 中维护了当前 RelNode，通过 RelNode 的 input 维护了 RelSubset 子节点，以此类推，形成了一颗 RelSubset 树，整体结构如下图所示。
+
+![RelSubset 树结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/26/1703552044.png)
 
 #### 第二轮 setRoot
+
+在调用第二轮 setRoot 前，会优先判断当前 RelNode 的 Trait 是否和目标 Trait 相同，不相同则调用优化器的 `changeTraits` 方法变换特征。由于 RelNode 中的 Convention Trait 是 NONE，目标 Convention Trait 是 ENUMERABLE，因此会先调用 changeTraits 方法。
+
+```java
+final RelNode rootRel2 = rel.getTraitSet().equals(requiredOutputTraits) ? rel : planner.changeTraits(rel, requiredOutputTraits);
+```
+
+##### changeTraits
+
+changeTraits 实现逻辑如下，会传入 RelNode 和期望的 RelTraitSet，然后先调用 ensureRegistered 确保所有的 RelNode 都注册成 RelSubset，
+
+```java
+public RelNode changeTraits(final RelNode rel, RelTraitSet toTraits) {
+    RelSubset rel2 = ensureRegistered(rel, null);
+    if (rel2.getTraitSet().equals(toTraits)) {
+        return rel2;
+    }
+    return rel2.set.getOrCreateSubset(rel.getCluster(), toTraits, true);
+}
+```
+
+
+
+
 
 TODO
 
