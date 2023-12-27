@@ -2,7 +2,7 @@
 title: Apache Calcite 学习资料整理
 tags: [Calcite, Query Optimization]
 categories: [Calcite]
-top: 1
+sticky: 999
 date: 2023-09-18 08:39:23
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 banner: china
@@ -14,7 +14,15 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 
 ## 个人整理
 
-* [Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html)
+* Calcite 知识图谱：[思维导图（密码: kiqs）](https://www.mubu.com/doc/18VzEyDdpBR)
+
+* Calcite 源码学习第 1 弹：[Apache Calcite 快速入门指南](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html)
+* Calcite 源码学习第 2 弹：[Apache Calcite SQL Parser 原理剖析](https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html)
+* Calcite 源码学习第 3 弹：[Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)
+* Calcite 源码学习第 4 弹：TODO
+* Calcite 源码学习第 5 弹：TODO
+* Calcite 源码学习第 6 弹：[深入理解 Apache Calcite HepPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html)
+* Calcite 源码学习第 7 弹：[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)
 
 ## 官方文档
 

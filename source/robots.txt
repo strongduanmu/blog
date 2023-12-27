@@ -10,5 +10,5 @@ Allow: /notes/
 Disallow: /vendors/
 Disallow: /css/
 Disallow: /fancybox/
-Sitemap: /sitemap.xml
-Sitemap: /baidusitemap.xml
+Allow: Sitemap: /sitemap.xml
+Allow: Sitemap: /baidusitemap.xml
