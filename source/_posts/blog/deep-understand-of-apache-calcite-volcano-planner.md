@@ -805,7 +805,7 @@ final RelNode rootRel2 = rel.getTraitSet().equals(requiredOutputTraits) ? rel : 
 
 ##### changeTraits
 
-changeTraits 实现逻辑如下，会传入 RelNode 和期望的 RelTraitSet，然后先调用 ensureRegistered 确保所有的 RelNode 都注册成 RelSubset，
+changeTraits 实现逻辑如下，会传入 RelNode 和期望的 RelTraitSet，然后先调用 ensureRegistered 确保所有的 RelNode 都注册成 RelSubset，然后调用 `getOrCreateSubset` 方法生成 RelTraitSet 对应的 RelSubset。
 
 ```java
 public RelNode changeTraits(final RelNode rel, RelTraitSet toTraits) {
@@ -817,11 +817,59 @@ public RelNode changeTraits(final RelNode rel, RelTraitSet toTraits) {
 }
 ```
 
+此时，根节点 RelSubSet 的 Convention 已经变换为 ENUMERABLE，子节点 RelSubSet 的 Convention 仍然是 NONE，后续需要关注子节点 Convention 的变换时机。
+
+![根节点 RelSubSet Convention](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/27/1703636903.png)
+
+##### registerSubset
+
+由于经过了第一轮 setRoot 以及 changeTraits 处理，`rootRel2` 变成了一颗 RelSubset 树，在第二轮 setRoot 调用 registerImpl 时，由于 RelNode 已经是 RelSubset，因此会调用 registerSubset 方法。
+
+```java
+// VolcanoPlanner#registerImpl 方法
+private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
+    if (rel instanceof RelSubset) {
+        return registerSubset(set, (RelSubset) rel);
+    }
+    ...
+}
+```
+
+registerSubset 方法实现逻辑如下，首先会尝试对 RelSet 进行合并，由于当前案例中 `RelSet set` 为 null，未覆盖 merge 逻辑，后续我们会探索其他复杂案例的  RelSet 合并操作。`canonize` 方法用于处理当前 RelSubset 存在多个等价的 RelSubset 时，获取原始的 RelSubSet。
+
+```java
+private RelSubset registerSubset(@Nullable RelSet set, RelSubset subset) {
+    if ((set != subset.set) && (set != null) && (set.equivalentSet == null)) {
+        LOGGER.trace("Register #{} {}, and merge sets", subset.getId(), subset);
+        merge(set, subset.set);
+    }
+    return canonize(subset);
+}
+
+/**
+ * If a subset has one or more equivalent subsets (owing to a set having
+ * merged with another), returns the subset which is the leader of the
+ * equivalence class.
+ *
+ * @param subset Subset
+ * @return Leader of subset's equivalence class
+ */
+private static RelSubset canonize(final RelSubset subset) {
+    RelSet set = subset.set;
+    if (set.equivalentSet == null) {
+        return subset;
+    }
+    // 循环获取原始的 RelSet，然后创建对应 Trait 的 RelSubset
+    do {
+        set = set.equivalentSet;
+    } while (set.equivalentSet != null);
+    return set.getOrCreateSubset(subset.getCluster(), subset.getTraitSet(), subset.isRequired());
+}
+```
+
+##### ensureRootConverters
 
 
-
-
-TODO
 
 ### findBestExp 流程
 
