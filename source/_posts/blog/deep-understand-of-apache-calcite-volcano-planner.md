@@ -869,7 +869,78 @@ private static RelSubset canonize(final RelSubset subset) {
 
 ##### ensureRootConverters
 
-TODO
+最后会执行 `ensureRootConverters` 方法，确保根节点的等价集合都包含了 `AbstractConverter`，以便于发现代价更小的实现时，能够将 RelSubset 转换为根节点。ensureRootConverters 方法实现逻辑如下，如果根节点中记录的等价关系代数 RelNode 已经是 AbstractConverter，则直接添加到 subsets 集合中。然后判断根节点的所有 RelSubset，如果发现 `root trait` 和 `subset trait` 不同时，将会注册一个 AbstractConverter（AbstractConverter 是一个 RelNode，用于将一个关系代数转换为指定 Convention 的关系代数）。
+
+```java
+/**
+ * Ensures that the subset that is the root relational expression contains
+ * converters to all other subsets in its equivalence set.
+ *
+ * <p>Thus the planner tries to find cheap implementations of those other
+ * subsets, which can then be converted to the root. This is the only place
+ * in the plan where explicit converters are required; elsewhere, a consumer
+ * will be asking for the result in a particular convention, but the root has
+ * no consumers.
+ */
+void ensureRootConverters() {
+    final Set<RelSubset> subsets = new HashSet<>();
+    for (RelNode rel : root.getRels()) {
+        if (rel instanceof AbstractConverter) {
+            subsets.add((RelSubset) ((AbstractConverter) rel).getInput());
+        }
+    }
+    for (RelSubset subset : root.set.subsets) {
+        final ImmutableList<RelTrait> difference = root.getTraitSet().difference(subset.getTraitSet());
+      	// 当 root trait 和 subset trait 不同时，注册一个 AbstractConverter（AbstractConverter 是一个 RelNode）
+        if (difference.size() == 1 && subsets.add(subset)) {
+            register(new AbstractConverter(subset.getCluster(), subset, difference.get(0).getTraitDef(), root.getTraitSet()), root);
+        }
+    }
+}
+```
+
+然后调用 register 方法，分别将 AbstractConverter 和 root 节点作为参数传入，然后调用 ensureRegistered 方法将 RelNode 注册为 RelSubset，此处 root 节点已经为 RelSubset，所以会直接返回，并获取到 RelSubset 对应的 RelSet。
+
+```java
+public RelSubset register(RelNode rel, @Nullable RelNode equivRel) {
+    final RelSet set;
+    if (equivRel == null) {
+        set = null;
+    } else {
+        ...
+        equivRel = ensureRegistered(equivRel, null);
+        set = getSet(equivRel);
+    }
+    return registerImpl(rel, set);
+}
+```
+
+然后逻辑会再次调用到 registerImpl 方法，当发现当前节点是 Converter 时，会尝试将 Converter merge 到 Converter 子节点的 RelSet 中。
+
+```java
+private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
+    ...
+    // Converters are in the same set as their children.
+    if (rel instanceof Converter) {
+        final RelNode input = ((Converter) rel).getInput();
+        final RelSet childSet = castNonNull(getSet(input));
+      	// 
+        if ((set != null) && (set != childSet) && (set.equivalentSet == null)) {
+            merge(set, childSet);
+            ...
+        } else {
+            set = childSet;
+        }
+    }
+    ...
+}
+```
+
+第二轮 setRoot 结束后，RelSubset 的树形结构如下图所示，根节点的 Convention 变成了 ENUMERABLE，
+
+
+
+
 
 ### findBestExp 流程
 
@@ -1089,10 +1160,6 @@ replacer.visit 实现逻辑如下：
     }
   }
 ```
-
-## VolcanoPlanner 优化示例
-
-TODO
 
 ## 结语
 
