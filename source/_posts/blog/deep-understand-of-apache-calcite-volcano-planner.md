@@ -793,7 +793,7 @@ LogicalProject(subset=[rel#14:RelSubset#2.NONE.[]], EMPNO=[$0], NAME=[$1], DEPTN
 
 RelSubset 树是通过成员变量 `final RelSet set` 变量实现，RelSet 中维护了当前 RelNode，通过 RelNode 的 input 维护了 RelSubset 子节点，以此类推，形成了一颗 RelSubset 树，整体结构如下图所示。
 
-![RelSubset 树结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/26/1703552044.png)
+![RelSubset 树结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/29/1703810657.png)
 
 #### 第二轮 setRoot
 
@@ -936,68 +936,67 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
 }
 ```
 
-第二轮 setRoot 结束后，RelSubset 的树形结构如下图所示，根节点的 Convention 变成了 ENUMERABLE，
+第二轮 setRoot 结束后，RelSubset 的树形结构如下图所示，根节点的 Convention 变成了 ENUMERABLE，根节点 RelSet 中记录的 rels 增加了 AbstractConverter，subsets 增加了 Convention 为 ENUMERABLE 的 RelSubset，其他子节点的信息和第一轮 setRoot 一致。
 
-
-
-
+![第二轮 setRoot RelSubset 树形结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/29/1703810113.jpg)
 
 ### findBestExp 流程
 
-findBestExp 方法会根据 setRoot 阶段生成的匹配规则以及 RelSubset 中记录的 cost，寻找最优执行计划。
+完成了 setRoot 流程后，最后一步就是调用 `findBestExp` 方法，根据 setRoot 阶段生成的 RelSubset 树以及其中记录的代价信息，寻找最优的执行计划。下面是 findBestExp 方法的实现，核心的处理逻辑主要是 `ruleDriver.drive()` 和 `buildCheapestPlan` 方法，`ruleDriver.drive()` 负责从 ruleQueue 中取出匹配的规则并进行关系代数变换，并和之前的代价进行比较以寻找每一个节点的最小代价实现。`buildCheapestPlan` 方法则遍历整个 RelSubset 树，寻找出全局最优的执行计划。
 
 ```java
-  /**
-   * Finds the most efficient expression to implement the query given via
-   * {@link org.apache.calcite.plan.RelOptPlanner#setRoot(org.apache.calcite.rel.RelNode)}.
-   *
-   * @return the most efficient RelNode tree found for implementing the given
-   * query
-   */
-  @Override public RelNode findBestExp() {
+/**
+ * Finds the most efficient expression to implement the query given via
+ * {@link org.apache.calcite.plan.RelOptPlanner#setRoot(org.apache.calcite.rel.RelNode)}.
+ *
+ * @return the most efficient RelNode tree found for implementing the given
+ * query
+ */
+@Override
+public RelNode findBestExp() {
     assert root != null : "root must not be null";
-    // 确保所有等价集都包含 AbstractConverter，能够在获取最优 plan 后转换为 root
+    // 确保所有等价集都包含 AbstractConverter，以便于发现代价更小的实现时，能够将 RelSubset 转换为根节点
     ensureRootConverters();
+  	// 注册物化视图相关的关系代数，本文暂时不涉及，后续文章会单独解读物化视图和 Lattice 格
     registerMaterializations();
     // 寻找最优 plan，即 cost 最小的 plan，先找到每个节点的最优 plan，然后构建全局最优 plan
-    // ruleDriver 包括 IterativeRuleDriver 和 TopDownRuleDriver 两种，后续再深入分析对应的使用场景
+    // ruleDriver 包括 IterativeRuleDriver 和 TopDownRuleDriver 两种，本文案例使用的是 IterativeRuleDriver
     ruleDriver.drive();
-    dumpRuleAttemptsInfo();
     // 构建全局最优 plan
     RelNode cheapest = root.buildCheapestPlan(this);
     return cheapest;
-  }
+}
 ```
 
-IterativeRuleDriver#drive 方法使用了一个死循环，会不断地从 ruleQueue 中获取规则，当 ruleQueue 中没有规则时，或者抛出 VolcanoTimeoutException 时，此时会中断循环。onMatch 方法会不断地进行关系代数的转换。
+#### drive
+
+本文案例中 `driver` 的实现类为 `IterativeRuleDriver`，该方法负责应用规则，按照优化规则对关系代数进行变换。`IterativeRuleDriver#drive` 方法实现逻辑如下，该方法使用了一个 `while(true)` 死循环，会不断地从 `ruleQueue` 中弹出规则，并调用 `VolcanoRuleMatch#onMatch` 方法对关系代数进行变换。当 ruleQueue 中没有匹配的规则，或者优化器抛出了 `VolcanoTimeoutException` 时，此时会中断循环。
 
 ```java
-  @Override public void drive() {
+public void drive() {
     while (true) {
-      assert planner.root != null : "RelSubset must not be null at this point";
-      LOGGER.debug("Best cost before rule match: {}", planner.root.bestCost);
-
-      VolcanoRuleMatch match = ruleQueue.popMatch();
-      if (match == null) {
-        break;
-      }
-
-      assert match.getRule().matches(match);
-      try {
-        match.onMatch();
-      } catch (VolcanoTimeoutException e) {
-        LOGGER.warn("Volcano planning times out, cancels the subsequent optimization.");
+        // 从 ruleQueue 中弹出匹配规则
+        VolcanoRuleMatch match = ruleQueue.popMatch();
+        if (match == null) {
+            break;
+        }
+        // 判断规则是否匹配
+        assert match.getRule().matches(match);
+        try {
+            // 调用 onMatch 方法对关系代数进行变换
+            match.onMatch();
+        } catch (VolcanoTimeoutException e) {
+            LOGGER.warn("Volcano planning times out, cancels the subsequent optimization.");
+            planner.canonize();
+            break;
+        }
+        // The root may have been merged with another subset. Find the new root subset.
         planner.canonize();
-        break;
-      }
-
-      // The root may have been merged with another
-      // subset. Find the new root subset.
-      planner.canonize();
     }
-
-  }
+}
 ```
+
+TODO
 
 ruleQueue 中包含的规则：
 
@@ -1081,6 +1080,8 @@ transformTo 方法会调用 org/apache/calcite/plan/volcano/VolcanoRuleCall.java
     }
   }
 ```
+
+#### buildCheapestPlan
 
 buildCheapestPlan 流程：
 
