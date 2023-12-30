@@ -996,43 +996,44 @@ public void drive() {
 }
 ```
 
+当前的案例中，preQueue 中记录了 2 个需要预先处理的匹配规则：`ExpandConversionRule` 和 `ProjectRemoveRule`，ruleQueue 包含了 4 个匹配规则，分别是 `EnumerableFilterRule`、`ProjectFilterTransposeRule`、`EnumerableProjectRule` 和 `ExpandConversionRule`。
+
+ExpandConversionRule 则用于将 AbstractConverter 转换为 converters 链，converters 链会将原始的关系代数转换到目标特征。ProjectRemoveRule 负责将仅返回其输入的 Project 节点转换为其子节点，例如：`Project(ArrayReader(a), {$input0}) becomes ArrayReader(a)`。
+
+EnumerableFilterRule 和 EnumerableProjectRule 在 Calcite 中属于 `ConverterRule`，负责将 LogicalFilter、LogicalProject 转换为 EnumerableFilter 和 EnumerableProject。ProjectFilterTransposeRule 会将 Project 和 Filter 进行转置变换，属于 `TransformationRule`。
+
+![ruleQueue 包含的 VolcanoRuleMatch](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/30/1703897196.png)
+
+从队列中弹出 VolcanoRuleMatch 后会调用 `VolcanoRuleMatch#onMatch` 方法进行关系代数变换，方法实现逻辑如下。
+
 TODO
 
-ruleQueue 中包含的规则：
-
-![image-20231128130927611](/Users/duanzhengqiang/blog/source/_posts/blog/image-20231128130927611.png)
-
-onMatch 方法逻辑：
-
 ```java
-// RelOptRuleCall 代表了对 RelOptRule 的调用，并传递了一组关系表达式作为参数，此处为 VolcanoRuleCall 实现类
+// VolcanoRuleMatch 继承了 RelOptRuleCall，RelOptRuleCall 代表了对 RelOptRule 的调用，并传递了一组关系表达式作为参数
 protected void onMatch() {
-    assert getRule().matches(this);
-    volcanoPlanner.checkCancel();
     try {
-      ...
-      // 遍历当前节点 LogicalProject
-      for (int i = 0; i < rels.length; i++) {
-        RelNode rel = rels[i];
-        // 获取当前节点的 RelSubset
-        RelSubset subset = volcanoPlanner.getSubset(rel);
-				// 检查 subset（不能为空...），并输出 debug 日志
-      }
-			...
-      // 将当前的 VolcanoRuleCall 添加到 deque 头部，push 内部调用 addFirst
-      volcanoPlanner.ruleCallStack.push(this);
-      try {
-        // 调用 VolcanoRuleCall 中缓存的 rule#onMatch 方法，当前是 EnumerableProjectRule，它也是一个 ConverterRule，用于将 LogicalProject 转换为 EnumerableProject。onMatch 方法会调用 rule#convert 方法，并进行 transformTo 转换。
-        getRule().onMatch(this);
-      } finally {
-        // 从 ruleCallStack 中弹出首个对下，调用 deque removeFirst 方法
-        volcanoPlanner.ruleCallStack.pop();
-      }
+        ...
+        // 遍历 VolcanoRuleMatch 中记录的 rels
+        for (int i = 0; i < rels.length; i++) {
+            RelNode rel = rels[i];
+            // 获取对应的 RelSubset
+            RelSubset subset = volcanoPlanner.getSubset(rel);
+            // 检查 subset 不能为空，并输出 debug 日志
+        }
+        ...
+        // 将当前的 VolcanoRuleCall 添加到 deque 头部，push 内部调用 addFirst
+        volcanoPlanner.ruleCallStack.push(this);
+        try {
+            // 调用 VolcanoRuleCall 中缓存的 rule#onMatch 方法
+            getRule().onMatch(this);
+        } finally {
+            // 从 ruleCallStack 中弹出首个对象，调用 deque removeFirst 方法
+            volcanoPlanner.ruleCallStack.pop();
+        }
     } catch (Exception e) {
-      throw new RuntimeException("Error while applying rule " + getRule()
-          + ", args " + Arrays.toString(rels), e);
+        throw new RuntimeException("Error while applying rule " + getRule() + ", args " + Arrays.toString(rels), e);
     }
-  }
+}
 ```
 
 ![rels 对象结构，input 是子类的 RelSubset](/Users/duanzhengqiang/blog/source/_posts/blog/image-20231129082549997.png)
