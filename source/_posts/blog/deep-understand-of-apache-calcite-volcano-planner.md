@@ -1004,9 +1004,7 @@ EnumerableFilterRule 和 EnumerableProjectRule 在 Calcite 中属于 `ConverterR
 
 ![ruleQueue 包含的 VolcanoRuleMatch](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/30/1703897196.png)
 
-从队列中弹出 VolcanoRuleMatch 后会调用 `VolcanoRuleMatch#onMatch` 方法进行关系代数变换，方法实现逻辑如下。
-
-TODO
+从队列中弹出 `VolcanoRuleMatch` 后会调用 `VolcanoRuleMatch#onMatch` 方法进行关系代数变换，方法实现逻辑如下。VolcanoRuleMatch 继承了 `RelOptRuleCall`，RelOptRuleCall 代表了对 RelOptRule 的调用，并传递了一组关系表达式作为参数。开始 onMatch 前，会将当前的 VolcanoRuleCall 添加到 deque 头部，然后调用不同 rule 的 onMatch 方法，完成后 finally 代码块会从 deque 头部弹出。
 
 ```java
 // VolcanoRuleMatch 继承了 RelOptRuleCall，RelOptRuleCall 代表了对 RelOptRule 的调用，并传递了一组关系表达式作为参数
@@ -1036,7 +1034,7 @@ protected void onMatch() {
 }
 ```
 
-![rels 对象结构，input 是子类的 RelSubset](/Users/duanzhengqiang/blog/source/_posts/blog/image-20231129082549997.png)
+TODO
 
 transformTo 方法会调用 org/apache/calcite/plan/volcano/VolcanoRuleCall.java:100 中的 transformTo 方法。
 
