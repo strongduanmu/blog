@@ -14,13 +14,15 @@
     screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/06/20/1655708134.png
     avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/06/20/1655708310.jpg
     description: 即时通讯网
+
+'技术工具':
   - title: Arthas
     url: https://arthas.aliyun.com/
     screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/29/1703826306.png
     avatar: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/29/1703826270.png
     description: Arthas - Java 应用诊断利器
 
-'实用工具':
+'日常工具':
   - title: Tables Generator
     url: https://www.tablesgenerator.com/
     screenshot: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/14/1644799035.png
