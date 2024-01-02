@@ -1034,51 +1034,49 @@ protected void onMatch() {
 }
 ```
 
-TODO
-
-transformTo 方法会调用 org/apache/calcite/plan/volcano/VolcanoRuleCall.java:100 中的 transformTo 方法。
+以 `EnumerableFilterRule` 为例，onMatch 方法会先调用 `convert` 方法，将 LogicalFilter 转换为 EnumerableFilter，然后调用 transformTo 方法对 RelNode 树进行变换。
 
 ```java
-// equiv 其他等价关系的映射首次调用为空 Map
-@Override public void transformTo(RelNode rel, Map<RelNode, RelNode> equiv,
-      RelHintsPropagator handler) {
-  	// 判断 rel 是否为 PhysicalNode，PhysicalNode 不允许为 TransformationRule
-    if (rel instanceof PhysicalNode
-        && rule instanceof TransformationRule) {
-      throw new RuntimeException(
-          rel + " is a PhysicalNode, which is not allowed in " + rule);
+public void onMatch(RelOptRuleCall call) {
+    RelNode rel = call.rel(0);
+    if (rel.getTraitSet().contains(inTrait)) {
+        // 将 LogicalFilter 转换为 EnumerableFilter
+        final RelNode converted = convert(rel);
+        if (converted != null) {
+            // 调用 transformTo 方法对 RelNode 树进行变换
+            call.transformTo(converted);
+        }
     }
-		// 对 Hint 进行处理，暂不关注
+}
+```
+
+`VolcanoRuleCall#transformTo` 实现逻辑如下，由于 EnumerableFilter 是转换的节点，会调用 ensureRegistered 方法对该节点进行重新注册，此时会计算 EnumerableFilter 的代价，并更新 RelSubset 中记录的最小代价。
+
+```java
+public void transformTo(RelNode rel, Map<RelNode, RelNode> equiv, RelHintsPropagator handler) {
+    // 对 Hint 进行处理，将原始 RelNode 的 Hint 复制到新的 RelNode 中
     rel = handler.propagate(rels[0], rel);
     try {
-      ...
-      // Registering the root relational expression implicitly registers
-      // its descendants. Register any explicit equivalences first, so we
-      // don't register twice and cause churn.
-      // 遍历等价集，并进行注册，首次调用为空
-      for (Map.Entry<RelNode, RelNode> entry : equiv.entrySet()) {
-        volcanoPlanner.ensureRegistered(
-            entry.getKey(), entry.getValue());
-      }
-      // The subset is not used, but we need it, just for debugging
-      @SuppressWarnings("unused")
-      RelSubset subset = volcanoPlanner.ensureRegistered(rel, rels[0]);
-
-      if (volcanoPlanner.getListener() != null) {
-        RelOptListener.RuleProductionEvent event =
-            new RelOptListener.RuleProductionEvent(
-                volcanoPlanner,
-                rel,
-                this,
-                false);
-        volcanoPlanner.getListener().ruleProductionSucceeded(event);
-      }
+        ...
+        // Registering the root relational expression implicitly registers
+        // its descendants. Register any explicit equivalences first, so we
+        // don't register twice and cause churn.
+        // 遍历等价集，并进行注册，本案例中 EnumerableFilter 等价集合为空
+        for (Map.Entry<RelNode, RelNode> entry : equiv.entrySet()) {
+            volcanoPlanner.ensureRegistered(entry.getKey(), entry.getValue());
+        }
+        // 注册 EnumerableFilter 并重新计算最小代价
+        RelSubset subset = volcanoPlanner.ensureRegistered(rel, rels[0]);
+        ...
     } catch (Exception e) {
-      throw new RuntimeException("Error occurred while applying rule "
-          + getRule(), e);
+        throw new RuntimeException("Error occurred while applying rule " + getRule(), e);
     }
-  }
+}
 ```
+
+变换完成后 RelSubset 树更新了 bestCost，并且 rels 中同时记录了 LogicalFilter 和 EnumerableFilter。
+
+![EnumerableFilterRule 变换后结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/02/1704158875.png)
 
 #### buildCheapestPlan
 
