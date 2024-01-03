@@ -458,18 +458,18 @@ public RelSubset ensureRegistered(RelNode rel, @Nullable RelNode equivRel) {
 ```java
 @Override
 public RelNode onRegister(RelOptPlanner planner) {
-  	// 获取子节点
+    // 获取子节点
     List<RelNode> oldInputs = getInputs();
     List<RelNode> inputs = new ArrayList<>(oldInputs.size());
     for (final RelNode input : oldInputs) {
-				...
+        ...
     }
     RelNode r = this;
     if (!Util.equalShallow(oldInputs, inputs)) {
-      	// 复制生成新的 RelNode
+        // 复制生成新的 RelNode
         r = copy(getTraitSet(), inputs);
     }
-  	// 重新计算 Digest 摘要信息，是 RelNode 的唯一标识
+    // 重新计算 Digest 摘要信息，是 RelNode 的唯一标识
     r.recomputeDigest();
     return r;
 }
@@ -1080,84 +1080,81 @@ public void transformTo(RelNode rel, Map<RelNode, RelNode> equiv, RelHintsPropag
 
 #### buildCheapestPlan
 
-buildCheapestPlan 流程：
-
-![image-20231129091835780](/Users/duanzhengqiang/blog/source/_posts/blog/image-20231129091835780.png)
-
-递归调用 Relsubset Tree 并获取每一个节点上的最优 plan，然后组装返回全局最优 plan。
+变换完成后，会调用 `RelSubset#buildCheapestPlan` 方法构建代价最小的执行计划，buildCheapestPlan 方法实现逻辑如下，首先会初始化 CheapestPlanReplacer 类，它负责遍历 RelSubset 树并将每个节点替换为代价最小的 RelNode，遍历完成后返回全局最小代价的执行计划。
 
 ```java
 /**
  * Recursively builds a tree consisting of the cheapest plan at each node.
  */
 RelNode buildCheapestPlan(VolcanoPlanner planner) {
-  // 初始化树遍历器，会遍历 RelSet Tree 并进行节点替换
-  CheapestPlanReplacer replacer = new CheapestPlanReplacer(planner);
-  // Replacer 内部维护了 final Map<Integer, RelNode> visited = new HashMap<>(); 记录当前节点是否遍历过
-  final RelNode cheapest = replacer.visit(this, -1, null);
-
-  if (planner.getListener() != null) {
-    RelOptListener.RelChosenEvent event =
-        new RelOptListener.RelChosenEvent(
-            planner,
-            null);
-    planner.getListener().relChosen(event);
-  }
-
-  return cheapest;
+    // 初始化树遍历器，会遍历 RelSubset 树并进行节点替换
+    CheapestPlanReplacer replacer = new CheapestPlanReplacer(planner);
+    // Replacer 内部维护了 final Map<Integer, RelNode> visited = new HashMap<>(); 记录当前节点是否遍历过
+    final RelNode cheapest = replacer.visit(this, -1, null);
+    ...
+    return cheapest;
 }
 ```
 
-replacer.visit 实现逻辑如下：
+`CheapestPlanReplacer#visit` 是处理的核心逻辑，其实现细节如下，首先会根据 RelNode 的 Id 标识从 visited 中获取最优节点，如果当前节点已经遍历过则会直接返回。如果 visited 中未包含，则会判断节点是否为 RelSubset，案例中的节点已经都变换为 RelSubset，因此这一步会找出 RelSubset 中的最小代价 cheapest 进行替换。然后会继续遍历子节点寻找 cheapest 进行替换，替换后的子节点会和原子节点进行比对，不同则会将新的子节点复制到当前节点中。
 
 ```java
-    public RelNode visit(
-        RelNode p,
-        int ordinal,
-        @Nullable RelNode parent) {
-      // 每一个 RelNode 都有个唯一 Id
-      final int pId = p.getId();
-      // 从 visited 中获取当前节点是否已经遍历过，如果遍历过则直接返回
-      RelNode prevVisit = visited.get(pId);
-      if (prevVisit != null) {
+public RelNode visit(RelNode p, int ordinal, @Nullable RelNode parent) {
+    // 每一个 RelNode 都有个唯一 Id
+    final int pId = p.getId();
+    // 从 visited 中获取当前节点是否已经遍历过，如果遍历过则直接返回
+    RelNode prevVisit = visited.get(pId);
+    if (prevVisit != null) {
         // return memoized result of previous visit if available
         return prevVisit;
-      }
-			// 判断当前节点为 RelSubset，则进行进一步处理
-      if (p instanceof RelSubset) {
+    }
+    // 判断当前节点为 RelSubset，则进行进一步处理
+    if (p instanceof RelSubset) {
         RelSubset subset = (RelSubset) p;
         // 获取 RelSubset 中记录的最优 plan
         RelNode cheapest = subset.best;
         if (cheapest == null) {
-          // 如果获取不到最优 plan，则抛出异常
-          ...
-          LOGGER.trace("Caught exception in class={}, method=visit", getClass().getName(), e);
-          throw e;
+            // 如果获取不到最优 plan，则抛出异常
+            ...
+            LOGGER.trace("Caught exception in class={}, method=visit", getClass().getName(), e);
+            throw e;
         }
         p = cheapest;
-      }
-			...
-			// 获取当前节点的子节点，进行遍历处理，获取最优 plan
-      List<RelNode> oldInputs = p.getInputs();
-      List<RelNode> inputs = new ArrayList<>();
-      for (int i = 0; i < oldInputs.size(); i++) {
+    }
+    ...
+    // 获取当前节点的子节点，进行遍历处理，获取最优 plan
+    List<RelNode> oldInputs = p.getInputs();
+    List<RelNode> inputs = new ArrayList<>();
+    for (int i = 0; i < oldInputs.size(); i++) {
         RelNode oldInput = oldInputs.get(i);
+        // 遍历子节点
         RelNode input = visit(oldInput, i, p);
         inputs.add(input);
-      }
-      // 新的子节点和老的子节点不同，则将新的子节点复制到当前节点中
-      if (!inputs.equals(oldInputs)) {
+    }
+    // 新的子节点和老的子节点不同，则将新的子节点复制到当前节点中
+    if (!inputs.equals(oldInputs)) {
         final RelNode pOld = p;
         p = p.copy(p.getTraitSet(), inputs);
-        planner.provenanceMap.put(
-            p, new VolcanoPlanner.DirectProvenance(pOld));
-      }
-      // 记录到 visited
-      visited.put(pId, p); // memoize result for pId
-      return p;
+        planner.provenanceMap.put(p, new VolcanoPlanner.DirectProvenance(pOld));
     }
-  }
+    // 记录到 visited
+    visited.put(pId, p); // memoize result for pId
+    return p;
+}
 ```
+
+最终，我们得到了如下的最优执行计划，Calcite 执行器会生成执行代码，执行并返回查询结果。
+
+```
+EnumerableFilter(condition=[=($1, 'Alice')])
+  CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
+```
+
+### VolcanoPlanner 整体流程
+
+TODO
+
+![VolcanoPlanner 整体流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/03/1704245597.png)
 
 ## 结语
 
