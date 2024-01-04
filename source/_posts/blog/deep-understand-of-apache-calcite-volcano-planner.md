@@ -1166,7 +1166,7 @@ EnumerableFilter(condition=[=($1, 'Alice')])
 
 然后介绍了 VolcanoPlanner 中的一些基础概念——RelNode、RelSet 和 RelSubset，理解了这些概念对学习 VolcanoPlanner 原理非常有帮助。同时，我们参考了 Julain 分享的 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://calcite.apache.org/community/#cost-based-query-optimization-in-apache-phoenix-using-apache-calcite)，提前了解了 VolcanoPlanner 的处理流程，整体上对优化流程有了一些了解。最后，本文结合一个简单的案例，深入 Calcite 源码细节，带领大家一起探究了整个流程。
 
-限于文章的篇幅以及案例的选择，VolcanoPlanner 优化器的一些细节本文无法全面覆盖，还请各位读者多多包涵。下一篇文章，我们将关注 VolcanoPlanner 中的统计信息和代价模型，并会通过一个多表关联、聚合查询的案例，一起探究下 VolcanoPlanner 优化器是如何使用统计信息和代价模型进行代价计算，在多表关联、聚合查询 SQL 中，VolcanoPlanner 又会使用哪些优化方式得到最优执行计划。欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
+限于文章的篇幅以及案例的选择，VolcanoPlanner 优化器的一些细节本文无法全面覆盖，还请各位读者多多包涵。下一篇文章，我们将关注 **VolcanoPlanner 中的统计信息和代价模型，并会通过一个多表关联、聚合查询的案例，一起探究下 VolcanoPlanner 优化器是如何使用统计信息和代价模型进行代价计算，在多表关联、聚合查询 SQL 中，VolcanoPlanner 又会使用哪些优化方式得到最优执行计划**。欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
 
 
 
