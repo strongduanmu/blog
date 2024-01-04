@@ -1150,15 +1150,23 @@ EnumerableFilter(condition=[=($1, 'Alice')])
   CsvTableScan(table=[[SALES, EMPS]], fields=[[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]])
 ```
 
-### VolcanoPlanner 整体流程
-
-TODO
+### 整体流程总结
 
 ![VolcanoPlanner 整体流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/03/1704245597.png)
 
+前文我们以简单的查询语句为例，一起探究了 VolcanoPlanner 优化器实现细节，想必大家阅读完一定有所收获。为了加深大家对优化器的理解，最后我们再进行一些梳理总结，上图展示了 VolcanoPlanner 优化器的整体流程，总体上可以分为三步：
+
+1. 第一步：注册优化器规则。通过调用 `addRule` 方法，我们可以快速将优化器规则注册进来，这些规则会维护在 VolcanoPlanner 的 classOperands 对象中，后续筛选规则时会从该对象中获取规则；
+2. 第二步：初始化 `RelSubset`。这步会遍历逻辑计划树，将每个节点注册成为 RelSubset 并维护节点的代价信息，然后将逻辑计划树转换为 RelSubset 树，RelSubset 对象关联了所属的 `RelSet` 对象，该对象维护了当前节点的等价集合，RelSubset 中记录的是当前已知代价最小的关系代数。`fireRules` 方法负责筛选规则，会将匹配的规则添加到队列中；
+3. 第三步：查找最优计划。根据前文初始化的 RelSubset 树以及队列中记录的匹配规则，该步骤会调用 `drive` 方法应用规则，然后通过 `onMatch` 方法对关系代数进行变换，完成变换后会重新计算代价信息，并更新 RelSubset 和 RelSet 对象。最后会调用 buildCheapestPlan 方法，从 RelSubset 树中获取整体代价最小的执行计划。
+
 ## 结语
 
-TODO
+本文首先介绍了 Volcano/Cascades 优化器的理论基础，Volcano 优化器生成器论文中介绍的 `Logical Algebra`、`Physical Algebra`、`Transformation Rule`，以及 Cascades 优化器论文中介绍的 `Memo` 数据结构，`Pattern` 匹配规则等概念在 Calcite VolcanoPlanner 中都有体现，大家在阅读代码时可以参考论文中的概念进行理解。
+
+然后介绍了 VolcanoPlanner 中的一些基础概念——RelNode、RelSet 和 RelSubset，理解了这些概念对学习 VolcanoPlanner 原理非常有帮助。同时，我们参考了 Julain 分享的 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://calcite.apache.org/community/#cost-based-query-optimization-in-apache-phoenix-using-apache-calcite)，提前了解了 VolcanoPlanner 的处理流程，整体上对优化流程有了一些了解。最后，本文结合一个简单的案例，深入 Calcite 源码细节，带领大家一起探究了整个流程。
+
+限于文章的篇幅以及案例的选择，VolcanoPlanner 优化器的一些细节本文无法全面覆盖，还请各位读者多多包涵。下一篇文章，我们将关注 VolcanoPlanner 中的统计信息和代价模型，并会通过一个多表关联、聚合查询的案例，一起探究下 VolcanoPlanner 优化器是如何使用统计信息和代价模型进行代价计算，在多表关联、聚合查询 SQL 中，VolcanoPlanner 又会使用哪些优化方式得到最优执行计划。欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
 
 
 
