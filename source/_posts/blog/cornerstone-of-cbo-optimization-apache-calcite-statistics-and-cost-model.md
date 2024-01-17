@@ -18,6 +18,12 @@ references:
     url: https://zhuanlan.zhihu.com/p/370372242
   - title: PolarDB-X 面向 HTAP 的 CBO 优化器
     url: https://zhuanlan.zhihu.com/p/353161383
+  - title: 独家揭秘 | 阿里云分析型数据库 AnalyticDB 新一代 CBO 优化器技术
+    url: https://developer.aliyun.com/article/751481
+  - title: Oracle 多列统计信息
+    url: https://blog.51cto.com/lhrbest/2712352
+  - title: Kylin 如何实现基数统计
+    url: https://zhuanlan.zhihu.com/p/355154549?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1730343025270837248&utm_source=wechat_session
 date: 2024-01-09 08:30:21
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 ---
@@ -34,7 +40,13 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780
 
 ### 统计信息
 
-TODO
+统计信息 `Statistic` 为优化器的 Cost 计算提供了必要的数据支撑，通常我们可以将统计信息划分为`基础统计信息`和`高级统计信息`。
+
+基础统计信息负责大部分通用场景下的 Cost 计算，具体包括表级别的统计信息 `Row Count`，单个字段的统计信息：每个字段的 `NDV 值`（The Number of Distinct Values），`Max 值`，`Min 值`，`NULL 值`，`Histogram 值`（分布信息，用于区间查询）, `Count-Min Sketch 值`（用于等值查询），`DataSize 值` 等。由于基础统计信息对 Cost 计算至关重要，需要做到自动收集，自动更新，否则很可能因为基础统计信息的缺失，导致优化器产生灾难性的执行计划。
+
+高级统计信息主要用于提升复杂场景下的决策质量，通常包括`多字段间的关联度`（Column Group）、`Functional Deplendency`、`数据倾斜` 等，高级统计信息需要手工触发，只有在必要的时候才会收集。
+
+TODO 基数估计
 
 ### 代价模型
 
