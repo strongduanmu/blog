@@ -6,12 +6,8 @@ banner: china
 references:
   - title: Metadata Management in Apache Calcite
     url: https://www.querifylabs.com/blog/metadata-management-in-apache-calcite
-  - title: SparkSQL Catalyst － 基于代价优化（CBO）
-    url: https://sq.sf.163.com/blog/article/178255009191530496
   - title: Calcite 官方文档中文版 - 适配器 - 统计和代价
     url: https://strongduanmu.com/wiki/calcite/adapters.html#%E7%BB%9F%E8%AE%A1%E5%92%8C%E4%BB%A3%E4%BB%B7
-  - title: 数据库内核-CBO 优化器采样与代价模型
-    url: https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session
   - title: 数据库等值查询与统计信息
     url: https://zhuanlan.zhihu.com/p/576987355
   - title: PolarDB-X CBO 优化器技术内幕
@@ -22,8 +18,10 @@ references:
     url: https://developer.aliyun.com/article/751481
   - title: Oracle 多列统计信息
     url: https://blog.51cto.com/lhrbest/2712352
-  - title: Kylin 如何实现基数统计
-    url: https://zhuanlan.zhihu.com/p/355154549?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1730343025270837248&utm_source=wechat_session
+  - title: 【独家】一文看懂 MySQL 直方图
+    url: https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA
+  - title: 数据库内核-CBO 优化器采样与代价模型
+    url: https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session
 date: 2024-01-09 08:30:21
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 ---
@@ -46,11 +44,37 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780
 
 高级统计信息主要用于提升复杂场景下的决策质量，通常包括`多字段间的关联度`（Column Group）、`Functional Deplendency`、`数据倾斜` 等，高级统计信息需要手工触发，只有在必要的时候才会收集。
 
-TODO 基数估计
+TODO: 介绍 Histogram、Count-Min Sketch。
+
+### 基数估计
+
+有了统计信息后，我们就可以对执行计划中的各个算子进行基数估计（`Cardinality Estimation`），估算这些算子产生结果的行数（或基数）。如下图所示，通过基数估计我们可以选择更优的 `JOIN` 顺序以减少中间结果。`Scan` 算子的行数可以直接从表的统计信息 `Row Count` 获取，而对于 `Filter` 算子，可以使用输入的 `Scan` 算子的行数乘以谓词的选择性。
+
+![基数估计在执行计划选择中的用途](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/23/1705969782.png)
+
+下面展示了常用算子基数估计的例子：
+
+- `Scan` 算子基数估计：统计信息中收集的表 Row Count；
+- `Filter` 算子基数估计：对于唯一属性的谓词，相等条件下结果不超过一行，对于非唯一属性的谓词，相等条件下结果使用 `NDV` 估算选择率，然后计算结果。对于范围查询，我们可以使用直方图估算选择率，然后计算结果；
+- `Join` 算子基数估计：`LeftRowCount * RightRowCount * Join Condition Selectivity`；
+- `Union` 算子基数估计：`LeftRowCount + RightRowCount`；
+- `Agg` 算子基数估计：Group By 列的 Distinct 值数量（NDV）。
+
+TODO
 
 ### 代价模型
 
-TODO
+代价模型（Cost Model）是用于估算物理执行计划的代价，代价用（CPU、Memory、IO、Net）四元组来描述。每一算子都会通过上述四元组来描述其代价，这个执行计划的代价即是其全部算子的代价的求和。最终优化器会根据求和后的CPU、Memory、IO、Net加权计算出执行计划最终的代价。
+
+```
+CPU：代表CPU的消耗数值
+Memory：代表Memory的占用量
+IO：代表磁盘的逻辑IO次数
+Net：代表网络的逻辑IO次数(交互次数及传输量)
+最终Cost = (CPU, Memory, IO, Net) · (w1, w2, w3, w4)，W为权重向量
+```
+
+
 
 ## Calcite RelMetadataQuery 实现
 
