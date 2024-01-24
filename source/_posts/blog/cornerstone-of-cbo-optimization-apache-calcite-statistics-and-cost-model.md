@@ -44,8 +44,6 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780
 
 高级统计信息主要用于提升复杂场景下的决策质量，通常包括`多字段间的关联度`（Column Group）、`Functional Deplendency`、`数据倾斜` 等，高级统计信息需要手工触发，只有在必要的时候才会收集。
 
-TODO: 介绍 Histogram、Count-Min Sketch。
-
 ### 基数估计
 
 有了统计信息后，我们就可以对执行计划中的各个算子进行基数估计（`Cardinality Estimation`），估算这些算子产生结果的行数（或基数）。如下图所示，通过基数估计我们可以选择更优的 `JOIN` 顺序以减少中间结果。`Scan` 算子的行数可以直接从表的统计信息 `Row Count` 获取，而对于 `Filter` 算子，可以使用输入的 `Scan` 算子的行数乘以谓词的选择性。
@@ -60,21 +58,15 @@ TODO: 介绍 Histogram、Count-Min Sketch。
 - `Union` 算子基数估计：`LeftRowCount + RightRowCount`；
 - `Agg` 算子基数估计：Group By 列的 Distinct 值数量（NDV）。
 
-TODO
-
 ### 代价模型
 
-代价模型（Cost Model）是用于估算物理执行计划的代价，代价用（CPU、Memory、IO、Net）四元组来描述。每一算子都会通过上述四元组来描述其代价，这个执行计划的代价即是其全部算子的代价的求和。最终优化器会根据求和后的CPU、Memory、IO、Net加权计算出执行计划最终的代价。
+代价模型（`Cost Model`）是用于估算物理执行计划的代价，代价通常使用 `CPU`、`Memory`、`IO`、`Net` 四元组来描述，每一算子都会通过上述四元组来描述其代价。执行计划的代价即是其全部算子的代价之和，最终优化器会根据求和后的 CPU、Memory、IO、Net 加权计算出执行计划的最终代价。
 
-```
-CPU：代表CPU的消耗数值
-Memory：代表Memory的占用量
-IO：代表磁盘的逻辑IO次数
-Net：代表网络的逻辑IO次数(交互次数及传输量)
-最终Cost = (CPU, Memory, IO, Net) · (w1, w2, w3, w4)，W为权重向量
-```
-
-
+* `CPU`：代表 CPU 的消耗数值；
+* `Memory`：代表 Memory 的占用量；
+* `IO`：代表磁盘的逻辑 IO 次数；
+* `Net`：代表网络的逻辑 IO 次数（交互次数及传输量）；
+* 最终 Cost = (CPU, Memory, IO, Net) · (w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>)，w 为权重向量。
 
 ## Calcite RelMetadataQuery 实现
 
