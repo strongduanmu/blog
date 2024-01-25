@@ -8,40 +8,38 @@ date: 2023-10-26 09:00:00
 
 > 原文链接：https://calcite.apache.org/docs/stream.html
 
-TODO
-
 Calcite 扩展了 SQL 和关系代数以支持流式查询。
 
 ## 介绍
 
-流是持续、永久流动的记录的集合。与表不同，它们通常不存储在磁盘上，而是通过网络流动并在内存中短时间保存。
+流是持续、永久流动的记录集合。与表不同，它们通常不存储在磁盘上，而是通过网络流动并在内存中短暂保存。
 
-流是对表的补充，因为它们代表企业现在和未来正在发生的事情，而表则代表过去。将流归档到表中是很常见的。
+流是对表的补充，因为它们代表企业现在和未来正在发生的事情，而表则代表过去。将流归档到表中是很常见的操作。
 
-与表一样，您通常希望使用基于关系代数的高级语言来查询流，根据模式进行验证，并进行优化以利用可用的资源和算法。
+与表一样，你通常希望使用基于关系代数的高级语言来查询流，根据模式进行验证，并进行优化以利用可用的资源和算法。
 
-Calcite 的 SQL 是标准 SQL 的扩展，而不是另一种“类 SQL”语言。这种区别很重要，原因如下：
+Calcite 的 SQL 是标准 SQL 的扩展，而不是另一种 `类 SQL` 语言。这种区别很重要，原因如下：
 
-- 对于任何了解常规 SQL 的人来说，流式 SQL 都很容易学习。
-- 语义很清晰，因为我们的目标是在流上产生相同的结果，就像表中存在相同的数据一样。
-- 您可以编写组合流和表（或流的历史记录，基本上是内存中的表）的查询。
+- 对于任何了解常规 SQL 的人来说，流式 SQL 都很容易学习；
+- 语义很清晰，因为我们的目标是在流上产生相同的结果，就像表中存在相同的数据一样；
+- 你可以编写组合流和表（或流的历史记录，基本上是内存中的表）的查询；
 - 许多现有工具可以生成标准 SQL。
 
-如果不使用该`STREAM`关键字，您将回到常规标准 SQL。
+如果不使用 `STREAM` 关键字，则会返回常规标准 SQL。
 
-## 示例架构
+## 示例模式
 
-我们的流式 SQL 示例使用以下架构：
+我们的流式 SQL 示例使用以下模式：
 
-- `Orders (rowtime, productId, orderId, units)`- 一个流和一个表
-- `Products (rowtime, productId, name)`- 一张桌子
-- `Shipments (rowtime, orderId)`- 一条流
+- `Orders (rowtime, productId, orderId, units)`——一个流和一张表；
+- `Products (rowtime, productId, name)`——一张表；
+- `Shipments (rowtime, orderId)`——一个流。
 
 ## 一个简单的查询
 
 让我们从最简单的流式查询开始：
 
-```
+```sql
 SELECT STREAM *
 FROM Orders;
 
@@ -57,13 +55,13 @@ FROM Orders;
  11:24:11 |        10 |      12 |     4
 ```
 
-此查询从`Orders`流中读取所有列和行。与任何流式查询一样，它永远不会终止。每当记录到达时，它就会输出一条记录`Orders`。
+此查询从 `Orders` 流中读取所有列和行。与任何流式查询一样，它永远不会终止。每当记录到达 `Orders` 时，它就会输出一条记录。
 
-键入`Control-C`以终止查询。
+输入 `Control-C` 终止查询。
 
-关键字`STREAM`是流式 SQL 中的主要扩展。它告诉系统您对传入订单感兴趣，而不是现有订单。查询
+`STREAM` 关键字是流式 SQL 中的主要扩展。它告诉系统你对新输入的订单感兴趣，而不是现有订单。如下查询：
 
-```
+```sql
 SELECT *
 FROM Orders;
 
@@ -77,11 +75,11 @@ FROM Orders;
 4 records returned.
 ```
 
-也有效，但会打印出所有现有订单，然后终止。我们将其称为*关系*查询，而不是*流式查询*。它具有传统的 SQL 语义。
+也有效，但会打印出所有现有订单，然后终止。我们将其称为关系查询，而不是流式查询。它具有传统的 SQL 语义。
 
-`Orders`很特别，因为它既有流又有表。如果您尝试在表上运行流式查询，或在流上运行关系查询，Calcite 会给出错误：
+`Orders` 很特殊，因为它既有流又有表。如果您尝试在表上运行流式查询，或在流上运行关系查询，Calcite 会给出错误：
 
-```
+```sql
 SELECT * FROM Shipments;
 
 ERROR: Cannot convert stream 'SHIPMENTS' to a table
@@ -93,9 +91,9 @@ ERROR: Cannot convert table 'PRODUCTS' to a stream
 
 ## 过滤行
 
-就像在常规 SQL 中一样，您可以使用`WHERE`子句来过滤行：
+就像在常规 SQL 中一样，您使用 `WHERE` 子句来过滤行：
 
-```
+```sql
 SELECT STREAM *
 FROM Orders
 WHERE units > 3;
@@ -111,9 +109,9 @@ WHERE units > 3;
 
 ## 投影表达式
 
-在子句中使用表达式`SELECT`来选择要返回的列或计算表达式：
+在 `SELECT` 语句中使用表达式来选择要返回的列或计算表达式：
 
-```
+```sql
 SELECT STREAM rowtime,
   'An order for ' || units || ' '
     || CASE units WHEN 1 THEN 'unit' ELSE 'units' END
@@ -132,31 +130,31 @@ FROM Orders;
  11:24:11 | An order by 4 units of product #10
 ```
 
-我们建议您始终在子句`rowtime`中包含该列`SELECT` 。在每个流和流查询中拥有排序的时间戳使得稍后可以进行高级计算，例如`GROUP BY`和`JOIN`。
+我们建议您始终在 `SELECT` 子句中包含 `rowtime` 列。在每个流和流查询中拥有排序的时间戳使得稍后可以进行高级计算，例如 `GROUP BY` 和 `JOIN` 。
 
-## 翻滚窗户
+## 滚动窗口（Tumbling windows）
 
-有多种方法可以计算流上的聚合函数。差异是：
+有多种方法可以计算流上的聚合函数。它们的差异是：
 
 - 每行输入多少行？
 - 每个传入值是否出现在一个或多个总计中？
-- 什么定义了“窗口”，即构成给定输出行的行集？
+- 什么定义了`窗口`，即构成给定输出行的行集？
 - 结果是流还是关系？
 
-有多种窗口类型：
+Calcite 有多种窗口类型：
 
-- 翻滚窗口（GROUP BY）
-- 跳跃窗口（多 GROUP BY）
-- 滑动窗口（窗口函数）
-- 层叠窗口（窗口函数）
+- 滚动窗口 `tumbling windows`（GROUP BY）；
+- 跳跃窗口 `hopping window`（多 GROUP BY）；
+- 滑动窗口 `sliding window`（window 函数）；
+- 层叠窗口 `cascading window`（window 函数）。
 
 下图显示了使用它们的查询类型：
 
-![窗户类型](https://calcite.apache.org/img/window-types.png)
+![Calcite 窗口类型](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/25/1706145322.png)
 
-首先，我们将查看一个由 Streaming 定义的 *滚动窗口*`GROUP BY`。这是一个例子：
+首先，我们来看一个滚动窗口，它由流式的 `GROUP BY` 定义。如下是示例 SQL：
 
-```
+```sql
 SELECT STREAM CEIL(rowtime TO HOUR) AS rowtime,
   productId,
   COUNT(*) AS c,
@@ -173,17 +171,17 @@ GROUP BY CEIL(rowtime TO HOUR), productId;
  12:00:00 |        40 |       1 |    12
 ```
 
-结果是一个流。`productId`在 11 点钟，Calcite 会为自 10 点钟以来有订单的每个订单发出小计 ，时间戳为 11 点钟。12点，它会发出11:00到12:00之间发生的订单。每个输入行仅对一个输出行有贡献。
+结果是一个流。在 11 点钟，Calcite 会为自 10 点钟以来有订单的每个 `productId` 分组计数，时间戳为 11 点钟。 12点，它会统计11:00到12:00之间发生的订单。每个输入行仅被包含在一个输出的分组中。
 
-Calcite 如何知道 10:00:00 小计已在 11:00:00 完成，以便可以发出它们？它知道它`rowtime`正在增加，它也知道它`CEIL(rowtime TO HOUR)`也在增加。因此，一旦它在 11:00:00 或之后看到了一行，它就永远不会看到对 10:00:00 总计有贡献的行。
+Calcite 如何知道 10:00:00 的统计已在 11:00:00 完成，以便可以输出它们？因为 Calcite 知道 `rowtime` 正在增加，并且也知道 `CEIL(rowtime TO HOUR)` 在增加。因此，一旦它在 11:00:00 或之后看到了一行，它就永远不会看到对 10:00:00 统计有影响的数据行。
 
-递增或递减的列或表达式被称为 *单调的*。
+递增或递减的列或表达式被称为单调的。
 
-如果列或表达式的值稍微乱序，并且流具有声明特定值将永远不会再次出现的机制（例如标点符号或水印），则该列或表达式被称为准*单调*。
+如果列或表达式的值稍微乱序，并且流具有声明特定值将永远不会再次出现的机制（例如标点符号或水印），则该列或表达式被称为准单调。
 
-如果子句中没有单调或准单调表达式`GROUP BY`，Calcite 就无法取得进展，并且不允许查询：
+如果 `GROUP BY` 子句中没有单调或准单调表达式，Calcite 就无法取得进展，并且不允许查询：
 
-```
+```sql
 SELECT STREAM productId,
   COUNT(*) AS c,
   SUM(units) AS units
@@ -193,11 +191,13 @@ GROUP BY productId;
 ERROR: Streaming aggregation requires at least one monotonic expression in GROUP BY clause
 ```
 
-单调和准单调列需要在模式中声明。当记录进入流时，单调性被强制执行，并由从该流读取的查询假定。我们建议您为每个流提供一个名为 的时间戳列 `rowtime`，但您可以将其他列声明为单调的，`orderId`例如 。
+单调和准单调列需要在模式中声明。当记录进入流时，单调性被强制执行，并且从该流读取的查询假定了数据具有单调性。我们建议你为每个流提供一个名为 `rowtime` 的时间戳列，但你也可以将其他列声明为单调的，例如 `orderId` 。
 
-[我们在下面](https://calcite.apache.org/docs/stream.html#punctuation)讨论标点符号、水印和其他取得进展的方法 。
+我们在[下面](https://strongduanmu.com/wiki/calcite/stream.html#%E6%A0%87%E7%82%B9)讨论标点符号、水印和其他取得进展的方法。
 
-## 翻滚车窗，改进
+## 改进的滚动窗口
+
+TODO
 
 前面的翻滚窗口示例很容易编写，因为窗口为一小时。对于不是整个时间单位的间隔，例如 2 小时或 2 小时 17 分钟，不能使用`CEIL`，并且表达式会变得更加复杂。
 

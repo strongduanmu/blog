@@ -68,7 +68,21 @@ cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780
 * `Net`：代表网络的逻辑 IO 次数（交互次数及传输量）；
 * 最终 Cost = (CPU, Memory, IO, Net) · (w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>)，w 为权重向量。
 
-## Calcite RelMetadataQuery 实现
+## Calcite 统计信息实现
+
+RelMetadataQuery
+
+TODO
+
+
+
+## Calcite 代价模型实现
+
+TODO
+
+
+
+## 结语
 
 TODO
 
