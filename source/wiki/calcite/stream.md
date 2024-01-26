@@ -197,13 +197,11 @@ ERROR: Streaming aggregation requires at least one monotonic expression in GROUP
 
 ## 改进的滚动窗口
 
-TODO
+前面的滚动窗口示例很容易编写，因为窗口为一小时。对于不是整个时间单位的间隔，例如 2 小时或 2 小时 17 分钟，你不能使用 `CEIL` ，并且表达式会变得更加复杂。
 
-前面的翻滚窗口示例很容易编写，因为窗口为一小时。对于不是整个时间单位的间隔，例如 2 小时或 2 小时 17 分钟，不能使用`CEIL`，并且表达式会变得更加复杂。
+Calcite 支持滚动窗口的替代语法：
 
-Calcite 支持翻滚窗口的替代语法：
-
-```
+```sql
 SELECT STREAM TUMBLE_END(rowtime, INTERVAL '1' HOUR) AS rowtime,
   productId,
   COUNT(*) AS c,
@@ -220,11 +218,11 @@ GROUP BY TUMBLE(rowtime, INTERVAL '1' HOUR), productId;
  12:00:00 |        40 |       1 |    12
 ```
 
-如您所见，它返回与上一个查询相同的结果。该`TUMBLE` 函数返回一个分组键，该分组键对于最终出现在给定汇总行中的所有行都相同；该`TUMBLE_END`函数采用相同的参数并返回该窗口结束的时间；还有一个`TUMBLE_START`功能。
+如你所见，它返回与上一个查询相同的结果。 `TUMBLE` 函数会返回一个分组键，该键在最终输出的统计结果中会保持相同； `TUMBLE_END` 函数采用相同的参数并返回该窗口结束的时间；此外还有一个 `TUMBLE_START` 函数。
 
-`TUMBLE`有一个可选参数来对齐窗口。在以下示例中，我们使用 30 分钟间隔和 0:12 作为对齐时间，因此查询会在每小时过去 12 和 42 分钟发出摘要：
+`TUMBLE` 有一个可选参数来对齐窗口。在以下示例中，我们使用 30 分钟间隔和 0:12 作为对齐时间，因此查询会在每小时过去 12 和 42 分钟输出结果：
 
-```
+```sql
 SELECT STREAM
   TUMBLE_END(rowtime, INTERVAL '30' MINUTE, TIME '0:12') AS rowtime,
   productId,
@@ -244,13 +242,13 @@ GROUP BY TUMBLE(rowtime, INTERVAL '30' MINUTE, TIME '0:12'),
  11:42:00 |        10 |       1 |     4
 ```
 
-## 跳跃窗口
+## 跳跃窗口（Hopping windows）
 
-跳跃窗口是滚动窗口的概括，它允许数据在窗口中保留的时间长于发出间隔。
+跳跃窗口是滚动窗口的泛化，它允许数据在窗口中保留的时间长于输出间隔。
 
-例如，以下查询发出时间戳为 11:00 的行，其中包含从 08:00 到 11:00 的数据（如果我们比较迂腐的话，则为 10:59.9），而时间戳为 12:00 的行包含从 09:00 到 11:00 的数据。 12:00。
+例如，以下查询输出时间戳为 11:00 的行，其中包含从 08:00 到 11:00 的数据（如果我们比较迂腐的话，则为 10:59.9），而时间戳为 12:00 的行包含从 09:00 到 12:00 的数据。
 
-```
+```sql
 SELECT STREAM
   HOP_END(rowtime, INTERVAL '1' HOUR, INTERVAL '3' HOUR) AS rowtime,
   COUNT(*) AS c,
@@ -264,17 +262,17 @@ GROUP BY HOP(rowtime, INTERVAL '1' HOUR, INTERVAL '3' HOUR);
  12:00:00 |        8 |    50
 ```
 
-在此查询中，由于保留期是发出期的 3 倍，因此每个输入行正好贡献 3 个输出行。想象一下，该`HOP`函数为传入行生成一组组键的集合，并将其值放入每个组键的累加器中。例如， `HOP(10:18:00, INTERVAL '1' HOUR, INTERVAL '3')`生成3个周期
+在此查询中，由于保留期是输出期的 3 倍，因此每个输入行正好贡献 3 个输出行。想象一下 `HOP` 函数为输入行生成一组分组键的集合，并将其值放入每个分组键的累加器中。例如， `HOP(10:18:00, INTERVAL '1' HOUR, INTERVAL '3')` 生成 3 个时间段。
 
-```
+```sql
 [08:00, 09:00) [09:00, 10:00) [10:00, 11:00) 
 ```
 
-这为那些对内置函数`HOP`和不满意的用户提供了允许用户定义分区函数的可能性`TUMBLE`。
+这为那些对内置函数 `HOP` 和 `TUMBLE` 不满意的用户提供了允许用户定义分区函数的可能性。
 
 我们可以构建复杂的复杂表达式，例如指数衰减的移动平均线：
 
-```
+```sql
 SELECT STREAM HOP_END(rowtime),
   productId,
   SUM(unitPrice * EXP((rowtime - HOP_START(rowtime)) SECOND / INTERVAL '1' HOUR))
@@ -284,28 +282,28 @@ GROUP BY HOP(rowtime, INTERVAL '1' SECOND, INTERVAL '1' HOUR),
   productId
 ```
 
-发出：
+它会输出：
 
-- 一行 at`11:00:00`包含行`[10:00:00, 11:00:00)`;
-- 一行 at`11:00:01`包含 中的行`[10:00:01, 11:00:01)`。
+- `11:00:00` 处的一行包含 `[10:00:00, 11:00:00)` 中的行；
+- `11:00:01` 处的行包含 `[10:00:01, 11:00:01)` 中的行。
 
 该表达式对最近订单的权重比对旧订单的权重更大。将窗口从 1 小时延长到 2 小时或 1 年实际上对结果的准确性没有影响（但会使用更多的内存和计算）。
 
-请注意，我们`HOP_START`在聚合函数 ( `SUM`) 内部使用，因为它是一个对于小计中所有行而言都是恒定的值。`SUM`对于典型的聚合函数（等`COUNT` ），这是不允许的。
+请注意，我们在聚合函数 ( `SUM` ) 中使用 `HOP_START` ，因为它是一个对于统计中所有行而言都是恒定的值。对于典型的聚合函数（ `SUM` 、 `COUNT` 等），这是不允许的。
 
-如果您熟悉`GROUPING SETS`，您可能会注意到分区函数可以被视为 的泛化`GROUPING SETS`，因为它们允许输入行贡献多个小计。的辅助函数`GROUPING SETS`，例如`GROUPING()`和，可以在聚合函数内部使用，因此和可以以相同的方式使用`GROUP_ID`也就不足为奇了 。`HOP_START``HOP_END`
+如果您熟悉 `GROUPING SETS` ，您可能会注意到分区函数可以被视为 `GROUPING SETS` 的泛化，因为它们允许输入行参与多个统计。 `GROUPING SETS` 的辅助函数，例如 `GROUPING()` 和 `GROUP_ID` ，可以在聚合函数内部使用，因此 `HOP_START` 并不奇怪和 `HOP_END` 可以以相同的方式使用。
 
 ## 分组集
 
-`GROUPING SETS`对于流式查询有效，前提是每个分组集都包含单调或准单调表达式。
+`GROUPING SETS` 对于流式查询有效，前提是每个分组集都包含单调或准单调表达式。
 
-`CUBE`和`ROLLUP`对于流查询无效，因为它们将生成至少一个聚合所有内容的分组集（如 `GROUP BY ()`）。
+`CUBE` 和 `ROLLUP` 对于流式查询无效，因为它们将生成至少一个聚合所有内容的分组集（如 `GROUP BY ()` ）。
 
 ## 聚合后过滤
 
-与在标准 SQL 中一样，您可以应用`HAVING`子句来过滤流发出的行`GROUP BY`：
+与标准 SQL 中一样，你可以应用 `HAVING` 子句来过滤流 `GROUP BY` 输出的行：
 
-```
+```sql
 SELECT STREAM TUMBLE_END(rowtime, INTERVAL '1' HOUR) AS rowtime,
   productId
 FROM Orders
@@ -321,9 +319,9 @@ HAVING COUNT(*) > 2 OR SUM(units) > 10;
 
 ## 子查询、视图和 SQL 的闭包属性
 
-前面的查询可以使用子查询上的子句`HAVING`来表示：`WHERE`
+前面的 `HAVING` 查询可以使用子查询上的 `WHERE` 子句来表示：
 
-```
+```sql
 SELECT STREAM rowtime, productId
 FROM (
   SELECT TUMBLE_END(rowtime, INTERVAL '1' HOUR) AS rowtime,
@@ -341,13 +339,13 @@ WHERE c > 2 OR su > 10;
  11:00:00 |        40
 ```
 
-`HAVING`在 SQL 的早期引入，当时需要一种方法来在聚合*后*执行过滤。（回想一下，在行`WHERE`进入子句之前过滤行`GROUP BY`。）
+`HAVING` 是在 SQL 早期引入的，当时需要一种方法来在聚合后执行过滤器。 （回想一下， `WHERE` 在行进入 `GROUP BY` 子句之前过滤行。）
 
 从那时起，SQL 就成为一种数学封闭语言，这意味着您可以对表执行的任何操作也可以对查询执行。
 
-*SQL的闭包特性*非常强大。它不仅使视图变得 `HAVING`过时（或者至少将其简化为语法糖），而且使视图成为可能：
+SQL的闭包特性非常强大。它不仅使 `HAVING` 过时（或者至少将其简化为语法糖），而且使视图成为可能：
 
-```
+```sql
 CREATE VIEW HourlyOrderTotals (rowtime, productId, c, su) AS
   SELECT TUMBLE_END(rowtime, INTERVAL '1' HOUR),
     productId,
@@ -367,13 +365,13 @@ WHERE c > 2 OR su > 10;
  11:00:00 |        40
 ```
 
-子句中的子查询`FROM`有时被称为“内联视图”，但实际上，它们比视图更基本。视图只是一种方便的方法，通过给片段命名并将它们存储在元数据存储库中，将 SQL 分割成可管理的块。
+`FROM` 子句中的子查询有时称为`内联视图`，但实际上，它们比视图更基本。视图只是一种方便的方法，通过给片段命名并将它们存储在元数据存储库中，将 SQL 分割成可管理的块。
 
-许多人发现嵌套查询和视图在流上比在关系上更有用。流式查询是连续运行的运算符的管道，并且这些管道通常会变得很长。嵌套查询和视图有助于表达和管理这些管道。
+许多人发现嵌套查询和视图在流上比在关系上更有用。流式查询是所有连续运行的运算符管道，并且这些管道通常会变得很长。嵌套查询和视图有助于表达和管理这些管道。
 
-顺便说一句，子句`WITH`可以完成与子查询或视图相同的功能：
+顺便说一句， `WITH` 子句可以完成与子查询或视图相同的功能：
 
-```
+```sql
 WITH HourlyOrderTotals (rowtime, productId, c, su) AS (
   SELECT TUMBLE_END(rowtime, INTERVAL '1' HOUR),
     productId,
@@ -394,13 +392,13 @@ WHERE c > 2 OR su > 10;
 
 ## 流和关系之间的转换
 
-回顾一下视图的定义`HourlyOrderTotals`。视图是流还是关系？
+回顾一下 `HourlyOrderTotals` 视图的定义。视图是流还是关系？
 
-它不包含`STREAM`关键字，因此它是一个关系。然而，它是一种可以转换为流的关系。
+它不包含 `STREAM` 关键字，因此它是一个关系。然而，它是一种可以转换为流的关系。
 
 您可以在关系查询和流查询中使用它：
 
-```
+```sql
 # A relation; will query the historic Orders table.
 # Returns the largest number of product #10 ever sold in one hour.
 SELECT max(su)
@@ -414,36 +412,36 @@ FROM HourlyOrderTotals
 WHERE productId = 10;
 ```
 
-这种方法不限于视图和子查询。[按照 CQL [ 1](https://calcite.apache.org/docs/stream.html#ref1) ]中提出的方法，流式 SQL 中的每个查询都被定义为关系查询，并使用`STREAM`最顶层的关键字转换为流`SELECT`。
+这种方法不限于视图和子查询。按照 CQL[^1] 中规定的方法，流式 SQL 中的每个查询都被定义为关系查询，并使用最顶层 `SELECT` 中的 `STREAM` 关键字转换为流。
 
-如果`STREAM`关键字出现在子查询或视图定义中，则它不起作用。
+如果 `STREAM` 关键字出现在子查询或视图定义中，则它不起作用。
 
 在查询准备时，Calcite 会确定查询中引用的关系是否可以转换为流或历史关系。
 
-有时，流会提供其部分历史记录（例如 Apache Kafka [ [2](https://calcite.apache.org/docs/stream.html#ref2) ] 主题中最近 24 小时的数据），但不是全部。在运行时，Calcite 会确定是否有足够的历史记录来运行查询，如果没有，则给出错误。
+有时，流会提供其部分历史记录（例如 Apache Kafka[^2] 主题中最近 24 小时的数据），但不是全部。在运行时，Calcite 会确定是否有足够的历史记录来运行查询，如果没有，则给出错误。
 
-## “饼图”问题：流上的关系查询
+## 饼图问题：流上的关系查询
 
-需要将流转换为关系的一种特殊情况发生在我所说的“饼图问题”中。想象一下，您需要编写一个带有图表的网页，如下所示，该图表总结了过去一小时内每种产品的订单数量。
+需要将流转换为关系的一种特殊情况发生在我所说的`饼图问题`中。想象一下，您需要编写一个带有图表的网页，如下所示，该图表总结了过去一小时内每种产品的订单数量。
 
-![饼形图](https://calcite.apache.org/img/pie-chart.png)
+![最近一小时订单量饼图](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/26/1706230517.png)
 
-但该`Orders`流只包含一些记录，而不是一个小时的摘要。我们需要对流的历史记录运行关系查询：
+但是 `Orders` 流只包含一些记录，而不是一个小时的统计。我们需要对流的历史记录运行关系查询：
 
-```
+```sql
 SELECT productId, count(*)
 FROM Orders
 WHERE rowtime BETWEEN current_timestamp - INTERVAL '1' HOUR
               AND current_timestamp;
 ```
 
-如果流的历史记录`Orders`被假脱机到`Orders`表中，我们就可以回答查询，尽管成本很高。如果我们能够告诉系统将一小时的摘要具体化到一个表中，随着流的流动不断维护它，并自动重写查询以使用该表，那就更好了。
+如果 `Orders` 流的历史记录被写入到 `Orders` 表，我们就可以返回查询，尽管这样成本很高。如果我们能够告诉系统将一小时的统计具体化到一个表中，随着流的流动不断维护它，并自动重写查询以使用该表，那就更好了。
 
 ## 排序
 
-的故事`ORDER BY`与 类似`GROUP BY`。语法看起来与常规 SQL 类似，但 Calcite 必须确保它能够及时提供结果。因此，它需要在键的前缘上有一个单调的表达`ORDER BY`。
+`ORDER BY` 的故事与 `GROUP BY` 类似。语法看起来与常规 SQL 类似，但 Calcite 必须确保它能够及时提供结果。因此，它需要在 `ORDER BY` 键的前面有一个单调的表达式。
 
-```
+```sql
 SELECT STREAM CEIL(rowtime TO hour) AS rowtime, productId, orderId, units
 FROM Orders
 ORDER BY CEIL(rowtime TO hour) ASC, units DESC;
@@ -462,7 +460,7 @@ ORDER BY CEIL(rowtime TO hour) ASC, units DESC;
 
 大多数查询将按照插入的顺序返回结果，因为引擎使用流算法，但您不应该依赖它。例如，考虑一下：
 
-```
+```sql
 SELECT STREAM *
 FROM Orders
 WHERE productId = 10
@@ -481,11 +479,11 @@ WHERE productId = 30;
  11:24:11 |        10 |      12 |     4
 ```
 
-= 30的行`productId`显然是无序的，可能是因为`Orders`流被分区`productId`并且分区流在不同时间发送数据。
+`productId` = 30 的行显然是无序的，可能是因为 `Orders` 流在 `productId` 上分区，并且分区流在不同时间发送数据。
 
-如果您需要特定的顺序，请添加显式的`ORDER BY`：
+如果您需要特定的顺序，请添加明确的 `ORDER BY` ：
 
-```
+```sql
 SELECT STREAM *
 FROM Orders
 WHERE productId = 10
@@ -505,29 +503,29 @@ ORDER BY rowtime;
  11:24:11 |        10 |      12 |     4
 ```
 
-Calcite 可能会`UNION ALL`通过合并使用来实现`rowtime`，这只是效率稍低一些。
+Calcite 可能会通过使用 `rowtime` 合并来实现 `UNION ALL` ，这只是效率稍低一些。
 
-您只需将 an 添加`ORDER BY`到最外面的查询即可。如果您需要`GROUP BY`在 a 之后执行`UNION ALL`，Calcite 将`ORDER BY` 隐式添加一个，以使 GROUP BY 算法成为可能。
+您只需要在最外面的查询中添加 `ORDER BY` 即可。例如，如果您需要在 `UNION ALL` 之后执行 `GROUP BY` ，Calcite 将隐式添加 `ORDER BY` ，以使 GROUP BY 算法成为可能。
 
 ## 表构造函数
 
-该`VALUES`子句创建一个包含给定行集的内联表。
+`VALUES` 子句创建一个包含给定行集的内联表。
 
-不允许流式传输。行集永远不会改变，因此流永远不会返回任何行。
+`VALUES` 子句不允许流式传输。行集永远不会改变，因此流永远不会返回任何行。
 
-```
+```sql
 > SELECT STREAM * FROM (VALUES (1, 'abc'));
 
 ERROR: Cannot stream VALUES
 ```
 
-## 推拉窗
+## 滑动窗口（Sliding windows）
 
-标准 SQL 具有可在子句中使用的所谓“分析函数” `SELECT`。与 不同的是`GROUP BY`，这些记录不会崩溃。每输入一条记录，就会输出一条记录。但聚合函数是基于多行的窗口。
+标准 SQL 具有所谓的`分析函数`，可以在 `SELECT` 子句中使用。与 `GROUP BY` 不同，它们不会折叠记录。每输入一条记录，就会输出一条记录。但聚合函数是基于多行的窗口。
 
 让我们看一个例子。
 
-```
+```sql
 SELECT STREAM rowtime,
   productId,
   units,
@@ -535,11 +533,11 @@ SELECT STREAM rowtime,
 FROM Orders;
 ```
 
-该功能毫不费力即可提供强大的功能。`SELECT`根据多个窗口规范，您可以在子句中包含多个函数。
+该功能毫不费力即可提供强大的功能。根据多窗口使用规范，您可以在 `SELECT` 子句中使用多个函数。
 
 以下示例返回过去 10 分钟平均订单大小大于上周平均订单大小的订单。
 
-```
+```sql
 SELECT STREAM *
 FROM (
   SELECT STREAM rowtime,
@@ -554,21 +552,21 @@ FROM (
 WHERE m10 > d7;
 ```
 
-为了简洁起见，这里我们使用这样的语法：使用子句部分定义窗口`WINDOW`，然后在每个子句中细化窗口`OVER`。如果您愿意，您还可以定义`WINDOW`子句中的所有窗口，或内联的所有窗口。
+为了简洁起见，这里我们使用这样的语法：使用 `WINDOW` 子句部分定义窗口，然后在每个 `OVER` 子句中细化窗口。如果你愿意，你还可以在 `WINDOW` 子句中定义所有窗口，或内联所有窗口。
 
 但真正的力量超越了语法。在幕后，该查询维护两个表，并使用 FIFO 队列在小计中添加和删除值。但是您可以访问这些表，而无需在查询中引入联接。
 
 窗口聚合语法的一些其他功能：
 
-- 您可以根据行数定义窗口。
-- 该窗口可以引用尚未到达的行。（流将等待，直到他们到达）。
-- 您可以计算与顺序相关的函数，例如`RANK`和 中位数。
+- 你可以根据行数定义窗口；
+- 该窗口可以引用尚未到达的行（流将等待，直到他们到达）；
+- 你可以计算与顺序相关的函数，例如 `RANK` 和中位数。
 
-## 层叠窗口
+## 层叠窗口（Cascading windows）
 
-如果我们想要一个为每条记录返回结果的查询（如滑动窗口），但在固定时间段重置总计（如滚动窗口），该怎么办？这种模式称为*层叠窗口*。这是一个例子：
+如果我们想要一个为每条记录返回结果的查询（如滑动窗口），但在固定时间段重置总计（如滚动窗口），该怎么办？这种模式称为层叠窗口。这是一个例子：
 
-```
+```sql
 SELECT STREAM rowtime,
   productId,
   units,
@@ -576,19 +574,19 @@ SELECT STREAM rowtime,
 FROM Orders;
 ```
 
-它看起来类似于滑动窗口查询，但单调表达式出现在`PARTITION BY`窗口的子句内。随着行时间从 10:59:59 移动到 11:00:00， `FLOOR(rowtime TO HOUR)`从 10:00:00 变为 11:00:00，因此开始一个新分区。在新的小时到达的第一行将开始新的总计；第二行的总计由两行组成，依此类推。
+它看起来类似于滑动窗口查询，但单调表达式出现在窗口的 `PARTITION BY` 子句中。随着行时间从 10:59:59 移动到 11:00:00， `FLOOR(rowtime TO HOUR)` 从 10:00:00 更改为 11:00:00，会开始一个新分区。在新的小时到达的第一行将开始新的总计；第二行的总计由两行组成，依此类推。
 
-Calcite 知道旧分区将永远不会再次使用，因此会从其内部存储中删除该分区的所有小计。
+Calcite 知道旧分区将永远不会再次使用，因此会从其内部存储中删除该分区的所有统计。
 
 使用级联和滑动窗口的分析函数可以组合在同一个查询中。
 
-## 将流连接到表
+## 流和表关联
 
-涉及流的连接有两种：流到表连接和流到流连接。
+涉及流的关联有两种：流到表关联和流到流关联。
 
-如果表的内容没有改变，那么流到表的连接就很简单。此查询通过每种产品的标价丰富了订单流：
+如果表的内容没有改变，那么流到表的关联就很简单。此查询通过每种产品的标价丰富了订单流：
 
-```
+```sql
 SELECT STREAM o.rowtime, o.productId, o.orderId, o.units,
   p.name, p.unitPrice
 FROM Orders AS o
@@ -607,11 +605,11 @@ JOIN Products AS p
  11:24:11 |        10 |      12 |     4 | Beer   |      0.25
 ```
 
-如果表发生变化会发生什么？例如，假设产品 10 的单价在 11:00 增加到 0.35。11:00之前下的订单应采用旧价格，11:00之后下的订单应采用新价格。
+如果表发生变化会发生什么？例如，假设产品 10 的单价在 11:00 增加到 0.35。 11:00之前下的订单应采用旧价格，11:00之后下的订单应采用新价格。
 
-实现此目的的一种方法是使用一个表来保存每个版本的开始和结束有效日期，`ProductVersions`如下例所示：
+实现此目的的一种方法是使用一个表来保存每个版本的开始和结束有效日期，在以下示例中为 `ProductVersions` ：
 
-```
+```sql
 SELECT STREAM *
 FROM Orders AS o
 JOIN ProductVersions AS p
@@ -630,11 +628,13 @@ JOIN ProductVersions AS p
  11:24:11 |        10 |      12 |     4 |         10 | Beer   |      0.35
 ```
 
-实现此目的的另一种方法是使用具有时间支持的数据库（能够查找过去任何时刻的数据库内容），并且系统需要知道流的列`rowtime`对应`Orders`于表的事务时间戳 `Products`。
+实现此目的的另一种方法是使用具有时间支持的数据库（能够查找过去任何时刻的数据库内容），并且系统需要知道 `rowtime` `Orders` 流的列对应于 `Products` 表的事务时间戳。
 
 对于许多应用程序来说，不值得花费时间支持或版本化表的成本和精力。应用程序可以接受查询在重播时给出不同的结果：在此示例中，在重播时，产品 10 的所有订单都被分配了较晚的单价 0.35。
 
-## 将流加入流
+## 流和流关联
+
+TODO
 
 如果连接条件以某种方式迫使两个流彼此保持有限距离，则连接两个流是有意义的。在以下查询中，发货日期在订单日期的一小时内：
 
@@ -772,7 +772,8 @@ WINDOW lastHour AS (
 
 ## 参考
 
-- [ 1 ] [Arvind Arasu、Shivnath Babu 和 Jennifer Widom (2003) CQL 连续查询语言：语义基础和查询执行](https://ilpubs.stanford.edu:8090/758/)。
+[^1]:  [Arvind Arasu、Shivnath Babu 和 Jennifer Widom (2003) CQL 连续查询语言：语义基础和查询执行](https://ilpubs.stanford.edu:8090/758/)
+
 - [ 2 ] [阿帕奇卡夫卡](https://kafka.apache.org/documentation.html)。
 - [ 3 ][阿帕奇·萨姆扎](https://samza.apache.org/)。
 - [ 4 ] [SamzaSQL](https://github.com/milinda/samza-sql)。
