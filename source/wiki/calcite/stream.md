@@ -2,7 +2,7 @@
 layout: wiki
 wiki: Calcite 官方文档中文版
 order: 102
-title: 流式处理
+title: 流式查询
 date: 2023-10-26 09:00:00
 ---
 
@@ -774,7 +774,7 @@ WINDOW lastHour AS (
 
 ![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
 
-## 参考
+## 参考引用
 
 [^1]:   [Arvind Arasu, Shivnath Babu, and Jennifer Widom (2003) The CQL Continuous Query Language: Semantic Foundations and Query Execution](https://ilpubs.stanford.edu:8090/758/).
 [^2]:   [Apache Kafka](https://kafka.apache.org/documentation.html).
