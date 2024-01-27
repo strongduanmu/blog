@@ -146,7 +146,7 @@ Calcite 有多种窗口类型：
 - 滚动窗口 `tumbling windows`（GROUP BY）；
 - 跳跃窗口 `hopping window`（多 GROUP BY）；
 - 滑动窗口 `sliding window`（window 函数）；
-- 层叠窗口 `cascading window`（window 函数）。
+- 级联窗口 `cascading window`（window 函数）。
 
 下图显示了使用它们的查询类型：
 
@@ -562,9 +562,9 @@ WHERE m10 > d7;
 - 该窗口可以引用尚未到达的行（流将等待，直到他们到达）；
 - 你可以计算与顺序相关的函数，例如 `RANK` 和中位数。
 
-## 层叠窗口（Cascading windows）
+## 级联窗口（Cascading windows）
 
-如果我们想要一个为每条记录返回结果的查询（如滑动窗口），但在固定时间段重置总计（如滚动窗口），该怎么办？这种模式称为层叠窗口。这是一个例子：
+如果我们想要一个为每条记录返回结果的查询（如滑动窗口），但在固定时间段重置总计（如滚动窗口），该怎么办？这种模式称为级联窗口。这是一个例子：
 
 ```sql
 SELECT STREAM rowtime,
@@ -634,11 +634,9 @@ JOIN ProductVersions AS p
 
 ## 流和流关联
 
-TODO
+如果连接条件以某种方式使得两个流彼此保持有限距离，则关联两个流是有意义的。在以下查询中，发货日期在订单日期的一小时内：
 
-如果连接条件以某种方式迫使两个流彼此保持有限距离，则连接两个流是有意义的。在以下查询中，发货日期在订单日期的一小时内：
-
-```
+```sql
 SELECT STREAM o.rowtime, o.productId, o.orderId, s.rowtime AS shipTime
 FROM Orders AS o
 JOIN Shipments AS s
@@ -655,33 +653,33 @@ JOIN Shipments AS s
 
 请注意，相当多的订单没有出现，因为它们在一小时内没有发货。当系统收到时间戳为 11:24:11 的订单 10 时，它已经从哈希表中删除了时间戳为 10:18:07 的订单 8（含）之前的订单。
 
-正如您所看到的，将两个流的单调或准单调列连接在一起的“锁定步骤”对于系统取得进展是必要的。如果它不能推断出锁定步骤，它将拒绝执行查询。
+正如您所看到的，将两个流的单调或准单调列关联在一起的`锁定步骤`对于系统取得进展是必要的。如果它不能推断出锁定步骤，它将拒绝执行查询。
 
-## 数据管理语言
+## 数据管理语言（DML）
 
-不仅查询对流有意义，而且查询也对流有意义。对流运行 DML 语句（ `INSERT`、`UPDATE`、`DELETE`以及它们的罕见表亲`UPSERT`和）也是有意义的。`REPLACE`
+不仅查询语句能够支持流操作，而且 DML 语句（（ `INSERT` 、 `UPDATE` 、 `DELETE` 以及它们衍生的 `UPSERT` 和 `REPLACE`）也支持流操作。
 
-DML 很有用，因为它允许您具体化流或基于流的表，因此在经常使用值时可以节省精力。
+DML 很有用，因为它允许你具体化流或基于流的表，因此在经常使用值时可以节省精力。
 
-考虑流应用程序通常如何由查询管道组成，每个查询将输入流转换为输出流。管道的组件可以是视图：
+考虑流应用程序通常由查询管道组成，每个查询将输入流转换为输出流。管道的组件可以是视图：
 
-```
+```sql
 CREATE VIEW LargeOrders AS
 SELECT STREAM * FROM Orders WHERE units > 1000;
 ```
 
-或常设`INSERT`声明：
+或标准的 `INSERT` 声明：
 
-```
+```sql
 INSERT INTO LargeOrders
 SELECT STREAM * FROM Orders WHERE units > 1000;
 ```
 
-它们看起来很相似，并且在这两种情况下，管道中的下一步都可以读取，`LargeOrders`而不必担心它是如何填充的。效率上有区别：`INSERT`无论有多少消费者，语句都做同样的工作；该视图的工作与消费者的数量成正比，特别是如果没有消费者，则该视图不起作用。
+它们看起来很相似，并且在这两种情况下，管道中的下一步都可以从 `LargeOrders` 读取，而不必担心它是如何填充的。效率上有区别：无论有多少个消费者， `INSERT` 语句都做同样的工作。而视图的工作与消费者的数量成正比，特别是如果没有消费者，则该视图不起作用。
 
-其他形式的 DML 对流也有意义。例如，以下常设`UPSERT`语句维护一个表，该表具体化了最后一小时订单的摘要：
+其他形式的 DML 对流也有意义。例如，以下标准的 `UPSERT` 语句维护一个表，该表具体化了最后一小时订单的统计：
 
-```
+```sql
 UPSERT INTO OrdersSummary
 SELECT STREAM productId,
   COUNT(*) OVER lastHour AS c
@@ -692,61 +690,59 @@ WINDOW lastHour AS (
   RANGE INTERVAL '1' HOUR PRECEDING)
 ```
 
-## 标点
+## 标点符号（Punctuation）
 
-即使单调键中没有足够的值来推出结果，标点符号[ [5 \]也允许流查询取得进展。](https://calcite.apache.org/docs/stream.html#ref5)
-
-（我更喜欢术语“行时间边界”，并且水印[ [6](https://calcite.apache.org/docs/stream.html#ref6) ]是一个相关概念，但出于这些目的，标点符号就足够了。）
+即使单调键中没有足够的值来推出结果，标点符号[^5]也允许流查询取得进展（我更喜欢术语是`行时间边界`，水印[^6]是一个相关概念，但出于这些目的，标点符号就足够了）。
 
 如果流启用了标点符号，则它可能无法排序，但仍然可以排序。因此，出于语义目的，按照排序流进行工作就足够了。
 
-顺便说一句，如果无序流是*t 排序* （即每个记录保证在其时间戳的*t*秒内到达）或*k 排序*（即每个记录保证不超过*k 个*位置乱序）。因此，对这些流的查询可以与对带有标点符号的流的查询类似地进行规划。
+顺便说一句，如果无序流是 t 排序的（即每条记录保证在其时间戳的 t 秒内到达）或 k 排序的（即每条记录保证不超过k 个位置乱序）。因此，对这些流的查询可以与对带有标点符号的流的查询类似地进行规划。
 
-而且，我们经常希望聚合不基于时间但仍然单调的属性。“一支球队在获胜状态和失败状态之间转换的次数”就是这样一个单调属性。系统需要自己弄清楚聚合这样的属性是安全的；标点符号不添加任何额外信息。
+而且，我们经常希望聚合不基于时间但仍然单调的属性。 `一支球队在获胜状态和失败状态之间转换的次数`就是这样一个单调属性。系统需要自己弄清楚聚合这样的属性是安全的；标点符号不添加任何额外信息。
 
-我想到了规划者的一些元数据（成本指标）：
+我想到了优化器的一些元数据（成本指标）：
 
 1. 该流是否根据给定的属性（或多个属性）排序？
-2. 是否可以根据给定属性对流进行排序？（对于有限关系，答案始终是“是”；对于流，它取决于标点符号的存在或属性和排序键之间的链接。）
+2. 是否可以根据给定属性对流进行排序？ （对于有限关系，答案始终是`是`；对于流，它取决于标点符号的存在或属性和排序键之间的链接）；
 3. 为了执行这种排序，我们需要引入什么延迟？
 4. 执行该排序的成本是多少（CPU、内存等）？
 
-[我们在BuiltInMetadata.Collation](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/BuiltInMetadata.Collation.html)中已经有了(1) 。对于 (2)，对于有限关系，答案始终为“真”。但我们需要为流实现 (2)、(3) 和 (4)。
+我们在 [BuiltInMetadata.Collation](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/BuiltInMetadata.Collation.html) 中已经有了(1)。对于 (2)，对于有限关系，答案始终为`真`。但我们需要为流实现 (2)、(3) 和 (4)。
 
 ## 流的状态
 
-并非本文中的所有概念都已在 Calcite 中实现。其他的可以在 Calcite 中实现，但不能在特定的适配器中实现，例如 SamzaSQL [ [3](https://calcite.apache.org/docs/stream.html#ref3) ][ [4](https://calcite.apache.org/docs/stream.html#ref4) ]。
+并非本文中的所有概念都已在 Calcite 中实现。其他的可能在 Calcite 中实现，但不能在 SamzaSQL [^3] [^4] 等特定适配器中实现。
 
 ### 已实现
 
-- 流媒体`SELECT`,,,,,, `WHERE`_ `GROUP BY`_ `HAVING`_`UNION ALL``ORDER BY`
-- `FLOOR`和`CEIL`功能
-- 单调性
-- `VALUES`不允许串流
+- 流式的 `SELECT` 、 `WHERE` 、 `GROUP BY` 、 `HAVING` 、 `UNION ALL` 、 `ORDER BY`；
+- `FLOOR` 和 `CEIL` 函数；
+- 单调性；
+- 不允许流式的 `VALUES`。
 
 ### 未实现
 
 本文档中提供了以下功能，就好像方解石支持它们一样，但实际上它（尚未）不支持。完全支持意味着参考实现支持该功能（包括负面情况）并且 TCK 对其进行了测试。
 
-- 流到流`JOIN`
-- 流到表`JOIN`
-- 流媒体观看
-- 流式传输（`UNION ALL`合并`ORDER BY`）
-- 流上的关系查询
-- 流式窗口聚合（滑动和级联窗口）
-- 检查子`STREAM`查询和视图中是否被忽略
-- 检查流媒体`ORDER BY`不能有`OFFSET`或`LIMIT`
-- 历史有限；在运行时，检查是否有足够的历史记录来运行查询。
-- [准单调性](https://issues.apache.org/jira/browse/CALCITE-1096)
-- `HOP`和`TUMBLE`（以及辅助`HOP_START`, `HOP_END`, `TUMBLE_START`, `TUMBLE_END`）功能
+- 流到流 `JOIN`；
+- 流到表 `JOIN`；
+- 流式视图；
+- 带有 `ORDER BY` 的流式  `UNION ALL` （需要合并）；
+- 流式关系查询；
+- 流式窗口聚合（滑动和级联窗口）；
+- 检查子查询和视图中的 `STREAM` 是否被忽略；
+- 检查流式 `ORDER BY` 不能有 `OFFSET` 或 `LIMIT`；
+- 有限的历史——在运行时，检查是否有足够的历史记录来运行查询；
+- [准单调性](https://issues.apache.org/jira/browse/CALCITE-1096)；
+- `HOP` 和 `TUMBLE` （以及辅助 `HOP_START` 、 `HOP_END` 、 `TUMBLE_START` 、 `TUMBLE_END` ）功能。
 
-### 本文档中要做的事情
+### 文档中待办事项
 
-- 重新访问是否可以直播`VALUES`
-- `OVER`定义流窗口的子句
-- 考虑是否允许在流式查询中使用`CUBE`和`ROLLUP`，并理解某些级别的聚合永远不会完成（因为它们没有单调表达式），因此永远不会被发出。
-- 修复`UPSERT`示例以删除过去一小时内未发生的产品的记录。
-- 输出到多个流的DML；也许是标准声明的扩展 `REPLACE`。
+- 重新访问是否可以流式执行 `VALUES`；
+- `OVER` 子句定义流上的窗口；
+- 考虑是否在流式查询中允许 `CUBE` 和 `ROLLUP` ，并了解某些级别的聚合永远不会完成（因为它们没有单调表达式），因此永远不会被输出；
+- 修复 `UPSERT` 示例以删除过去一小时内未出现的产品记录；
+- 输出到多个流的DML；也许是标准 `REPLACE` 语句的扩展。
 
 ## 功能
 
@@ -754,31 +750,21 @@ WINDOW lastHour AS (
 
 标量函数：
 
-- `FLOOR(dateTime TO intervalType)`将日期、时间或时间戳值向下舍入为给定的间隔类型
-- `CEIL(dateTime TO intervalType)`将日期、时间或时间戳值向上舍入为给定的间隔类型
+- `FLOOR(dateTime TO intervalType)` 将日期、时间或时间戳值向下舍入为给定的间隔类型；
+- `CEIL(dateTime TO intervalType)` 将日期、时间或时间戳值四舍五入到给定的间隔类型。
 
 分区函数：
 
-- `HOP(t, emit, retain)`返回作为跳跃窗口一部分的行的组键的集合
-- `HOP(t, emit, retain, align)`返回作为具有给定对齐方式的跳跃窗口一部分的行的组键的集合
-- `TUMBLE(t, emit)`返回作为滚动窗口一部分的行的组键
-- `TUMBLE(t, emit, align)`返回作为具有给定对齐方式的翻滚窗口一部分的行的组键
+- `HOP(t, emit, retain)` 返回作为跳跃窗口一部分的行的组键集合；
+- `HOP(t, emit, retain, align)` 返回作为具有给定对齐方式的跳跃窗口一部分的行的组键的集合；
+- `TUMBLE(t, emit)` 返回作为滚动窗口一部分的行的组键；
+- `TUMBLE(t, emit, align)` 返回作为具有给定对齐方式的翻滚窗口一部分的行的组键。
 
-`TUMBLE(t, e)`相当于`TUMBLE(t, e, TIME '00:00:00')`.
+`TUMBLE(t, e)` 相当于 `TUMBLE(t, e, TIME '00:00:00')` 。
 
-`TUMBLE(t, e, a)`相当于`HOP(t, e, e, a)`.
+`TUMBLE(t, e, a)` 相当于 `HOP(t, e, e, a)` 。
 
-`HOP(t, e, r)`相当于`HOP(t, e, r, TIME '00:00:00')`.
-
-## 参考
-
-[^1]:  [Arvind Arasu、Shivnath Babu 和 Jennifer Widom (2003) CQL 连续查询语言：语义基础和查询执行](https://ilpubs.stanford.edu:8090/758/)
-
-- [ 2 ] [阿帕奇卡夫卡](https://kafka.apache.org/documentation.html)。
-- [ 3 ][阿帕奇·萨姆扎](https://samza.apache.org/)。
-- [ 4 ] [SamzaSQL](https://github.com/milinda/samza-sql)。
-- [ 5 ] [Peter A. Tucker、David Maier、Tim Sheard 和 Leonidas Fegaras (2003) 在连续数据流中利用标点符号语义](https://www.whitworth.edu/academic/department/mathcomputerscience/faculty/tuckerpeter/pdf/117896_final.pdf)。
-- [ 6 ] [Tyler Akidau、Alex Balikov、Kaya Bekiroglu、Slava Chernyak、Josh Haberman、Reuven Lax、Sam McVeety、Daniel Mills、Paul Nordstrom 和 Sam Whittle (2013) MillWheel：互联网规模的容错流处理](https://research.google.com/pubs/pub41378.html)。
+`HOP(t, e, r)` 相当于 `HOP(t, e, r, TIME '00:00:00')` 。
 
 
 
@@ -787,3 +773,12 @@ WINDOW lastHour AS (
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
 ![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
+
+## 参考
+
+[^1]:   [Arvind Arasu, Shivnath Babu, and Jennifer Widom (2003) The CQL Continuous Query Language: Semantic Foundations and Query Execution](https://ilpubs.stanford.edu:8090/758/).
+[^2]:   [Apache Kafka](https://kafka.apache.org/documentation.html).
+[^3]:   [Apache Samza](https://samza.apache.org/).
+[^4]:   [SamzaSQL](https://github.com/milinda/samza-sql).
+[^5]:   [Peter A. Tucker, David Maier, Tim Sheard, and Leonidas Fegaras (2003) Exploiting Punctuation Semantics in Continuous Data Streams](https://www.whitworth.edu/academic/department/mathcomputerscience/faculty/tuckerpeter/pdf/117896_final.pdf).
+[^6]:   [Tyler Akidau, Alex Balikov, Kaya Bekiroglu, Slava Chernyak, Josh Haberman, Reuven Lax, Sam McVeety, Daniel Mills, Paul Nordstrom, and Sam Whittle (2013) MillWheel: Fault-Tolerant Stream Processing at Internet Scale](https://research.google.com/pubs/pub41378.html).
