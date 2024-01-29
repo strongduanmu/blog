@@ -89,7 +89,7 @@ System-R 优化器的枚举算法演示了两个重要的技术：使用动态�
 
 
 
-## 参考文献
+## 参考文档
 
 [^1]: Apers, P.M.G., Hevner, A.R., Yao, S.B. Optimization Algorithms for Distributed Queries. IEEE Transactions on Software Engineering, Vol 9:1, 1983.
 [^2]: Bancilhon, F., Maier, D., Sagiv, Y., Ullman, J.D. Magic sets and other strange ways to execute logic programs. In Proc. of ACM PODS, 1986.
