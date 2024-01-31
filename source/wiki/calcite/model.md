@@ -8,13 +8,11 @@ date: 2023-10-26 09:00:00
 
 > 原文链接：https://calcite.apache.org/docs/model.html
 
-Calcite 模型可以表示为 JSON/YAML 文件。本文描述了这些文件的结构。还可以使用 `Schema` SPI 编程的方式构建模型。
+Calcite 模型可以表示为 `JSON/YAML` 文件。本文描述了这些文件的结构。还可以使用 `Schema` SPI 编程的方式构建模型。
 
-## 元素 Elements
+## 根节点
 
-### 根 Root
-
-#### JSON
+**JSON：**
 
 ```json
 {
@@ -25,7 +23,7 @@ Calcite 模型可以表示为 JSON/YAML 文件。本文描述了这些文件的�
 }
 ```
 
-#### YAML
+**YAML：**
 
 ```yaml
 version: 1.0
@@ -36,21 +34,21 @@ types:
 - [Type...]
 ```
 
+TODO
+
 * `version`（必填字符串）必须具有 value `1.0`；
 
 * `defaultSchema`（可选字符串）。如果指定，它将是此模型中定义的模式名称（区分大小写），并将成为使用此模型的 Calcite 连接的默认模式；
 
-* `schemas`（[模式 Schema ](https://calcite.apache.org/docs/model.html#schema)元素的可选列表）；
+* `schemas`（[模式](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F-schema)元素的可选列表）；
 
-* `types`（所有模式共享的 [Type](https://calcite.apache.org/docs/model.html#type) 元素的可选列表）。
+* `types`（所有模式共享的[类型](https://calcite.apache.org/docs/model.html#type)元素可选列表）。
 
-### 模式 Schema
-
-TODO
+## 模式
 
 发生在`root.schemas`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-1)
+**JSON：**
 
 ```
 {
@@ -61,7 +59,7 @@ TODO
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-1)
+**YAML：**
 
 ```
 name: foodmart
@@ -82,13 +80,13 @@ materializations:
 
 `path`（可选列表）是用于解析此架构中使用的函数的 SQL 路径。如果指定，它必须是一个列表，并且列表的每个元素必须是字符串或字符串列表。例如，
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-2)
+**JSON：**
 
 ```
   path: [ ['usr', 'lib'], 'lib' ]
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-2)
+**YAML：**
 
 ```
 path:
@@ -109,11 +107,11 @@ path:
 
 在模式中显式创建的表、函数、类型和子模式不受此缓存机制的影响。它们总是立即出现在模式中，并且永远不会被刷新。
 
-### 地图模式[永久链接](https://calcite.apache.org/docs/model.html#map-schema)
+## Map 模式
 
 与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-3)
+**JSON：**
 
 ```
 {
@@ -125,7 +123,7 @@ path:
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-3)
+**YAML：**
 
 ```
 name: foodmart
@@ -145,11 +143,11 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 `types`定义此模式中的类型。
 
-### 自定义架构[永久链接](https://calcite.apache.org/docs/model.html#custom-schema)
+## 自定义模式
 
 与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-4)
+**JSON：**
 
 ```
 {
@@ -163,7 +161,7 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-4)
+**YAML：**
 
 ```
 name: mongo
@@ -179,11 +177,11 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 `operand`（可选映射）包含要传递给工厂的属性。
 
-### JDBC 模式[永久链接](https://calcite.apache.org/docs/model.html#jdbc-schema)
+## JDBC 模式
 
 与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-5)
+**JSON：**
 
 ```
 {
@@ -198,7 +196,7 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-5)
+**YAML：**
 
 ```
 name: foodmart
@@ -224,11 +222,11 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 `jdbcSchema`（可选字符串）是 JDBC 数据源中初始模式的名称。
 
-### 物化[永久链接](https://calcite.apache.org/docs/model.html#materialization)
+## 物化视图
 
 发生在`root.schemas.materializations`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-6)
+**JSON：**
 
 ```
 {
@@ -238,7 +236,7 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-6)
+**YAML：**
 
 ```
 view: V
@@ -252,11 +250,11 @@ sql: select deptno, count(*) as c, sum(sal) as s from emp group by deptno
 
 `sql`（可选字符串，或将连接为多行字符串的字符串列表）是具体化的 SQL 定义。
 
-### 桌子[永久链接](https://calcite.apache.org/docs/model.html#table)
+## 表
 
 发生在`root.schemas.tables`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-7)
+**JSON：**
 
 ```
 {
@@ -265,7 +263,7 @@ sql: select deptno, count(*) as c, sum(sal) as s from emp group by deptno
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-7)
+**YAML：**
 
 ```
 name: sales_fact
@@ -282,11 +280,11 @@ columns:
 
 `columns`[（ Column](https://calcite.apache.org/docs/model.html#column)元素列表，对于某些类型的表是必需的，对于其他类型的表是可选的，例如View）
 
-### 看法[永久链接](https://calcite.apache.org/docs/model.html#view)
+## 视图
 
 与基类[Table](https://calcite.apache.org/docs/model.html#table)一样，出现在`root.schemas.tables`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-8)
+**JSON：**
 
 ```
 {
@@ -297,7 +295,7 @@ columns:
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-8)
+**YAML：**
 
 ```
 name: female_emps
@@ -328,11 +326,11 @@ modifiable: true
 - 如果您向不可修改的视图提交 INSERT、UPDATE 或 UPSERT 命令，Calcite 在验证语句时会抛出错误。
 - 如果 DML 语句创建的行不会出现在视图中（例如，上面`female_emps`、with 中的行`gender = 'M'`），Calcite 将在执行该语句时引发错误。
 
-### 定制桌子[永久链接](https://calcite.apache.org/docs/model.html#custom-table)
+## 自定义表
 
 与基类[Table](https://calcite.apache.org/docs/model.html#table)一样，出现在`root.schemas.tables`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-9)
+**JSON：**
 
 ```
 {
@@ -345,7 +343,7 @@ modifiable: true
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-9)
+**YAML：**
 
 ```
 name: female_emps
@@ -361,13 +359,13 @@ operand:
 
 `operand`（可选映射）包含要传递给工厂的属性。
 
-### 溪流[永久链接](https://calcite.apache.org/docs/model.html#stream)
+## 流式查询
 
 有关表是否允许流式传输的信息。
 
 发生在`root.schemas.tables.stream`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-10)
+**JSON：**
 
 ```
 {
@@ -376,7 +374,7 @@ operand:
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-10)
+**YAML：**
 
 ```
 stream: true
@@ -387,11 +385,11 @@ history: false
 
 `history`（可选；默认 false）是流的历史记录是否可用。
 
-### 柱子[永久链接](https://calcite.apache.org/docs/model.html#column)
+## 列
 
 发生在`root.schemas.tables.columns`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-11)
+**JSON：**
 
 ```
 {
@@ -399,7 +397,7 @@ history: false
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-11)
+**YAML：**
 
 ```
 name: empno
@@ -407,11 +405,11 @@ name: empno
 
 `name`（必填字符串）是该列的名称。
 
-### 功能[永久链接](https://calcite.apache.org/docs/model.html#function)
+## 函数
 
 发生在`root.schemas.functions`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-12)
+**JSON：**
 
 ```
 {
@@ -422,7 +420,7 @@ name: empno
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-12)
+**YAML：**
 
 ```
 name: MY_PLUS
@@ -445,11 +443,11 @@ path: {}
 
 `path`（可选的字符串列表）是解析此函数的路径。
 
-### 类型[永久链接](https://calcite.apache.org/docs/model.html#type)
+## 类型
 
 发生在`root.types`和 之内`root.schemas.types`。
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-13)
+**JSON：**
 
 ```
 {
@@ -464,7 +462,7 @@ path: {}
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-13)
+**YAML：**
 
 ```
 name: mytype1
@@ -480,11 +478,11 @@ attributes:
 
 `attributes`（可选）是该类型的属性列表。如果`attributes`和`type`两者存在于同一级别， `type`则优先。
 
-### 格子[永久链接](https://calcite.apache.org/docs/model.html#lattice)
+## Lattice 格
 
 发生在`root.schemas.lattices`.
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-14)
+**JSON：**
 
 ```
 {
@@ -517,7 +515,7 @@ attributes:
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-14)
+**YAML：**
 
 ```
 name: star
@@ -558,13 +556,13 @@ tiles:
 
 `defaultMeasures`[（可选的度量](https://calcite.apache.org/docs/model.html#measure)元素 列表）是图块默认应具有的度量列表。中定义的任何图块`tiles`仍然可以定义自己的度量，包括不在此列表中的度量。如果未指定，默认的度量列表只是“count(*)”：
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-15)
+**JSON：**
 
 ```
 [ { name: 'count' } ]
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-15)
+**YAML：**
 
 ```
 name: count
@@ -582,7 +580,7 @@ name: count
 
 另请参见：[格子](https://calcite.apache.org/docs/lattice.html)。
 
-### 瓦[永久链接](https://calcite.apache.org/docs/model.html#tile)
+## Tile 块
 
 发生在`root.schemas.lattices.tiles`.
 
@@ -601,7 +599,7 @@ name: count
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-16)
+**YAML：**
 
 ```
 dimensions: [ 'the_year', ['t', 'quarter'] ]
@@ -617,11 +615,11 @@ measures:
 
 `measures`（[Measure](https://calcite.apache.org/docs/model.html#measure)元素的可选列表）是应用于参数的聚合函数的列表。如果未指定，则使用晶格的默认度量列表。
 
-### 措施[永久链接](https://calcite.apache.org/docs/model.html#measure)
+## 度量
 
 发生在`root.schemas.lattices.defaultMeasures` 和 之内`root.schemas.lattices.tiles.measures`。
 
-#### JSON[永久链接](https://calcite.apache.org/docs/model.html#json-16)
+**JSON：**
 
 ```
 {
@@ -630,7 +628,7 @@ measures:
 }
 ```
 
-#### YAML[永久链接](https://calcite.apache.org/docs/model.html#yaml-17)
+**YAML：**
 
 ```
 agg: sum
