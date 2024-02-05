@@ -1,0 +1,23 @@
+name: 备忘录
+title: 备忘录
+icon: https://help.apple.com/assets/656FB92B5073D2DECA0862BB/656FB92CF0F7AD2F770901D2/zh_CN/c34b1b0e87e731a83161d9bb21345afc.png
+cover: https://help.apple.com/assets/656FB92B5073D2DECA0862BB/656FB92CF0F7AD2F770901D2/zh_CN/c34b1b0e87e731a83161d9bb21345afc.png
+coverpage: [cover, title, description] # 封面页显示的内容
+
+sidebar: 
+  - layout: search
+    override: search
+    filter: /notes/
+    placeholder: 在备忘录中搜索...
+  - toc
+
+base_dir: /notes/
+toc:
+  '常用命令':
+    - index
+    - docker
+    - git
+  '常用软件':
+    - idea
+    - mac
+    - virtual_box

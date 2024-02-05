@@ -2,9 +2,9 @@
 title: ShardingSphere 5.3.1 新特性之动态数据脱敏
 tags: [ShardingSphere]
 categories: [ShardingSphere]
-banner: china
 date: 2023-01-17 10:27:56
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
+banner: china
 ---
 
 > 本文首发于 [Apache ShardingSphere 微信公众号](https://mp.weixin.qq.com/s/Ga0k93PTlFQNZ6jd18cCbg)，欢迎关注公众号，后续将会有更多技术分享。

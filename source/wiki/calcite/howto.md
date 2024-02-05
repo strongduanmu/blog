@@ -1,6 +1,6 @@
 ---
 layout: wiki
-wiki: Calcite 官方文档中文版
+wiki: calcite
 order: 202
 title: 如何参与
 date: 2023-10-26 09:00:00

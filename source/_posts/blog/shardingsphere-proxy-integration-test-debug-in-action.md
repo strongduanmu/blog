@@ -4,14 +4,11 @@ tags: [Java, Remote Debugging, Docker, ShardingSphere]
 categories: [In Action]
 date: 2022-04-22 10:47:24
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/21/1658403607.jpg
-banner: china
 references:
-  - title: 'ShardingSphere 集成测试文档'
-    url: https://shardingsphere.apache.org/document/current/cn/test-manual/integration-test/
-  - title: 'Testcontainer-01篇 基本入门'
-    url: https://blog.csdn.net/mail_liuxing/article/details/99075606
-  - title: 'How to locally debug containers started by Testcontainers'
-    url: https://bsideup.github.io/posts/debugging_containers/
+  - '[ShardingSphere 集成测试文档](https://shardingsphere.apache.org/document/current/cn/test-manual/integration-test/)'
+  - '[Testcontainer-01篇 基本入门](https://blog.csdn.net/mail_liuxing/article/details/99075606)'
+  - '[How to locally debug containers started by Testcontainers](https://bsideup.github.io/posts/debugging_containers/)'
+banner: china
 ---
 
 ## 前言

@@ -2,20 +2,15 @@
 title: Apache Calcite SQL Parser 原理剖析
 tags: [Calcite, JavaCC]
 categories: [Calcite]
-banner: china
 date: 2023-10-09 08:28:49
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 references:
-  - title: 'JavaCC 官方文档'
-    url: https://javacc.github.io/javacc/
-  - title: 'JavaCC 语法文档'
-    url: https://javacc.github.io/javacc/documentation/grammar.html
-  - title: 'JavaCC 实战'
-    url: https://alphahinex.github.io/2022/05/01/javacc-in-action/
-  - title: 'Calcite - 看懂 Parser.jj 中的 SqlSelect'
-    url: https://www.jianshu.com/p/ddb5e4788500
-  - title: 'Apache Calcite SQL 解析及语法扩展'
-    url: https://zhuanlan.zhihu.com/p/509681717
+  - '[JavaCC 官方文档](https://javacc.github.io/javacc/)'
+  - '[JavaCC 语法文档](https://javacc.github.io/javacc/documentation/grammar.html)'
+  - '[JavaCC 实战](https://alphahinex.github.io/2022/05/01/javacc-in-action/)'
+  - '[Calcite - 看懂 Parser.jj 中的 SqlSelect](https://www.jianshu.com/p/ddb5e4788500)'
+  - '[Apache Calcite SQL 解析及语法扩展](https://zhuanlan.zhihu.com/p/509681717)'
+banner: china
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。

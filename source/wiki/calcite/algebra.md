@@ -1,6 +1,6 @@
 ---
 layout: wiki
-wiki: Calcite 官方文档中文版
+wiki: calcite
 order: 2
 title: 代数
 date: 2021-12-07 11:15:27

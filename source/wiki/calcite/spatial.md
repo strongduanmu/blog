@@ -1,6 +1,6 @@
 ---
 layout: wiki
-wiki: Calcite 官方文档中文版
+wiki: calcite
 order: 101
 title: 空间
 date: 2023-10-24 09:00:00

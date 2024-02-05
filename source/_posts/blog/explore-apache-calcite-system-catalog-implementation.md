@@ -2,20 +2,15 @@
 title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
-banner: china
 date: 2023-10-30 08:45:38
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
 references:
-  - title: 'Introduction to Apache Calcite Catalog'
-    url: https://note.youdao.com/s/YCJgUjNd
-  - title: 'Apache Calcite 框架原理入门和生产应用'
-    url: https://zhuanlan.zhihu.com/p/548933943
-  - title: 'CMU 15-445 Database Storage II'
-    url: https://15445.courses.cs.cmu.edu/fall2019/slides/04-storage2.pdf
-  - title: 'CMU 15-445 Query Planning & Optimization I'
-    url: https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf
-  - title: 'Calcite 介绍'
-    url: https://www.cnblogs.com/ulysses-you/p/9358186.html
+  - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
+  - '[Apache Calcite 框架原理入门和生产应用](https://zhuanlan.zhihu.com/p/548933943)'
+  - '[CMU 15-445 Database Storage II](https://15445.courses.cs.cmu.edu/fall2019/slides/04-storage2.pdf)'
+  - '[CMU 15-445 Query Planning & Optimization I](https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf)'
+  - '[Calcite 介绍](https://www.cnblogs.com/ulysses-you/p/9358186.html)'
+banner: china
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。

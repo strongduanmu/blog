@@ -1,6 +1,6 @@
 ---
 layout: wiki
-wiki: Calcite 官方文档中文版
+wiki: calcite
 order: 100
 title: 适配器
 date: 2021-12-12 11:15:27

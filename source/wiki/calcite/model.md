@@ -1,6 +1,6 @@
 ---
 layout: wiki
-wiki: Calcite 官方文档中文版
+wiki: calcite
 order: 201
 title: JSON/YAML 模型
 date: 2023-10-26 09:00:00

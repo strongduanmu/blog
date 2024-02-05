@@ -2,18 +2,14 @@
 title: 使用 Wireshark 解决 BenchmarkSQL 压测 Proxy 异常
 tags: [Wireshark, ShardingSphere, In Action]
 categories: [In Action]
-banner: china
 date: 2023-12-05 11:31:34
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/12/06/1701833859.png
 references:
-  - title: 'ShardingSphere-Proxy 数据库协议交互解读'
-    url: https://mp.weixin.qq.com/s/M7uMynSeK2KwBSWHmCMWZQ
-  - title: 'ShardingSphere-Proxy 前端协议问题排查方法及案例'
-    url: https://mp.weixin.qq.com/s/ROtf-rFeFDeHjX2ln_Pk4Q
-  - title: 'MySQL 技术内幕九：通信协议详解'
-    url: https://zhuanlan.zhihu.com/p/144657586
-  - title: 'MySQL 协议分析'
-    url: https://www.cnblogs.com/davygeek/p/5647175.html
+  - '[ShardingSphere-Proxy 数据库协议交互解读](https://mp.weixin.qq.com/s/M7uMynSeK2KwBSWHmCMWZQ)'
+  - '[ShardingSphere-Proxy 前端协议问题排查方法及案例](https://mp.weixin.qq.com/s/ROtf-rFeFDeHjX2ln_Pk4Q)'
+  - '[MySQL 技术内幕九：通信协议详解](https://zhuanlan.zhihu.com/p/144657586)'
+  - '[MySQL 协议分析](https://www.cnblogs.com/davygeek/p/5647175.html)'
+banner: china
 ---
 
 ## 问题背景

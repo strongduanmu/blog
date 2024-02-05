@@ -2,28 +2,19 @@
 title: CBO 优化的基石——Apache Calcite 统计信息和代价模型详解
 tags: [Calcite]
 categories: [Calcite]
-banner: china
 references:
-  - title: Metadata Management in Apache Calcite
-    url: https://www.querifylabs.com/blog/metadata-management-in-apache-calcite
-  - title: Calcite 官方文档中文版 - 适配器 - 统计和代价
-    url: https://strongduanmu.com/wiki/calcite/adapters.html#%E7%BB%9F%E8%AE%A1%E5%92%8C%E4%BB%A3%E4%BB%B7
-  - title: 数据库等值查询与统计信息
-    url: https://zhuanlan.zhihu.com/p/576987355
-  - title: PolarDB-X CBO 优化器技术内幕
-    url: https://zhuanlan.zhihu.com/p/370372242
-  - title: PolarDB-X 面向 HTAP 的 CBO 优化器
-    url: https://zhuanlan.zhihu.com/p/353161383
-  - title: 独家揭秘 | 阿里云分析型数据库 AnalyticDB 新一代 CBO 优化器技术
-    url: https://developer.aliyun.com/article/751481
-  - title: Oracle 多列统计信息
-    url: https://blog.51cto.com/lhrbest/2712352
-  - title: 【独家】一文看懂 MySQL 直方图
-    url: https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA
-  - title: 数据库内核-CBO 优化器采样与代价模型
-    url: https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session
+  - '[Metadata Management in Apache Calcite](https://www.querifylabs.com/blog/metadata-management-in-apache-calcite)'
+  - '[Calcite 官方文档中文版 - 适配器 - 统计和代价](https://strongduanmu.com/wiki/calcite/adapters.html#%E7%BB%9F%E8%AE%A1%E5%92%8C%E4%BB%A3%E4%BB%B7)'
+  - '[数据库等值查询与统计信息](https://zhuanlan.zhihu.com/p/576987355)'
+  - '[PolarDB-X CBO 优化器技术内幕](https://zhuanlan.zhihu.com/p/370372242)'
+  - '[PolarDB-X 面向 HTAP 的 CBO 优化器](https://zhuanlan.zhihu.com/p/353161383)'
+  - '[独家揭秘 | 阿里云分析型数据库 AnalyticDB 新一代 CBO 优化器技术](https://developer.aliyun.com/article/751481)'
+  - '[Oracle 多列统计信息](https://blog.51cto.com/lhrbest/2712352)'
+  - '[【独家】一文看懂 MySQL 直方图](https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA)'
+  - '[title: 数据库内核-CBO 优化器采样与代价模型](https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session)'
 date: 2024-01-09 08:30:21
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
+banner: china
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。

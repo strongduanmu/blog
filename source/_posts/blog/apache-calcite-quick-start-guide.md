@@ -4,19 +4,13 @@ tags: [Calcite]
 categories: [Calcite]
 date: 2023-09-24 14:46:43
 cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
-banner: china
 references:
-  - title: 'Calcite 入门使用 - I (CSV Example)'
-    url: https://zhuanlan.zhihu.com/p/53725382
-  - title: 'Apache Calcite 官方文档之 Tutorial 英文版'
-    url: https://calcite.apache.org/docs/tutorial.html
-  - title: 'Apache Calcite 官方文档之 Tutorial 中文版'
-    url: https://strongduanmu.com/wiki/calcite/tutorial.html
-  - title: 'Apache Calcite：Hadoop 中新型大数据查询引擎'
-    url: https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite
-  - title: 'Apache Calcite: A Foundational Framework for Optimized Query Processing Over Heterogeneous Data Sources'
-    url: https://arxiv.org/pdf/1802.10233.pdf
-
+  - '[Calcite 入门使用 - I (CSV Example)](https://zhuanlan.zhihu.com/p/53725382)'
+  - '[Apache Calcite 官方文档之 Tutorial 英文版](https://calcite.apache.org/docs/tutorial.html)'
+  - '[Apache Calcite 官方文档之 Tutorial 中文版](https://strongduanmu.com/wiki/calcite/tutorial.html)'
+  - '[Apache Calcite：Hadoop 中新型大数据查询引擎](https://www.infoq.cn/article/new-big-data-hadoop-query-engine-apache-calcite)'
+  - '[Apache Calcite: A Foundational Framework for Optimized Query Processing Over Heterogeneous Data Sources](https://arxiv.org/pdf/1802.10233.pdf)'
+banner: china
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
