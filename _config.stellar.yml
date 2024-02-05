@@ -172,7 +172,7 @@ comments:
     data-reactions-enabled: 1
     data-emit-metadata: 0
     data-input-position: top # top, bottom
-    data-theme: noborder_dark
+    data-theme: preferred_color_scheme
     data-lang: zh-CN
     data-loading: lazy
     crossorigin: anonymous
@@ -466,7 +466,7 @@ plugins:
     typingAnimate: true # 打字机动画
 
 style:
-  darkmode: always # auto / always / false
+  darkmode: auto # auto / always / false
   smooth_scroll: true # true / false 开启时如果目录过长可能无法准确定位
   font-size:
     root: 16px # 改这个会影响全局所有文字的字号
