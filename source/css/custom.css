@@ -1,0 +1,127 @@
+@media screen and (min-width: 2048px) {
+  :root {
+    --gap-l: 16px;
+    --width-left: 288px;
+    --width-main: 720px;
+  }
+}
+
+@media screen and (min-width: 2560px) {
+  :root {
+    --width-main: 720px;
+    --gap-l: 16px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  :root {
+    --width-left: 288px;
+  }
+
+  body:before {
+    display: none !important;
+  }
+}
+
+body:before {
+  background-image: url(/assets/placeholder/noise.png);
+  content: "";
+  display: block;
+  height: 100%;
+  opacity: .025;
+  pointer-events: none;
+  position: fixed;
+  touch-action: none;
+  width: 100%;
+  z-index: 10;
+}
+
+pre {
+  font-size: .875rem;
+}
+
+.cmt-body.waline {
+  --waline-avatar-size: 46px;
+  --waline-m-avatar-size: 38px;
+  --waline-white: #000;
+  --waline-light-grey: #666;
+  --waline-dark-grey: #999;
+  --waline-color: #fff;
+  --waline-bgcolor: var(--block);
+  --waline-bgcolor-light: #272727;
+  --waline-border-color: #333;
+  --waline-disable-bgcolor: #444;
+  --waline-disable-color: #272727;
+  --waline-bq-color: #272727;
+  --waline-info-bgcolor: #272727;
+  --waline-info-color: #666;
+}
+
+.md-text blockquote ol,
+.md-text blockquote p,
+.md-text blockquote ul,
+.md-text ol ol,
+.md-text ol p,
+.md-text ol ul,
+.md-text ul ol,
+.md-text ul p,
+.md-text ul ul,
+.md-text .tag-plugin,
+.md-text .tag-plugin.note>.body,
+.md-text .tag-plugin.note>.body p,
+.md-text.content .tag-plugin.quot p {
+  font-size: .9375rem;
+}
+
+.md-text .highlight.powershell .code:before {
+  content: "PowerShell"
+}
+
+.md-text .tag-plugin {
+  text-align: left;
+}
+
+.md-text .tag-plugin.link {
+  justify-content: flex-start;
+}
+
+/* .md-text .tag-plugin.quot {
+  flex-direction: row;
+} */
+
+/* .md-text .tag-plugin.quot .content {
+  padding: 0 8px;
+} */
+
+.md-text.content .tag-plugin.quot p {
+  color: var(--text-p1);
+}
+
+.post-list .post-card.post.photo .cover .cover-info[position=bottom] {
+  background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, .8));
+}
+
+.post-list .post-card.wiki article .preview img {
+  width: 80px;
+  max-height: 80px;
+}
+
+/* .social-wrap {
+  filter: invert(85%) sepia(0%) saturate(1%) hue-rotate(87deg) brightness(95%) contrast(98%);
+} */
+
+.swiper {
+  --gap-p: 1rem;
+  border-radius: 6px;
+}
+
+.tag-plugin.video iframe,
+.tag-plugin.video video {
+  border-radius: 6px;
+}
+
+.wl-btn,
+.wl-editor,
+.wl-input {
+  font-family: "LXGW WenKai Screen", system-ui, "Microsoft Yahei", "Segoe UI", -apple-system, Roboto, Ubuntu, "Helvetica Neue", Arial, "WenQuanYi Micro Hei", sans-serif;
+}

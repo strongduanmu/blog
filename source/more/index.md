@@ -2,7 +2,6 @@
 layout: page
 menu_id: more
 breadcrumb: false
-comment_id: /more/
 ---
 
 {% navbar active:/more/ [关于博主](/more/) [我的动态](/more/news)  %}

@@ -1,14 +1,15 @@
 name: 备忘录
 title: 备忘录
-icon: https://help.apple.com/assets/656FB92B5073D2DECA0862BB/656FB92CF0F7AD2F770901D2/zh_CN/c34b1b0e87e731a83161d9bb21345afc.png
-cover: https://help.apple.com/assets/656FB92B5073D2DECA0862BB/656FB92CF0F7AD2F770901D2/zh_CN/c34b1b0e87e731a83161d9bb21345afc.png
+description: 备忘录用于记录日常工作常用的网站、工具和命令，方便快速查阅以提升工作效率。
+icon: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/02/05/1707126361.png
+cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/02/05/1707126361.png
 coverpage: [cover, title, description] # 封面页显示的内容
 
+search:
+  filter: /notes/
+  placeholder: 在备忘录中搜索...
+
 sidebar: 
-  - layout: search
-    override: search
-    filter: /notes/
-    placeholder: 在备忘录中搜索...
   - toc
 
 base_dir: /notes/

@@ -21,7 +21,7 @@ open_graph:
 ######## Sidebar ########
 # 左上角显示的 logo 区域，包含图标、大标题、副标题
 logo:
-  avatar: '[${config.avatar}](/more/me/)' # you can set avatar link in _config.yml or '[https://xxx.png](/about/)'
+  avatar: '[${config.avatar}](/more/)' # you can set avatar link in _config.yml or '[https://xxx.png](/about/)'
   title: '[${config.title}](/)' # you can set html tag like: '[<img no-lazy height="32px" src="xxx"/>](/)'
   subtitle: '不积跬步，无以至千里 🤔 | 不积小流，无以成江海 😃' # '文字1 | 文字2' (鼠标放上去会切换到文字2)
 
@@ -38,7 +38,7 @@ menubar:
       title: 博客
       url: /
     - id: wiki
-      title: 维基
+      title: 文档
       url: /wiki/
     - id: notes
       title: 备忘录
@@ -257,16 +257,15 @@ footer:
       - '[文章分类](/categories/)'
       - '[文章标签](/tags/)'
       - '[文章归档](/archives/)'
-    维基:
-      - '[所有维基](/wiki/)'
+    文档:
+      - '[所有文档](/wiki/)'
       - '[Calcite](/wiki/calcite/background.html)'
       - '[JDBC](/wiki/jdbc/preface.html)'
-    动态:
-      - '[2024](/news/)'
+    备忘录:
+      - '[备忘录](/notes/)'
     更多:
-      - '[我的订阅](/more/)'
-      - '[关于本站](/more/about/)'
-      - '[关于博主](/more/me/)'
+      - '[关于博主](/more/)'
+      - '[我的动态](/more/news/)'
   content: | # 支持 Markdown 格式
     本站由 [@strongduanmu](https://github.com/strongduanmu) 使用 [Stellar](https://github.com/xaoxuu/hexo-theme-stellar) 主题创建。
     本博客所有文章除特别声明外，均采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 许可协议，转载请注明出处。

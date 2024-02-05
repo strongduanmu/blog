@@ -6,8 +6,7 @@
 title: 端小强的博客
 avatar: /assets/placeholder/avatar.png
 favicon: /assets/placeholder/favicon.ico
-description: 欢迎访问端小强的博客，本人目前专注于 Apache ShardingSphere 内核模块开发，以及 Apache Calcite 查询优化技术的研究，本站会记录日常工作学习过程中的经验总结和知识梳理，欢迎大家留言交流。
-keywords: [博客, 维基, 动态, 生活, 技术, 记录, 分享]
+keywords: [ShardingSphere, Calcite]
 author: 端小强
 language: zh-CN
 timezone: Asia/Shanghai

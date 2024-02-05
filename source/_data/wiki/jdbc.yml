@@ -1,0 +1,16 @@
+name: JDBC 4.2 规范中文版
+title: JDBC 4.2 规范中文版
+subtitle: 'Java 数据库访问规范 | 众多 ORM 框架学习的基础'
+tags: JDBC 4.2
+description: JDBC 是 Java Database Connectivity 的缩写，它提供了 Java 语言的数据库访问规范，通过 JDBC API 用户可以访问任何实现该规范的数据库。掌握 JDBC 规范的内容，是学习各种 ORM 框架的基础，也能够帮助我们更好地理解数据库驱动实现。
+icon: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/13/1647162370.jpg
+cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/13/1647162370.jpg
+coverpage: true
+search:
+  filter: /wiki/jdbc/
+  placeholder: 在 JDBC 4.2 规范中搜索...
+sidebar: 
+  - toc
+base_dir: /wiki/jdbc/
+toc:
+  - preface
