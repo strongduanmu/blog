@@ -41,7 +41,7 @@ menubar:
       title: 文档
       url: /wiki/
     - id: notes
-      title: 备忘录
+      title: 便笺
       url: /notes/
     - id: more
       title: 更多
@@ -253,21 +253,24 @@ footer:
       url: /atom.xml
   sitemap:
     博客:
-      - '[近期发布](/)'
-      - '[文章分类](/categories/)'
-      - '[文章标签](/tags/)'
-      - '[文章归档](/archives/)'
+      - '[博客](/)'
+      - '[分类](/categories/)'
+      - '[标签](/tags/)'
+      - '[归档](/archives/)'
     文档:
-      - '[所有文档](/wiki/)'
+      - '[文档](/wiki/)'
       - '[Calcite](/wiki/calcite/background.html)'
-      - '[JDBC](/wiki/jdbc/preface.html)'
-    备忘录:
-      - '[备忘录](/notes/)'
+      - '[CMU 15-445/645](/wiki/cmu_15_445/index.html)'
+      - '[CMU 15-721](/wiki/cmu_15_721/index.html)'
+    便笺:
+      - '[Common](/notes/)'
+      - '[Docker](/notes/docker.html)'
+      - '[Git](/notes/git.html)'
     更多:
-      - '[关于博主](/more/)'
-      - '[我的动态](/more/news/)'
+      - '[关于](/more/)'
+      - '[动态](/more/news/)'
   content: | # 支持 Markdown 格式
-    本站由 [@strongduanmu](https://github.com/strongduanmu) 使用 [Stellar](https://github.com/xaoxuu/hexo-theme-stellar) 主题创建。
+    本站由 [@strongduanmu](https://github.com/strongduanmu) 使用 [Stellar](https://github.com/xaoxuu/hexo-theme-stellar) 主题创建，使用 [Vercel](https://blog-parasolwaddledee.vercel.app/) 站点部署。
     本博客所有文章除特别声明外，均采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 许可协议，转载请注明出处。
     <span id="busuanzi_container_site_pv">本站总访问量 <span id="busuanzi_value_site_pv"></span> 次，本站访客数 <span id="busuanzi_value_site_uv"></span> 人次。</span>
   # 主题用户越多，开发者维护和更新的积极性就越高，如果您喜欢本主题，请在适当的位置显示主题信息和仓库链接以表支持。

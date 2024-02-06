@@ -4,7 +4,7 @@ breadcrumb: false
 menu_id: news
 ---
 
-{% navbar active:/more/news/ [关于博主](/more/) [我的动态](/more/news)  %}
+{% navbar active:/more/news/ [关于博主](/more/) [我的动态](/more/news/)  %}
 
 {% timeline %}
 
