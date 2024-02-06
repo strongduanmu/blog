@@ -64,11 +64,11 @@ Things we need store（我们需要存储如下信息）:
 
 Create a database that models a digital music store. 创建一个数据库，为数字音乐商店建模。
 
-![数字音乐商店数据库模型](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586165.png)
+![数字音乐商店数据库模型](/assets/blog/2024/01/07/1704586165.png)
 
 Example: Get the year that Ice Cube went solo. 示例：找出 Ice Cube 单飞的年份。我们可以写一个 python 程序，遍历文件中的所有行，通过 parse 函数将行记录解析成数据，然后判断数组的第一个值是否等于 Ice Cube，相等则返回第二个值。
 
-![通过程序查找记录](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586207.png)
+![通过程序查找记录](/assets/blog/2024/01/07/1704586207.png)
 
 通过这种方式查找数据会存在一些问题，这些问题也是我们想要构建一个数据库管理系统的动机。具体问题如下：
 
@@ -162,7 +162,7 @@ A **tuple** is a set of attribute values (also known as its domain) in the relat
 - Values are (normally) atomic/scalar. Ted Codd 提出的关系模型中，值(通常)是原子/标量，不能是数组也不能是嵌套对象，但是随着关系模型的发展，也支持了数组和 JSON 对象存储。
 - The special value **NULL** is a member of every domain. 每个元组中包含了一个特殊值 NULL。
 
-![n-ary 关系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586647.png)
+![n-ary 关系](/assets/blog/2024/01/07/1704586647.png)
 
 `n-ary` 关系其实就是一张表上有 n 列。在课程中，会使用到 relation 和 table 这两个术语，实际上他们是一回事。
 
@@ -179,7 +179,7 @@ Auto-generation of unique integer primary keys: 自动生成唯一的整数主�
 
 为了方便唯一定位一条记录，我们为 Artist 表增加了一个 id 作为主键。
 
-![主键](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586714.png)
+![主键](/assets/blog/2024/01/07/1704586714.png)
 
 ### 关系模型之外键
 
@@ -187,7 +187,7 @@ A **foreign key** specifies that an attribute from one relation has to map to a 
 
 假设前面的示例中，我们想要在专辑表存储多位艺术家的名字，我们可以尝试将 artist 改成 artists，但是这就违背了原子性的要求，即每个字段必须只有一个值，如果存储多个值，使用中也会带来很多不便。
 
-![外键](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586757.png)
+![外键](/assets/blog/2024/01/07/1704586757.png)
 
 为了解决这个问题，我们可以考虑增加一张 ArtistAlbum 表，用来存储 Artist 和 Album 的映射关系，通过 ArtistAlbum 表，可以建立多对多的关系。另外，为了保证 ArtistAlbum 表的数据和主表的一致性，需要将对应字段设置成外键，保证数据的一致性。
 
@@ -215,7 +215,7 @@ Each operator takes one or more relations as its inputs and outputs a new relati
 
 Ted Codd 提出了关系代数的七种基础运算符，这些运算是检索记录所必须的基础操作。值得一提的是，这种代数是基于集合的，这种集合是数据的无需列表或无需集合，里面的元素是可以重复的。
 
-![关系代数基础运算符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704586871.png)
+![关系代数基础运算符](/assets/blog/2024/01/07/1704586871.png)
 
 ### 关系代数之 SELECT
 
@@ -226,7 +226,7 @@ Choose a subset of the tuples from a relation that satisfies a selection predica
 
 下面是选择操作符的示例，我们可以单独使用 a_id = 'a2' 对结果集进行过滤，过滤之后可以得到一个结构和原始表格一致的新的结果集。此外，我们还可以组合多个谓词，来实现更复杂的选择逻辑。
 
-![选择操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587007.png)
+![选择操作符](/assets/blog/2024/01/07/1704587007.png)
 
 ```sql
 SELECT * FROM R WHERE a_id='a2' AND b_id>102;
@@ -241,7 +241,7 @@ Generate a relation with tuples that contains only the specified attributes. 生
 
 下面的示例展示了先进行选择，再进行投影的操作，我们可以按照自己想要的顺序指定投影，可以在投影操作中进行运算，例如 `b_id - 100`，然后生成一个新的关系。
 
-![投影操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587083.png)
+![投影操作符](/assets/blog/2024/01/07/1704587083.png)
 
 ```sql
 SELECT b_id-100, a_id FROM R WHERE a_id = 'a2';
@@ -255,7 +255,7 @@ Generate a relation that contains all tuples that appear in either only one or b
 
 当你想对两个关系进行 UNION 操作时，这两个关系必须具有相同的属性和相同的类型。
 
-![UNION 操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587160.png)
+![UNION 操作符](/assets/blog/2024/01/07/1704587160.png)
 
 ```sql
 (SELECT * FROM R) UNION ALL (SELECT * FROM S);
@@ -269,7 +269,7 @@ Generate a relation that contains only the tuples that appear in both of the inp
 
 和 UNION 运算一样，INTERSECTION 运算也要求两个关系必须具有相同的属性和相同的类型。
 
-![INTERSECTION 操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587214.png)
+![INTERSECTION 操作符](/assets/blog/2024/01/07/1704587214.png)
 
 ```sql
 (SELECT * FROM R) INTERSECT (SELECT * FROM S);
@@ -281,7 +281,7 @@ Generate a relation that contains only the tuples that appear in the first and n
 
 `Syntax: (R – S)`
 
-![DIFFERENCE 操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587308.png)
+![DIFFERENCE 操作符](/assets/blog/2024/01/07/1704587308.png)
 
 ```sql
 (SELECT * FROM R) EXCEPT (SELECT * FROM S);
@@ -297,7 +297,7 @@ Product 积运算，也叫笛卡尔积。
 Syntax: (R × S)
 ```
 
-![PRODUCT 操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587356.png)
+![PRODUCT 操作符](/assets/blog/2024/01/07/1704587356.png)
 
 在 SQL 中，我们可以使用 CROSS JOIN，或者不写任何 JOIN 时，使用的就是笛卡尔积。
 
@@ -317,7 +317,7 @@ Generate a relation that contains all tuples that are a combination of two tuple
 Syntax: (R ⋈ S)
 ```
 
-![JOIN 操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587389.png)	
+![JOIN 操作符](/assets/blog/2024/01/07/1704587389.png)	
 
 在 SQL 中，我们可以使用 NATURAL JOIN 进行关联，NATURAL JOIN 会自动根据相同名称的字段进行关联。
 
@@ -329,7 +329,7 @@ SELECT * FROM R NATURAL JOIN S;
 
 Ted Codd 提出基础的关系模型运算符之后，后人又结合新的数据库发展提出了其他的运算符，主要包括如下的运算符。
 
-![扩展操作符](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587454.png)
+![扩展操作符](/assets/blog/2024/01/07/1704587454.png)
 
 ### 关于 DBMS 一些观点
 
@@ -337,7 +337,7 @@ Relational algebra still defines the high-level steps of how to compute a query.
 
 假设我们要对 R 和 S 进行 Join，我可以先对 R 和 S 进行自然连接，然后再使用 b_id = 102 条件进行过滤。也可以先对 S 表进行过滤，再使用 R 表和过滤结果进行自然连接。这两者的效率相差非常大。
 
-![执行顺序对比](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/07/1704587525.png)
+![执行顺序对比](/assets/blog/2024/01/07/1704587525.png)
 
 A better approach is to state the high-level answer that you want the DBMS to compute. 更好的方法是声明希望DBMS计算的高级答案。
 

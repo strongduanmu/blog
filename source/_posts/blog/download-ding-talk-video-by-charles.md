@@ -3,7 +3,7 @@ title: Charles 抓包下载钉钉群直播视频
 date: 2021-06-19 10:46:35
 tags: [Charles, FFmpeg]
 categories: [Tool]
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624088349.jpg
+cover: /assets/blog/2021/06/19/1624088349.jpg
 banner: china
 ---
 
@@ -11,7 +11,7 @@ banner: china
 
 作为一名爱学习的技术青年，博主经常会加入一些技术讨论群，参与技术大佬的直播分享，但是由于日常工作繁忙，经常会错过很多精彩的直播，因此想将直播视频下载下来，充分利用上下班的时间进行回看。但是往往事与愿违，大部分群管理员都会设置不允许下载回放 ( 如下图 ) ，幸好强大的互联网提供了各种 NB 工具，最终使用 `Charles` 和 `FFmpeg` 工具，成功实现了钉钉直播视频下载。
 
-![1624070842](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070842.jpg)
+![1624070842](/assets/blog/2021/06/19/1624070842.jpg)
 
 ## Charles 配置
 
@@ -24,25 +24,25 @@ License Key: 48891cf209c6d32bf4
 
 安装完成后，需要配置 Charles 代理，首先选择 `Proxy -> macOS Proxy` 菜单开启代理。
 
-![1624070886](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070886.jpg)
+![1624070886](/assets/blog/2021/06/19/1624070886.jpg)
 
 然后再选择 `Proxy -> Proxy Settings` 菜单，对代理进行配置，需要开启 `HTTP` 代理——选择 `Use HTTP proxy`。
 
-![1624070907](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070907.jpg)
+![1624070907](/assets/blog/2021/06/19/1624070907.jpg)
 
 由于钉钉群直播使用了 HTTPS 协议，因此需要安装 Charles 根证书，并设置 SSL 代理，支持加密数据的获取。安装 Charles 根证书操作很简单，选择 `Help -> SSL Proxying -> Install Charles Root Certificate` 即可完成安装。通常会出现如下界面 ( 未出现可自行打开 Mac 系统自带软件——钥匙串访问 ) ，如果证书显示不被信任，则双击进行设置，设置为始终信任。
 
-![1624070928](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070928.jpg)
+![1624070928](/assets/blog/2021/06/19/1624070928.jpg)
 
 最后再设置 SSL 代理，选择 `Proxy -> SSL Proxying Settings` 菜单，出现如下界面后，选中 `Enable SSL Proxying`，然后添加一个代理规则，Host 设置为 `*`，由于是抓取 HTTPS 协议请求，Port 设置为 `443`。
 
-![1624070945](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070945.jpg)
+![1624070945](/assets/blog/2021/06/19/1624070945.jpg)
 
 ## Charles 抓包
 
 Charles 配置完成后，打开钉钉群直播视频，然后观察 Charles 抓包内容，获取到如下请求信息，其中 `*.alicdn.com` 格式的请求，为钉钉群视频直播地址。展开抓取到的请求信息后，发现了完整的视频地址，最后我们要做的就是想办法下载 `m3u8` 格式的视频。
 
-![1624070969](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070969.jpg)
+![1624070969](/assets/blog/2021/06/19/1624070969.jpg)
 
 ## FFmpeg 下载视频
 
@@ -71,7 +71,7 @@ ffmpeg -i "https://lzdliving.alicdn.com/live_hp/2fa194dc-044e-43f6-b964-3a09a43a
 
 下载完成后，我们可以在 Download 文件夹找到对应的视频文件，使用 `ffplay ~/Downloads/数据集成 Elasticsearch 实时同步.mp4` 命令进行播放测试，可以看到效果非常完美。
 
-![1624070987](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/19/1624070987.jpg)
+![1624070987](/assets/blog/2021/06/19/1624070987.jpg)
 
 ## 参考文档
 

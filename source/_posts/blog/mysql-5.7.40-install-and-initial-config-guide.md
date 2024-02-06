@@ -3,7 +3,7 @@ title: MySQL 5.7.40 安装及初始化配置指南
 tags: [MySQL]
 categories: [MySQL]
 date: 2022-11-18 09:00:00
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/12/25/1640431841.jpg
+cover: /assets/blog/2021/12/25/1640431841.jpg
 banner: china
 ---
 
@@ -18,7 +18,7 @@ MySQL 是当前主流的开源关系型数据库，学习 MySQL 能够帮助我�
 
 > 选择通用二进制安装包，主要是考虑到这种安装方式较为简单，并且在不同的 Linux 发行版上具有很好的通用性，此外还可以灵活地指定安装路径，在一台机器上安装多个 MySQL 实例。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/11/22/1669080676.png)
+![](/assets/blog/2022/11/22/1669080676.png)
 
 下载完成后，我们使用 `scp` 命令将二进制安装包拷贝到服务器的 `/usr/local` 目录下。
 
@@ -142,7 +142,7 @@ $> cp support-files/mysql.server /etc/init.d/mysql.server
 
 > MySQL 支持本地 Socket 登录和远程 TCP/IP 登录，本地 Socket 登录使用 `mysql -S /tmp/mysql.sock -uroot -p` 登录，远程 TCP/IP 使用 `mysql -h 127.0.0.1 -P 3306 -uroot -p` 登录。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/17/1692234209.png)
+![](/assets/blog/2023/08/17/1692234209.png)
 
 此外，为了简化操作，我们可以将 MySQL 二进制程序的路径添加到 PATH 中，建议将 MySQL 路径添加在最左侧，避免操作系统自带的 MySQL 程序影响。
 
@@ -156,11 +156,11 @@ echo $PATH
 
 关于 MySQL 的启动，前文我们使用了 `bin/mysqld_safe --user=mysql &` 进行启动，`mysqld_safe` 是一个守护进程，它会监控 `mysqld` 进程的运行情况，当 `mysqld` 进程意外停止时，`mysqld_safe` 会重新启动 `mysqld` 进程。下图中，我们通过 `kill -9 pid` 手动杀死了 `mysqld` 进程，可以看到 `mysqld_safe` 立即检测到并对 `mysqld` 进行了重启。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/18/1692319030.png)
+![](/assets/blog/2023/08/18/1692319030.png)
 
 除了使用 `mysqld_safe` 启动 MySQL 外，还可以通过 Linux 启动项实现开机自启动，在前面的安装步骤中，我们执行了 `cp support-files/mysql.server /etc/init.d/mysql.server` 命令，`mysql.server` 脚本中提供了 `start`、`stop`、`restart`、`status` 等命令。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/08/18/1692319672.png)
+![](/assets/blog/2023/08/18/1692319672.png)
 
 可以通过 `chkconfig` 实现 `mysql.server` 自启动，执行如下脚本，然后重启服务器测试配置是否生效。
 

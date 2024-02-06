@@ -3,7 +3,7 @@ title: ShardingSphere 5.1.0 执行引擎性能优化揭秘
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2022-03-03 18:18:18
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
+cover: /assets/blog/2021/06/25/1624608310.png
 banner: china
 ---
 
@@ -21,7 +21,7 @@ banner: china
 
 在解读执行引擎性能优化之前，让我们先来回顾下 Apache ShardingSphere 微内核及内核流程中执行引擎的原理。如下图所示，Apache ShardingSphere 微内核包含了 `SQL 解析`、`SQL 路由`、`SQL 改写`、`SQL 执行`和`结果归并`等核心流程。
 
-![1646306201](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306201.jpg)
+![1646306201](/assets/blog/2022/03/03/1646306201.jpg)
 
 SQL 解析引擎负责对用户输入的 SQL 语句进行解析，并生成包含上下文信息的 SQLStatement。SQL 路由引擎则根据解析上下文提取出分片条件，再结合用户配置的分片规则，计算出真实 SQL 需要执行的数据源并生成路由结果。SQL 改写引擎根据 SQL 路由引擎返回的结果，对原始 SQL 进行改写，具体包括了正确性改写和优化性改写。SQL 执行引擎则负责将 SQL 路由和改写引擎返回的真实 SQL 安全且高效地发送到底层数据源执行，执行的结果集最终会由归并引擎进行处理，生成统一的结果集返回给用户。
 
@@ -51,7 +51,7 @@ public enum ConnectionMode {
 
 那么，Apache ShardingSphere SQL 执行引擎是如何帮助用户选择连接模式的呢？SQL 执行引擎选择连接模式的逻辑可以参考下图：
 
-![1646306276](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306276.jpg)
+![1646306276](/assets/blog/2022/03/03/1646306276.jpg)
 
 用户通过配置 `maxConnectionSizePerQuery` 参数，可以指定每条语句在同一个数据源上最大允许的连接数。通过上面的计算公式，当每个数据库连接需执行的 SQL 数量小于等于 1 时，说明当前可以满足每条真实执行的 SQL 都分配一个独立的数据库连接，此时会选择内存限制模式，同一个数据源允许创建多个数据库连接进行并行执行。反之则会选择连接限制模式，同一个数据源只允许创建一个数据库连接进行执行，然后将结果集加载进内存结果集，再提供给归并引擎使用。
 
@@ -177,7 +177,7 @@ rules:
 
 在 `5.0.0` 版本中，我们执行 `SELECT * FROM t_order` 语句后，可以得到如下路由结果，结果中包含 ds_0 和 ds_1 两个数据源，并且各自包含了两个路由结果，由于 `max-connections-size-per-query` 设置为 1，此时无法满足每个真实执行 SQL 都有一个数据库连接，因此会选择连接限制模式。
 
-![1646306369](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306369.jpg)
+![1646306369](/assets/blog/2022/03/03/1646306369.jpg)
 
 同时由于使用了连接限制模式，在并行执行后会将结果集加载至内存中，使用 JDBCMemoryQueryResult 进行存储，当用户结果集较大时，会占用较多的内存。内存结果集的使用也会导致归并时只能使用内存归并，而无法使用流式归并。
 
@@ -189,7 +189,7 @@ private QueryResult createQueryResult(final ResultSet resultSet, final Connectio
 
 在 `5.1.0` 版本中，我们使用了 UNION ALL 对执行的 SQL 进行优化，同一个数据源中多个路由结果会被合并为一条 SQL 执行。由于能够满足一个数据库连接持有一个结果集，因此会选择内存限制模式。在内存限制模式下，会使用流式结果集 JDBCStreamQueryResult 对象持有结果集，在需要使用数据时，可以按照流式查询的方式查询数据。
 
-![1646306402](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306402.jpg)
+![1646306402](/assets/blog/2022/03/03/1646306402.jpg)
 
 ## **性能优化测试**
 
@@ -539,7 +539,7 @@ public class QueryOptimizationTest {
 </tbody>
 </table>
 
-![1646306546](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/03/1646306546.jpg)
+![1646306546](/assets/blog/2022/03/03/1646306546.jpg)
 
 CASE 1 与 CASE 2 都是基于 100 万数据量下的 sysbench 表结构进行测试，由于测试表分片数较多，整体性能提升了 4 倍左右，理论上随着分片数的增加，性能提升的效果会更加明显。
 

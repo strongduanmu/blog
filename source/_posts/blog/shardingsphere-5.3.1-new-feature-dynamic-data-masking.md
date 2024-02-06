@@ -3,7 +3,7 @@ title: ShardingSphere 5.3.1 新特性之动态数据脱敏
 tags: [ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-01-17 10:27:56
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
+cover: /assets/blog/2021/06/25/1624608310.png
 banner: china
 ---
 
@@ -21,7 +21,7 @@ banner: china
 
 基于 ShardingSphere 微内核及可插拔架构，数据脱敏功能只需要实现结果归并引擎 SPI 就可以实现功能的灵活扩展。如下图所示，ShardingSphere 微内核中已经包含了 `SQL 解析`、`SQL 路由`、`SQL 执行`等核心逻辑，ShardingSphere 5.3.1 版本提供的动态脱敏功能，只是对其他功能查询结果的增强处理，因此只需要实现归并引擎中的 ResultDecoratorEngine 和 ResultDecorator 即可实现脱敏功能。
 
-![ShardingSphere 可插拔架构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309251036380.png)
+![ShardingSphere 可插拔架构](/assets/blog/blog/202309251036380.png)
 
 为了实现数据脱敏功能，本次在 features 模块中增加 `shardingsphere-mask` 模块，该模块包含了 `shardingsphere-mask-api`、`shardingsphere-mask-core` 和 `shardingsphere-mask-distsql`，各个模块的作用如下：
 
@@ -33,7 +33,7 @@ banner: china
 
 下图展示了目前 ShardingSphere 内核功能的关系，总体上可以将内核功能划分为三个级别：基于列级别的功能、基于表级别的功能和基于数据源级别的功能。基于列级别的功能包括了数据加密和数据脱敏，主要针对列进行增强处理，基于表级别的功能则包含了数据分片和内置的单表管理，基于数据源级别的功能目前最为丰富，包括了 SphereEx 商业版提供的双写功能，ShardingSphere 开源版本提供的读写分离、高可用发现和影子库功能，这些都是围绕数据库流量治理相关的功能。ShardingSphere 会按照这三个层级关系依次进行处理，而在每一个层级内部，则是根据 Order 进行处理，例如：当用户同时使用加密和脱敏功能时，会优先处理加密逻辑，将存储在数据库中的密文数据进行解密，然后再使用脱敏算法进行数据脱敏。
 
-![ShardingSphere 内核功能分层](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309251037711.png)
+![ShardingSphere 内核功能分层](/assets/blog/blog/202309251037711.png)
 
 ### 脱敏 YAML API & DistSQL
 

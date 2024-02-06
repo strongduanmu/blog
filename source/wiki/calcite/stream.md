@@ -150,7 +150,7 @@ Calcite 有多种窗口类型：
 
 下图显示了使用它们的查询类型：
 
-![Calcite 窗口类型](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/25/1706145322.png)
+![Calcite 窗口类型](/assets/blog/2024/01/25/1706145322.png)
 
 首先，我们来看一个滚动窗口，它由流式的 `GROUP BY` 定义。如下是示例 SQL：
 
@@ -424,7 +424,7 @@ WHERE productId = 10;
 
 需要将流转换为关系的一种特殊情况发生在我所说的`饼图问题`中。想象一下，您需要编写一个带有图表的网页，如下所示，该图表总结了过去一小时内每种产品的订单数量。
 
-![最近一小时订单量饼图](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/01/26/1706230517.png)
+![最近一小时订单量饼图](/assets/blog/2024/01/26/1706230517.png)
 
 但是 `Orders` 流只包含一些记录，而不是一个小时的统计。我们需要对流的历史记录运行关系查询：
 
@@ -772,7 +772,7 @@ WINDOW lastHour AS (
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)
 
 ## 参考文档
 

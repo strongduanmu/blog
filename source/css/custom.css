@@ -125,3 +125,7 @@ pre {
 .wl-input {
   font-family: "LXGW WenKai Screen", system-ui, "Microsoft Yahei", "Segoe UI", -apple-system, Roboto, Ubuntu, "Helvetica Neue", Arial, "WenQuanYi Micro Hei", sans-serif;
 }
+
+li>code:not([class]), p>code:not([class]) {
+  color: #ff5724;
+}

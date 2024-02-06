@@ -3,7 +3,7 @@ title: Apache Calcite 快速入门指南
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-09-24 14:46:43
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
+cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Calcite 入门使用 - I (CSV Example)](https://zhuanlan.zhihu.com/p/53725382)'
   - '[Apache Calcite 官方文档之 Tutorial 英文版](https://calcite.apache.org/docs/tutorial.html)'
@@ -19,7 +19,7 @@ banner: china
 
 Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`SQL 校验`、`SQL 查询优化`、`SQL 生成`以及`数据连接查询`等典型数据库管理功能。Calcite 的目标是 [One Size Fits All](http://www.slideshare.net/julianhyde/apache-calcite-one-planner-fits-all)，即一种方案适应所有需求场景，希望能为不同计算平台和数据源提供统一的查询引擎，并以类似传统数据库的访问方式（SQL 和高级查询优化）来访问不同计算平台和数据源上的数据。下图展示了 Calcite 的架构以及 Calcite 和数据处理系统的交互关系，从图中我们可以看出 Calcite 具有 4 种类型的组件。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/31/1659246792.png Calcite 架构图 width:500px padding:10px bg:white %}
+{% image /assets/blog/2022/07/31/1659246792.png Calcite 架构图 width:500px padding:10px bg:white %}
 
 * 最外层是 `JDBC Client` 和数据处理系统（`Data Processing System`），JDBC Client 提供给用户，用于连接 Calcite 的 JDBC Server，数据处理系统则用于对接不同的数据存储引擎；
 
@@ -35,7 +35,7 @@ Apache Calcite 是一个动态数据管理框架，提供了：`SQL 解析`、`S
 
 在了解了 Calcite 的基本架构和特点之后，我们以 Calcite 官方经典的 CSV 案例作为入门示例，来展示下 Calcite 强大的功能。首先，从 github 下载 calcite 项目源码，`git clone https://github.com/apache/calcite.git`，然后执行 `cd calcite/example/csv` 进入 csv 目录。
 
-![Calcite Github 仓库](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/07/31/1659249652.png)
+![Calcite Github 仓库](/assets/blog/2022/07/31/1659249652.png)
 
 Calcite 为我们提供了内置的 sqlline 命令，可以通过 `./sqlline` 快速连接到 Calcite，并使用 `!connect` 定义数据库连接，`model` 属性用于指定 Calcite 的数据模型配置文件。
 
@@ -99,7 +99,7 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 在 Caclite 集成 CSV 示例中，我们主要关注三个部分：一是 Calcite 元数据的定义，二是优化规则的管理，三是最优计划的执行。这三个部分是 Calcite 执行流程的核心，元数据主要用于对 SqlNode 语法树进行校验，并为 CBO 优化中代价的计算提供统计信息。优化规则被 Calcite 优化器使用，用来对逻辑计划进行改写，并生成最优的执行计划。最终，执行器会基于最优的执行计划，在不同的存储引擎上进行执行。
 
-![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/13/1697156972.png)
+![Calcite 执行流程](/assets/blog/2023/10/13/1697156972.png)
 
 我们先关注 Calcite 元数据的定义，元数据的定义是通过 `!connect jdbc:calcite:model=src/test/resources/model.json admin admin` 命令，指定 model 属性对应的配置文件 `model.json` 来注册元数据，具体内容如下：
 
@@ -292,7 +292,7 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 初始化完成后，元数据对象的结构如下，注册了 `metadata` 和 `SALES` 两个 schema。
 
-![元数据对象结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/06/1693962395.png)
+![元数据对象结构](/assets/blog/2023/09/06/1693962395.png)
 
 ## Calcite 优化规则管理
 
@@ -308,7 +308,7 @@ void testSelectSingleProjectGz() throws SQLException {
 
 Caclite 首先会将 SQL 解析成 SqlNode 语法树，再通过语法校验、逻辑计划生成等阶段得到如下的逻辑计划树。`LogicalProject` 代表了逻辑投影，会查询 SQL 中指定的投影字段 name 对应的**数据列**。而 LogicalProject 想要获取投影字段对应的数据，需要向下调用 `CsvTableScan`，CsvTableScan 则会对 EMPS 表进行扫描获取**数据行**，逻辑计划树中 CsvTableScan 会获取数据行中的所有行、所有列，再将数据传递给上层的 LogicalProject 按投影列进行过滤。
 
-![Calcite 逻辑优化](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309260913430.png)
+![Calcite 逻辑优化](/assets/blog/blog/202309260913430.png)
 
 细心的读者可能已经发现，为什么我们指定的 SQL 中只需要查询 name 列，而逻辑计划树中的 CsvTableScan 却要扫描所有列？为了避免 CsvTableScan 扫描无用的数据列，CSV 案例中定义了 CsvProjectTableScanRule 优化规则，**主要用于将 Projection 下推到 TableScan 中，在数据扫描阶段就过滤无用的数据列，从而达到减少数据传输，降低计算时占用内存的目的**。可以看到，经过 CsvProjectTableScanRule 优化后，逻辑计划树中只有一个 CsvTableScan 算子，内部包含了 table 和 fields，可以在数据扫描时过滤投影列（和 Projection 下推类似，我们也可以将 Filter 下推到 TableScan 中，减少加载到内存的数据行，Filter 下推读者可以自行尝试下）。
 
@@ -378,7 +378,7 @@ public class CsvProjectTableScanRule extends RelRule<CsvProjectTableScanRule.Con
 
 CsvProjectTableScanRule 继承了 RelRule 抽象类，而 RelRule 抽象类又继承 RelOptRule 抽象类，继承关系如下图所示。Calcite 优化器会调用 `matches` 方法判断当前优化规则是否匹配，匹配则继续调用 `onMatch` 方法对逻辑计划树进行变换，通过代码可以看出，CSV 示例中会将投影列 fields 下推到 CsvTableScan 中。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309270817769.png RelOptRule 继承关系 width:250px padding:25px bg:white %}
+{% image /assets/blog/blog/202309270817769.png RelOptRule 继承关系 width:250px padding:25px bg:white %}
 
 了解了 CsvProjectTableScanRule 大致的优化逻辑后，我们再来看下 Calcite 是如何注册和执行优化规则的。在 CsvTableScan 中定义了一个 `register` 方法，用于注册和当前关系代数节点相关的优化规则，`CsvRules.PROJECT_SCAN` 是调用 `toRule` 方法得到的优化规则对象。入参 `RelOptPlanner` 是 Calcite 中的优化器对象，目前提供了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，HepPlanner 采用 RBO 模型，基于已知的优化规则进行优化，而 VolcanoPlanner 则采用 CBO 模型，基于执行计划的代价进行选择。本文由于篇幅原因，先从优化器的外部接口了解其功能，暂时不做过多的探究，在后续的文章中，我们将深入学习这两种优化器的内部实现。
 
@@ -424,7 +424,7 @@ public interface Program {
 
 如下图所示，Calcite Prepare 类中默认注册了 5 个 Program，内部封装了 `HepPlanner` 和 `VolcanoPlanner` 两种优化器，以及相关子查询消除等改写逻辑，可以对查询 SQL 进行比较全面的查询优化。
 
-![Calcite JDBC 默认提供的 Program](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/28/1695901517.png)
+![Calcite JDBC 默认提供的 Program](/assets/blog/2023/09/28/1695901517.png)
 
 调用 `program.run` 方法会触发 `SequenceProgram` 内部逻辑， 依次触发 programs 对象的 run 方法。我们以第一个 Program 为例，内部会调用 HepPlanner 优化器的 `setRoot` 和 `findBestExp` 方法，setRoot 方法用于将关系代数设置到 planner 中，而 findBestExp 方法则会调用优化器的逻辑，根据优化规则或者代价选择最优的执行计划。
 
@@ -436,7 +436,7 @@ planner.findBestExp();
 
 优化完成后我们就得到了最优的执行计划，使用 `RelOptUtil.toString(root.rel)` 查看其结果为 `CsvTableScan(table=[[SALES, EMPS]], fields=[[1]])`，下一步我们将看看最优执行计划是如何执行得到结果的。
 
-![最优执行计划](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/28/1695902416.png)
+![最优执行计划](/assets/blog/2023/09/28/1695902416.png)
 
 ## Calcite 最优计划执行
 
@@ -500,7 +500,7 @@ public interface PreparedResult {
 
 在生成 Bindable 接口的实现类时，会调用 EnumerableInterpretable 生成代码逻辑，并使用 Janino 将代码编译为 Java 类并创建对象。
 
-![Calcite 执行生成代码](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/09/30/1696061406.png)
+![Calcite 执行生成代码](/assets/blog/2023/09/30/1696061406.png)
 
 最终返回的 PreparedResultImpl 实现类如下，getBindable 接口会返回 Janino 动态生成的 Java 对象，而 Bindable 接口调用 bind 方法即可返回 Enumerable 迭代器，Calcite JDBC 从迭代器中遍历出记录，再通过 JDBC 接口封装返回给应用程序。
 
@@ -552,4 +552,4 @@ public interface Bindable<T> {
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

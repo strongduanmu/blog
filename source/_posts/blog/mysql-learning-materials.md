@@ -3,7 +3,7 @@ title: MySQL 学习资料整理
 tags: [MySQL]
 categories: [MySQL]
 date: 2023-08-11 08:36:28
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/12/25/1640431841.jpg
+cover: /assets/blog/2021/12/25/1640431841.jpg
 banner: china
 ---
 

@@ -3,7 +3,7 @@ title: ShardingSphere 5.0.0 内核优化及升级指南
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2021-11-27 17:18:02
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
+cover: /assets/blog/2021/06/25/1624608310.png
 banner: china
 ---
 
@@ -17,7 +17,7 @@ banner: china
 
 Apache ShardingSphere 5.0.0 GA 版提出了全新的 Database Plus 理念，目标是构架异构数据库上层标准和生态，为用户提供精准化和差异化的能力。Database Plus 具有连接、增量、可插拔的特点，具体来说，Apache ShardingSphere 能够连接不同的异构数据库，基于异构数据库的基础服务，提供诸数据分片、数据加解密及分布式事务等增量功能。另外，通过可插拔平台，Apache ShardingSphere 提供的增量功能能够无限扩展，用户也可以根据需求灵活地进行扩展。Database Plus 理念的出现，使得 `Apache ShardingSphere` 真正意义上，从一个分库分表中间件蜕变成为一套强大的分布式数据库生态系统。通过践行 Database Plus 理念，基于可插拔平台提供的扩展点，`Apache ShardingSphere` 内核也进行了全面地可插拔化改造。下图展示了全新的可插拔架构内核：
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/27/1638005159.jpg width:750px padding:10px bg:white %}
+{% image /assets/blog/2021/11/27/1638005159.jpg width:750px padding:10px bg:white %}
 
 `Apache ShardingSphere` 内核流程中的 `元数据加载`、`SQL 解析`、`SQL 路由` 、`SQL 改写`、`SQL 执行` 和 `结果归并`，都提供了丰富的扩展点，基于这些扩展点，`Apache ShardingSphere` 默认实现了 `数据分片`、`读写分离`、`加解密`、`影子库压测` 及 `高可用` 等功能。
 
@@ -54,7 +54,7 @@ SQL 执行引擎扩展点按照不同的执行方式来提供扩展，目前，`
 
 Federation 执行引擎是 `5.0.0 GA` 版内核的又一大亮点功能，目标是支持那些在 `4.1.1 GA` 版中无法执行的分布式查询语句，例如：跨数据库实例的关联查询及子查询。Federation 执行引擎的出现，使得业务研发人员不必再关心 SQL 的使用范围，能够专注于业务功能开发，减少了业务层面的功能限制。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/11/27/1638005207.jpg width:500px padding:10px bg:white %}
+{% image /assets/blog/2021/11/27/1638005207.jpg width:500px padding:10px bg:white %}
 
 上图展示了 Federation 执行引擎的处理流程，总体上来看，仍然是遵循着 `SQL 解析`、`SQL 路由`、`SQL 改写`、`SQL 执行` 这几个步骤，唯一的区别是 Federation 执行引擎额外引入了 `SQL 优化`，对分布式查询语句进行 RBO（Rule Based Optimizer） 和 CBO（Cost Based Optimizer） 优化，从而得到代价最小的执行计划。在 SQL 路由阶段，路由引擎会根据 SQL 语句是否跨多个数据库实例，来决定 SQL 是否通过 Federation 执行引擎来执行。
 

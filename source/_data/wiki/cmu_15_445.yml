@@ -3,8 +3,8 @@ title: CMU 15-445/645 学习笔记
 subtitle: '热门的数据库基础课程 | 网红教授亲自授课教学'
 tags: CMU 15-445/645
 description: CMU 15-445/645 是卡内基梅隆大学 Andy Pavlo 教授推出的基础数据库课程，主要介绍数据库管理系统的设计和实现，具体包括：数据模型、存储模型、查询语言、索引、事务处理等数据库核心内容。此外，课程中还安排了多个编码实验，可以有效提升工程实践能力。
-icon: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/31/1698714330.png
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/31/1698714330.png
+icon: /assets/blog/2023/10/31/1698714330.png
+cover: /assets/blog/2023/10/31/1698714330.png
 coverpage: true
 search:
   filter: /wiki/cmu_15_445/

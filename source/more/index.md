@@ -8,7 +8,7 @@ breadcrumb: false
 
 ## 关于博主
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/02/05/1707109038.jpg width:400px %}
+{% image /assets/blog/2024/02/05/1707109038.jpg width:400px %}
 
 大家好，我是端正强，目前是 Apache ShardingSphere 社区的 PMC 成员，并担任 SphereEx 高级中间件工程师职位。从 2018 年开始接触 Apache ShardingSphere 中间件，曾主导公司内部海量数据的分库分表，有着丰富的实践经验。本人热爱开源，乐于分享，目前专注于 [Apache ShardingSphere](https://github.com/apache/shardingsphere) 内核模块开发，业余时间喜欢研究 [Apache Calcite](https://github.com/apache/calcite) 查询优化技术，期待能够和大家多多交流，共同进步。
 

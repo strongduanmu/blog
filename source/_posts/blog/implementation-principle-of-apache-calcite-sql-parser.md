@@ -3,7 +3,7 @@ title: Apache Calcite SQL Parser 原理剖析
 tags: [Calcite, JavaCC]
 categories: [Calcite]
 date: 2023-10-09 08:28:49
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
+cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[JavaCC 官方文档](https://javacc.github.io/javacc/)'
   - '[JavaCC 语法文档](https://javacc.github.io/javacc/documentation/grammar.html)'
@@ -21,7 +21,7 @@ banner: china
 
 Calcite SQL 解析采用的是 `JavaCC` 框架，本文首先会简要介绍 JavaCC 的使用规范，并结合 Calcite 源码对 JavaCC 的使用方式进行学习。然后我们会关注 Calcite SQL Parser 的实现，以及如何使用 `Freemarker` 模板对 Caclite 解析进行扩展。最后我们再学习下解析后的 AST 对象——`SqlNode` 体系，以及基于 SqlNode 的 SQL 生成，期望通过这些内容能够帮助大家深刻理解 Caclite SQL 解析。
 
-![Calcite 执行流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/13/1697156972.png)
+![Calcite 执行流程](/assets/blog/2023/10/13/1697156972.png)
 
 ## JavaCC 简介
 
@@ -198,11 +198,11 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 
 Calcite SQL Parser 的核心实现在 `calcite-core` 模块，在 `src/main` 下包含了 `codegen` 目录，`Parser.jj` 文件是 SQL Parser 相关的词法和语法规则文件，并且为了实现 SQL Parser 的扩展，Calcite 采用了 Freemarker 模板引擎，`config.fmpp` 和 `default_config.fmpp` 用于定义 Freemarker 模板的属性。
 
-![Calcite SQL Parser 解析文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160859394.png)
+![Calcite SQL Parser 解析文件](/assets/blog/blog/202310160859394.png)
 
 Calcite SQL Parser 的入口类是 `SqlParser`，调用 `SQLParser.create` 可以快速创建解析对象，然后进行 SQL 解析。`SPAN`  类是 `SqlParserPos` 的构建器，构建的 `SqlParserPos` 对象主要用来记录 `TOKEN` 在 SQL 中的位置。`SqlAbstractParserImpl` 是解析的抽象类，Calcite 中生成的 `SqlParserImpl`、`SqlBabelParserImpl` 和 `SqlDdlParserImpl` 都继承了该抽象类。
 
-![Calcite SQL Parser 核心类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202310160913074.png)
+![Calcite SQL Parser 核心类](/assets/blog/blog/202310160913074.png)
 
 Calcite SQL Parser 调用非常简单，按照如下示例可以快速地解析并获取 AST 对象。`SqlParser.create` 方法传入要解析的 SQL 字符串，以及一个 Config 对象。
 
@@ -376,7 +376,7 @@ final public SqlNode OrderedQueryOrExpr(ExprContext exprContext) throws ParseExc
 
 QueryOrExpr 方法内部会依次调用 `LeafQueryOrExpr`、`LeafQuery` 和 `SqlSelect` 方法，在 `SqlSelect` 方法内部，则会对查询语句的每个语法片段依次进行初始化，最终返回 SqlSelect 对象。SqlSelect 对象初始化的调用链路如下图所示。
 
-![SqlSelect 初始化调用链路](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697586335.png)
+![SqlSelect 初始化调用链路](/assets/blog/2023/10/18/1697586335.png)
 
 ## Calcite SQL Parser 扩展
 
@@ -384,7 +384,7 @@ QueryOrExpr 方法内部会依次调用 `LeafQueryOrExpr`、`LeafQuery` 和 `Sql
 
 Calcite SQL Parser 语法扩展流程如下图所示，Calcite 在 templates 目录提供了内置的 `Parser.jj` 模板，在 includes 目录提供了扩展的 `compoundIdentifier.ftl` 和 `parserImpls.ftl` 模板。这些模板通过 `FMPP`（FreeMarker Preprocessor）可以生成最终的解析文件 `Parser.jj`，再交由 JavaCC 编译工具生成 SqlParserImpl 类。
 
-![Calcite SQL Parser 语法扩展流程](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697590210.png)
+![Calcite SQL Parser 语法扩展流程](/assets/blog/2023/10/18/1697590210.png)
 
 `core` 模块 `build.gradle.kts` 中的脚本也印证了以上的处理流程，先执行 `FmppTask`，再执行 `JavaCCTask`。
 
@@ -406,7 +406,7 @@ val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCT
 
 了解了 Calcite SQL Parser 语法扩展的流程后，我们再来看一个语法扩展的例子。在 `server` 模块，Calcite 使用相同的扩展方法，增加了对 DDL 语句的支持。下图展示了 `server` 模块语法扩展使用到的文件——`config.fmpp` 和 `parserImpls.ftl`。
 
-![Server 模块语法扩展文件](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697604159.png)
+![Server 模块语法扩展文件](/assets/blog/2023/10/18/1697604159.png)
 
 `config.fmpp` 文件（如下所示）定义了 `Parser.jj` 模板中需要使用的参数，如果未配置则默认会使用 `default_config.fmpp` 中的参数。`parser` 下的 `package`、`class` 和 `imports` 用于定义生成的解析器类的`包名`、`类名`和`引入的包`。`keywords` 用于定义扩展语法中的关键字，`nonReservedKeywordsToAdd` 用于定义非保留的关键字。`createStatementParserMethods`、`dropStatementParserMethods ` 和 `truncateStatementParserMethods` 分别用于定义 DDL 语句中 `CREATE`、`DROP` 和 `TRUNCATE` 语句的初始化方法。`implementationFiles` 则用于定义这些方法的实现文件。
 
@@ -552,7 +552,7 @@ val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCT
 
 想观察整个过程的读者，可以尝试执行 `ServerParserTest#testCreateForeignSchema` 单元测试，可以看到 `build` 目录生成了统一的 `Parser.jj` 文件。然后经过 JavaCC 编译生成了 `SqlDdlParserImpl` 类。
 
-![执行 DDL 单测编译生成 SqlDdlParserImpl](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/18/1697605707.png)
+![执行 DDL 单测编译生成 SqlDdlParserImpl](/assets/blog/2023/10/18/1697605707.png)
 
 ## Calcite SqlNode 体系 & SQL 生成
 
@@ -560,13 +560,13 @@ val javaCCMain by tasks.registering(org.apache.calcite.buildtools.javacc.JavaCCT
 
 SqlNode 是所有解析节点的父类，Calcite 中目前有 70 多个实现类，这些类共同组成了 SqlNode 体系。SqlNode 体系总体上可以分为 3 大类：`SqlCall`、`SqlLiteral` 和 `SqlIdentifier`。从下图中可以看出 `SqlNode` 抽象类定义了 `validate`、`unparse` 和 `accept` 等抽象方法，各实现类负责实现当前节点的处理逻辑，从而保证 SqlNode 体系能够完成元数据校验、SQL 方言生成等功能。
 
-![SqlNode 体系分类](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697676145.png)
+![SqlNode 体系分类](/assets/blog/2023/10/19/1697676145.png)
 
 下面我们再来具体了解下 `SqlCall`、`SqlLiteral` 和 `SqlIdentifier` 这 3 类 SqlNode 分别包含了哪些子类，以及他们的具体作用。
 
 * `SqlCall`：代表了对 SqlOperator 的调用，Calcite 中每个操作都可以对应一个 SqlCall，例如查询操作是 SqlSelectOperator，对应的 SqlNode 是 `SqlSelect`。常用的 SqlCall 实现类如下图所示，包含了`SqlSelect`、`SqlDelete`、`SqlUpdate`、`SqlInsert` 和 `SqlMerge` 等。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
+{% image /assets/blog/2023/10/19/1697677726.png SqlCall 子类体系 width:500px padding:20px bg:white %}
 
 以 SqlSelect 为例，类中包含了查询语句涉及的子句，`selectList` 代表了查询中的投影列，`from` 代表了查询的表，`where` 则代表了查询条件，其他字段也都和查询语句中的子句能够一一对应。
 
@@ -602,12 +602,12 @@ public class SqlSelect extends SqlCall {
 
 前文示例中的 `select name from EMPS` 语句，经过 Calcite SQL Parser 解析，最终能够得到如下的 AST 结构（SqlNode 树）：
 
-![AST 抽象语法树](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/20/1697762396.png)
+![AST 抽象语法树](/assets/blog/2023/10/20/1697762396.png)
 
 * `SqlIdentifier`：代表 SQL 中的标识符，例如 SQL 语句中的表名、字段名。
 * `SqlLiteral`：主要用于封装 SQL 中的常量，通常也叫做字面量。
 
-![SqlLiteral 子类体系](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/19/1697677850.png)
+![SqlLiteral 子类体系](/assets/blog/2023/10/19/1697677850.png)
 
 Calcite 支持了众多类型的常量，下表展示了常量类型及其含义，可供大家学习参考。
 
@@ -860,4 +860,4 @@ public void unparse(SqlWriter writer, SqlCall call, int leftPrec, int rightPrec)
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

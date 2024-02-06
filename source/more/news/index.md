@@ -10,6 +10,6 @@ menu_id: news
 
 <!-- node 2024-02-05 -->
 Test！
-<!-- {% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2024/02/05/1707109038.jpg %} -->
+<!-- {% image /assets/blog/2024/02/05/1707109038.jpg %} -->
 
 {% endtimeline %}

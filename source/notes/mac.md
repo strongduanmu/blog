@@ -16,7 +16,7 @@ brew install --cask kext-updater
 
 安装完成后打开 `Kext Updater`，点击 Check 检测最新驱动，完成后最新的驱动会下载到桌面 `Kext-Updates` 文件夹下。
 
-![Kext Updater 更新驱动](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/11/14/1699923359.png)
+![Kext Updater 更新驱动](/assets/blog/2023/11/14/1699923359.png)
 
 然后执行以下命令挂在 EFI 分区，此时将 `AppleALC.kext` 文件复制到 `/Volumes/Untitled 1/EFI/OC/Kexts` 目录下（记得备份原始文件）。
 

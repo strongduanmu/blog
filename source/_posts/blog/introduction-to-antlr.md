@@ -3,7 +3,7 @@ title: ANTLR 基础入门
 tags: [Antlr]
 categories: [Antlr]
 date: 2021-07-31 08:57:21
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/introduction-to-antlr.png
+cover: /assets/blog/blog/introduction-to-antlr.png
 banner: china
 ---
 
@@ -155,7 +155,7 @@ grun HelloWorld r -gui
 hello world
 ```
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110755878.png)
+![](/assets/blog/blog/202308110755878.png)
 
 在命令行直接输入`grun`，可以查看其他参数的帮助信息：
 
@@ -209,7 +209,7 @@ assign : ID '=' expr ';' ;
 
 整个语法分析的过程如下：
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110756627.png)
+![](/assets/blog/blog/202308110756627.png)
 
 首先，输入的字符串`sp = 100;`，经过词法分析器`lexer`可以转换为多个词法符号，再经过语法分析器`parser`，生成对应的语法分析树。语法分析树的内部节点是词组名（对应语法规则中的`assign`和`expr`），这些名字用于识别它们的子节点，并将子节点归类。根节点是一个抽象的名字，此处为`stat`（statement 的缩写），叶子节点对应输入的词法符号。
 
@@ -231,7 +231,7 @@ void assign() { // 根据assign规则生成的方法
 
 在 ANTLR 中，assign 语法规则对应的语法分析树，可以映射成如下类型：
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110756615.png)
+![](/assets/blog/blog/202308110756615.png)
 
 左图中`stat`、`assign`、`expr`代表的是规则节点（`RuleNode`），对应 ANTLR 语法定义中的规则名称，`sp`、`100`对应的是终端节点（`TerminalNode`），即词法符号。
 
@@ -243,11 +243,11 @@ void assign() { // 根据assign规则生成的方法
 
 ANTLR 的运行库提供了两种遍历树的机制——`语法分析树监听器`和`语法分析树访问器`。ANTLR 默认会生成语法分析树监听器，内置的`ParseTreeWalker`类会进行深度优先遍历（如下图所示），遍历树的不同节点时，会触发不同的事件，语法分析树监听器会对不同的事件作出相应的处理。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110757919.png)
+![](/assets/blog/blog/202308110757919.png)
 
 ANTLR 默认为每个语法文件生成了一个 ParseTreeListener 的子类，语法中的每条规则都有对应的`enter`和`exit`方法，用户可以自行实现 ParseTreeListener 接口，来实现自己的业务逻辑。ParseTreeWalker 类对 ParseTreeListener 接口完整的调用流程如下图：
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110757402.png)
+![](/assets/blog/blog/202308110757402.png)
 
 监听器机制的优势在于对语法分析树的遍历是自动的，用户无需编写遍历语法分析树的代码，也无需让监听器显示地访问子节点。
 
@@ -259,7 +259,7 @@ antlr4 HelloWorld.g4 -visitor
 
 通常，语法分析树访问器对树的遍历过程如下：
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110757456.png)
+![](/assets/blog/blog/202308110757456.png)
 
 ANTLR 默认会提供访问器接口及一个默认实现类，用户只需要实现自己感兴趣的方法即可。
 
@@ -365,11 +365,11 @@ SUB
 
 区别于前文直接使用命令行的方式，本例中会使用 IDEA 进行计算器程序开发，首先需要在 IDEA 中安装`ANTLR v4`插件，该插件可以快速地对语法规则进行解析，生成语法分析树。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110758553.png)
+![](/assets/blog/blog/202308110758553.png)
 
 以前文的语法规则为例，我们使用`ANTLR v4`插件进行语法解析，例如：选中语法规则`stat`，然后右击，选择`Test Rule stat`，出现`ANTLR Preview`界面，输入`a = 5`，右侧能够实时显示出对应的语法分析树，语法调试非常方便。
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110758311.png)
+![](/assets/blog/blog/202308110758311.png)
 
 其次，我们需要在项目中引入[antlr4-maven-plugin](https://www.antlr.org/api/maven-plugin/latest/index.html)插件，该插件规定了语法规则文件的路径，默认路径如下：
 
@@ -409,7 +409,7 @@ src/main/
 
 安装好插件后，执行`mvn package`会自动生成语法分析树访问器，生成的代码位于`target/generated-sources`目录下：
 
-![](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202308110758590.png)
+![](/assets/blog/blog/202308110758590.png)
 
 下面，我们需要编写一个计算器表达式解析程序的访问器，由于返回的结果为只包含整数，因此泛型可以声明为`Integer`，访问器代码实现如下：
 

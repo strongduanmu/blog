@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-9-12 17:24:20
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/sqlancer-logo.png
+cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
   - '[SQLacner for Databend 使用说明](https://blog.csdn.net/hys__handsome/article/details/127141285)'

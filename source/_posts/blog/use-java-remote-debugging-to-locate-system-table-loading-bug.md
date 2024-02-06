@@ -3,7 +3,7 @@ title: 使用 Java 远程调试技术定位系统表加载问题
 tags: [Java, Remote Debugging]
 categories: [In Action]
 date: 2022-03-30 11:15:27
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/30/1648635657.jpg
+cover: /assets/blog/2022/03/30/1648635657.jpg
 banner: china
 ---
 
@@ -15,7 +15,7 @@ banner: china
 
 根据 `打包后 ShardingSphere 无法加载系统表` 这个现象，首先想到的就是打包后的程序是否丢失了系统表配置文件。为了排查丢失配置文件的可能性，笔者使用 `JD-GUI` 对打包后的 jar 包进行反编译，得到如下结果：
 
-![1648687778](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/31/1648687778.png)
+![1648687778](/assets/blog/2022/03/31/1648687778.png)
 
 从结果可以看出，ShardingSphere 加载系统表所使用的配置文件都存在，并未出现配置文件丢失的情况。为了进一步定位打包程序的问题，我们需要使用远程调试技术，了解打包程序内部运行的逻辑。
 
@@ -95,17 +95,17 @@ nohup java ${JAVA_OPTS} ${JAVA_MEM_OPTS} -classpath ${CLASS_PATH} ${MAIN_CLASS} 
 
 启动 ShardingSphere 后，我们在 IDEA 中配置远程调试，选择 `Run/Debug Configurations -> Remote JVM Debug`，然后配置被调试程序的 Host 和 Port。
 
-![1648780219](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/01/1648780219.png)
+![1648780219](/assets/blog/2022/04/01/1648780219.png)
 
 保存之后，我们使用 IDEA Debug 模式启动程序，可以看到在 ShardingSphere 启动过程中，程序会停在我们设置的断点处。
 
-![1648780577](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/01/1648780577.png)
+![1648780577](/assets/blog/2022/04/01/1648780577.png)
 
 ## 问题优化
 
 通过 JDWP 远程调试技术，笔者在系统表加载的流程中发现了问题的原因，在 IDEA 中可以正常运行的 `File#listFiles()` 方法，打包之后返回的结果却为 null，这导致系统表元数据为空。
 
-![1648780752](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/01/1648780752.png)
+![1648780752](/assets/blog/2022/04/01/1648780752.png)
 
 查阅了一些资料后发现，当源码打成 JAR 包后，由于 JAR 包是一个压缩包，无法直接使用 `File API` 去访问压缩包中的文件，需要使用流进行文件的读写。针对这个问题，笔者对系统表配置读取的逻辑进行了如下调整：
 
@@ -132,7 +132,7 @@ private static ShardingSphereSchema createSchema(final Collection<InputStream> s
 
 经过调整之后，重新进行了打包测试，问题终于迎刃而解。通过这次问题的调查，笔者深刻认识到功能自测不能只在开发环境中进行测试，更应该考虑实际部署的环境，按照真实场景进行测试，从而充分暴露这些潜在的问题，希望后续的开发工作中能避免类似的问题。
 
-![1648781791](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/01/1648781791.png)
+![1648781791](/assets/blog/2022/04/01/1648781791.png)
 
 ## 参考文档
 

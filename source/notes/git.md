@@ -58,7 +58,7 @@ Hi strongduanmu! You've successfully authenticated, but GitHub does not provide 
 
 为了不影响工作效率，尝试将 SSH 替换为 HTTPS，参考 [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)，点击个人头像下的 **Settings**，然后选择 `Developer settings -> Personal access tokens -> Fine-grained personal access tokens Beta -> Generate new token`，生成 token 如下图所示。
 
-![生成 token](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309151042092.png)
+![生成 token](/assets/blog/blog/202309151042092.png)
 
 生成完成后，执行 `git fetch` 等命令时，输入用户名和密码（生成的 token）。
 

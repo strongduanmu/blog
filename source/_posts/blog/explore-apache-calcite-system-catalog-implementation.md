@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/04/05/1649126780.jpg
+cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
   - '[Apache Calcite 框架原理入门和生产应用](https://zhuanlan.zhihu.com/p/548933943)'
@@ -21,7 +21,7 @@ banner: china
 
 ## 什么是 System Catalog
 
-![System Catalog 在数据库系统中的作用](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/10/30/1698628551.png)
+![System Catalog 在数据库系统中的作用](/assets/blog/2023/10/30/1698628551.png)
 
 在 [CMU 15-445 Query Planning & Optimization I](https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf) 课程中介绍了数据库系统的整体架构，系统目录（`System Catalog`）主要负责存储数据库的元数据信息，具体包括：表、列、索引、视图、用户、权限以及内部统计信息等。从上图可以看出，系统目录在数据库绑定校验、逻辑计划树改写和执行计划优化等阶段发挥了重要作用。
 
@@ -58,7 +58,7 @@ public abstract class CalciteSchema {
 
 如下图所示，Calcite Schema 支持任意层级的嵌套，可以很方便地适配不同的数据库，借助 Schema 的嵌套结构，Calcite 衍生出了 `NameSpace` 概念，通过 NameSpace 可以对不同 Schema 下的对象进行有效地隔离。例如在最底层 SubSchema 中定义的表、函数等对象，只能在当前的 Schema 中使用，如果想要在多个 Schema 中共享对象，则可以考虑在共同的父 Schema 中进行定义。
 
-![Calcite Schema 嵌套结构](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2023/11/09/1699492678.png)
+![Calcite Schema 嵌套结构](/assets/blog/2023/11/09/1699492678.png)
 
 [Schema](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/schema/Schema.java) 接口定义如下，可以看到它提供了 `getTable`、`getType`、`getFunctions` 和 `getSubSchema` 等访问方法，常见的 Schema 接口实现类有 AbstractSchema、CsvSchema、JdbcCatalogSchema 等。AbstractSchema 对 Schema 接口的方法进行了实现，并提供了可重写的 `getTableMap`、`getFunctionMultimap` 和 `getSubSchemaMap` 方法，用于向 Schema 中注册表、函数和子 Schema。CsvSchema 和 JdbcCatalogSchema 都是继承了 AbstractSchema 完成 Schema 注册，大家也可以参考该方式简化注册 Schema 的流程。
 
@@ -138,4 +138,4 @@ TODO
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/202309210909027.png)
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

@@ -3,7 +3,7 @@ title: 关系系统查询优化概述论文学习
 tags: [Query Optimization,Paper]
 categories: [Paper]
 date: 2022-01-18 08:39:23
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/17/1647475423.jpg
+cover: /assets/blog/2022/03/17/1647475423.jpg
 banner: china
 ---
 
@@ -19,7 +19,7 @@ banner: china
 
 查询执行引擎实现了一组物理算子（`physical operators`）。算子负责将一个或多个数据流作为输入，并生成一个输出数据流。物理算子的例子包括：`（外部）排序`、`顺序扫描`、`索引扫描`、`嵌套循环连接`（nested-loop join） 和 `排序合并连接`（sort-merge join）。我将这些算子称为物理算子，因为它们不一定与关系操作符一一对应。理解物理算子最简单的方法是将它看做代码块，代码块作为基础模块实现了 SQL 查询语句的执行。这种执行的抽象表示就是物理算子树，如图 1 所示。算子树中的边表示物理算子之间的数据流。我们使用 `物理算子树`、`执行计划`（或者 `简单的计划`）这些可交换的术语。执行引擎负责计划的执行，并且生成查询的结果。因此，查询执行引擎的功能决定了可行的算子树的结构。读者可以参考[^20]来了解查询估算技术的概要。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/20/1647762436.png width:500px padding:10px bg:white %}
+{% image /assets/blog/2022/03/20/1647762436.png width:500px padding:10px bg:white %}
 
 查询优化器负责为执行引擎生成输入。它接受一个已解析的 SQL 查询作为输入，并负责从可行的执行计划空间里，为给定的 SQL 查询生成有效的执行计划。优化器的任务并不简单，因为对于给定的 SQL 查询，可能存在大量可行的算子树：
 
@@ -47,7 +47,7 @@ Join(Join(A,B),C) = Join(Join(B,C),A)
 
 在 SPJ 查询上下文中，System-R 优化器的搜索空间由算子树组成，算子树对应了线性序列的连接操作，例如：`Join(Join(Join(A,B),C),D)` 的序列如图 2(a) 所示。由于连接的结合性和交换性，这些序列在逻辑上是等价的。连接算子既可以使用嵌套循环（`nested loop`）实现，也可以使用排序合并（`sort-merge`）实现。每个扫描节点即可以使用索引扫描（使用聚集或非聚集索引），也可以使用顺序扫描。最后，谓词应当尽可能早地进行计算。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/03/20/1647762649.png width:500px padding:10px bg:white %}
+{% image /assets/blog/2022/03/20/1647762649.png width:500px padding:10px bg:white %}
 
 成本模型将估算的成本，分配给搜索空间中的任何部分或全部执行计划。它还决定了执行计划中，每个算子输出的数据流的估算大小。成本模型依赖于：
 

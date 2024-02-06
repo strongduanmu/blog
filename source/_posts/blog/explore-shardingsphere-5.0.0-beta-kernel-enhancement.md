@@ -3,7 +3,7 @@ title: 探秘 ShardingSphere 5.0.0 beta 版内核增强
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2021-06-25 15:58:08
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/06/25/1624608310.png
+cover: /assets/blog/2021/06/25/1624608310.png
 banner: china
 ---
 
@@ -17,7 +17,7 @@ banner: china
 
 在探秘 `5.0.0-beta` 版内核增强之前，让我们先来回顾下 ShardingSphere 的内核原理。如下图所示，ShardingSphere 内核主要由 `解析引擎`、`路由引擎`、`改写引擎`、`Standard 执行引擎`、`Federate 执行引擎`、`归并引擎` 等组成，Federate 执行引擎是本次 `5.0.0-beta` 版本引入的新功能，用于增强分布式查询能力。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625101067.jpg width:550px padding:10px bg:white %}
+{% image /assets/blog/2021/07/01/1625101067.jpg width:550px padding:10px bg:white %}
 
 - `解析引擎`：解析引擎负责进行 SQL 解析，具体可以分为词法分析和语法分析。词法分析负责将 SQL 语句拆分为一个个不可再分的单词，然后语法分析器对 SQL 进行理解，并最终得到解析上下文。解析上下文包括表、选择项、排序项、分组项、聚合函数、分页信息、查询条件以及可能需要修改的占位符标记；
 
@@ -45,9 +45,9 @@ SQL 解析引擎是 ShardingSphere 项目的基石，也是项目中最稳定的
 
 针对社区反馈问题较多的 `PostgreSQL`，`SQLServer` 和 `Oracle` 等数据库中的 SQL 支持度问题，ShardingSphere 社区通过核心团队成员领导支持、社区同学大规模参与的方式进行提升。特别是在本次作为 Apache 优秀社区参加的 `Google Summer Code` 中，海外同学做出了较大贡献。
 
-![1625101230](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625101230.jpg)
+![1625101230](/assets/blog/2021/07/01/1625101230.jpg)
 
-![1625101241](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625101241.jpg)
+![1625101241](/assets/blog/2021/07/01/1625101241.jpg)
 
 在众多社区贡献者的努力之下，ShardingSphere `5.0.0-beta` 版的 SQL 支持度取得了大幅度提升，为了打造更好的项目基石，我们会持续提升优化 SQL 支持度，期待有更多的贡献者可以参与到这项工作中来，一起提升 SQL 支持度。
 
@@ -72,13 +72,13 @@ ALTER TABLE t_order ADD CONSTRAINT t_order_fk FOREIGN KEY (order_id) REFERENCES 
 
 对于以上三种主要类型的表进行排列组合，可以得到如下 9 种组合场景。
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625101297.jpg width:500px padding:10px bg:white %}
+{% image /assets/blog/2021/07/01/1625101297.jpg width:500px padding:10px bg:white %}
 
 针对这 9 种表的组合场景，ShardingSphere `5.0.0-beta` 版对 `ShardingTableBroadcastRoutingEngine` 路由引擎进行了增强，完全支持分片表/广播表和其他类型表的组合路由。当 SQL 语句中包含的表都为分片表，并且都是绑定表关系时，会按照原有主表驱动路由的方式进行处理。当 SQL 语句中包含的表都为分片表，但不是绑定表关系时，或者 SQL 语句中的部分表为分片表时，路由引擎会按照表所属的数据源先取交集，然后再对同数据源的物理表计算笛卡尔积，得到最终的路由结果。
 
 由于表的组合关系复杂，路由结果也存在多种情况。当分片表只配置了单个数据节点，并且分布在同一数据源时，DDL 语句多表组合的笛卡尔积路由结果是合法的，而当分片表配置了多个数据节点时，笛卡尔积路由结果往往是非法的。路由引擎需要能够判断出合法路由结果和非法路由结果，对于非法的路由结果，路由引擎需要抛出合适的异常信息。
 
-![1625101630](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2021/07/01/1625101630.jpg)
+![1625101630](/assets/blog/2021/07/01/1625101630.jpg)
 
 为了保证用户使用 ShardingSphere 的安全性，针对不支持的 SQL 或非法 SQL，ShardingSphere 引入了前置校验（`pre validate`）和后置校验（`post validate`）。前置校验主要用于校验 SQL 语句的基本信息是否合法，如：表是否存在、索引是否存在、多个单表是否存在于同一个数据源中。后置校验主要用于校验路由的结果是否合法，如：在 `ALTER TABLE` 语句中添加外键约束时，我们认为所有的主表（`primary table`）都成功添加外键约束为合法路由结果，否则将抛出异常信息。
 

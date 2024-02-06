@@ -24,4 +24,4 @@ sudo /Library/Application\ Support/VirtualBox/LaunchDaemons/VirtualBoxStartup.sh
 
 重启 VirtualBox 后再次尝试，可以正常安装或使用系统了。
 
-![1660094128](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/08/10/1660094128.png)
+![1660094128](/assets/blog/2022/08/10/1660094128.png)

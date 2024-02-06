@@ -3,7 +3,7 @@ title: Java8 新特性实战
 tags: [Java8]
 categories: [Java]
 date: 2020-01-12 09:00:00
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/10/1644493506.jpg
+cover: /assets/blog/2022/02/10/1644493506.jpg
 banner: china
 ---
 
@@ -11,7 +11,7 @@ banner: china
 
 Java8 是 Oracle 公司在 2014 年 3 ⽉发布的版本，是 Java5 之后最重要的版本，带来了诸多⽅⾯的新特性，包括语⾔、类库、编译器及 JVM 等新特性。本⽂重点介绍 Java8 中语法相关的新特性，主要包括 `Lambda 表达式`、`Stream API`、`New Date API`、`Optional` 等。
 
-![1644542238](https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644542238.png)
+![1644542238](/assets/blog/2022/02/11/1644542238.png)
 
 ## Lambda 表达式
 
@@ -68,7 +68,7 @@ executorService.execute(() -> {
 });
 ```
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644543745.png width:500px padding:20px bg:white %}
+{% image /assets/blog/2022/02/11/1644543745.png width:500px padding:20px bg:white %}
 
 - 参数列表：`函数式接口` 中的抽象方法对应的参数列表，前文例子中函数式接口为 Runnable 接口，抽象方法为 run 方法，为空参数方法；
 - 箭头：Lambda 表达式的标志符号，用来分隔参数列表和 Lambda 主体；
@@ -805,7 +805,7 @@ System.out.println(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-
 
 在 Optional 出现之前，Java 的 NullPointerException 问题令人头疼，我们需要手动添加很多判空逻辑：
 
-{% image https://cdn.jsdelivr.net/gh/strongduanmu/cdn@master/2022/02/11/1644542092.jpg width:600px padding:20px bg:#2B2B2B %}
+{% image /assets/blog/2022/02/11/1644542092.jpg width:600px padding:20px bg:#2B2B2B %}
 
 为了减少这样的 null 值判断，Java8 借鉴了 Guava Optional，提供了新的 Optional 容器。根据官方文档定义，Optional 是一个容器对象，容器中可能包含也可能不包含一个非空对象。如果对象存在，isPresent() 将会返回 true，get()方法将会返回一个值。
 

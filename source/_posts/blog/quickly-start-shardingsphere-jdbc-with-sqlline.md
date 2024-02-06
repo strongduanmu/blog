@@ -3,7 +3,7 @@ title: 基于 SQLLine 快速体验 ShardingSphere JDBC
 tags: [SQLLine, ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-8-29 10:55:41
-cover: https://cdn.jsdelivr.net/gh/strongduanmu/cdn/blog/sqlline.png
+cover: /assets/blog/blog/sqlline.png
 references:
   - '[SQLLine 官方文档](https://github.com/julianhyde/sqlline)'
 banner: china
