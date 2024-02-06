@@ -4,7 +4,7 @@ tags: [MySQL]
 categories: [MySQL]
 date: 2023-08-11 08:36:28
 cover: /assets/blog/2021/12/25/1640431841.jpg
-banner: china
+banner: /assets/banner/banner_3.jpg
 ---
 
 ## 前言

@@ -253,12 +253,10 @@ footer:
       url: /atom.xml
   sitemap:
     博客:
-      - '[博客](/)'
       - '[分类](/categories/)'
       - '[标签](/tags/)'
       - '[归档](/archives/)'
     文档:
-      - '[文档](/wiki/)'
       - '[Calcite](/wiki/calcite/background.html)'
       - '[CMU 15-445/645](/wiki/cmu_15_445/index.html)'
       - '[CMU 15-721](/wiki/cmu_15_721/index.html)'

@@ -8,7 +8,7 @@ references:
   - '[Calcite RBO 简介](https://zhuanlan.zhihu.com/p/65673329)'
   - '[Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)'
   - '[Calcite 启发式 Planner（HepPlanner）](https://zhuanlan.zhihu.com/p/61661909)'
-banner: china
+banner: /assets/banner/banner_6.jpg
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。

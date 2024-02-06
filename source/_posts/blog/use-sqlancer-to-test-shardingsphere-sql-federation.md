@@ -9,7 +9,7 @@ references:
   - '[SQLacner for Databend 使用说明](https://blog.csdn.net/hys__handsome/article/details/127141285)'
   - '[用 SQLancer 在 Postgres 的 Citus 扩展中挖掘逻辑错误](https://www.modb.pro/db/431552)'
   - '[数据库进阶测试三部曲 - 从 PQS 到 NoREC 再到 TLP](https://zhuanlan.zhihu.com/p/144725800)'
-banner: china
+banner: /assets/banner/banner_12.jpg
 ---
 
 ## 什么是 SQLacner

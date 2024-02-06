@@ -4,7 +4,7 @@ tags: [Java8]
 categories: [Java]
 date: 2020-01-12 09:00:00
 cover: /assets/blog/2022/02/10/1644493506.jpg
-banner: china
+banner: /assets/banner/banner_1.jpg
 ---
 
 ## 前言

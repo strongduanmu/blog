@@ -4,7 +4,7 @@ tags: [Linux, VirtualBox, CentOS]
 categories: [Linux]
 date: 2021-11-07 20:37:44
 cover: /assets/blog/2021/11/14/1636874726.jpg
-banner: china
+banner: /assets/banner/banner_4.jpg
 ---
 
 ## 前言

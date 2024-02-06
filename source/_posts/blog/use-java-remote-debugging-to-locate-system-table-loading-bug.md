@@ -4,7 +4,7 @@ tags: [Java, Remote Debugging]
 categories: [In Action]
 date: 2022-03-30 11:15:27
 cover: /assets/blog/2022/03/30/1648635657.jpg
-banner: china
+banner: /assets/banner/banner_10.jpg
 ---
 
 ## 背景

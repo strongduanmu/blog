@@ -6,7 +6,7 @@ date: 2023-8-29 10:55:41
 cover: /assets/blog/blog/sqlline.png
 references:
   - '[SQLLine 官方文档](https://github.com/julianhyde/sqlline)'
-banner: china
+banner: /assets/banner/banner_4.jpg
 ---
 
 ## SQLLine 简介

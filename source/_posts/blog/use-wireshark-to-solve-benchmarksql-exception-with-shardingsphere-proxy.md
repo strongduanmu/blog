@@ -9,7 +9,7 @@ references:
   - '[ShardingSphere-Proxy 前端协议问题排查方法及案例](https://mp.weixin.qq.com/s/ROtf-rFeFDeHjX2ln_Pk4Q)'
   - '[MySQL 技术内幕九：通信协议详解](https://zhuanlan.zhihu.com/p/144657586)'
   - '[MySQL 协议分析](https://www.cnblogs.com/davygeek/p/5647175.html)'
-banner: china
+banner: /assets/banner/banner_1.jpg
 ---
 
 ## 问题背景

@@ -6,7 +6,7 @@ date: 2023-10-29 14:20:55
 cover: /assets/blog/2021/12/25/1640431841.jpg
 references:
   - '[MySQL Test Framework 官方文档](https://dev.mysql.com/doc/dev/mysql-server/latest/PAGE_MYSQL_TEST_RUN.html)'
-banner: china
+banner: /assets/banner/banner_11.jpg
 ---
 
 ## MySQL Test Framework 简介

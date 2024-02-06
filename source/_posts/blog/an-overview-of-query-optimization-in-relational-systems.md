@@ -4,7 +4,7 @@ tags: [Query Optimization,Paper]
 categories: [Paper]
 date: 2022-01-18 08:39:23
 cover: /assets/blog/2022/03/17/1647475423.jpg
-banner: china
+banner: /assets/banner/banner_1.jpg
 ---
 
 本文翻译自论文 [An Overview of Query Optimization in Relational Systems](https://web.stanford.edu/class/cs345d-01/rl/chaudhuri98.pdf)，论文介绍了 70 年代以来优化器方面的研究成果，通过本文的学习，我们可以快速了解关系系统中常见的查询优化技术，为后续深入学习 Calcite 及查询优化技术打下良好的基础。

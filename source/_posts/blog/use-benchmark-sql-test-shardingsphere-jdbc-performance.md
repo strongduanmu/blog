@@ -4,7 +4,7 @@ date: 2023-09-07 18:07:01
 tags: [In Action, ShardingSphere]
 categories: [ShardingSphere]
 cover: /assets/blog/2021/06/25/1624608310.png
-banner: china
+banner: /assets/banner/banner_9.jpg
 ---
 
 

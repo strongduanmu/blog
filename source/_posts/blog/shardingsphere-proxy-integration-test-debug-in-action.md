@@ -8,7 +8,7 @@ references:
   - '[ShardingSphere 集成测试文档](https://shardingsphere.apache.org/document/current/cn/test-manual/integration-test/)'
   - '[Testcontainer-01篇 基本入门](https://blog.csdn.net/mail_liuxing/article/details/99075606)'
   - '[How to locally debug containers started by Testcontainers](https://bsideup.github.io/posts/debugging_containers/)'
-banner: china
+banner: /assets/banner/banner_8.jpg
 ---
 
 ## 前言
