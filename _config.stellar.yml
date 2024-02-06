@@ -306,6 +306,8 @@ tag_plugins:
   # {% image %}
   image:
     fancybox: true # true, false
+    replace_original:  #把 markdown 格式的图片解析成图片标签
+      enable: true
   # {% copy xxx %}
   copy:
     toast: 复制成功
