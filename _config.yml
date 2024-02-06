@@ -149,7 +149,7 @@ inject:
     - <script defer src="/_vercel/insights/script.js"></script>
     - <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     - <script defer src="/_vercel/speed-insights/script.js"></script>
-    - <script async src="/js/jquery.min.js">$(".banner img.bg").attr("src", "/assets/banner/banner_" + Math.floor((Math.random() * 12 + 1)) + ".jpg")</script>
+    - <script>function change_banner(){$(".banner img.bg").attr("src", "/assets/banner/banner_" + Math.floor((Math.random() * 20 + 1)) + ".jpg")};setTimeout("change_banner()", 250);</script>
 
 ## Themes: https://hexo.io/themes/
 theme: stellar
