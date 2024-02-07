@@ -20,9 +20,13 @@ breadcrumb: false
 
 参与 [亚马逊云科技中国峰会 Dev Day](https://aws.amazon.com/cn/about-aws/events/summit2022/index/)，分享 `Apache ShardingSphere 分布式数据库生态的云原生实践` 主题演讲，介绍了 Apache ShardingSphere 和 AWS Aurora 联合打造的分布式数据库生态，以及 ShardingSphere 的云原生实践。[PPT 下载地址](https://strongduanmu.com/share/Apache%20ShardingSphere%20%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%94%9F%E6%80%81%E7%9A%84%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5.pdf)，视频观看地址。
 
+{% image /assets/share/amazon_dev_day.png %}
+
 <!-- node 2021/12/14~17 PostgresConf.CN & PGConf.Asia2021 -->
 
 参与 [2021 年度 PostgreSQL 亚洲技术大会](https://2021.postgresconf.cn/)，分享 `PostgreSQL 增量服务生态实践` 主题演讲，介绍基于 Apache ShardingSphere 打造的 PostgreSQL 增量服务生态。[PPT 下载地址](https://strongduanmu.com/share/PostgreSQL%20%E5%A2%9E%E9%87%8F%E6%9C%8D%E5%8A%A1%E7%94%9F%E6%80%81%E5%AE%9E%E8%B7%B5.pdf)，视频观看地址。
+
+{% image /assets/share/postgres_conf.png %}
 
 <!-- node 2021/12/11「TUG 企业行 - 武汉站」走进神州数码，聊聊开源数据架构 -->
 
@@ -35,6 +39,8 @@ breadcrumb: false
 <!-- node 2021/5/16 Apache DolphinScheduler - ShardingSphere Global Online Co-MeetUp -->
 
 参与 [Apache DolphinScheduler 和 ShardingSphere 全球线上联合 MeetUp](https://www.meetup.com/dolphinscheduler/events/277413098)，分享 `Insight Into Apache ShardingSphere` 主题演讲，向海外同学介绍 Apache ShardingSphere 项目的概况和核心特性。[PPT 下载地址](https://strongduanmu.com/share/Insight%20Into%20Apache%20ShardingSphere.pdf)，[视频观看地址](https://www.youtube.com/watch?v=BV8QEScCmgU)。
+
+{% image /assets/share/dolphinscheduler_and_shardingsphere_co_meetup.png %}
 
 {% endtimeline %}
 
