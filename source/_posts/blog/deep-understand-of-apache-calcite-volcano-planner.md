@@ -51,11 +51,11 @@ Calcite VolcanoPlanner 优化器是基于 `Goetz Graefe` 的两篇经典优化�
 
 Cascades Optimizer 在搜索的过程中，它的搜索空间是一个关系代数算子树所组成的森林，而保存这个森林的数据结构就是 `Memo`。Memo 包含了两个最基本的概念：`Expression Group`（下文简称 `Group`） 和 `Group Expression`（对应关系代数算子）。每个 Group 中保存的是逻辑等价的 Group Expression，而 Group Expression 的子节点是由 Group 组成。下图是由五个 Group 组成的 Memo：
 
-![Memo 组成结构](/assets/blog/2023/12/08/1701996404.png)
+![Memo 组成结构](deep-understand-of-apache-calcite-volcano-planner/1701996404.png)
 
 通过上面的 Memo 结构，我们可以提取出以下两棵等价的算子树，使用 Memo 结构存储下面两棵树，可以避免存储冗余的算子（如 `Scan A` 以及 `Scan B`）。
 
-![等价算子树](/assets/blog/2023/12/08/1701996456.png)
+![等价算子树](deep-understand-of-apache-calcite-volcano-planner/1701996456.png)
 
 #### Rule 的改进
 
@@ -65,7 +65,7 @@ Cascades Optimizer 在搜索的过程中，它的搜索空间是一个关系代�
 
 `Pattern` 用于描述 Group Expression 的局部特征。每个 Rule 都有自己的 Pattern，只有满足了相应 Pattern 的 Group Expression 才能够应用该 Rule。下图中左侧定义了一个 `Selection -> Projection` 的 Pattern，并在右侧 Memo 中红色虚线内匹配上了 Group Expression。
 
-![Pattern 匹配关系代数算子](/assets/blog/2023/12/08/1701996507.png)
+![Pattern 匹配关系代数算子](deep-understand-of-apache-calcite-volcano-planner/1701996507.png)
 
 #### Searching Algorithm
 
@@ -206,7 +206,7 @@ public class RelSubset extends AbstractRelNode {
 
 介绍完 VolcanoPlanner 中的核心概念，让我们再来了解下 Calcite 优化器的处理流程，Julain 在 2016 年举办的 Hadoop Summit 大会上分享了 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://calcite.apache.org/community/#cost-based-query-optimization-in-apache-phoenix-using-apache-calcite)，其中介绍了 Caclite 优化器的处理流程，虽然已经过去了很久，但是仍然可以作为 VolcanoPlanner 的参考资料。
 
-![Calcite Volcano Planner 处理流程](/assets/blog/2023/12/09/1702118316.png)
+![Calcite Volcano Planner 处理流程](deep-understand-of-apache-calcite-volcano-planner/1702118316.png)
 
 上图展示了 VolcanoPlanner 的处理流程，可以看到 SQL 语句被解析为 AST 后，通过 SqlToRelConverter 将 AST 转换为 RelNode 和 RexNode。RelNode Tree 就是我们常说的逻辑执行计划。方框内是 VolcanoPlanner 的核心流程，主要包含了如下几个关键步骤：
 
@@ -305,7 +305,7 @@ public static void registerDefaultRules(RelOptPlanner planner, boolean enableMat
 
 Calcite JDBC 默认注册了 101 个优化规则，这些优化规则的作用，我们后续文章会进行分类学习，在实际使用中可以选择自己需要的优化规则去使用。到这里，Calicte 就完成了 VolcanoPlanner 的优化，并默认注册了 101 个优化规则。
 
-![Calcite JDBC 默认注册的规则](/assets/blog/2023/12/17/1702769869.png)
+![Calcite JDBC 默认注册的规则](deep-understand-of-apache-calcite-volcano-planner/1702769869.png)
 
 ### setRoot 流程
 
@@ -695,11 +695,11 @@ public double getRowCount() {
 
 最终返回的 CsvTableScan VolcanoCost 对象如下图所示，记录了 `cpu`、`io` 和 `rowCount` 信息。
 
-![CsvTableScan VolcanoCost 对象](/assets/blog/2023/12/22/1703207948.png)
+![CsvTableScan VolcanoCost 对象](deep-understand-of-apache-calcite-volcano-planner/1703207948.png)
 
 `propagateCostImprovements` 方法会按照前文所述，将 RelSubset 中的代价和新计算的代价进行比较，如果发现更小代价，则会更新 bestCost 和 best 属性，RelSubset 更新后的对象如下图所示。
 
-![更新代价后的 RelSubset](/assets/blog/2023/12/22/1703208192.png)
+![更新代价后的 RelSubset](deep-understand-of-apache-calcite-volcano-planner/1703208192.png)
 
 ##### fireRules
 
@@ -726,7 +726,7 @@ void fireRules(RelNode rel) {
 
 `classOperands` 中记录了 RelNode 和 RelOptRuleOperand 的对应关系，RelOptRuleOperand 用于判断 RelOptRule 是否可以用于某个关系代数。下图展示了 CsvTableScan 对应的 RelOptRuleOperand 集合，这些 RelOptRuleOperand 都是和 TableScan 相关的规则。
 
-![classOperands 存储的优化规则](/assets/blog/2023/12/23/1703298241.png)
+![classOperands 存储的优化规则](deep-understand-of-apache-calcite-volcano-planner/1703298241.png)
 
 对于每一个 RelOptRuleOperand，都会调用其 `matches` 方法，方法内会判断 RelNode 是否是 RelOptRuleOperand 中记录的 clazz 实例，以及 RelNode 是否包含定义的 trait 特征，最后会使用 predicate 方法对 RelNode 进行匹配。
 
@@ -784,7 +784,7 @@ LogicalProject(subset=[rel#14:RelSubset#2.NONE.[]], EMPNO=[$0], NAME=[$1], DEPTN
 
 RelSubset 树是通过成员变量 `final RelSet set` 变量实现，RelSet 中维护了当前 RelNode，通过 RelNode 的 input 维护了 RelSubset 子节点，以此类推，形成了一颗 RelSubset 树，整体结构如下图所示。
 
-![RelSubset 树结构](/assets/blog/2023/12/29/1703810657.png)
+![RelSubset 树结构](deep-understand-of-apache-calcite-volcano-planner/1703810657.png)
 
 #### 第二轮 setRoot
 
@@ -810,7 +810,7 @@ public RelNode changeTraits(final RelNode rel, RelTraitSet toTraits) {
 
 此时，根节点 RelSubSet 的 Convention 已经变换为 ENUMERABLE，子节点 RelSubSet 的 Convention 仍然是 NONE，后续需要关注子节点 Convention 的变换时机。
 
-![根节点 RelSubSet Convention](/assets/blog/2023/12/27/1703636903.png)
+![根节点 RelSubSet Convention](deep-understand-of-apache-calcite-volcano-planner/1703636903.png)
 
 ##### registerSubset
 
@@ -929,7 +929,7 @@ private RelSubset registerImpl(RelNode rel, @Nullable RelSet set) {
 
 第二轮 setRoot 结束后，RelSubset 的树形结构如下图所示，根节点的 Convention 变成了 ENUMERABLE，根节点 RelSet 中记录的 rels 增加了 AbstractConverter，subsets 增加了 Convention 为 ENUMERABLE 的 RelSubset，其他子节点的信息和第一轮 setRoot 一致。
 
-![第二轮 setRoot RelSubset 树形结构](/assets/blog/2023/12/29/1703810113.jpg)
+![第二轮 setRoot RelSubset 树形结构](deep-understand-of-apache-calcite-volcano-planner/1703810113.jpg)
 
 ### findBestExp 流程
 
@@ -993,7 +993,7 @@ ExpandConversionRule 则用于将 AbstractConverter 转换为 converters 链，c
 
 EnumerableFilterRule 和 EnumerableProjectRule 在 Calcite 中属于 `ConverterRule`，负责将 LogicalFilter、LogicalProject 转换为 EnumerableFilter 和 EnumerableProject。ProjectFilterTransposeRule 会将 Project 和 Filter 进行转置变换，属于 `TransformationRule`。
 
-![ruleQueue 包含的 VolcanoRuleMatch](/assets/blog/2023/12/30/1703897196.png)
+![ruleQueue 包含的 VolcanoRuleMatch](deep-understand-of-apache-calcite-volcano-planner/1703897196.png)
 
 从队列中弹出 `VolcanoRuleMatch` 后会调用 `VolcanoRuleMatch#onMatch` 方法进行关系代数变换，方法实现逻辑如下。VolcanoRuleMatch 继承了 `RelOptRuleCall`，RelOptRuleCall 代表了对 RelOptRule 的调用，并传递了一组关系表达式作为参数。开始 onMatch 前，会将当前的 VolcanoRuleCall 添加到 deque 头部，然后调用不同 rule 的 onMatch 方法，完成后 finally 代码块会从 deque 头部弹出。
 
@@ -1067,7 +1067,7 @@ public void transformTo(RelNode rel, Map<RelNode, RelNode> equiv, RelHintsPropag
 
 变换完成后 RelSubset 树更新了 bestCost，并且 rels 中同时记录了 LogicalFilter 和 EnumerableFilter。
 
-![EnumerableFilterRule 变换后结构](/assets/blog/2024/01/02/1704158875.png)
+![EnumerableFilterRule 变换后结构](deep-understand-of-apache-calcite-volcano-planner/1704158875.png)
 
 #### buildCheapestPlan
 
@@ -1143,7 +1143,7 @@ EnumerableFilter(condition=[=($1, 'Alice')])
 
 ### 整体流程总结
 
-![VolcanoPlanner 整体流程](/assets/blog/2024/01/03/1704245597.png)
+![VolcanoPlanner 整体流程](deep-understand-of-apache-calcite-volcano-planner/1704245597.png)
 
 前文我们以简单的查询语句为例，一起探究了 VolcanoPlanner 优化器实现细节，想必大家阅读完一定有所收获。为了加深大家对优化器的理解，最后我们再进行一些梳理总结，上图展示了 VolcanoPlanner 优化器的整体流程，总体上可以分为三步：
 
@@ -1165,4 +1165,4 @@ EnumerableFilter(condition=[=($1, 'Alice')])
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)
+![Calcite 从入门到精通](deep-understand-of-apache-calcite-volcano-planner/202309210909027-20240207092016569.png)

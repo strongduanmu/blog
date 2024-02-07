@@ -11,7 +11,7 @@ references:
   - '[独家揭秘 | 阿里云分析型数据库 AnalyticDB 新一代 CBO 优化器技术](https://developer.aliyun.com/article/751481)'
   - '[Oracle 多列统计信息](https://blog.51cto.com/lhrbest/2712352)'
   - '[【独家】一文看懂 MySQL 直方图](https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA)'
-  - '[title: 数据库内核-CBO 优化器采样与代价模型](https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session)'
+  - '[数据库内核-CBO 优化器采样与代价模型](https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session)'
 date: 2024-01-09 08:30:21
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
@@ -39,7 +39,7 @@ banner: /assets/banner/banner_5.jpg
 
 有了统计信息后，我们就可以对执行计划中的各个算子进行基数估计（`Cardinality Estimation`），估算这些算子产生结果的行数（或基数）。如下图所示，通过基数估计我们可以选择更优的 `JOIN` 顺序以减少中间结果。`Scan` 算子的行数可以直接从表的统计信息 `Row Count` 获取，而对于 `Filter` 算子，可以使用输入的 `Scan` 算子的行数乘以谓词的选择性。
 
-![基数估计在执行计划选择中的用途](/assets/blog/2024/01/23/1705969782.png)
+![基数估计在执行计划选择中的用途](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/1705969782.png)
 
 下面展示了常用算子基数估计的例子：
 
@@ -83,4 +83,4 @@ TODO
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
-![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)
+![Calcite 从入门到精通](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/1210909027.png)

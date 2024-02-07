@@ -96,7 +96,7 @@ osCollectorDevices=net_eth0 blk_sda
 
 执行一段时间后，本地使用 BenchmarkSQL 程序复现异常，异常信息如下图所示：
 
-![BenchmarkSQL 初始化数据异常](/assets/blog/2023/12/06/1701862834.png)
+![BenchmarkSQL 初始化数据异常](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1701862834.png)
 
 为了方便问题分析，尝试使用 IDEA 配置 BenchmarkSQL 初始化程序进行 Debug 定位，首先看下 `runDatabaseBuild.sh` 脚本的逻辑，主要包含了：1. 初始化表结构；2. 加载数据；3. 初始化索引、外键等。根据前文的异常堆栈，是在第二步加载数据中出现的异常，因此先注释第二步的脚本，单独 Debug 执行。
 
@@ -131,15 +131,15 @@ java -cp "$myCP" -Dprop=$PROPS $myOPTQuickCSP LoadData $*
 
 可以通过 IDEA 直接打开 `src/LoadData` 工程，为了读取数据源配置，我们需要配置系统变量 prop 指定配置文件路径，然后执行 `LoadData#main` 方法进行初始化数据。根据异常堆栈的位置，设置条件断点，本地复现了异常。
 
-![LoadData 复现异常](/assets/blog/2024/01/05/1704417767.png)
+![LoadData 复现异常](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704417767.png)
 
 bindValues 只有 38928 个，按照 SQL 中的参数个数 17 计算，只设置了 2289 组参数，与逻辑中期望的 10000 组参数相差甚远。
 
-![LoadData 导入数据逻辑](/assets/blog/2024/01/05/1704417811.png)
+![LoadData 导入数据逻辑](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704417811.png)
 
 排查 MySQL 驱动逻辑发现 bindValues 是由 `parameterCount` 控制，可以看到 parameterCount 传递的值为 38928，和 10000 * 17 结果不一致，继续排查发现 `parameterCount` 是从服务端即 Proxy 获取。
 
-![MySQL 驱动从 Proxy 读取 parameterCount](/assets/blog/2024/01/05/1704417857.png)
+![MySQL 驱动从 Proxy 读取 parameterCount](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704417857.png)
 
 Proxy 中处理预编译 SQL Prepare 是通过 `MySQLComStmtPrepareExecutor` 类进行的，通过 debug 可以看出 Proxy 处理的 parameterCount 是符合预期的，并且也成功写入到 `MySQLComStmtPrepareOKPacket` 包中返回。问题看起来似乎有点复杂，Proxy 返回了正确的 parameterCount，而 MySQL 驱动接收到的却是一个错误的值，这到底是为什么？
 
@@ -182,13 +182,13 @@ void assertBenchmarkSQL() throws SQLException {
 
 执行单测程序，复现了前文的异常，Prxoy debug 仍然是同样的行为，Proxy 返回正确的 parameterCount，而 MySQL 驱动获取的结果却是错误的。
 
-![最小化 Demo 复现异常](/assets/blog/2024/01/05/1704417635.png)
+![最小化 Demo 复现异常](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704417635.png)
 
 #### Wireshark 工具简介
 
 为了弄清楚 Proxy 返回给 MySQL 驱动过程中发生了什么问题，我们需要通过抓包方式进行问题排查，由于该问题在本机已经复现，可以直接使用 `Wireshark` 进行抓包。本地打开 Wireshark 如下图所示，列表中展示了本机网卡，需要根据使用情况进行选择。
 
-![Wireshark 网卡选择](/assets/blog/2024/01/05/1704429304.png)
+![Wireshark 网卡选择](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704429304.png)
 
 当前 Demo 连接的是本地运行 Proxy 实例，客户端通过 127.0.0.1 端口 3307 进行连接，流量都经过 Loopback 网卡，因此选择 Loopback 作为抓包对象。选择网卡后，Wireshark 即开始抓包。由于网卡中可能会有很多其他进程的流量，需要过滤出指定端口的流量：
 
@@ -196,7 +196,7 @@ void assertBenchmarkSQL() throws SQLException {
 tcp.port == 3307
 ```
 
-![根据 3307 端口过滤](/assets/blog/2024/01/05/1704430048.png)
+![根据 3307 端口过滤](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704430048.png)
 
 **其他抓包注意事项：**
 
@@ -221,7 +221,7 @@ jdbc:mysql://127.0.0.1:3306/db?useSSL=false
 
 Wireshark 支持读取多种抓包文件格式，包括 tcpdump 的抓包格式。Wireshark 默认会把 `3306` 端口解码为 MySQL 协议、`5432` 端口解码为 PostgreSQL 协议。对于 Proxy 可能使用不同端口的情况，可以使用 `Decode As...` 指定端口的解码协议。例如，Proxy 使用了 3307 端口，可以按照以下步骤把 3307 端口解码为 MySQL 协议：
 
-![设置 3307 端口为 MySQL 协议](/assets/blog/2024/01/05/1704430568.png)
+![设置 3307 端口为 MySQL 协议](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704430568.png)
 
 当 Wirekshark 能够解析出 MySQL 协议后，我们可以增加过滤条件，只显示 MySQL 协议数据：
 
@@ -229,13 +229,13 @@ Wireshark 支持读取多种抓包文件格式，包括 tcpdump 的抓包格式�
 tcp.port == 3307 and mysql
 ```
 
-![过滤 3307 端口和 MySQL 协议](/assets/blog/2024/01/05/1704430876.png)
+![过滤 3307 端口和 MySQL 协议](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704430876.png)
 
 #### 使用 Wireshark 抓包定位
 
 了解了 Wireshark 基本使用方式后，我们执行前文编写的最小化 Demo，抓包获取到了如下报文信息，响应报文中返回的 parameterCount 为 38928，转换为 16 进制为 9810（2 字节），而以类似的方式计算 170000 对应的 16 进制是 029810（3 字节）。
 
-![最小化 Demo 测试 Proxy 抓包](/assets/blog/2024/01/05/1704431027.png)
+![最小化 Demo 测试 Proxy 抓包](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704431027.png)
 
 可以看出报文返回的信息丢失了一个字节，那么 MySQL 协议里面 parameterCount 最多可以传输几个字节呢？参考 [MySQL 协议文档](https://dev.mysql.com/doc/dev/mysql-server/latest/page_protocol_com_stmt_prepare.html#sect_protocol_com_stmt_prepare_response_ok)及 MySQLComStmtPrepareOKPacket 实现，parameterCount 参数最大只能存储 2 字节的数值，即 ffff=65535。
 
@@ -273,11 +273,11 @@ public final class MySQLComStmtPrepareOKPacket extends MySQLPacket {
 
 既然 MySQL 协议中定义的 parameterCount 最大为 65535，那么 BenchmarkSQL 测试原生 MySQL 也应当报错，而实际反馈原生 MySQL 不会出现异常。为了一探究竟，我们打算再测试下原生 MySQL，看下协议上是如何处理的。调整 JDBC URL 直接指向 MySQL 数据库，并执行单测程序。
 
-![最小化 Demo 测试 MySQL 抓包](/assets/blog/2024/01/05/1704431482.png)
+![最小化 Demo 测试 MySQL 抓包](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704431482.png)
 
 测试并抓包后发现，原生 MySQL 同样不支持 2 字节以上的 parameterCount，MySQL 会直接抛出异常。此时 MySQL 驱动捕获到 `1390` 异常码后，会将预编译 SQL 转换为非预编译 SQL，直接将参数拼接在 VALUES 中，然后再次发起请求。
 
-![MySQL 驱动根据异常码再次发起请求](/assets/blog/2024/01/05/1704431609.png)
+![MySQL 驱动根据异常码再次发起请求](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704431609.png)
 
 到这里问题终于明确了，Proxy 对于预编译参数超过 65535 的情况，未进行异常校验，导致通过 Netty 返回报文时丢失了一个字节，进而出现 MySQL 驱动中报出的参数 Index 越界异常。
 
@@ -314,7 +314,7 @@ ER_PS_MANY_PARAM(XOpenSQLState.GENERAL_ERROR, 1390, "Prepared statement contains
 
 修改完成后，再次使用 BenchmarkSQL 进行测试，此时异常问题已经得到了解决。
 
-![BenchmarkSQL 测试通过](/assets/blog/2024/01/05/1704433581.jpg)
+![BenchmarkSQL 测试通过](use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy/1704433581.jpg)
 
 ## 结语
 

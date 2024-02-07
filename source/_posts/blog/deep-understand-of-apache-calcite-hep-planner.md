@@ -89,7 +89,7 @@ HepPlanner 构建逻辑如下，内部会维护 HepProgram。
 
 HepProgram 结构如下：
 
-![image-20230618093426281](./deep-understand-of-calcite-hep-planner/image-20230618093426281.png)
+![image-20230618093426281](deep-understand-of-apache-calcite-hep-planner/image-20230618093426281.png)
 
 **setRoot:** 
 
@@ -147,7 +147,7 @@ HepProgram 结构如下：
 // 生成的 HepRelVertex 会赋值给 root
 ```
 
-![img_v2_71f2e11d-3228-4aa3-9676-2205f6a6e74g](./deep-understand-of-calcite-hep-planner/img_v2_71f2e11d-3228-4aa3-9676-2205f6a6e74g.jpg)
+![img_v2_71f2e11d-3228-4aa3-9676-2205f6a6e74g](deep-understand-of-apache-calcite-hep-planner/img_v2_71f2e11d-3228-4aa3-9676-2205f6a6e74g.jpg)
 
 **findBestExp:**
 
@@ -208,7 +208,7 @@ HepProgram 结构如下：
 
 PushProjectIntoScanRule 匹配之后，会调用 transformTo 修改当前的 rel，然后会重新调用 addToGraph 方法，新节点看起来 digest 未变更，导致获取到仍然是之前未下推的 HepRelVertex。
 
-![image-20230618114851924](./deep-understand-of-calcite-hep-planner/image-20230618114851924.png)
+![image-20230618114851924](deep-understand-of-apache-calcite-hep-planner/image-20230618114851924.png)
 
 
 
@@ -306,7 +306,7 @@ applyRules(instruction.rules, true);
 
 可以看到有三个优化规则。
 
-![image-20230616222119495](./deep-understand-of-calcite-hep-planner/image-20230616222119495.png)
+![image-20230616222119495](deep-understand-of-apache-calcite-hep-planner/image-20230616222119495.png)
 
 HepMatchOrder 代表了基于规则优化的顺序，包含了 ARBITRARY（任意顺序）、BOTTOM_UP（自底向上）、TOP_DOWN（自顶向下） 和 DEPTH_FIRST（深度优先）。然后循环进行匹配：
 
