@@ -150,6 +150,7 @@ inject:
     - <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     - <script defer src="/_vercel/speed-insights/script.js"></script>
     - <script>function change_banner(){$(".banner img.bg").attr("src", "/assets/banner/banner_" + Math.floor((Math.random() * 20 + 1)) + ".jpg")};setTimeout("change_banner()", 250);</script>
+    - <script>function change_img_alt(){$("article.md-text img:not(.post-cover img):not(.cover img):not(.card-link img):not(.image-bg img):not(.social img):not(.preview img)").each(function(index){$(this).after("<div class='image-meta' style='text-align:center;'><span class='image-caption center' style='display:inline-block;font-size:.8125rem;color:var(--text-p2);line-height:1.5;text-align:justify;'>" + ($(this).attr("title") || $(this).attr("alt")) + "</span></div>")});}setTimeout("change_img_alt()", 1000);</script>
 
 ## Themes: https://hexo.io/themes/
 theme: stellar
