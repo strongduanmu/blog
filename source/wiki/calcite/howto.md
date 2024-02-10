@@ -22,54 +22,52 @@ $ cd apache-calcite-1.36.0-src
 $ gradle build
 ```
 
-TODO
-
-[运行测试](https://calcite.apache.org/docs/howto.html#running-tests)描述了如何运行更多或更少的测试（但你应该使用`gradle`命令而不是 `./gradlew`）。
+[运行测试](https://strongduanmu.com/wiki/calcite/howto.html#%E8%BF%90%E8%A1%8C%E6%B5%8B%E8%AF%95)描述了如何运行更多或更少的测试（但你应该使用 `gradle` 命令而不是 `./gradlew` ）。
 
 ## 从 Git 构建
 
 先决条件是你的路径上有 git 和 Java（JDK 8、9、10、11、12、13、14、15、16、17、18 或 19）。
 
-创建 GitHub 存储库的本地副本 `cd`到其根目录，然后使用包含的 Gradle 包装器进行构建：
+创建 GitHub 存储库的本地副本，然后 `cd` 到其根目录，再使用包含的 Gradle 包装器进行构建：
 
-```
+```bash
 $ git clone https://github.com/apache/calcite.git
 $ cd calcite
 $ ./gradlew build
 ```
 
-方解石包含许多机器生成的代码。默认情况下，它们会在每次构建时重新生成，但这会产生负面影响，即在非机器生成的代码未更改时导致整个项目重新编译。
+Calcite 包含许多机器生成的代码。默认情况下，它们会在每次构建时重新生成，但这会产生负面影响，即在非机器生成的代码未更改时导致整个项目重新编译。
 
-通常，当相关模板发生更改时，会自动调用重新生成，并且它应该透明地工作。但是，如果你的 IDE 不生成源（例如`core/build/javacc/javaCCMain/org/apache/calcite/sql/parser/impl/SqlParserImpl.java`），那么你可以`./gradlew generateSources`手动调用任务。
+通常，当相关模板发生更改时，会自动调用重新生成，并且它应该透明地工作。但是，如果你的 IDE 不生成源（例如 `core/build/javacc/javaCCMain/org/apache/calcite/sql/parser/impl/SqlParserImpl.java` ），那么你可以手动调用 `./gradlew generateSources` 任务。
 
-[运行测试](https://calcite.apache.org/docs/howto.html#running-tests)描述了如何运行更多或更少的测试。
+[运行测试](https://strongduanmu.com/wiki/calcite/howto.html#%E8%BF%90%E8%A1%8C%E6%B5%8B%E8%AF%95)描述了如何运行更多或更少的测试。
 
 ## Gradle 与 Gradle 包装器
 
-Calcite 使用 Gradle Wrapper 来创建一致的构建环境。在典型情况下，你不需要手动安装 Gradle，而是 `./gradlew`会下载适合你的版本并验证预期的校验和。
+Calcite 使用 Gradle Wrapper 来创建一致的构建环境。在典型情况下，你不需要手动安装 Gradle， `./gradlew` 会为您下载正确的版本并验证预期的校验和。
 
 如果你愿意，可以手动安装 Gradle，但请注意这可能会导致版本不匹配。
 
-有关 Gradle 的更多信息，请查看以下链接： [Gradle 五件事](https://docs.gradle.org/current/userguide/what_is_gradle.html#five_things)； [Gradle 多项目构建](https://docs.gradle.org/current/userguide/intro_multi_project_builds.html)。
+有关 Gradle 的更多信息，请查看以下链接：[Gradle 五件事](https://docs.gradle.org/current/userguide/what_is_gradle.html#five_things) 和 [Gradle 多项目构建](https://docs.gradle.org/current/userguide/intro_multi_project_builds.html)。
 
 ## 升级 Gradle 和 Gradle 包装器
 
-Gradle 的[文档](https://docs.gradle.org/current/userguide/upgrading_version_7.html) 提供了有关如何升级 Gradle 的详细信息。以下是步骤列表：
+[Gradle 的文档](https://docs.gradle.org/current/userguide/upgrading_version_7.html)提供了有关如何升级 Gradle 的详细信息。以下是步骤列表：
 
-1. 运行`./gradlew help --warning-mode=all`以查明你是否正在使用任何已弃用的功能。
-2. 修复弃用的问题并重复上一步以确认它们已修复。Gradle 文档在这一步可能非常有帮助，因为它包含有关弃用以及如何处理它们的信息。
-3. 运行`./gradlew wrapper --gradle-version <new_gradle_version>`升级 Gradle。如有必要，它还会升级 Gradle Wrapper。此步骤还会更新`gradle/wrapper/gradle-wrapper.properties`，包括校验和。
-4. 如果需要，检查并更新 Kotlin 版本`gradle.properties`。[应根据Kotlin 兼容性矩阵](https://docs.gradle.org/current/userguide/compatibility.html#kotlin)进行检查。
-5. 步骤 3 将从 中删除标头 `gradle/wrapper/gradle-wrapper.properties`，因此现在运行`./gradlew autostyleApply`将其添加回来。
-6. `gradle/wrapper/gradle-wrapper.properties`根据官方 [Gradle](https://gradle.org/release-checksums/)版本校验和检查更新的 Gradle 版本和校验和 。
-7. 尝试构建项目并运行测试；[使用故障排除指南](https://docs.gradle.org/current/userguide/troubleshooting.html#troubleshooting)调试任何错误 。
+1. 运行 `./gradlew help --warning-mode=all` 以查明你是否正在使用任何已弃用的功能；
+2. 修复弃用的问题并重复上一步以确认它们已修复。 Gradle 文档在这一步可能非常有帮助，因为它包含有关弃用以及如何处理它们的信息；
+3. 运行 `./gradlew wrapper --gradle-version <new_gradle_version>` 来升级 Gradle。如有必要，它还会升级 Gradle Wrapper。此步骤还会更新 `gradle/wrapper/gradle-wrapper.properties` ，包括校验和；
+4. 如果需要，检查并更新 `gradle.properties` 中的 Kotlin 版本。应根据 [Kotlin 兼容性矩阵](https://docs.gradle.org/current/userguide/compatibility.html#kotlin)进行检查；
+5. 步骤 3 将从 `gradle/wrapper/gradle-wrapper.properties` 中删除标头，因此现在运行 `./gradlew autostyleApply` 将其添加回来；
+6. 根据官方 [Gradle 版本校验和](https://gradle.org/release-checksums/)检查 `gradle/wrapper/gradle-wrapper.properties` 中更新的 Gradle 版本和校验和；
+7. 尝试构建项目并运行测试；使用[故障排除指南](https://docs.gradle.org/current/userguide/troubleshooting.html#troubleshooting)调试任何错误；
 8. 更新本指南中的 Gradle 版本。
 
 ## 运行测试
 
-除非你指定，否则测试套件将在你构建时默认运行 `-x test`
+构建时测试套件将默认运行，除非你指定 `-x test`：
 
-```
+```bash
 $ ./gradlew assemble # build the artifacts
 $ ./gradlew build -x test # build the artifacts, verify code style, skip tests
 $ ./gradlew check # verify code style, execute tests
@@ -78,6 +76,8 @@ $ ./gradlew style # update code formatting (for auto-correctable cases) and veri
 $ ./gradlew autostyleCheck checkstyleAll # report code style violations
 $ ./gradlew -PenableErrorprone classes # verify Java code with Error Prone compiler, requires Java 11
 ```
+
+TODO
 
 你可以使用它`./gradlew assemble`来构建工件并跳过所有测试和验证。
 
