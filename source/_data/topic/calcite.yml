@@ -1,0 +1,4 @@
+name: Calcite # 在面包屑导航上会显示较短的名字
+title: Calcite 源码学习系列 # 在列表页会显示完整的专栏标题
+description: Apache Calcite 是一个动态数据管理框架，提供了如：SQL 解析、SQL 校验、SQL 查询优化、SQL 生成以及数据连接查询等典型数据库管理功能。目前，Apache Calcite 作为 SQL 解析与优化引擎，已经广泛使用在 Hive、Drill、Flink、Phoenix 和 Storm 等项目中。
+order_by: -date # 默认是按发布日期倒序排序

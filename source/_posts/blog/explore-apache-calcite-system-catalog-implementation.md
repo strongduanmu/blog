@@ -11,6 +11,7 @@ references:
   - '[CMU 15-445 Query Planning & Optimization I](https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf)'
   - '[Calcite 介绍](https://www.cnblogs.com/ulysses-you/p/9358186.html)'
 banner: /assets/banner/banner_9.jpg
+topic: calcite
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。

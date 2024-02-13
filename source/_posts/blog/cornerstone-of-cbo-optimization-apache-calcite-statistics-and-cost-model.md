@@ -15,6 +15,7 @@ references:
 date: 2024-01-09 08:30:21
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
+topic: calcite
 ---
 
 > 注意：本文基于 [Calcite 1.35.0](https://github.com/apache/calcite/tree/75750b78b5ac692caa654f506fc1515d4d3991d6) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
