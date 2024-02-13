@@ -117,7 +117,7 @@ code
   +-- calcite-test-dataset
 ```
 
-注意：集成测试搜索 `../calcite-test-dataset` 或 `../../calcite-test-dataset`。您可以通过 `calcite.test.dataset` 系统属性指定完整路径。
+注意：集成测试搜索 `../calcite-test-dataset` 或 `../../calcite-test-dataset`。你可以通过 `calcite.test.dataset` 系统属性指定完整路径。
 
 2. 构建并启动 VM：
 
@@ -168,29 +168,27 @@ cd calcite-test-dataset && mvn install
 
 按照安装 IDEA 的标准步骤并设置 Calcite 目前支持的 JDK 版本之一。
 
-TODO
+首先[从命令行构建 Calcite](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)。
 
-首先[从命令行构建Calcite](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)。
+转到 `文件 > 打开...` 并打开 Calcite 的根 `build.gradle.kts` 文件。当 IntelliJ 询问你是否要将其作为项目或文件打开时，请选择项目。另外，当它询问你是否想要一个新窗口时，请选择是。 IntelliJ 的 Gradle 项目导入器应该处理其余的事情。
 
-转到*“文件”>“打开...”*并打开 Calcite 的根`build.gradle.kts`文件。当 IntelliJ 询问你是否要将其作为项目或文件打开时，请选择项目。另外，当它询问你是否想要一个新窗口时，请说“是”。IntelliJ 的 Gradle 项目导入器应该处理其余的事情。
+你可以在 [GitHub](https://gist.github.com/gianm/27a4e3cad99d7b9b6513b6885d3cfcc9) 上导入部分实现的 IntelliJ 代码样式配置。它并没有做让 Calcite 的样式检查器满意所需的一切，但它做了相当多的事情。要导入，请转至首选项 > 编辑器 > 代码样式，单击方案旁边的齿轮，然后单击导入方案 > IntelliJ IDEA 代码样式 XML。
 
-[你可以在 GitHub 上](https://gist.github.com/gianm/27a4e3cad99d7b9b6513b6885d3cfcc9)导入部分实现的 IntelliJ 代码样式配置。它并没有做让 Calcite 的样式检查器满意所需的所有事情，但它做了相当多的事情。要导入，请转至*Preferences > Editor > Code Style*，单击“scheme”旁边的齿轮，然后单击*Import Scheme > IntelliJ IDEA Code Style XML*。
-
-导入程序完成后，测试项目设置。例如，`JdbcTest.testWinAgg`使用 *Navigate > Symbol*导航至该方法并输入`testWinAgg`。`testWinAgg`右键单击并选择*“运行”*（或等效的键盘快捷键）来运行。
+导入程序完成后，测试项目设置。例如，使用 Navigate > Symbol 导航到方法 `JdbcTest.testWinAgg` 并输入 `testWinAgg` 。右键单击并选择运行（或等效的键盘快捷键）来运行 `testWinAgg` 。
 
 ### 设置 NetBeans
 
-从主菜单中，选择*“文件”>“打开项目”*，然后导航到带有小 Gradle 图标的项目名称 (Calcite)，然后选择打开。等待 NetBeans 完成所有依赖项的导入。
+从主菜单中，选择 `文件 > 打开项目`，然后导航到带有小 Gradle 图标的项目名称 (Calcite)，然后选择打开。等待 NetBeans 完成所有依赖项的导入。
 
-为了确保项目配置成功，请导航至`testWinAgg`中的方法`org.apache.calcite.test.JdbcTest`。右键单击该方法并选择“*运行重点测试方法”*。NetBeans 将运行 Gradle 进程，你应该在命令输出窗口中看到一行 `Running org.apache.calcite.test.JdbcTest`后跟`"BUILD SUCCESS"`。
+为了确保项目配置成功，请导航到 `org.apache.calcite.test.JdbcTest` 中的方法 `testWinAgg` 。右键单击该方法并选择运行重点测试方法。 NetBeans 将运行 Gradle 进程，你应该在命令输出窗口中看到一行 `Running org.apache.calcite.test.JdbcTest` ，后跟 `"BUILD SUCCESS"` 。
 
-注意：尚不清楚 NetBeans 是否在项目导入时自动生成相关源，因此你可能需要`./gradlew generateSources`在导入项目之前运行（以及在更新模板解析器源和项目版本时）
+注意：尚不清楚 NetBeans 是否在项目导入时自动生成相关源，因此你可能需要在导入项目之前（以及更新模板解析器源和项目版本时）运行 `./gradlew generateSources`。
 
-## 追踪
+## 追踪（Tracing）
 
-要启用跟踪，请将以下标志添加到 java 命令行：
+要启用追踪，请将以下标志添加到 java 命令行：
 
-```
+```properties
 -Dcalcite.debug=true
 ```
 
@@ -200,9 +198,9 @@ TODO
 Exception in thread "main" java.lang.ClassCastException: Integer cannot be cast to Long  at Baz$1$1.current(Unknown Source)
 ```
 
-默认情况下，Calcite 使用 SLF4J 的 Log4j 绑定。有一个提供的配置文件，它将 INFO 级别的日志记录输出到`core/src/test/resources/log4j.properties`. 你可以修改 rootLogger 的级别以增加详细程度，或者更改特定类的级别（如果你愿意）。
+默认情况下，Calcite 使用 SLF4J 的 Log4j 绑定。提供了一个配置文件，它将 INFO 级别的日志记录输出到 `core/src/test/resources/log4j.properties` 中的控制台。你可以修改 rootLogger 的级别以增加详细程度，或者更改特定类的级别（如果你愿意）。
 
-```
+```properties
 # Change rootLogger level to WARN
 log4j.rootLogger=WARN, A1
 # Increase level to DEBUG for RelOptPlanner
@@ -213,14 +211,14 @@ log4j.logger.org.apache.calcite.plan.hep.HepPlanner=TRACE
 
 ## 在 Intellij 中调试生成的类
 
-Calcite 使用[Janino](https://janino-compiler.github.io/janino/)生成 Java 代码。生成的类可以交互式调试（请参阅[Janino 教程](https://janino-compiler.github.io/janino/)）。
+Calcite 使用 [Janino](https://janino-compiler.github.io/janino/) 生成 Java 代码。生成的类可以交互式调试（请参阅 [Janino 教程](https://janino-compiler.github.io/janino/)）。
 
 要调试生成的类，请在启动 JVM 时设置两个系统属性：
 
-- `-Dorg.codehaus.janino.source_debugging.enable=true`
-- `-Dorg.codehaus.janino.source_debugging.dir=C:\tmp`（此属性是可选的；如果未设置，Janino 将在系统临时文件的默认位置创建临时文件，例如`/tmp`在基于 Unix 的系统上。）
+- `-Dorg.codehaus.janino.source_debugging.enable=true`；
+- `-Dorg.codehaus.janino.source_debugging.dir=C:\tmp` （此属性是可选的；如果未设置，Janino 将在系统的默认临时文件位置创建临时文件，例如基于 Unix 的系统上的 `/tmp`）。
 
-代码生成后，可以进入 Intellij 并将包含生成的临时文件的文件夹标记为生成的源根或源根，或者`org.codehaus.janino.source_debugging.dir`在启动 JVM 时直接将 的值设置为现有的源根。
+代码生成后，可以进入 Intellij 将包含生成的临时文件的文件夹标记为生成的源根或源根，也可以在启动 JVM 时直接将 `org.codehaus.janino.source_debugging.dir` 的值设置为现有的源根。
 
 ## CSV 适配器
 
@@ -228,13 +226,13 @@ Calcite 使用[Janino](https://janino-compiler.github.io/janino/)生成 Java 代
 
 ## MongoDB 适配器
 
-首先，下载并安装 Calcite，然后[安装 MongoDB](https://www.mongodb.org/downloads)。
+首先，下载并安装 Calcite，然后安装 [MongoDB](https://www.mongodb.org/downloads)。
 
 注意：你可以从上面的集成测试虚拟机使用 MongoDB。
 
 将 MongoDB 的邮政编码数据集导入 MongoDB：
 
-```
+```bash
 $ curl -o /tmp/zips.json https://media.mongodb.org/zips.json
 $ mongoimport --db test --collection zips --file /tmp/zips.json
 Tue Jun  4 16:24:14.190 check 9 29470
@@ -243,7 +241,7 @@ Tue Jun  4 16:24:14.469 imported 29470 objects
 
 登录 MongoDB 以检查它是否存在：
 
-```
+```bash
 $ mongo
 MongoDB shell version: 2.4.3
 connecting to: test
@@ -257,7 +255,7 @@ bye
 
 使用 [mongo-model.json](https://github.com/apache/calcite/blob/main/mongodb/src/test/resources/mongo-model.json) Calcite 模型进行连接：
 
-```
+```bash
 $ ./sqlline
 sqlline> !connect jdbc:calcite:model=mongodb/src/test/resources/mongo-model.json admin admin
 Connecting to jdbc:calcite:model=mongodb/src/test/resources/mongo-model.json
@@ -289,15 +287,15 @@ $
 
 ## Splunk 适配器
 
-要针对 Splunk 运行测试套件和示例查询，请`tutorialdata.zip`按照 [Splunk 教程](https://docs.splunk.com/Documentation/Splunk/6.0.2/PivotTutorial/GetthetutorialdataintoSplunk)中的说明加载 Splunk 的数据集。
+要针对 Splunk 运行测试套件和示例查询，请按照 [Splunk 教程](https://docs.splunk.com/Documentation/Splunk/6.0.2/PivotTutorial/GetthetutorialdataintoSplunk)中的说明加载 Splunk 的 `tutorialdata.zip` 数据集。
 
-（此步骤是可选的，但它为示例查询提供了一些有趣的数据。如果你打算使用 运行测试套件，则这也是必要的 `-Dcalcite.test.splunk=true`。）
+（此步骤是可选的，但它为示例查询提供了一些有趣的数据。如果你打算使用 `-Dcalcite.test.splunk=true` 运行测试套件，则这也是必要的。）
 
-## 实施适配器
+## 实现一个适配器
 
-新的适配器可以通过实现来创建`CalcitePrepare.Context`：
+可以通过实现 `CalcitePrepare.Context` 创建新的适配器：
 
-```
+```java
 import org.apache.calcite.adapter.java.JavaTypeFactory;
 import org.apache.calcite.jdbc.CalcitePrepare;
 import org.apache.calcite.jdbc.CalciteSchema;
@@ -319,9 +317,9 @@ public class AdapterContext implements CalcitePrepare.Context {
 
 ### 用 Java 测试适配器
 
-下面的示例显示了如何使用 `CalcitePrepare`自定义上下文（`AdapterContext`在本例中）提交 SQL 查询。Calcite 使用`Context`. `CalcitePrepare.PrepareResult` 提供对底层枚举和枚举方法的访问。可枚举本身自然可以是某些适配器特定的实现。
+下面的示例显示了如何使用自定义上下文（在本例中为 `AdapterContext` ）将 SQL 查询提交到 `CalcitePrepare` 。 Calcite 使用 `Context` 提供的资源准备并实现查询执行。 `CalcitePrepare.PrepareResult` 提供对底层枚举和枚举方法的访问。可枚举本身自然可以是某些适配器特定的实现。
 
-```
+```java
 import org.apache.calcite.jdbc.CalcitePrepare;
 import org.apache.calcite.prepare.CalcitePrepareImpl;
 import org.junit.Test;
@@ -340,26 +338,27 @@ public class AdapterContextTest {
 }
 ```
 
-# 面向开发人员的高级主题
+# 面向开发者的高级主题
 
 如果你要向代码库的特定部分添加功能，则可能会对以下部分感兴趣。如果你只是从源代码构建并运行测试，则不需要了解这些主题。
 
-## Java类型工厂
+## Java 类型工厂
 
-当 Calcite 比较类型（ 的实例`RelDataType`）时，它要求它们是同一对象。如果有两个不同的类型实例引用相同的 Java 类型，Calcite 可能无法识别它们是否匹配。建议：
+当 Calcite 比较类型（ `RelDataType` 的实例）时，它要求它们是同一对象。如果有两个不同的类型实例引用相同的 Java 类型，Calcite 可能无法识别它们是否匹配。建议：
 
-- `JavaTypeFactory`在Calcite上下文中使用单个实例；
+* 在 Calcite 上下文中使用 `JavaTypeFactory` 的单个实例；
+
 - 存储类型，以便始终为相同类型返回相同的对象。
 
 ## 重建生成的 Protocol Buffer 代码
 
-Calcite 的 Avatica Server 组件支持使用[Protocol Buffers 的](https://developers.google.com/protocol-buffers/)RPC 序列化。在 Avatica 的上下文中，Protocol Buffers 可以生成由模式定义的消息集合。该库本身可以使用新模式解析旧的序列化消息。在不保证客户端和服务器具有相同版本的对象的环境中，这是非常需要的。
+Calcite 的 Avatica Server 组件支持使用 [Protocol Buffers](https://developers.google.com/protocol-buffers/) 的 RPC 序列化。在 Avatica 的上下文中，Protocol Buffers 可以生成由模式定义的消息集合。该库本身可以使用新模式解析旧的序列化消息。在不保证客户端和服务器具有相同版本的对象的环境中，这是非常需要的。
 
 通常，Protocol Buffers 库生成的代码不需要仅在每次构建时重新生成，仅当架构更改时才需要重新生成。
 
 首先，安装Protobuf 3.0：
 
-```
+```bash
 $ wget https://github.com/google/protobuf/releases/download/v3.0.0-beta-1/protobuf-java-3.0.0-beta-1.tar.gz
 $ tar xf protobuf-java-3.0.0-beta-1.tar.gz && cd protobuf-3.0.0-beta-1
 $ ./configure
@@ -369,16 +368,16 @@ $ sudo make install
 
 然后，重新生成编译后的代码：
 
-```
+```bash
 $ cd avatica/core
 $ ./src/main/scripts/generate-protobuf.sh
 ```
 
-## 创建计划规则
+## 创建优化器规则
 
-创建一个扩展类`RelRule`（或者偶尔是一个子类）。
+创建一个扩展 `RelRule` 的类（或者偶尔是一个子类）。
 
-```
+```java
 /** Planner rule that matches a {@link Filter} and futzes with it.
  *
  * @see CoreRules#FILTER_FUTZ
@@ -409,19 +408,19 @@ class FilterFutzRule extends RelRule<FilterFutzRule.Config> {
 }
 ```
 
-类*名*应指示匹配的基本 RelNode 类型，有时后跟规则的作用，然后是单词`Rule`。例子：`ProjectFilterTransposeRule`，`FilterMergeRule`。
+类名应指示匹配的基本 RelNode 类型，有时后跟规则的作用，然后是单词 `Rule` 。示例： `ProjectFilterTransposeRule` 、 `FilterMergeRule` 。
 
-该规则必须有一个以 a`Config`作为参数的构造函数。它应该`protected`并且只会从 调用`Config.toRule()`。
+该规则必须有一个以 `Config` 作为参数的构造函数。它应该是 `protected` ，并且只会从 `Config.toRule()` 调用。
 
-该类必须包含一个名为`Config`扩展的 接口`RelRule.Config`（或规则的超类的配置）。
+该类必须包含一个名为 `Config` 的接口，该接口扩展 `RelRule.Config` （或规则的超类的配置）。
 
-`Config`必须实施该`toRule`方法并创建规则。
+`Config` 必须实现 `toRule` 方法并创建规则。
 
-`Config`必须有一个名为`DEFAULT`创建典型配置的成员。至少，它必须调用`withOperandSupplier`来创建典型的操作数树。
+`Config` 必须有一个名为 `DEFAULT` 的成员来创建典型配置。至少，它必须调用 `withOperandSupplier` 来创建典型的算子树。
 
-该规则*不应*具有静态`INSTANCE`字段。*持有者类中应该*有一个规则实例，例如`CoreRules` 或`EnumerableRules`：
+该规则不应具有静态 `INSTANCE` 字段。持有者类中应该有一个规则实例，例如 `CoreRules` 或 `EnumerableRules` ：
 
-```
+```java
 public class CoreRules {
   ...
 
@@ -430,11 +429,13 @@ public class CoreRules {
 }
 ```
 
-持有者类*可以*包含具有不同参数的规则的其他实例（如果常用）。
+持有者类可以包含具有不同参数的规则的其他实例（如果常用）。
 
-如果规则是使用多种操作数模式实例化的（例如，使用相同 RelNode 基类的不同子类，或者使用不同的谓词），则配置*可能*包含一个方法`withOperandFor` ，以便更轻松地构建通用操作数模式。（参见`FilterAggregateTransposeRule`示例。）
+如果规则是使用多种操作数模式实例化的（例如，使用相同 RelNode 基类的不同子类，或者使用不同的谓词），则配置可能包含一个方法 `withOperandFor` 以使其更容易构建常见的操作数模式（参见 `FilterAggregateTransposeRule` 示例）。 
 
 # 提交者的高级主题
+
+TODO
 
 以下部分是Calcite提交者，特别是发布经理感兴趣的。
 
