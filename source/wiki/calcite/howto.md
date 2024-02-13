@@ -154,11 +154,11 @@ cd calcite-test-dataset && mvn install
 
 ## 贡献
 
-请参阅[开发者指南](https://calcite.apache.org/develop/#contributing)。
+请参阅[开发者指南-贡献](https://strongduanmu.com/wiki/calcite/develop.html#%E8%B4%A1%E7%8C%AE)。
 
 ## 入门
 
-请参阅[开发者指南](https://calcite.apache.org/develop/#getting-started)。
+请参阅[开发者指南-入门](https://strongduanmu.com/wiki/calcite/develop.html#%E5%85%A5%E9%97%A8)。
 
 ## 设置 IDE 进行贡献
 

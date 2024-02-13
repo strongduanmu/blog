@@ -16,31 +16,31 @@ date: 2024-02-13 09:00:00
 
 Calcite 使用 git 进行版本控制。标准源位于 Apache，但大多数人发现 Github 镜像更加用户友好。
 
-## 下载源代码、构建并运行测试
+## 下载源码、构建并运行测试
 
 前提条件是您的路径上有 Git 和 Java（JDK 8u220 或更高版本，首选 11）。
 
 注意：早期的 OpenJDK 1.8 版本（例如 1.8u202 之前的版本）已知在为类型注释生成字节码时存在问题（请参阅[JDK-8187805](https://bugs.openjdk.java.net/browse/JDK-8187805)、 [JDK-8187805](https://bugs.openjdk.java.net/browse/JDK-8187805)、 [JDK-8210273](https://bugs.openjdk.java.net/browse/JDK-8210273)、 [JDK-8160928](https://bugs.openjdk.java.net/browse/JDK-8160928)、 [JDK-8144185](https://bugs.openjdk.java.net/browse/JDK-8144185)），因此请确保您使用的是最新的 Java。
 
-创建 Git 存储库的本地副本`cd`到其根目录，然后使用 Gradle 进行构建：
+创建 Git 存储库的本地副本 `cd` 到其根目录，然后使用 Gradle 进行构建：
 
-```
+```bash
 $ git clone https://github.com/apache/calcite.git
 $ cd calcite
 $ ./gradlew build
 ```
 
-HOWTO 描述了如何 [从源代码发行版构建](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)、 [设置 IDE 进行贡献](https://calcite.apache.org/docs/howto.html#setting-up-an-ide-for-contributing)、 [运行更多或更少的测试](https://calcite.apache.org/docs/howto.html#running-tests)以及 [运行集成测试](https://calcite.apache.org/docs/howto.html#running-integration-tests)。
+HOWTO 描述了如何[从源代码发行版进行构建](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)、[设置用于贡献的 IDE](https://calcite.apache.org/docs/howto.html#setting-up-an-ide-for-contributing)、[运行更多或更少的测试](https://calcite.apache.org/docs/howto.html#running-tests)以及[运行集成测试](https://calcite.apache.org/docs/howto.html#running-integration-tests)。
 
 ## JIRA 帐户
 
-Calcite 使用[JIRA](https://issues.apache.org/jira/browse/CALCITE)进行问题/案例管理。您必须拥有 JIRA 帐户才能记录案例和问题。
+Calcite 使用 [JIRA](https://issues.apache.org/jira/browse/CALCITE) 进行问题/案例管理。您必须拥有 JIRA 帐户才能记录案例和问题。
 
 ### 我已经有一个 ASF JIRA 帐户并希望添加为贡献者
 
-如果您已有 ASF JIRA 帐户，则无需注册新帐户。请使用以下模板发送电子邮件至[jira-requests@calcite.apache.org](mailto:jira-requests@calcite.apache.org) ，以便我们将您的帐户添加到 JIRA 的贡献者列表中：
+如果您已有 ASF JIRA 帐户，则无需注册新帐户。请使用以下模板发送电子邮件至 jira-requests@calcite.apache.org，以便我们将您的帐户添加到 JIRA 的贡献者列表中：
 
-[**[在电子邮件客户端中打开模板\]**](mailto:jira-requests@calcite.apache.org?subject=Add me as a contributor to JIRA&body=Hello, Please add me as a contributor to JIRA. My JIRA username is: [INSERT YOUR JIRA USERNAME HERE] Thanks, [INSERT YOUR NAME HERE])
+[[在你的电子邮件客户端中打开模板]](mailto:jira-requests@calcite.apache.org?subject=Add me as a contributor to JIRA&body=Hello, Please add me as a contributor to JIRA. My JIRA username is: [INSERT YOUR JIRA USERNAME HERE] Thanks, [INSERT YOUR NAME HERE])
 
 ```
 Subject: Add me as a contributor to JIRA
