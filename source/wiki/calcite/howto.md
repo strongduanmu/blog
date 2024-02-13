@@ -44,7 +44,7 @@ Calcite 包含许多机器生成的代码。默认情况下，它们会在每次
 
 ## Gradle 与 Gradle 包装器
 
-Calcite 使用 Gradle Wrapper 来创建一致的构建环境。在典型情况下，你不需要手动安装 Gradle， `./gradlew` 会为您下载正确的版本并验证预期的校验和。
+Calcite 使用 Gradle Wrapper 来创建一致的构建环境。在典型情况下，你不需要手动安装 Gradle， `./gradlew` 会为你下载正确的版本并验证预期的校验和。
 
 如果你愿意，可以手动安装 Gradle，但请注意这可能会导致版本不匹配。
 
@@ -77,73 +77,39 @@ $ ./gradlew autostyleCheck checkstyleAll # report code style violations
 $ ./gradlew -PenableErrorprone classes # verify Java code with Error Prone compiler, requires Java 11
 ```
 
-TODO
-
-你可以使用它`./gradlew assemble`来构建工件并跳过所有测试和验证。
+你可以使用 `./gradlew assemble` 构建工件并跳过所有测试和验证。
 
 还有其他选项可以控制运行哪些测试以及在什么环境中运行，如下所示。
 
-- ```plaintext
-  -Dcalcite.test.db=DB
-  ```
+- `-Dcalcite.test.db=DB` （其中 DB 为 `h2` 、 `hsqldb` 、 `mysql` 或 `postgresql` ）允许你更改 JDBC 测试套件的数据源。 Calcite 的测试套件需要一个填充有 foodmart 数据集的 JDBC 数据源。
+  - `hsqldb` 默认使用 hsqldb 内存数据库；
+  - 所有其他都访问测试虚拟机（请参阅下面的[集成测试](https://strongduanmu.com/wiki/calcite/howto.html#%E8%BF%90%E8%A1%8C%E9%9B%86%E6%88%90%E6%B5%8B%E8%AF%95)）。 `mysql` 和 `postgresql` 可能比 hsqldb 快一些，但你需要填充它（即配置虚拟机）。
+- `-Dcalcite.debug` 将额外的调试信息打印到标准输出；
+- `-Dcalcite.test.splunk` 启用针对 Splunk 运行的测试。Splunk 必须已安装并正在运行；
+- `./gradlew testSlow` 运行需要更长时间执行的测试。例如，有些测试可以在内存中创建虚拟 TPC-H 和 TPC-DS 模式，并根据这些基准运行测试。
 
-  （其中 DB 是
+注意：测试是在分叉的 JVM 中执行的，因此使用 Gradle 运行测试时不会自动传递系统属性。默认情况下，构建脚本传递以下 `-D...` 属性（请参阅 `build.gradle.kts` 中的 `passProperty` ）：
 
-  ```plaintext
-  h2
-  ```
-
-  、
-
-  ```plaintext
-  hsqldb
-  ```
-
-  、
-
-  ```plaintext
-  mysql
-  ```
-
-  或
-
-  ```plaintext
-  postgresql
-  ```
-
-  ）允许你更改测试套件的 JDBC 数据源。Calcite 的测试套件需要一个填充有 foodmart 数据集的 JDBC 数据源。
-
-  - `hsqldb`默认情况下，使用内存中的 hsqldb 数据库。
-  - 所有其他人都访问测试虚拟机（请参阅下面的[集成测试](https://calcite.apache.org/docs/howto.html#running-integration-tests)）。 `mysql`并且`postgresql`可能比 hsqldb 快一些，但你需要填充它（即配置虚拟机）。
-
-- `-Dcalcite.debug`将额外的调试信息打印到标准输出。
-
-- `-Dcalcite.test.splunk`启用针对 Splunk 运行的测试。Splunk 必须已安装并正在运行。
-
-- `./gradlew testSlow`运行需要更长执行时间的测试。例如，有些测试可以在内存中创建虚拟 TPC-H 和 TPC-DS 模式，并根据这些基准运行测试。
-
-注意：测试是在分叉的 JVM 中执行的，因此使用 Gradle 运行测试时不会自动传递系统属性。默认情况下，构建脚本会传递以下`-D...`属性（请参阅`passProperty`）`build.gradle.kts`：
-
-- `java.awt.headless`
-- `junit.jupiter.execution.parallel.enabled`， 默认：`true`
-- `junit.jupiter.execution.timeout.default`， 默认：`5 m`
-- `user.language`， 默认：`TR`
-- `user.country`， 默认：`tr`
-- `calcite.**`（启用`calcite.test.db`和上述其他）
+- `java.awt.headless`；
+- `junit.jupiter.execution.parallel.enabled`， 默认：`true`；
+- `junit.jupiter.execution.timeout.default`， 默认：`5 m`；
+- `user.language`， 默认：`TR`；
+- `user.country`， 默认：`tr`；
+- `calcite.**` （启用 `calcite.test.db` 及上述其他内容）。
 
 ## 运行集成测试
 
-为了测试 Calcite 的外部适配器，应使用测试虚拟机。VM 包括 Cassandra、Druid、H2、HSQLDB、MySQL、MongoDB 和 PostgreSQL。
+为了测试 Calcite 的外部适配器，应使用测试虚拟机。 VM 包括 Cassandra、Druid、H2、HSQLDB、MySQL、MongoDB 和 PostgreSQL。
 
 测试虚拟机需要 5GiB 磁盘空间，构建需要 30 分钟。
 
-注意：你可以使用[calcite-test-dataset](https://github.com/vlsi/calcite-test-dataset) 填充你自己的数据库，但建议使用测试虚拟机，以便可以重现测试环境。
+注意：你可以使用 [calcite-test-dataset](https://github.com/vlsi/calcite-test-dataset) 填充你自己的数据库，但建议使用测试虚拟机，以便可以重现测试环境。
 
 ### 虚拟机准备
 
-0）安装依赖项：[Vagrant](https://www.vagrantup.com/)和[VirtualBox](https://www.virtualbox.org/)
+0. 安装依赖项：[Vagrant](https://www.vagrantup.com/) 和 [VirtualBox](https://www.virtualbox.org/)；
 
-1) 在与方解石存储库相同的级别克隆 https://github.com/vlsi/calcite-test-dataset.git。例如：
+1) 在与 Calcite 存储库相同的级别克隆：https://github.com/vlsi/calcite-test-dataset.git 仓库。例如：
 
 ```
 code
@@ -151,58 +117,60 @@ code
   +-- calcite-test-dataset
 ```
 
-注意：集成测试搜索 ../calcite-test-dataset 或 ../../calcite-test-dataset。你可以通过 calcite.test.dataset 系统属性指定完整路径。
+注意：集成测试搜索 `../calcite-test-dataset` 或 `../../calcite-test-dataset`。您可以通过 `calcite.test.dataset` 系统属性指定完整路径。
 
-2）构建并启动VM：
+2. 构建并启动 VM：
 
-```
+```bash
 cd calcite-test-dataset && mvn install
 ```
 
 ### 虚拟机管理
 
-测试虚拟机由 Vagrant 配置，因此应使用常规 Vagrant 来启动和停止虚拟机`vagrant up`。[calcite-test-dataset](https://github.com/vlsi/calcite-test-dataset)`vagrant halt`自述文件中列出了不同数据库的连接字符串。
+测试虚拟机由 Vagrant 配置，因此应使用常规 Vagrant `vagrant up` 和 `vagrant halt` 来启动和停止虚拟机。 [calcite-test-dataset](https://github.com/vlsi/calcite-test-dataset) 自述文件中列出了不同数据库的连接字符串。
 
 ### 建议的测试流程
 
-注意：测试虚拟机应在启动集成测试之前启动。方解石本身不会启动/停止虚拟机。
+注意：测试虚拟机应在启动集成测试之前启动。Calcite 本身不会启动/停止虚拟机。
 
 命令行：
 
-- 执行常规单元测试（不需要外部数据）：没有变化。`./gradlew test`或者`./gradlew build`。
-- 对所有数据库执行所有测试：`./gradlew test integTestAll`.
-- 仅执行外部数据库的测试，不包括单元测试：`./gradlew integTestAll`
-- 执行 PostgreSQL JDBC 测试：`./gradlew integTestPostgresql`
-- 仅执行 MongoDB 测试：`./gradlew :mongo:build`
+- 执行常规单元测试（不需要外部数据）：没有变化。 `./gradlew test` 或 `./gradlew build`；
+- 对所有数据库执行所有测试： `./gradlew test integTestAll`；
+- 仅执行外部数据库的测试，不包括单元测试： `./gradlew integTestAll`；
+- 执行 PostgreSQL JDBC 测试： `./gradlew integTestPostgresql`；
+- 仅执行 MongoDB 测试： `./gradlew :mongo:build`。
 
-从 IDE 中：
+在 IDE 中执行：
 
-- 执行常规单元测试：没有变化。
-- 执行 MongoDB 测试：`MongoAdapterTest.java`使用`calcite.integrationTest=true`系统属性运行
-- 执行 MySQL 测试：运行`JdbcTest`并`JdbcAdapterTest`使用设置`-Dcalcite.test.db=mysql`
-- 执行 PostgreSQL 测试：运行`JdbcTest`并`JdbcAdapterTest`使用设置`-Dcalcite.test.db=postgresql`
+- 执行常规单元测试：没有变化；
+- 执行 MongoDB 测试：使用 `calcite.integrationTest=true` 系统属性运行 `MongoAdapterTest.java`；
+- 执行 MySQL 测试：使用设置 `-Dcalcite.test.db=mysql` 运行 `JdbcTest` 和 `JdbcAdapterTest`；
+- 执行 PostgreSQL 测试：使用设置 `-Dcalcite.test.db=postgresql` 运行 `JdbcTest` 和 `JdbcAdapterTest`。
 
 ### 集成测试技术细节
 
-使用外部数据的测试是在 Gradle 的集成测试阶段执行的。我们目前不使用集成前测试/集成后测试，但是，我们将来可以使用它。构建通过/失败的验证是在验证阶段执行的。集成测试应该命名为`...IT.java`，这样它们就不会在单元测试执行时被拾取。
+使用外部数据的测试是在 Gradle 的集成测试阶段执行的。我们目前不使用集成前测试/集成后测试，但是，我们将来可以使用它。构建通过/失败的验证是在验证阶段执行的。集成测试应命名为 `...IT.java` ，因此在单元测试执行时不会拾取它们。
 
 ## 贡献
 
-请参阅[开发人员指南](https://calcite.apache.org/develop/#contributing)。
+请参阅[开发者指南](https://calcite.apache.org/develop/#contributing)。
 
 ## 入门
 
-请参阅[开发人员指南](https://calcite.apache.org/develop/#getting-started)。
+请参阅[开发者指南](https://calcite.apache.org/develop/#getting-started)。
 
 ## 设置 IDE 进行贡献
 
 ### 设置 IntelliJ IDEA
 
-下载高于 (2018.X)的[IntelliJ IDEA](https://www.jetbrains.com/idea/)版本。版本 2019.2 和 2019.3 已经过社区成员的测试，看起来很稳定。对于不使用 Gradle 构建（版本 1.21.0 及之前版本）的方解石源，旧版本的 IDEA 仍然可以正常工作。
+下载高于 (2018.X) 的 [IntelliJ IDEA](https://www.jetbrains.com/idea/) 版本。版本 2019.2 和 2019.3 已经过社区成员的测试，看起来很稳定。对于不使用 Gradle 构建（版本 1.21.0 及之前版本）的方解石源，旧版本的 IDEA 仍然可以正常工作。
 
 按照安装 IDEA 的标准步骤并设置 Calcite 目前支持的 JDK 版本之一。
 
-首先[从命令行构建方解石](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)。
+TODO
+
+首先[从命令行构建Calcite](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)。
 
 转到*“文件”>“打开...”*并打开 Calcite 的根`build.gradle.kts`文件。当 IntelliJ 询问你是否要将其作为项目或文件打开时，请选择项目。另外，当它询问你是否想要一个新窗口时，请说“是”。IntelliJ 的 Gradle 项目导入器应该处理其余的事情。
 
@@ -380,7 +348,7 @@ public class AdapterContextTest {
 
 当 Calcite 比较类型（ 的实例`RelDataType`）时，它要求它们是同一对象。如果有两个不同的类型实例引用相同的 Java 类型，Calcite 可能无法识别它们是否匹配。建议：
 
-- `JavaTypeFactory`在方解石上下文中使用单个实例；
+- `JavaTypeFactory`在Calcite上下文中使用单个实例；
 - 存储类型，以便始终为相同类型返回相同的对象。
 
 ## 重建生成的 Protocol Buffer 代码
@@ -468,9 +436,9 @@ public class CoreRules {
 
 # 提交者的高级主题
 
-以下部分是方解石提交者，特别是发布经理感兴趣的。
+以下部分是Calcite提交者，特别是发布经理感兴趣的。
 
-## 通过 GitHub 管理方解石存储库
+## 通过 GitHub 管理Calcite存储库
 
 [提交者拥有对 Calcite 的ASF git 存储库的](https://gitbox.apache.org/repos/asf#calcite)写入权限， 该存储库托管项目的源代码以及网站。
 
@@ -489,7 +457,7 @@ GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访�
 
 ## 合并拉取请求
 
-这些是针对方解石提交者的说明，他已审查了贡献者的拉取请求，发现它令人满意，并将其合并到 main。通常贡献者不是提交者（否则，在你在审查中批准后，他们会自己提交）。
+这些是针对Calcite提交者的说明，他已审查了贡献者的拉取请求，发现它令人满意，并将其合并到 main。通常贡献者不是提交者（否则，在你在审查中批准后，他们会自己提交）。
 
 有些类型的持续集成测试不会针对 PR 自动运行。可以通过向 PR 添加适当的标签来显式触发这些测试。例如，你可以通过添加`slow-tests-needed`标签来运行缓慢的测试。由你决定是否需要在合并之前运行这些附加测试。
 
