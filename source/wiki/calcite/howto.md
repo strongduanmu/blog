@@ -435,13 +435,11 @@ public class CoreRules {
 
 # 提交者的高级主题
 
-TODO
+以下部分是 Calcite 提交者，特别是发布经理感兴趣的。
 
-以下部分是Calcite提交者，特别是发布经理感兴趣的。
+## 通过 GitHub 管理 Calcite 仓库
 
-## 通过 GitHub 管理Calcite存储库
-
-[提交者拥有对 Calcite 的ASF git 存储库的](https://gitbox.apache.org/repos/asf#calcite)写入权限， 该存储库托管项目的源代码以及网站。
+提交者拥有对 Calcite 的 [ASF git 存储库](https://gitbox.apache.org/repos/asf#calcite)的写入权限，该存储库托管项目的源代码以及网站。
 
 GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访问权限，包括打开/关闭/合并拉取请求和解决问题的权限。
 
@@ -449,49 +447,47 @@ GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访�
 
 步骤如下：
 
-- 将你的 GitHub 用户名设置到你的[Apache 配置文件](https://id.apache.org/)中。
-- 在你的 GitHub 帐户上启用[GitHub 2FA 。](https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/)
-- [激活 GitHub 2FA 会更改身份验证过程，并可能影响你访问 GitHub 的](https://help.github.com/en/github/authenticating-to-github/accessing-github-using-two-factor-authentication#using-two-factor-authentication-with-the-command-line)方式 。你可能需要建立个人访问令牌或将公共 SSH 密钥上传到 GitHub，具体取决于你使用的协议（HTTPS 与 SSH）。
-- 使用[帐户链接页面](https://gitbox.apache.org/setup/)合并你的 Apache 和 GitHub 帐户 （你应该在 GitBox 中看到 3 个绿色对勾）。
-- 至少等待 30 分钟，你将收到邀请你加入 Apache GitHub 组织的电子邮件。
+- 将你的 GitHub 用户名设置到你的 [Apache 配置文件](https://id.apache.org/)中；
+- 在你的 GitHub 帐户上启用 [GitHub 2FA](https://help.github.com/articles/securing-your-account-with-two-factor-authentication-2fa/)；
+- 激活 GitHub 2FA 会更改身份验证过程，并可能影响你[访问 GitHub](https://help.github.com/en/github/authenticating-to-github/accessing-github-using-two-factor-authentication#using-two-factor-authentication-with-the-command-line) 的方式。你可能需要建立个人访问令牌或将公共 SSH 密钥上传到 GitHub，具体取决于你使用的协议（HTTPS 与 SSH）；
+- 使用[帐户链接页面](https://gitbox.apache.org/setup/)合并你的 Apache 和 GitHub 帐户（你应该在 GitBox 中看到 3 个绿色对勾）；
+- 至少等待 30 分钟，你将收到邀请你加入 Apache GitHub 组织的电子邮件；
 - 接受邀请并验证你是[团队成员](https://github.com/orgs/apache/teams/calcite-committers/members)。
 
 ## 合并拉取请求
 
-这些是针对Calcite提交者的说明，他已审查了贡献者的拉取请求，发现它令人满意，并将其合并到 main。通常贡献者不是提交者（否则，在你在审查中批准后，他们会自己提交）。
+这些是针对 Calcite 提交者的说明，他已审查了贡献者的拉取请求，发现它令人满意，并将其合并到 main。通常贡献者不是提交者（否则，在你在审查中批准后，他们会自己提交）。
 
-有些类型的持续集成测试不会针对 PR 自动运行。可以通过向 PR 添加适当的标签来显式触发这些测试。例如，你可以通过添加`slow-tests-needed`标签来运行缓慢的测试。由你决定是否需要在合并之前运行这些附加测试。
+有些类型的持续集成测试不会针对 PR 自动运行。可以通过向 PR 添加适当的标签来显式触发这些测试。例如，你可以通过添加 `slow-tests-needed` 标签来运行慢速测试。由你决定是否需要在合并之前运行这些附加测试。
 
-如果 PR 有多个提交，请将它们压缩为单个提交。[提交消息应遵循贡献指南](https://calcite.apache.org/develop/#contributing)中概述的约定 。如果存在冲突，最好要求贡献者执行此步骤，否则最好手动执行此操作，因为这样可以节省时间，也可以避免向 GitHub 上的许多人发送不必要的通知消息。
+如果 PR 有多个提交，请将它们压缩为单个提交。提交消息应遵循[贡献指南](https://calcite.apache.org/develop/#contributing)中概述的约定。如果存在冲突，最好要求贡献者执行此步骤，否则最好手动执行此操作，因为这样可以节省时间，也可以避免向 GitHub 上的许多人发送不必要的通知消息。
 
-如果通过命令行（而不是通过 GitHub Web 界面）执行合并，请确保消息包含一行“Close apache/calcite#YYY”，其中 YYY 是 GitHub 拉取请求标识符。
+如果通过命令行（而不是通过 GitHub Web 界面）执行合并，请确保消息包含一行 `Close apache/calcite#YYY`，其中 YYY 是 GitHub 拉取请求标识符。
 
 当 PR 合并并推送后，请务必更新 JIRA 案例。你必须：
 
 - 解决问题（不要关闭它，因为这将由发布经理完成）；
-- 选择“已修复”作为解决原因；
-- 在“修复版本”字段中标记适当的版本（例如，1.20.0）；
-- 添加评论（例如，“已修复……”），其中包含指向解决问题的提交的超链接（在 GitHub 或 GitBox 中），并感谢贡献者的贡献（如果贡献者是已经是提交者了）。提供的超链接应该是相对于主分支的。你应该能够通过浏览来识别提交
-
-https://github.com/apache/calcite/commits/main/。
+- 选择`已修复`作为解决原因；
+- 在`修复版本`字段中标记适当的版本（例如 1.20.0）；
+- 添加评论（例如，`已修复……`），其中包含指向解决问题的提交的超链接（在 GitHub 或 GitBox 中），并感谢贡献者的贡献（如果贡献者是已经是提交者了）。提供的超链接应该是相对于主分支的。你应该能够通过浏览来识别提交——https://github.com/apache/calcite/commits/main/。
 
 ## 设置 PGP 签名密钥
 
-[按照此处的](https://www.apache.org/dev/release-signing)说明创建密钥对。（在 macOS 上，我做了`brew install gpg`并且 `gpg --full-generate-key`。）
+按照[此处](https://www.apache.org/dev/release-signing)的说明创建密钥对（在 macOS 上，我执行了 `brew install gpg` 和 `gpg --full-generate-key`）。
 
-[`KEYS`](https://dist.apache.org/repos/dist/release/calcite/KEYS) 按照文件中的说明将你的公钥添加到文件中 `KEYS`。如果你没有更新`KEYS`文件的权限，请向 PMC 寻求帮助。（该`KEYS`文件不存在于 git 存储库或发布 tar 球中，因为那是 [多余的](https://issues.apache.org/jira/browse/CALCITE-1746)。）
+按照 [KEYS](https://dist.apache.org/repos/dist/release/calcite/KEYS) 文件中的说明将你的公钥添加到 `KEYS` 文件中。如果你没有更新 `KEYS` 文件的权限，请向 PMC 寻求帮助（ `KEYS` 文件不存在于 git 存储库或发布 tar 球中，因为这是[多余的](https://issues.apache.org/jira/browse/CALCITE-1746)）。
 
-为了能够制作候选版本，请确保将密钥上传到[https://keyserver.ubuntu.com](https://keyserver.ubuntu.com/)和/或 [http://pool.sks-keyservers.net:11371（Nexus](http://pool.sks-keyservers.net:11371/)使用的密钥服务器）。
+为了能够制作候选版本，请确保将密钥上传到 https://keyserver.ubuntu.com 和/或 http://pool.sks-keyservers.net:11371（Nexus 使用的密钥服务器）。
 
 ## 设置 Nexus 存储库凭据
 
-Gradle 提供了多种[配置项目属性的](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)方法。例如，你可以更新`$HOME/.gradle/gradle.properties`.
+Gradle 提供了多种[配置项目属性](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)的方法。例如，你可以更新 `$HOME/.gradle/gradle.properties`。
 
 注意：构建脚本会打印缺少的属性，因此你可以尝试运行它并让它抱怨缺少的属性。
 
 使用以下选项：
 
-```
+```properties
 asfCommitterId=
 
 asfNexusUsername=
@@ -503,16 +499,16 @@ asfGitSourceUsername=
 asfGitSourcePassword=
 ```
 
-笔记：
+注意：
 
-- 和`asfNexusUsername`都是`asfSvnUsername`你的 apache id，`asfNexusPassword`和 `asfSvnPassword`是相应的密码。
-- Git 源帐户可以配置为 Gitbox（默认）或 Github。对于 Gitbox，`asfGitSourceUsername` 是你的 apache id，`asfGitSourcePassword`是相应的密码。对于 Github，`asfGitSourceUsername` 是你的 GitHub id，`asfGitSourcePassword`不是你的 GitHub 密码，你需要在 https://github.com/settings/tokens 选择 来生成`Personal access tokens`。
+- `asfNexusUsername` 和 `asfSvnUsername` 都是你的 apache id， `asfNexusPassword` 和 `asfSvnPassword` 是相应的密码；
+- Git 源帐户可以配置为 Gitbox（默认）或 Github。对于 Gitbox， `asfGitSourceUsername` 是你的 apache id， `asfGitSourcePassword` 是相应的密码。对于 Github， `asfGitSourceUsername` 是你的 GitHub id，而 `asfGitSourcePassword` 不是你的 GitHub 密码，你需要在 https://github.com/settings/tokens 中选择 `Personal access tokens`。
 
-当 使用[asflike-release-environment](https://github.com/vlsi/asflike-release-environment)时 ，凭证取自 `asfTest...`（例如`asfTestNexusUsername=test`）
+当使用 [asflike-release-environment](https://github.com/vlsi/asflike-release-environment) 时，凭据取自 `asfTest...` （例如 `asfTestNexusUsername=test` ）
 
-注意：如果你想使用`gpg-agent`，你需要传递一些更多的属性：
+注意：如果你想使用 `gpg-agent` ，你需要传递一些更多的属性：
 
-```
+```properties
 useGpgCmd=true
 signing.gnupg.keyName=
 signing.gnupg.useLegacyGpg=
@@ -523,46 +519,46 @@ signing.gnupg.useLegacyGpg=
 在你开始之前：
 
 - 确保你使用的是 JDK 8。注意：如果你使用基于 OpenJDK 的 Java，则需要 Java 8u202 或更高版本。
-- 确保构建和测试成功`-Dcalcite.test.db=hsqldb`（默认）
+- 使用 `-Dcalcite.test.db=hsqldb` （默认）确保构建和测试成功。
 
-```
+```bash
 # Make sure that there are no junk files in the sandbox
 git clean -xn
 # Publish snapshot artifacts
 ./gradlew clean publish -Pasf
 ```
 
-## 制定候选版本
+## 制作候选版本
 
-注意：发布工件（dist.apache.org 和repository.apache.org）通过 [stage-vote-release-plugin进行管理](https://github.com/vlsi/vlsi-release-plugins/tree/master/plugins/stage-vote-release-plugin)
+注意：发布构建（`dist.apache.org` 和 `repository.apache.org`）通过 [stage-vote-release-plugin](https://github.com/vlsi/vlsi-release-plugins/tree/master/plugins/stage-vote-release-plugin) 进行管理。
 
 在你开始之前：
 
-- 请查阅[发布仪表板](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12333950)以快速了解发布状态，并采取适当的操作来解决待处理的票证或将其移至另一个版本/待办事项。
-- 发送电子邮件至[dev@calcite.apache.org](mailto:dev@calcite.apache.org)通知 RC 构建过程正在启动，因此`main`分支处于代码冻结状态，直至另行通知。
-- 如上所述设置签名密钥。
-- 确保你使用的是 JDK 8（而不是 9 或 10）。
-- 检查`README`并`site/_docs/howto.md`获得正确的版本号。
-- 检查`site/_docs/howto.md`Gradle 版本是否正确。
-- 检查是否`NOTICE`有当前的版权年份。
-- 检查`calcite.version`中是否具有正确的值`/gradle.properties`。
-- 确保构建和测试成功
-- 确保`./gradlew javadoc`成功（即没有错误；警告也可以）
-- 使用 生成依赖项之间发生的漏洞的报告`./gradlew dependencyCheckUpdate dependencyCheckAggregate`。 如果在依赖项中发现新的严重漏洞，请向[private@calcite.apache.org](mailto:private@calcite.apache.org)报告。
-- 确定JDK、操作系统和Guava支持的配置。这些可能与先前版本的发行说明中描述的相同。将它们记录在发行说明中。要测试 Guava 版本*xy*，请指定`-Pguava.version=x.y`
+- 请查阅[发布仪表板](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12333950)以快速了解发布状态，并采取适当的操作来解决待处理的票证或将其移至另一个版本/待办事项；
+- 发送电子邮件至 dev@calcite.apache.org 通知 RC 构建过程正在启动，因此 `main` 分支处于代码冻结状态，直至另行通知；
+- 如上所述设置签名密钥；
+- 确保你使用的是 JDK 8（而不是 9 或 10）；
+- 检查 `README` 和 `site/_docs/howto.md` 的版本号是否正确；
+- 检查 `site/_docs/howto.md` 是否具有正确的 Gradle 版本；
+- 检查 `NOTICE` 是否具有当前版权年份；
+- 检查 `calcite.version` 在 `/gradle.properties` 中是否具有正确的值；
+- 确保构建和测试成功；
+- 确保 `./gradlew javadoc` 成功（即没有给出错误；警告也可以）；
+- 使用 `./gradlew dependencyCheckUpdate dependencyCheckAggregate` 生成依赖项之间发生的漏洞的报告。如果在依赖项中发现新的严重漏洞，请向 private@calcite.apache.org 报告；
+- 确定JDK、操作系统和Guava支持的配置。这些可能与先前版本的发行说明中描述的相同。将它们记录在发行说明中。要测试 Guava 版本 x.y，请指定 `-Pguava.version=x.y`；
 - 使用属性的可选测试：
-  - `-Dcalcite.test.db=mysql`
-  - `-Dcalcite.test.db=hsqldb`
-  - `-Dcalcite.test.mongodb`
-  - `-Dcalcite.test.splunk`
+  - `-Dcalcite.test.db=mysql`；
+  - `-Dcalcite.test.db=hsqldb`；
+  - `-Dcalcite.test.mongodb`；
+  - `-Dcalcite.test.splunk`。
 - 使用任务的可选测试：
-  - `./gradlew testSlow`
-- 将发行说明添加到`site/_docs/history.md`. 如果要发布的版本已存在发行说明，但已被注释掉，请删除注释（`{% comment %}`和`{% endcomment %}`）。包括提交历史记录、对该版本做出贡献的人员姓名，并说明该版本针对哪些版本的 Java、Guava 和操作系统进行了测试。
-- 确保 [每个“已解决”的 JIRA 案例](https://issues.apache.org/jira/issues/?jql=project %3D CALCITE AND status %3D Resolved and fixVersion is null)（包括重复的案例）都分配了一个修复版本（很可能是我们即将发布的版本）
+  - `./gradlew testSlow`；
+- 将发行说明添加到 `site/_docs/history.md` 。如果要发布的版本已存在发行说明，但已被注释掉，请删除注释（ `{% comment %}` 和 `{% endcomment %}` ）。包括提交历史记录、对该版本做出贡献的人员姓名，并说明该版本针对哪些版本的 Java、Guava 和操作系统进行了测试；
+- 确保每个[已解决的 JIRA 案例](https://issues.apache.org/jira/issues/?jql=project%20%3D%20CALCITE%20AND%20status%20%3D%20Resolved%20and%20fixVersion%20is%20null)（包括重复的案例）都分配了一个修复版本（很可能是我们即将发布的版本）。
 
 生成贡献者列表：
 
-```
+```bash
 # Commits since 1.35
 range=calcite-1.35.0..HEAD
 # distinct authors
@@ -573,9 +569,9 @@ git log --abbrev-commit --pretty=format:'%aN' $range | sort | uniq -c | sort -nr
 git log --abbrev-commit --pretty=format:'%f' $range | awk -F- '$1 == "CALCITE" {print $2}' | sort -u | wc
 ```
 
-`sqlline`使用 Spatial 和 Oracle 函数表进行冒烟测试：
+使用 Spatial 和 Oracle 函数表进行冒烟测试 `sqlline` ：
 
-```
+```bash
 $ ./sqlline
 > !connect jdbc:calcite:fun=spatial,oracle "sa" ""
 SELECT NVL(ST_Is3D(ST_PointFromText('POINT(-71.064544 42.28787)')), TRUE);
@@ -588,17 +584,17 @@ SELECT NVL(ST_Is3D(ST_PointFromText('POINT(-71.064544 42.28787)')), TRUE);
 > !quit
 ```
 
-候选版本进程不会添加提交，因此即使失败也不会造成任何损害。它可能会留下`-rc`标签，如果需要可以将其删除。
+候选版本进程不会添加提交，因此即使失败也不会造成任何影响。它可能会留下 `-rc` 标记，如果需要可以将其删除。
 
-[如果你愿意，你可以在asflike-release-environment](https://github.com/vlsi/asflike-release-environment)的帮助下执行试运行发布 ；它会执行相同的步骤，但会将更改推送到模拟 Nexus、Git 和 SVN 服务器。
+如果你愿意，你可以在 [asflike-release-environment](https://github.com/vlsi/asflike-release-environment) 的帮助下执行试运行发布；它会执行相同的步骤，但会将更改推送到模拟 Nexus、Git 和 SVN 服务器。
 
 如果任何步骤失败，请解决问题，然后从头开始。
 
-#### 开始候选版本构建
+### 开始候选版本构建
 
 选择一个候选版本索引并确保它不会干扰该版本之前的候选版本。
 
-```
+```bash
 # Tell GPG how to read a password from your terminal
 export GPG_TTY=$(tty)
 
@@ -613,73 +609,36 @@ git clean -xn
 ./gradlew prepareVote -Prc=0 -Pasf -Pasf.git.pushRepositoryProvider=GITBOX
 ```
 
-#### 故障排除
+### 故障排除
 
-- `net.rubygrapefruit.platform.NativeException: Could not start 'svnmucc'`：确保你`svnmucc`的机器上安装了命令。
-- `Execution failed for task ':closeRepository' ... Possible staging rules violation. Check repository status using Nexus UI`：登录[Nexus UI](https://repository.apache.org/#stagingRepositories)查看实际错误。如果是 `Failed: Signature Validation. No public key: Key with id: ... was not able to be located`，请确保你已将密钥上传到 Nexus 使用的密钥服务器，请参阅上文。
-- [[CALCITE-5573\]](https://issues.apache.org/jira/browse/CALCITE-5573)签署工件时 GradleprepareVote 失败
-- [[VLSI-RELEASE-PLUGINS-64\]](https://github.com/vlsi/vlsi-release-plugins/issues/64)由于缺少 nexus.txt，任务 ':releaseRepository 执行失败
+- `net.rubygrapefruit.platform.NativeException: Could not start 'svnmucc'` ：确保你的计算机中安装了 `svnmucc` 命令；
+- `Execution failed for task ':closeRepository' ... Possible staging rules violation. Check repository status using Nexus UI` ：登录 Nexus UI 查看实际错误。如果是 `Failed: Signature Validation. No public key: Key with id: ... was not able to be located` ，请确保你已将密钥上传到 Nexus 使用的密钥服务器，请参阅上文；
+- [[CALCITE-5573]](https://issues.apache.org/jira/browse/CALCITE-5573) 签署构建时 GradleprepareVote 失败；
+- [[VLSI-RELEASE-PLUGINS-64]](https://github.com/vlsi/vlsi-release-plugins/issues/64) 由于缺少 `nexus.txt`，任务 `:releaseRepository` 执行失败。
 
-#### 检查工件
+### 检查构建
 
-- 该目录中
+- `release/build/distributions` 目录中应包含以下 3 个文件，其中包括：
+  - `apache-calcite-X.Y.Z-src.tar.gz`；
+  - `apache-calcite-X.Y.Z-src.tar.gz.asc`；
+  - `apache-calcite-X.Y.Z-src.tar.gz.sha512`。
+- 请注意，文件名以 `apache-calcite-` 开头；
+- 在源发行版 `.tar.gz` （当前没有二进制发行版）中，检查所有文件是否属于名为 `apache-calcite-X.Y.Z-src` 的目录；
+- 该目录必须包含文件 `NOTICE` 、 `LICENSE` 、 `README` 、 `README.md`；
+  - 检查 `README` 中的版本是否正确；
+  - 检查 `NOTICE` 中的版权年份是否正确；
+  - 检查 `LICENSE` 是否与签入 git 的文件相同。
+- 确保以下文件不会出现在源发行版中： `KEYS` 、 `gradlew` 、 `gradlew.bat` 、 `gradle-wrapper.jar` 、 `gradle-wrapper.properties`；
+- 确保源发行版中没有 `KEYS` 文件；
+- 在每个 .jar（例如 `core/build/libs/calcite-core-X.Y.Z.jar` 和 `mongodb/build/libs/calcite-mongodb-X.Y.Z-sources.jar` ）中，检查 `META-INF` 目录是否包含 `LICENSE` 、 `NOTICE`；
+- 检查 PGP，按照[此文档](https://httpd.apache.org/dev/verification.html)。
 
-  ```plaintext
-  release/build/distributions
-  ```
+验证 Nexus 存储库中的暂存构建：
 
-  应包含以下 3 个文件，其中包括：
-
-  - `apache-calcite-X.Y.Z-src.tar.gz`
-  - `apache-calcite-X.Y.Z-src.tar.gz.asc`
-  - `apache-calcite-X.Y.Z-src.tar.gz.sha512`
-
-- 请注意，文件名以`apache-calcite-`.
-
-- 在源发行版`.tar.gz`（当前没有二进制发行版）中，检查所有文件是否属于名为 `apache-calcite-X.Y.Z-src`.
-
-- 该目录必须包含文件
-
-  ```plaintext
-  NOTICE
-  ```
-
-  , 
-
-  ```plaintext
-  LICENSE
-  ```
-
-  , 
-
-  ```plaintext
-  README
-  ```
-
-  ,
-
-  ```plaintext
-  README.md
-  ```
-
-  - 检查版本`README`是否正确
-  - 检查版权年份`NOTICE`是否正确
-  - 检查是否`LICENSE`与签入 git 的文件相同
-
-- 确保以下文件不会出现在源发行版中：`KEYS`, `gradlew`, `gradlew.bat`, `gradle-wrapper.jar`, `gradle-wrapper.properties`
-
-- `KEYS`确保源发行版中没有文件
-
-- 在每个 .jar（例如 `core/build/libs/calcite-core-X.Y.Z.jar`和 `mongodb/build/libs/calcite-mongodb-X.Y.Z-sources.jar`）中，检查`META-INF`目录是否包含`LICENSE`, `NOTICE`
-
-- 检查 PGP，按照[此](https://httpd.apache.org/dev/verification.html)
-
-验证 Nexus 存储库中的暂存工件：
-
-- 访问https://repository.apache.org/并登录
-- 在 下`Build Promotion`，单击`Staging Repositories`
-- 在`Staging Repositories`选项卡中应该有一行包含个人资料`org.apache.calcite` 和状态`closed`
-- 浏览工件树并确保 .jar、.pom、.asc 文件存在
+- 访问 https://repository.apache.org/ 并登录；
+- 在 `Build Promotion` 下，单击 `Staging Repositories`；
+- 在 `Staging Repositories` 选项卡中应该有一行包含配置文件 `org.apache.calcite` 和状态 `closed`；
+- 浏览工件树并确保 .jar、.pom、.asc 文件存在。
 
 ## 尝试发布失败后进行清理
 
@@ -687,7 +646,7 @@ git clean -xn
 
 ## 验证发布
 
-```
+```bash
 # Check that the signing key (e.g. DDB6E9812AD3FAE3) is pushed
 gpg --recv-keys key
 
@@ -719,7 +678,7 @@ checkHash apache-calcite-X.Y.Z-rcN
 
 ## 通过 Apache 投票流程获得发布批准
 
-通过向开发者列表发送电子邮件来开始投票。如果成功完成， Gradle`prepareVote`任务会在最后打印草稿邮件。你可以在 中找到草稿`/build/prepareVote/mail.txt`。
+通过向开发者列表发送电子邮件来开始投票。如果成功完成，Gradle `prepareVote` 任务会在最后打印草稿邮件。你可以在 `/build/prepareVote/mail.txt` 中找到草稿。
 
 投票结束后，发送结果：
 
@@ -757,7 +716,7 @@ Julian
 
 选择发布日期。这是基于你预计宣布发布的时间。这通常是投票结束后的一天。请记住，UTC 日期在太平洋时间下午 4 点更改。
 
-```
+```bash
 # Dry run publishing the release (push to asf-like-environment)
 ./gradlew publishDist -Prc=0
 
@@ -766,9 +725,9 @@ Julian
 ./gradlew publishDist -Prc=0 -Pasf -Pasf.git.pushRepositoryProvider=GITBOX
 ```
 
-如果由于某种原因`publishDist`任务失败（例如[未能发布 nexus 存储库）](https://github.com/vlsi/vlsi-release-plugins/issues/64)，仍然可以手动执行发布任务。如果你不确定需要做什么，请在开发列表中寻求帮助。
+如果由于某种原因 `publishDist` 任务失败（例如[未能发布 nexus 存储库](https://github.com/vlsi/vlsi-release-plugins/issues/64)，仍然可以手动执行发布任务。如果你不确定需要做什么，请在开发列表中寻求帮助。
 
-如果`releaseRepository`任务打印如下内容：
+如果 `releaseRepository` 任务打印如下内容：
 
 ```
 > Task :releaseRepository
@@ -777,39 +736,39 @@ GET request failed. 404: Not Found, body: [errors:[[id:*, msg:No such repository
 Requested operation was executed successfully in attempt 83 (maximum allowed 601)
 ```
 
-很可能存储库已成功发布，你可以在[ASF Nexus](https://repository.apache.org/)中检查它。
+很可能存储库已成功发布，你可以在 [ASF Nexus](https://repository.apache.org/) 中检查它。
 
-Svnpubsub 将发布到 [发布存储库](https://dist.apache.org/repos/dist/release/calcite)并几乎立即传播到 [镜像。](https://www.apache.org/dyn/closer.cgi/calcite)因此无需等待超过十五分钟即可宣布发布。
+Svnpubsub 将发布到[发布存储库](https://dist.apache.org/repos/dist/release/calcite)并几乎立即传播到[镜像](https://www.apache.org/dyn/closer.cgi/calcite)。因此无需等待超过十五分钟即可宣布发布。
 
 如果现在有超过 2 个版本，请清除最旧的版本：
 
-```
+```bash
 cd ~/dist/release/calcite
 svn rm apache-calcite-X.Y.Z
 svn ci
 ```
 
-旧版本将保留在 [版本存档](https://archive.apache.org/dist/calcite/)中。
+旧版本将保留在[版本存档](https://archive.apache.org/dist/calcite/)中。
 
-你应该会收到一封来自[Apache Reporter Service](https://reporter.apache.org/)的电子邮件。请务必在电子邮件中链接的网站上添加最新版本的版本号和日期。
+你应该会收到一封来自 [Apache Reporter Service]() 的电子邮件。请务必在电子邮件中链接的网站上添加最新版本的版本号和日期。
 
-一旦发布提交/标签到达 ASF 远程并 触发相应的[Gitub 工作流程，新版本的发行说明和 javadoc 将自动部署到网站。](https://github.com/apache/calcite/blob/main/.github/workflows/)
+一旦发布提交/标签到达 ASF 远程并触发相应的 [Github 工作流程](https://github.com/apache/calcite/blob/main/.github/workflows/)，新版本的发行说明和 javadoc 将自动部署到网站。
 
-[通过复制site/_posts/2016-10-12-release-1.10.0.md](https://github.com/apache/calcite/blob/main/site/_posts/2016-10-12-release-1.10.0.md)添加发布公告 ，并`history.md`根据需要调整发布日期。按照[site/README.md](https://github.com/apache/calcite/blob/main/site/README.md)中的说明在本地预览更改，然后提交更改并将其推送到`main`分支。请注意，由于[CALCITE-5584](https://issues.apache.org/jira/browse/CALCITE-5584)，该提交应作为最后一次提交推送到 Github，不要将其与“准备下一次开发迭代”提交链接。
+通过复制 [site/_posts/2016-10-12-release-1.10.0.md](site/_posts/2016-10-12-release-1.10.0.md) 添加发布公告，并根据需要调整 `history.md` 中的发布日期。按照 [site/README.md](https://github.com/apache/calcite/blob/main/site/README.md) 中的说明在本地预览更改，然后提交更改并将其推送到 `main` 分支。请注意，由于 [CALCITE-5584](https://issues.apache.org/jira/browse/CALCITE-5584)，该提交应作为最后一次提交推送到 Github，不要将其与`准备下一次开发迭代`提交链接。
 
 确保正确显示网站的所有更改（新闻、发行说明、javadoc）。
 
-在 JIRA 中，搜索 [此版本中已解决的所有问题](https://issues.apache.org/jira/issues/?jql=project %3D CALCITE and fixVersion %3D 1.5.0 and status %3D Resolved and resolution %3D Fixed)，并进行批量更新（选择选项`transition issues`），将其状态更改为“已关闭”，并添加更改注释“已在版本 XYZ (YYYY-MM-DD) 中解决”（填写适当地发布编号和日期）。取消选中“发送此更新的邮件”。[在 Calcite 项目的发布选项卡](https://issues.apache.org/jira/projects/CALCITE?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=released-unreleased)下， 将发布 XYZ 标记为已发布。如果尚不存在，请为下一个版本创建一个新版本（例如，X.Y+1.Z）。为了使[发布仪表板](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12333950) 反映下一个版本的状态，请更改为[仪表板提供支持的 JIRA 过滤器](https://issues.apache.org/jira/issues/?filter=12346388)中的修复版本 并保存更改。
+在 JIRA 中，搜索[此版本中解决的所有问题](https://issues.apache.org/jira/issues/?jql=project%20%3D%20CALCITE%20and%20fixVersion%20%3D%201.5.0%20and%20status%20%3D%20Resolved%20and%20resolution%20%3D%20Fixed)，然后进行批量更新（选择 `transition issues` 选项），将其状态更改为“已关闭”，并添加更改注释“已在版本 X.Y.Z (YYYY-MM) 中解决” -DD)”（适当填写版本号和日期）。取消选中“发送此更新的邮件”。在 Calcite 项目的[发布选项卡](https://issues.apache.org/jira/projects/CALCITE?selectedItem=com.atlassian.jira.jira-projects-plugin%3Arelease-page&status=released-unreleased)下，将发布 X.Y.Z 标记为已发布。如果尚不存在，请为下一个版本创建一个新版本（例如，X.Y+1.Z）。为了使[发布仪表板](https://issues.apache.org/jira/secure/Dashboard.jspa?selectPageId=12333950)反映下一个版本的状态，请更改为[仪表板提供支持的 JIRA 过滤器](https://issues.apache.org/jira/issues/?filter=12346388)中的修复版本并保存更改。
 
-增加`calcite.version`中的值`/gradle.properties`，提交并推送更改，并显示消息“准备下一次开发迭代”（请参阅[ ed1470a](https://github.com/apache/calcite/commit/ed1470a3ea53a78c667354a5ec066425364eca73)作为参考）
+增加 `/gradle.properties` 中的 `calcite.version` 值，提交并推送更改，并显示消息“准备下一次开发迭代”（请参阅 [ed1470a](https://github.com/apache/calcite/commit/ed1470a3ea53a78c667354a5ec066425364eca73) 作为参考）。
 
-重新开`main`分店。发送电子邮件至[dev@calcite.apache.org](mailto:dev@calcite.apache.org)通知`main`代码冻结已结束并且可以恢复提交。
+重新打开 `main` 分支。发送电子邮件至 dev@calcite.apache.org 通知 `main` 代码冻结已结束并且可以恢复提交。
 
-通过使用地址向[announce@apache.org](https://mail-archives.apache.org/mod_mbox/www-announce/)发送电子邮件来宣布发布 `@apache.org` 。你可以使用 [1.20.0公告](https://mail-archives.apache.org/mod_mbox/www-announce/201906.mbox/) 作为模板。请务必包含项目的简短描述。
+通过使用 `@apache.org` 地址向 announce@apache.org 发送电子邮件来宣布发布。你可以使用[1.20.0 公告](https://mail-archives.apache.org/mod_mbox/www-announce/201906.mbox/%3CCA%2BEpF8tcJcZ41rVuwJODJmyRy-qAxZUQm9OxKsoDi07c2SKs_A%40mail.gmail.com%3E)作为模板。请务必包含项目的简短描述。
 
 ## 发布网站
 
-[请参阅site/README.md](https://github.com/apache/calcite/blob/main/site/README.md)中的说明 。
+请参阅 [site/README.md](https://github.com/apache/calcite/blob/main/site/README.md) 中的说明 。
 
 # PMC 成员的高级主题
 
