@@ -40,7 +40,7 @@ Calcite 使用 [JIRA](https://issues.apache.org/jira/browse/CALCITE) 进行问�
 
 如果你已有 ASF JIRA 帐户，则无需注册新帐户。请使用以下模板发送电子邮件至 jira-requests@calcite.apache.org，以便我们将你的帐户添加到 JIRA 的贡献者列表中：
 
-[[在你的电子邮件客户端中打开模板]](mailto:jira-requests@calcite.apache.org?subject=Add me as a contributor to JIRA&body=Hello, Please add me as a contributor to JIRA. My JIRA username is: [INSERT YOUR JIRA USERNAME HERE] Thanks, [INSERT YOUR NAME HERE])
+[在你的电子邮件客户端中打开模板](mailto:jira-requests@calcite.apache.org?subject=Add me as a contributor to JIRA&body=Hello, Please add me as a contributor to JIRA. My JIRA username is: INSERT YOUR JIRA USERNAME HERE Thanks, INSERT YOUR NAME HERE)
 
 ```
 Subject: Add me as a contributor to JIRA
