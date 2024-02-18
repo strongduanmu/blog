@@ -4,7 +4,6 @@ menu_id: notes # 这个跟配置文件中的 `menu.notes` 关联起来，这很�
 layout: wiki
 order: 0
 title: Common
-date: 2024-02-05 11:15:27
 ---
 
 ## 技术论坛

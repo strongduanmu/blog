@@ -4,7 +4,6 @@ wiki: notes
 layout: wiki
 order: 20
 title: Git
-date: 2024-02-05 11:15:27
 ---
 
 ## 常用 Git 命令

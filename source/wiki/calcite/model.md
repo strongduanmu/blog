@@ -34,23 +34,21 @@ types:
 - [Type...]
 ```
 
-TODO
+* `version`：必填字符串，必须设置 version 属性值 `1.0`；
 
-* `version`（必填字符串）必须具有 value `1.0`；
+* `defaultSchema`：可选字符串，如果指定，它将作为此模型中定义的模式名称（区分大小写），并将成为使用此模型 Calcite 连接的默认模式；
 
-* `defaultSchema`（可选字符串）。如果指定，它将是此模型中定义的模式名称（区分大小写），并将成为使用此模型的 Calcite 连接的默认模式；
+* `schemas`：[模式](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F)元素的可选列表；
 
-* `schemas`（[模式](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F-schema)元素的可选列表）；
-
-* `types`（所有模式共享的[类型](https://calcite.apache.org/docs/model.html#type)元素可选列表）。
+* `types`：所有模式共享的[类型](https://strongduanmu.com/wiki/calcite/model.html#%E7%B1%BB%E5%9E%8B)元素可选列表。
 
 ## 模式
 
-发生在`root.schemas`.
+配置在 `root.schemas` 节点中。
 
 **JSON：**
 
-```
+```json
 {
   name: 'foodmart',
   path: ['lib'],
@@ -61,7 +59,7 @@ TODO
 
 **YAML：**
 
-```
+```yaml
 name: foodmart
 path:
   lib
@@ -70,29 +68,34 @@ materializations:
 - [ Materialization... ]
 ```
 
-`name`（必需字符串）是模式的名称。
+* `name`：必填字符串，模式的名称；
 
-`type`（可选字符串，默认`map`）表示子类型。值为：
+* `type`：可选字符串，默认为 `map`，表示子类型。可选值为：
 
-- `map`对于[地图模式](https://calcite.apache.org/docs/model.html#map-schema)
-- `custom`对于[自定义架构](https://calcite.apache.org/docs/model.html#custom-schema)
-- `jdbc`对于[JDBC 模式](https://calcite.apache.org/docs/model.html#jdbc-schema)
+  - `map` 用于配置 [Map 模式](https://strongduanmu.com/wiki/calcite/model.html#map-%E6%A8%A1%E5%BC%8F)；
 
-`path`（可选列表）是用于解析此架构中使用的函数的 SQL 路径。如果指定，它必须是一个列表，并且列表的每个元素必须是字符串或字符串列表。例如，
+  - `custom` 用于配置[自定义模式](https://strongduanmu.com/wiki/calcite/model.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%BC%8F)；
+
+  - `jdbc` 用于配置 [JDBC 模式](https://strongduanmu.com/wiki/calcite/model.html#jdbc-%E6%A8%A1%E5%BC%8F)。
+
+
+* `path`：可选列表，用于解析此模式中使用函数的 SQL 路径。如果指定，它必须是一个列表，并且列表的每个元素必须是字符串或字符串列表。例如，
 
 **JSON：**
 
-```
+```json
   path: [ ['usr', 'lib'], 'lib' ]
 ```
 
 **YAML：**
 
-```
+```yaml
 path:
 - [usr, lib]
 - lib
 ```
+
+TODO
 
 声明一个包含两个元素的路径：模式“/usr/lib”和模式“/lib”。大多数模式都位于顶层，对于这些模式，您可以使用字符串。
 
