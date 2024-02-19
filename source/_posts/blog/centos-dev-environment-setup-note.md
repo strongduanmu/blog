@@ -5,6 +5,9 @@ categories: [Linux]
 date: 2021-11-07 20:37:44
 cover: /assets/blog/2021/11/14/1636874726.jpg
 banner: /assets/banner/banner_4.jpg
+references:
+  - '[VirtualBox 的各种网络模式要如何选择](https://segmentfault.com/a/1190000020231540)'
+  - '[CentOS 7 配置静态 IP 不生效](https://blog.csdn.net/weixin_37569048/article/details/96852643)'
 ---
 
 ## 前言
@@ -16,21 +19,21 @@ banner: /assets/banner/banner_4.jpg
 搭建 CentOS 开发环境之前，需要先完成以下准备工作：
 
 * 安装 `VirtualBox 6.1`；
-* 下载 `CentOS-7-x86_64-Minimal-1708.iso` 镜像（官网 [下载地址](https://www.centos.org/download/)）；
+* 下载 `CentOS-7-x86_64-Minimal-1708.iso` 镜像（官网[下载地址](https://www.centos.org/download/)）。
 
 ## 创建虚拟机
 
 首先，打开 VirtualBox，然后选择 `新建`，创建虚拟机，然后填入名称 `centos7`，并选择虚拟机的类型 `Linux` 和版本 `Red Hat (64-bit)`。
 
-![1636877014](/assets/blog/2021/11/14/1636877014.jpg)
+![设置虚拟电脑名称](centos-dev-environment-setup-note/1636877014.jpg)
 
 然后设置虚拟机的内存大小，该设置按照实际使用场景进行调整即可。
 
-![1636877195](/assets/blog/2021/11/14/1636877195.jpg)
+![设置内存大小](centos-dev-environment-setup-note/1636877195.jpg)
 
 下一步，选择虚拟硬盘的文件类型，因为不需要在其他虚拟化软件中使用，所以我们选择默认的 `VDI` 文件类型。然后分配文件的大小，我们暂时分配 `20 GB`。
 
-![1636877532](/assets/blog/2021/11/14/1636877532.jpg)
+![设置文件大小](centos-dev-environment-setup-note/1636877532.jpg)
 
 选择创建，这时候我们就得到了一个 `centos7` 虚拟机。不过在安装之前，我们还要进行一些设置，来保证虚拟机能够正常启动和运行。
 
@@ -38,11 +41,11 @@ banner: /assets/banner/banner_4.jpg
 
 首先，我们要对虚拟机的系统启动顺序进行设置。选中列表中的虚拟机，然后选择 `设置-系统`，并将 `软驱` 移动到启动顺序的最后。
 
-![1636877818](/assets/blog/2021/11/14/1636877818.jpg)
+![调整启动顺序](centos-dev-environment-setup-note/1636877818.jpg)
 
 然后再选择 `存储-控制器-没有盘片`，点击右侧的光盘图标，分配光驱，选择前面下载的 `CentOS-7-x86_64-Minimal-1708.iso` 镜像文件。
 
-![1636878123](/assets/blog/2021/11/14/1636878123.jpg)
+![设置镜像文件](centos-dev-environment-setup-note/1636878123.jpg)
 
 ## 设置虚拟网卡
 
@@ -72,33 +75,33 @@ banner: /assets/banner/banner_4.jpg
 
 选择 `菜单-管理-主机网络管理器`，然后创建如下的虚拟网卡。
 
-![1636880984](/assets/blog/2021/11/14/1636880984.jpg)
+![创建虚拟网卡](centos-dev-environment-setup-note/1636880984.jpg)
 
 然后配置 `centos7` 虚拟机的网卡，网卡 1 配置为 `Host-Only`，网卡 2 配置为 `Nat` 。
 
-![1636881121](/assets/blog/2021/11/14/1636881121.jpg)
+![设置 Host-Only 网卡](centos-dev-environment-setup-note/1636881121.jpg)
 
-![1636881140](/assets/blog/2021/11/14/1636881140.jpg)
+![设置 NAT 网卡](centos-dev-environment-setup-note/1636881140.jpg)
 
 ## 启动虚拟机
 
 完成虚拟机配置后，点击 `启动` 按钮，启动虚拟机。启动过程中，需要设置 root 用户的密码，以及创建新用户。
 
-![1636881371](/assets/blog/2021/11/14/1636881371.jpg)
+![设置 root 用户密码](centos-dev-environment-setup-note/1636881371.jpg)
 
 启动安装完成之后，点击 `reboot` 进行重启。
 
-![1636881437](/assets/blog/2021/11/14/1636881437.jpg)
+![安装完成后重启](centos-dev-environment-setup-note/1636881437.jpg)
 
 然后使用 root 用户重新登录，并查看 IP 信息，发现获取不到 IP 信息。
 
-![1636881522](/assets/blog/2021/11/14/1636881522.jpg)
+![查看 IP 信息](centos-dev-environment-setup-note/1636881522.jpg)
 
 ## 虚拟机 IP 设置
 
 重启虚拟机之后，发现获取不到 IP 信息，还需要配合网卡设置虚拟机 IP。首先，进入 `/etc/sysconfig/network-scripts/` 目录下，查看该目录下的网卡文件，存在两个网卡 `enp0s3`，`enp0s8`。
 
-![1636881922](/assets/blog/2021/11/14/1636881922.jpg)
+![虚拟机 IP 设置](centos-dev-environment-setup-note/1636881922.jpg)
 
 修改  `enp0s3`，`enp0s8` 网卡配置：
 
@@ -143,28 +146,23 @@ ONBOOT=yes
 
 然后使用如下命令重启网络，发现并没有生效。
 
-```shell
+```bash
 service network restart
 ```
 
 查阅资料后，发现需要关闭网络管理器 `NetwokManager`，才能够使静态 IP 生效。
 
-```shell
+```bash
 systemctl stop NetworkManager
 systemctl disable NetworkManager
 ```
 
 关闭 `NetwokManager` 之后，再次修改网卡配置，并重启网络服务，发现 IP 已经配置完成。
 
-![1636882498](/assets/blog/2021/11/14/1636882498.jpg)
+![查看 IP 信息](centos-dev-environment-setup-note/1636882498.jpg)
 
 最后，使用 Mac 命令行连接虚拟机进行测试，输入 `ssh root@192.168.56.101`，终于成功登录上服务器。
 
-![1636882727](/assets/blog/2021/11/14/1636882727.png)
+![SSH 远程登录](centos-dev-environment-setup-note/1636882727.png)
 
 现在，可以享受在 Linux 环境开发的乐趣了。
-
-## 参考文档
-
-* [VirtualBox 的各种网络模式要如何选择](https://segmentfault.com/a/1190000020231540)
-* [CentOS 7 配置静态 IP 不生效](https://blog.csdn.net/weixin_37569048/article/details/96852643)
