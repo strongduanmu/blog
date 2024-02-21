@@ -62,9 +62,53 @@ topic: calcite
 
 ## Calcite 统计信息实现
 
-RelMetadataQuery
+Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择性 `Selectivity` 还需要传入谓词：
+
+```java
+class RelMetadataQuery {
+    // Cardinality
+    public Double getRowCount(RelNode rel) {...}
+
+    // Selectivity
+    public Double getSelectivity(RelNode rel, RexNode predicate) {...}
+}
+```
 
 TODO
+
+org/apache/calcite/test/JdbcAdapterTest.java:315 testJoin3TablesPlan 作为示例：
+
+```java
+@Test
+void testJoin3TablesPlan() {
+    CalciteAssert.model(JdbcTest.SCOTT_MODEL)
+        .query("select  empno, ename, dname, grade\n"
+            + "from scott.emp e inner join scott.dept d\n"
+            + "on e.deptno = d.deptno\n"
+            + "inner join scott.salgrade s\n"
+            + "on e.sal > s.losal and e.sal < s.hisal")
+        .explainContains("PLAN=JdbcToEnumerableConverter\n"
+            + "  JdbcProject(EMPNO=[$0], ENAME=[$1], DNAME=[$5], GRADE=[$6])\n"
+            + "    JdbcJoin(condition=[AND(>($2, $7), <($2, $8))], joinType=[inner])\n"
+            + "      JdbcJoin(condition=[=($3, $4)], joinType=[inner])\n"
+            + "        JdbcProject(EMPNO=[$0], ENAME=[$1], SAL=[$5], DEPTNO=[$7])\n"
+            + "          JdbcTableScan(table=[[SCOTT, EMP]])\n"
+            + "        JdbcProject(DEPTNO=[$0], DNAME=[$1])\n"
+            + "          JdbcTableScan(table=[[SCOTT, DEPT]])\n"
+            + "      JdbcTableScan(table=[[SCOTT, SALGRADE]])\n")
+        .runs()
+        .enable(CalciteAssert.DB == CalciteAssert.DatabaseInstance.HSQLDB)
+        .planHasSql("SELECT \"t\".\"EMPNO\", \"t\".\"ENAME\", "
+            + "\"t0\".\"DNAME\", \"SALGRADE\".\"GRADE\"\n"
+            + "FROM (SELECT \"EMPNO\", \"ENAME\", \"SAL\", \"DEPTNO\"\n"
+            + "FROM \"SCOTT\".\"EMP\") AS \"t\"\n"
+            + "INNER JOIN (SELECT \"DEPTNO\", \"DNAME\"\n"
+            + "FROM \"SCOTT\".\"DEPT\") AS \"t0\" ON \"t\".\"DEPTNO\" = \"t0\".\"DEPTNO\"\n"
+            + "INNER JOIN \"SCOTT\".\"SALGRADE\" "
+            + "ON \"t\".\"SAL\" > \"SALGRADE\".\"LOSAL\" "
+            + "AND \"t\".\"SAL\" < \"SALGRADE\".\"HISAL\"");
+}
+```
 
 
 
