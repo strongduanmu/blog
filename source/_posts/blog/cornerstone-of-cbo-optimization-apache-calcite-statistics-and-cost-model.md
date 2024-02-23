@@ -62,10 +62,11 @@ topic: calcite
 
 ## Calcite 统计信息实现
 
-Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择性 `Selectivity` 还需要传入谓词：
+Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择性 `Selectivity` 还需要传入谓词 `predicate`：
 
 ```java
 class RelMetadataQuery {
+
     // Cardinality
     public Double getRowCount(RelNode rel) {...}
 
@@ -74,9 +75,7 @@ class RelMetadataQuery {
 }
 ```
 
-TODO
-
-org/apache/calcite/test/JdbcAdapterTest.java:315 testJoin3TablesPlan 作为示例：
+下面展示了 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，测试 SQL 中包含了 `scott.emp`、`scott.dept` 和 `scott.salgrade` 3 张表，分别使用了等值和非等值关联条件。我们将结合此案例，来探究下 Calcite 统计信息入口类 `RelMetadataQuery` 如何进行初始化，它的内部又将调用哪些元数据对象以获取统计信息，此外，Caclite 又是如何基于统计信息进行基数估计。搞清楚这些问题后，相信大家对 Calcite 统计信息的实现会有更深刻的理解。
 
 ```java
 @Test
@@ -110,7 +109,13 @@ void testJoin3TablesPlan() {
 }
 ```
 
+### RelMetadataQuery 初始化
 
+TODO
+
+### RelMetadataQuery 获取统计信息
+
+TODO
 
 ## Calcite 代价模型实现
 
