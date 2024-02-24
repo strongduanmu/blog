@@ -4,6 +4,7 @@ wiki: calcite
 order: 100
 title: 适配器
 date: 2021-12-12 11:15:27
+banner: /assets/banner/banner_5.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/adapter.html

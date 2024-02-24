@@ -4,6 +4,7 @@ wiki: calcite
 order: 202
 title: 如何参与
 date: 2023-10-26 09:00:00
+banner: /assets/banner/banner_15.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/howto.html

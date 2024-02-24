@@ -4,6 +4,7 @@ wiki: calcite
 order: 101
 title: 空间
 date: 2023-10-24 09:00:00
+banner: /assets/banner/banner_11.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/spatial.html

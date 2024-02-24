@@ -4,6 +4,7 @@ wiki: calcite
 order: 1
 title: 教程
 date: 2021-12-05 11:15:27
+banner: /assets/banner/banner_10.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/tutorial.html

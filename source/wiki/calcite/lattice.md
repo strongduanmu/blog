@@ -4,6 +4,7 @@ wiki: calcite
 order: 104
 title: Lattice 格
 date: 2023-10-26 09:00:00
+banner: /assets/banner/banner_17.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/lattice.html

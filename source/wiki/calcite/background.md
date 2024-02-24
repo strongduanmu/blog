@@ -4,6 +4,7 @@ wiki: calcite
 order: 0
 title: 背景
 date: 2021-11-11 11:15:27
+banner: /assets/banner/banner_7.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/

@@ -4,6 +4,7 @@ wiki: calcite
 order: 2
 title: 代数
 date: 2021-12-07 11:15:27
+banner: /assets/banner/banner_2.jpg
 ---
 
 > 原文链接：https://calcite.apache.org/docs/algebra.html
