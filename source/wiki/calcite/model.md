@@ -100,24 +100,22 @@ path:
 
 `materializations` （可选的[物化视图](https://strongduanmu.com/wiki/calcite/model.html#%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE)列表）定义此模式中作为查询物化视图的表。
 
-`cache` （可选布尔值，默认 true）告诉 Calcite 是否缓存此模式生成的元数据（表、函数和子模式）。
+`cache` （可选布尔值，默认 true）告诉 Calcite 是否缓存此模式生成的元数据（包括表、函数和子模式）。
 
-TODO
+- 如果设置为 `false` ，Calcite 将在每次需要元数据时访问模式，例如，每次需要表列表以验证某个模式中的查询时；
+- 如果设置为 `true` ，Calcite 将在第一次读取元数据时缓存元数据。这可以带来更好的性能，特别是在名称匹配不区分大小写的情况下。
 
-- 如果 `false` ，Calcite 将在每次需要元数据时访问模式，例如，每次需要表列表以验证针对模式的查询时；
-- 如果 `true` ，Calcite 将在第一次读取元数据时缓存元数据。这可以带来更好的性能，特别是在名称匹配不区分大小写的情况下。
-
-然而，这也导致了缓存陈旧的问题。特定模式实现可以重写 `Schema.contentsHaveChangedSince` 方法来告诉 Calcite 何时应考虑其缓存已过期。
+然而，这也导致了缓存陈旧的问题。特定模式实现可以重写 `Schema.contentsHaveChangedSince` 方法，来告诉 Calcite 何时应考虑缓存过期。
 
 在模式中显式创建的表、函数、类型和子模式不受此缓存机制的影响。它们总是立即出现在模式中，并且永远不会被刷新。
 
 ## Map 模式
 
-与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
+与基类 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F) 一样，Map 模式同样出现在 `root.schemas` 中。
 
 **JSON：**
 
-```
+```json
 {
   name: 'foodmart',
   type: 'map',
@@ -129,7 +127,7 @@ TODO
 
 **YAML：**
 
-```
+```yaml
 name: foodmart
 type: map
 tables:
@@ -138,22 +136,23 @@ functions:
 - [ Function... ]
 types:
 - [ Type... ]
-name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)。`type`_ `path`_`cache``materializations
 ```
 
-`tables`（[表](https://calcite.apache.org/docs/model.html#table)元素的可选列表）定义此模式中的表。
+`name` 、 `type` 、 `path` 、 `cache` 和 `materializations` 都继承自 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F)。
 
-`functions`（[函数](https://calcite.apache.org/docs/model.html#function)元素的可选列表）定义此模式中的函数。
+* `tables` （[表](https://strongduanmu.com/wiki/calcite/model.html#%E8%A1%A8)元素的可选列表）定义模式中的表；
 
-`types`定义此模式中的类型。
+* `functions`（[函数](https://strongduanmu.com/wiki/calcite/model.html#%E5%87%BD%E6%95%B0)元素的可选列表）定义模式中的函数；
+
+* `types` 定义模式中的类型。
 
 ## 自定义模式
 
-与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
+与基类 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F) 一样，自定义模式出现在 `root.schemas` 中。
 
 **JSON：**
 
-```
+```json
 {
   name: 'mongo',
   type: 'custom',
@@ -167,27 +166,28 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 **YAML：**
 
-```
+```yaml
 name: mongo
 type: custom
 factory: org.apache.calcite.adapter.mongodb.MongoSchemaFactory
 operand:
   host: localhost
   database: test
-name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)。`type`_ `path`_`cache``materializations
 ```
 
-`factory`（必需字符串）是该模式的工厂类的名称。必须实现接口 [org.apache.calcite.schema.SchemaFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html) 并具有公共默认构造函数。
+`name` 、 `type` 、 `path` 、 `cache` 和 `materializations` 都继承自 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F)。
 
-`operand`（可选映射）包含要传递给工厂的属性。
+* `factory`（必填字符串）是该模式的工厂类的名称。必须实现接口 [org.apache.calcite.schema.SchemaFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/SchemaFactory.html) 并具有公共默认构造函数；
+
+* `operand`（可选映射）包含要传递给工厂的属性。
 
 ## JDBC 模式
 
-与基类[Schema](https://calcite.apache.org/docs/model.html#schema)一样，发生在`root.schemas`.
+与基类 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F) 一样，JDBC 模式出现在 `root.schemas` 中。
 
 **JSON：**
 
-```
+```json
 {
   name: 'foodmart',
   type: 'jdbc',
@@ -202,7 +202,7 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 **YAML：**
 
-```
+```yaml
 name: foodmart
 type: jdbc
 jdbcDriver: TODO
@@ -211,28 +211,28 @@ jdbcUser: TODO
 jdbcPassword: TODO
 jdbcCatalog: TODO
 jdbcSchema: TODO
-name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)。`type`_ `path`_`cache``materializations
 ```
 
-`jdbcDriver`（可选字符串）是 JDBC 驱动程序类的名称。如果未指定，则使用 JDBC DriverManager 选择的任何类。
+`name` 、 `type` 、 `path` 、 `cache` 和 `materializations` 继承自 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F)。
 
-`jdbcUrl`（可选字符串）是 JDBC 连接字符串，例如“jdbc:mysql://localhost/foodmart”。
+* `jdbcDriver`（可选字符串）是 JDBC 驱动程序类的名称。如果未指定，则使用 JDBC DriverManager 选择的任何类；
+* `jdbcUrl`（可选字符串）是 JDBC 连接字符串，例如：`jdbc:mysql://localhost/foodmart`；
 
-`jdbcUser`（可选字符串）是 JDBC 用户名。
+* `jdbcUser`（可选字符串）是 JDBC 用户名；
 
-`jdbcPassword`（可选字符串）是 JDBC 密码。
+* `jdbcPassword`（可选字符串）是 JDBC 密码；
 
-`jdbcCatalog`（可选字符串）是 JDBC 数据源中初始目录的名称。
+* `jdbcCatalog`（可选字符串）是 JDBC 数据源中初始目录的名称；
 
-`jdbcSchema`（可选字符串）是 JDBC 数据源中初始模式的名称。
+* `jdbcSchema`（可选字符串）是 JDBC 数据源中初始模式的名称。
 
 ## 物化视图
 
-发生在`root.schemas.materializations`.
+出现在 `root.schemas.materializations` 中。
 
 **JSON：**
 
-```
+```json
 {
   view: 'V',
   table: 'T',
@@ -242,15 +242,17 @@ name`,,,,继承自 [Schema](https://calcite.apache.org/docs/model.html#schema)�
 
 **YAML：**
 
-```
+```yaml
 view: V
 table: T
 sql: select deptno, count(*) as c, sum(sal) as s from emp group by deptno
 ```
 
-`view`（可选字符串）是视图的名称； null 表示该表已经存在并且填充了正确的数据。
+TODO
 
-`table`（必需字符串）是在查询中具体化数据的表的名称。如果`view`不为空，则该表可能不存在，如果不存在，Calcite 将创建并填充内存中的表。
+* `view`（可选字符串）是视图的名称。`null` 表示该表已经存在并且填充了正确的数据；
+
+* `table`（必填字符串）是在查询中具体化数据的表的名称。如果`view`不为空，则该表可能不存在，如果不存在，Calcite 将创建并填充内存中的表。
 
 `sql`（可选字符串，或将连接为多行字符串的字符串列表）是具体化的 SQL 定义。
 
