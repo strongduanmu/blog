@@ -96,18 +96,18 @@ path:
 - lib
 ```
 
+声明一个包含两个元素的路径：模式 `/usr/lib` 和模式 `/lib`。大多数模式都位于顶层，对于这些模式，你可以使用字符串。
+
+`materializations` （可选的[物化视图](https://strongduanmu.com/wiki/calcite/model.html#%E7%89%A9%E5%8C%96%E8%A7%86%E5%9B%BE)列表）定义此模式中作为查询物化视图的表。
+
+`cache` （可选布尔值，默认 true）告诉 Calcite 是否缓存此模式生成的元数据（表、函数和子模式）。
+
 TODO
 
-声明一个包含两个元素的路径：模式“/usr/lib”和模式“/lib”。大多数模式都位于顶层，对于这些模式，您可以使用字符串。
+- 如果 `false` ，Calcite 将在每次需要元数据时访问模式，例如，每次需要表列表以验证针对模式的查询时；
+- 如果 `true` ，Calcite 将在第一次读取元数据时缓存元数据。这可以带来更好的性能，特别是在名称匹配不区分大小写的情况下。
 
-`materializations`（ [Materialization](https://calcite.apache.org/docs/model.html#materialization)的可选列表）定义此模式中作为查询具体化的表。
-
-`cache`（可选布尔值，默认 true）告诉 Calcite 是否缓存此模式生成的元数据（表、函数和子模式）。
-
-- 如果`false`，Calcite 将在每次需要元数据时返回到模式，例如，每次需要表列表以验证针对模式的查询时。
-- 如果`true`，Calcite 将在第一次读取元数据时缓存元数据。这可以带来更好的性能，特别是在名称匹配不区分大小写的情况下。
-
-然而，这也导致了缓存陈旧的问题。特定模式实现可以重写该 `Schema.contentsHaveChangedSince`方法来告诉 Calcite 何时应考虑其缓存已过期。
+然而，这也导致了缓存陈旧的问题。特定模式实现可以重写 `Schema.contentsHaveChangedSince` 方法来告诉 Calcite 何时应考虑其缓存已过期。
 
 在模式中显式创建的表、函数、类型和子模式不受此缓存机制的影响。它们总是立即出现在模式中，并且永远不会被刷新。
 
@@ -327,7 +327,7 @@ modifiable: true
 有关可修改视图的错误：
 
 - 如果视图被标记`modifiable: true`且不可修改，Calcite 在读取模式时会抛出错误。
-- 如果您向不可修改的视图提交 INSERT、UPDATE 或 UPSERT 命令，Calcite 在验证语句时会抛出错误。
+- 如果你向不可修改的视图提交 INSERT、UPDATE 或 UPSERT 命令，Calcite 在验证语句时会抛出错误。
 - 如果 DML 语句创建的行不会出现在视图中（例如，上面`female_emps`、with 中的行`gender = 'M'`），Calcite 将在执行该语句时引发错误。
 
 ## 自定义表
@@ -574,7 +574,7 @@ name: count
 
 `statisticProvider`[（实现org.apache.calcite.materialize.LatticeStatisticProvider](https://calcite.apache.org/javadocAggregate/org/apache/calcite/materialize/LatticeStatisticProvider.html)的类的可选名称 ）提供每列中不同值数量的估计。
 
-您可以使用类名，或类加静态字段。例子：
+你可以使用类名，或类加静态字段。例子：
 
 ```
   "statisticProvider": "org.apache.calcite.materialize.Lattices#CACHING_SQL_STATISTIC_PROVIDER"
