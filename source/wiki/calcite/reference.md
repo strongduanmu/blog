@@ -9,15 +9,13 @@ banner: /assets/banner/banner_1.jpg
 
 > 原文链接：https://calcite.apache.org/docs/reference.html
 
-TODO
-
 该页面描述了 Calcite 的默认 SQL 解析器识别的 SQL 方言。
 
 ## 语法
 
-[类似BNF](https://en.wikipedia.org/wiki/Backus–Naur_Form)形式的 SQL 语法。
+SQL 语法采用了 [BNF](ttps://en.wikipedia.org/wiki/Backus–Naur_Form) 风格。
 
-```
+```sql
 statement:
       setStatement
   |   resetStatement
@@ -234,15 +232,17 @@ windowSpec:
       ')'
 ```
 
-在*insert*中，如果 INSERT 或 UPSERT 语句未指定目标列列表，则查询必须具有与目标表相同的列数，某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isInsertSubsetColumnsAllowed--)除外。
+在 `insert` 中，如果 `INSERT` 或 `UPSERT` 语句未指定目标列列表，则查询必须具有与目标表相同的列数，某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isInsertSubsetColumnsAllowed--)除外。
 
-在*merge*中，至少必须存在 WHEN MATCHED 和 WHEN NOT MATCHED 子句之一。
+在 `merge` 中，至少必须存在 `WHEN MATCHED` 和 `WHEN NOT MATCHED` 子句之一。
 
-*tablePrimary*只能在某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowExtend--)包含 EXTEND 子句；在这些相同的一致性级别中，*insert*中的任何*列都*可以替换为 *columnDecl*，这与将其包含在 EXTEND 子句中具有类似的效果。
+`tablePrimary` 只能在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowExtend--)包含 `EXTEND` 子句；在这些相同的一致性级别中，insert 中的任何列都可以由 `columnDecl` 替换，这与将其包含在 EXTEND 子句中具有类似的效果。
 
-在*orderItem*中，如果*expression*是正整数*n*，则表示SELECT 子句中的第*n项。*
+在 `orderItem` 中，如果 `expression` 是正整数 n，则表示 SELECT 子句中的第 n 项。
 
-在*query*中，*count*和*start*可以分别是无符号整数文字或值为整数的动态参数。
+在查询中，`count` 和 `start` 可以分别是无符号整数文字或值为整数的动态参数。
+
+TODO
 
 聚合查询是在 SELECT 子句中包含 GROUP BY 或 HAVING 子句或聚合函数的查询。在聚合查询的 SELECT、HAVING 和 ORDER BY 子句中，所有表达式必须是当前组内的常量（即，由 GROUP BY 子句定义的分组常量或常量）、聚合函数或常量的组合和聚合函数。聚合和分组函数只能出现在聚合查询中，并且只能出现在 SELECT、HAVING 或 ORDER BY 子句中。
 
