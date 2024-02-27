@@ -75,7 +75,7 @@ class RelMetadataQuery {
 }
 ```
 
-下面展示了 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，测试 SQL 中包含了 `scott.emp`、`scott.dept` 和 `scott.salgrade` 3 张表，分别使用了等值和非等值关联条件。我们将结合此案例，来探究下 Calcite 统计信息入口类 `RelMetadataQuery` 如何进行初始化，它的内部又将调用哪些元数据对象以获取统计信息，此外，Caclite 又是如何基于统计信息进行基数估计。搞清楚这些问题后，相信大家对 Calcite 统计信息的实现会有更深刻的理解。
+下面展示了 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，测试 SQL 中包含了 `scott.emp`、`scott.dept` 和 `scott.salgrade` 3 张表，分别使用了等值和非等值关联条件。
 
 ```java
 @Test
@@ -109,9 +109,77 @@ void testJoin3TablesPlan() {
 }
 ```
 
+我们将结合此案例，来探究下 Calcite 统计信息入口类 `RelMetadataQuery` 如何进行初始化，它的内部又将调用哪些元数据对象以获取统计信息，此外，Caclite 又是如何基于统计信息进行基数估计。搞清楚这些问题后，相信大家对 Calcite 统计信息的实现会有更深刻的理解。
+
 ### RelMetadataQuery 初始化
 
-TODO
+执行 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，首先会调用 `RelOptCluster.create(planner, rexBuilder);` 方法初始化 `RelOptCluster` 对象，初始化 RelOptCluster 时内部会调用 `setMetadataProvider` 和 `setMetadataQuerySupplier` 方法。
+
+```java
+/**
+ * Creates a cluster.
+ *
+ * <p>For use only from {@link #create} and {@link RelOptQuery}.
+ */
+RelOptCluster(RelOptPlanner planner, RelDataTypeFactory typeFactory, RexBuilder rexBuilder, AtomicInteger nextCorrel, Map<String, RelNode> mapCorrelToRel) {
+    this.nextCorrel = nextCorrel;
+    this.mapCorrelToRel = mapCorrelToRel;
+    this.planner = Objects.requireNonNull(planner, "planner");
+    this.typeFactory = Objects.requireNonNull(typeFactory, "typeFactory");
+    this.rexBuilder = rexBuilder;
+    this.originalExpression = rexBuilder.makeLiteral("?");
+
+    // set up a default rel metadata provider,
+    // giving the planner first crack at everything
+    setMetadataProvider(DefaultRelMetadataProvider.INSTANCE);
+    setMetadataQuerySupplier(RelMetadataQuery::instance);
+    this.emptyTraitSet = planner.emptyTraitSet();
+    assert emptyTraitSet.size() == planner.getRelTraitDefs().size();
+}
+```
+
+我们先来看下 setMetadataProvider 方法，该方法会传入 `DefaultRelMetadataProvider.INSTANCE` 实例，该实例初始化逻辑如下，作为默认的元数据提供器，DefaultRelMetadataProvider 定义了所有常用的关系代数 RelNode 的处理器，如果使用调用链方式时（使用 `ChainedRelMetadataProvider`），需要将 DefaultRelMetadataProvider 放在最后一个作为兜底方案。
+
+```java
+/**
+ * Creates a new default provider. This provider defines "catch-all"
+ * handlers for generic RelNodes, so it should always be given lowest
+ * priority when chaining.
+ *
+ * <p>Use this constructor only from a sub-class. Otherwise use the singleton
+ * instance, {@link #INSTANCE}.
+ */
+protected DefaultRelMetadataProvider() {
+    super(
+        ImmutableList.of(
+            RelMdPercentageOriginalRows.SOURCE,
+            RelMdColumnOrigins.SOURCE,
+            RelMdExpressionLineage.SOURCE,
+            RelMdTableReferences.SOURCE,
+            RelMdNodeTypes.SOURCE,
+            RelMdRowCount.SOURCE,
+            RelMdMaxRowCount.SOURCE,
+            RelMdMinRowCount.SOURCE,
+            RelMdUniqueKeys.SOURCE,
+            RelMdColumnUniqueness.SOURCE,
+            RelMdPopulationSize.SOURCE,
+            RelMdSize.SOURCE,
+            RelMdParallelism.SOURCE,
+            RelMdDistribution.SOURCE,
+            RelMdLowerBoundCost.SOURCE,
+            RelMdMemory.SOURCE,
+            RelMdDistinctRowCount.SOURCE,
+            RelMdSelectivity.SOURCE,
+            RelMdExplainVisibility.SOURCE,
+            RelMdPredicates.SOURCE,
+            RelMdAllPredicates.SOURCE,
+            RelMdCollation.SOURCE));
+}
+```
+
+`super` 方法会将集合中初始化的 RelMetadataProvider 集合传递给父类 `ChainedRelMetadataProvider`，并维护在 `providers` 变量中，后续调用 `ChainedRelMetadataProvider#apply` 和 `ChainedRelMetadataProvider#handlers` 方法时会从 providers 中获取。
+
+TODO RelMetadataProvider 继承体系
 
 ### RelMetadataQuery 获取统计信息
 

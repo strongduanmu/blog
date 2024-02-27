@@ -13,3 +13,8 @@
   screenshot: /assets/blog/2022/06/20/1655708134.png
   avatar: /assets/blog/2022/06/20/1655708310.jpg
   description: 即时通讯网
+- title: 设计模式
+  url: https://refactoringguru.cn/design-patterns
+  screenshot: /assets/links/design-patterns.png
+  avatar: /assets/links/design-patterns-logo.png
+  description: 深入设计模式在线书籍
