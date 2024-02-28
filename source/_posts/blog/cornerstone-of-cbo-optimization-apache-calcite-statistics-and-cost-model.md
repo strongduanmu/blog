@@ -179,7 +179,11 @@ protected DefaultRelMetadataProvider() {
 
 `super` 方法会将集合中初始化的 RelMetadataProvider 集合传递给父类 `ChainedRelMetadataProvider`，并维护在 `providers` 变量中，后续调用 `ChainedRelMetadataProvider#apply` 和 `ChainedRelMetadataProvider#handlers` 方法时会从 providers 中获取。
 
-TODO RelMetadataProvider 继承体系
+![RelMetadataProvider 继承体系](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/relmetadataprovider-class-implementation.png)
+
+上图展示了 RelMetadataProvider 继承体系，RelMetadataProvider 接口定义了获取关系表达式元数据的方法，通常不建议直接调用，而应当使用 RelMetadataQuery 入口类获取元数据。关于设计 RelMetadataProvider 的背景和动机，可以参考 [RelationalExpressionMetadata Wiki](http://www.hydromatic.net/wiki/RelationalExpressionMetadata)。
+
+
 
 ### RelMetadataQuery 获取统计信息
 
