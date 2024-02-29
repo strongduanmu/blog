@@ -183,7 +183,36 @@ protected DefaultRelMetadataProvider() {
 
 上图展示了 RelMetadataProvider 继承体系，RelMetadataProvider 接口定义了获取关系表达式元数据的方法，通常不建议直接调用，而应当使用 RelMetadataQuery 入口类获取元数据。关于设计 RelMetadataProvider 的背景和动机，可以参考 [RelationalExpressionMetadata Wiki](http://www.hydromatic.net/wiki/RelationalExpressionMetadata)。
 
+RelMetadataProvider 接口定义如下：
 
+```java
+public interface RelMetadataProvider {
+
+    // 为具体的关系代数类或子类，获取特定类型的统计信息，该方法返回的是 UnboundMetadata 函数式接口
+  	// 使用时可以调用 bind 方法返回绑定的元数据对象
+    @Deprecated
+    <@Nullable M extends @Nullable Metadata> @Nullable UnboundMetadata<M> apply(
+            Class<? extends RelNode> relClass, Class<? extends M> metadataClass);
+
+    @Deprecated
+    <M extends Metadata> Multimap<Method, MetadataHandler<M>> handlers(MetadataDef<M> def);
+
+    List<MetadataHandler<?>> handlers(Class<? extends MetadataHandler<?>> handlerClass);
+}
+```
+
+`RelMetadataProvider#apply` 方法的使用示例如下：
+
+```java
+RelMetadataProvider provider;
+LogicalFilter filter;
+RexNode predicate;
+UnboundMetadata<Selectivity> unboundMetadata = provider.apply(LogicalFilter.class, Selectivity.class);
+Selectivity selectivity = unboundMetadata.bind(filter, mq);
+Double d = selectivity.getSelectivity(predicate);
+```
+
+TODO
 
 ### RelMetadataQuery 获取统计信息
 
