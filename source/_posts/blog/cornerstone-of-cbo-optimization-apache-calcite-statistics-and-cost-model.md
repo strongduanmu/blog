@@ -113,7 +113,7 @@ void testJoin3TablesPlan() {
 
 ### RelMetadataQuery 初始化
 
-执行 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，首先会调用 `RelOptCluster.create(planner, rexBuilder);` 方法初始化 `RelOptCluster` 对象，初始化 RelOptCluster 时内部会调用 `setMetadataProvider` 和 `setMetadataQuerySupplier` 方法。
+执行 [JdbcAdapterTest#testJoin3TablesPlan](https://github.com/apache/calcite/blob/b16df019ed9fc7dba7392be9b758358c5a4e927b/core/src/test/java/org/apache/calcite/test/JdbcAdapterTest.java#L315) 单测，首先会调用 `RelOptCluster.create(planner, rexBuilder);` 方法初始化 `RelOptCluster` 对象，初始化 RelOptCluster 时内部会调用 `setMetadataProvider` 和 `setMetadataQuerySupplier` 方法，下面的小节我们将分别探究下这两个初始化方法的内部实现细节。
 
 ```java
 /**
@@ -138,7 +138,9 @@ RelOptCluster(RelOptPlanner planner, RelDataTypeFactory typeFactory, RexBuilder 
 }
 ```
 
-我们先来看下 setMetadataProvider 方法，该方法会传入 `DefaultRelMetadataProvider.INSTANCE` 实例，该实例初始化逻辑如下，作为默认的元数据提供器，DefaultRelMetadataProvider 定义了所有常用的关系代数 RelNode 的处理器，如果使用调用链方式时（使用 `ChainedRelMetadataProvider`），需要将 DefaultRelMetadataProvider 放在最后一个作为兜底方案。
+#### setMetadataProvider 初始化
+
+我们先来看下 `setMetadataProvider` 方法，该方法会传入 `DefaultRelMetadataProvider.INSTANCE` 实例，该实例初始化逻辑如下，作为默认的元数据提供器，DefaultRelMetadataProvider 定义了所有常用的关系代数 RelNode 的处理器，如果使用调用链方式时（使用 `ChainedRelMetadataProvider`），需要将 DefaultRelMetadataProvider 放在最后一个作为兜底方案。
 
 ```java
 /**
@@ -196,12 +198,14 @@ public interface RelMetadataProvider {
 
     @Deprecated
     <M extends Metadata> Multimap<Method, MetadataHandler<M>> handlers(MetadataDef<M> def);
-
+		
+  	// 获取实现特定 MetadataHandler 接口的 MetadataHandler 集合
+  	// MetadataHandler 是元数据处理器的标记接口，MetadataHandler#getDef 方法用于获取元数据处理器的定义，包含了元数据类，处理器类和处理方法
     List<MetadataHandler<?>> handlers(Class<? extends MetadataHandler<?>> handlerClass);
 }
 ```
 
-`RelMetadataProvider#apply` 方法的使用示例如下：
+`RelMetadataProvider#apply` 方法用于为具体的关系代数类或子类，获取特定类型的统计信息，该方法返回的是 `UnboundMetadata` 函数式接口，使用时可以调用 bind 方法返回绑定的元数据对象。该方法的使用示例如下，执行完 bind 方法会返回元数据对象 Selectivity，然后可以调用 getSelectivity 获取选择性统计信息。
 
 ```java
 RelMetadataProvider provider;
@@ -211,6 +215,32 @@ UnboundMetadata<Selectivity> unboundMetadata = provider.apply(LogicalFilter.clas
 Selectivity selectivity = unboundMetadata.bind(filter, mq);
 Double d = selectivity.getSelectivity(predicate);
 ```
+
+`RelMetadataProvider#handlers` 方法用于获取实现特定 `MetadataHandler` 接口的 MetadataHandler 集合，MetadataHandler 是元数据处理器的标记接口，`MetadataHandler#getDef` 方法用于获取元数据处理器的定义，包含了元数据类，处理器类和处理方法。
+
+```java
+/**
+ * Marker interface for a handler of metadata.
+ *
+ * @param <M> Kind of metadata
+ */
+public interface MetadataHandler<M extends Metadata> {
+    MetadataDef<M> getDef();
+
+    static SortedMap<String, Method> handlerMethods(Class<? extends MetadataHandler<?>> handlerClass) {
+        final ImmutableSortedMap.Builder<String, Method> map = ImmutableSortedMap.naturalOrder();
+        Arrays.stream(handlerClass.getDeclaredMethods()).filter(m -> !m.getName().equals("getDef"))
+                .filter(m -> !m.isSynthetic()).filter(m -> !Modifier.isStatic(m.getModifiers())).forEach(m -> map.put(m.getName(), m));
+        return map.build();
+    }
+}
+```
+
+
+
+TODO
+
+#### setMetadataQuerySupplier 初始化
 
 TODO
 
