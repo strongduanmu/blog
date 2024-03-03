@@ -216,7 +216,7 @@ Selectivity selectivity = unboundMetadata.bind(filter, mq);
 Double d = selectivity.getSelectivity(predicate);
 ```
 
-`RelMetadataProvider#handlers` 方法用于获取实现特定 `MetadataHandler` 接口的 MetadataHandler 集合，MetadataHandler 是元数据处理器的标记接口，`MetadataHandler#getDef` 方法用于获取元数据处理器的定义，包含了元数据类，处理器类和处理方法。
+`RelMetadataProvider#handlers` 方法用于获取实现特定 `MetadataHandler` 接口的 MetadataHandler 集合。MetadataHandler 是元数据处理器的标记接口，`MetadataHandler#getDef` 方法用于获取元数据处理器的定义，包含了元数据类，处理器类和处理方法。
 
 ```java
 /**
@@ -225,7 +225,8 @@ Double d = selectivity.getSelectivity(predicate);
  * @param <M> Kind of metadata
  */
 public interface MetadataHandler<M extends Metadata> {
-    MetadataDef<M> getDef();
+
+  	MetadataDef<M> getDef();
 
     static SortedMap<String, Method> handlerMethods(Class<? extends MetadataHandler<?>> handlerClass) {
         final ImmutableSortedMap.Builder<String, Method> map = ImmutableSortedMap.naturalOrder();
@@ -236,9 +237,36 @@ public interface MetadataHandler<M extends Metadata> {
 }
 ```
 
+MetadataHandler 接口还提供了静态方法 `handlerMethods`，该方法负责查找 MetadataHandler 实现类中定义的处理方法，结果会按照 `<MethodName, Method>` 结构返回，并且会过滤掉静态、`synthetic`（Java 编译器生成的方法）和 `getDef` 方法。
 
+介绍完 RelMetadataProvider 接口的相关方法后，我们再回过头看下 DefaultRelMetadataProvider 初始化时，传递给父类的 providers 是如何初始化的，他们分别又有哪些实际的作用。
 
 TODO
+
+| 元数据提供器类型 | 元数据提供器作用 |
+| ---------------------------------- | ---- |
+| RelMdPercentageOriginalRows.SOURCE |      |
+| RelMdColumnOrigins.SOURCE          |      |
+| RelMdExpressionLineage.SOURCE      |      |
+| RelMdTableReferences.SOURCE        |      |
+| RelMdNodeTypes.SOURCE              |      |
+| RelMdRowCount.SOURCE               |      |
+| RelMdMaxRowCount.SOURCE            |      |
+| RelMdMinRowCount.SOURCE            |      |
+| RelMdUniqueKeys.SOURCE             |      |
+| RelMdColumnUniqueness.SOURCE       |      |
+| RelMdPopulationSize.SOURCE         |      |
+| RelMdSize.SOURCE |      |
+| RelMdParallelism.SOURCE |      |
+| RelMdDistribution.SOURCE |      |
+| RelMdLowerBoundCost.SOURCE |      |
+| RelMdMemory.SOURCE |      |
+| RelMdDistinctRowCount.SOURCE |      |
+| RelMdSelectivity.SOURCE |      |
+| RelMdExplainVisibility.SOURCE |      |
+| RelMdPredicates.SOURCE |      |
+| RelMdAllPredicates.SOURCE | |
+| RelMdCollation.SOURCE | |
 
 #### setMetadataQuerySupplier 初始化
 
