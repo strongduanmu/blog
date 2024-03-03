@@ -239,13 +239,113 @@ public interface MetadataHandler<M extends Metadata> {
 
 MetadataHandler 接口还提供了静态方法 `handlerMethods`，该方法负责查找 MetadataHandler 实现类中定义的处理方法，结果会按照 `<MethodName, Method>` 结构返回，并且会过滤掉静态、`synthetic`（Java 编译器生成的方法）和 `getDef` 方法。
 
-介绍完 RelMetadataProvider 接口的相关方法后，我们再回过头看下 DefaultRelMetadataProvider 初始化时，传递给父类的 providers 是如何初始化的，他们分别又有哪些实际的作用。
+介绍完 RelMetadataProvider 接口的相关方法后，我们再回过头看下 DefaultRelMetadataProvider 初始化时，传递给父类的 22 个 providers 是如何创建的，他们分别又有哪些实际的用途。下面我们以 `RelMdPercentageOriginalRows.SOURCE` 为例，来看下具体的元数据提供器的内部实现。`RelMdPercentageOriginalRows.SOURCE` 实现逻辑如下，可以看到此处通过反射的方式初始化了 3 个元数据提供器，并使用 ChainedRelMetadataProvider 进行了包装，ChainedRelMetadataProvider 内部使用了[责任链模式](https://refactoringguru.cn/design-patterns/chain-of-responsibility)，会按照责任链进行元数据处理。
+
+```java
+public static final RelMetadataProvider SOURCE = ChainedRelMetadataProvider.of(ImmutableList.of(
+    ReflectiveRelMetadataProvider.reflectiveSource(new RelMdPercentageOriginalRowsHandler(), BuiltInMetadata.PercentageOriginalRows.Handler.class),
+    ReflectiveRelMetadataProvider.reflectiveSource(new RelMdCumulativeCost(), BuiltInMetadata.CumulativeCost.Handler.class),
+    ReflectiveRelMetadataProvider.reflectiveSource(new RelMdNonCumulativeCost(), BuiltInMetadata.NonCumulativeCost.Handler.class))
+);
+```
+
+我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数
+
+```java
+@SuppressWarnings("deprecation")
+public static <M extends Metadata> RelMetadataProvider reflectiveSource(MetadataHandler<? extends M> handler, Class<? extends MetadataHandler<M>> handlerClass) {
+    // When deprecated code is removed, handler.getDef().methods will no longer be required
+    return reflectiveSource(handler, handler.getDef().methods, handlerClass);
+}
+
+@Deprecated // to be removed before 2.0
+private static RelMetadataProvider reflectiveSource(final MetadataHandler target, final ImmutableList<Method> methods, final Class<? extends MetadataHandler<?>> handlerClass) {
+    final Space2 space = Space2.create(target, methods);
+    // This needs to be a concurrent map since RelMetadataProvider are cached in static
+    // fields, thus the map is subject to concurrent modifications later.
+    // See map.put in org.apache.calcite.rel.metadata.ReflectiveRelMetadataProvider.apply(
+    // java.lang.Class<? extends org.apache.calcite.rel.RelNode>)
+    final ConcurrentMap<Class<RelNode>, UnboundMetadata> methodsMap = new ConcurrentHashMap<>();
+    for (Class<RelNode> key : space.classes) {
+        ImmutableNullableList.Builder<Method> builder = ImmutableNullableList.builder();
+        for (final Method method : methods) {
+            builder.add(space.find(key, method));
+        }
+        final List<Method> handlerMethods = builder.build();
+        final UnboundMetadata function = (rel, mq) ->
+                (Metadata) Proxy.newProxyInstance(
+                        space.metadataClass0.getClassLoader(),
+                        new Class[]{space.metadataClass0}, (proxy, method, args) -> {
+                            // Suppose we are an implementation of Selectivity
+                            // that wraps "filter", a LogicalFilter. Then we
+                            // implement
+                            //   Selectivity.selectivity(rex)
+                            // by calling method
+                            //   new SelectivityImpl().selectivity(filter, rex)
+                            if (method.equals(BuiltInMethod.METADATA_REL.method)) {
+                                return rel;
+                            }
+                            if (method.equals(BuiltInMethod.OBJECT_TO_STRING.method)) {
+                                return space.metadataClass0.getSimpleName() + "(" + rel + ")";
+                            }
+                            int i = methods.indexOf(method);
+                            if (i < 0) {
+                                throw new AssertionError("not handled: " + method
+                                        + " for " + rel);
+                            }
+                            final Method handlerMethod = handlerMethods.get(i);
+                            if (handlerMethod == null) {
+                                throw new AssertionError("not handled: " + method + " for " + rel);
+                            }
+                            final Object[] args1;
+                            final List key1;
+                            if (args == null) {
+                                args1 = new Object[]{rel, mq};
+                                key1 = FlatLists.of(rel, method);
+                            } else {
+                                args1 = new Object[args.length + 2];
+                                args1[0] = rel;
+                                args1[1] = mq;
+                                System.arraycopy(args, 0, args1, 2, args.length);
+
+                                final Object[] args2 = args1.clone();
+                                args2[1] = method; // replace RelMetadataQuery with method
+                                for (int j = 0; j < args2.length; j++) {
+                                    if (args2[j] == null) {
+                                        args2[j] = NullSentinel.INSTANCE;
+                                    } else if (args2[j] instanceof RexNode) {
+                                        // Can't use RexNode.equals - it is not deep
+                                        args2[j] = args2[j].toString();
+                                    }
+                                }
+                                key1 = FlatLists.copyOf(args2);
+                            }
+                            if (mq.map.put(rel, key1, NullSentinel.INSTANCE) != null) {
+                                throw new CyclicMetadataException();
+                            }
+                            try {
+                                return handlerMethod.invoke(target, args1);
+                            } catch (InvocationTargetException | UndeclaredThrowableException e) {
+                                throw Util.throwAsRuntime(Util.causeOrSelf(e));
+                            } finally {
+                                mq.map.remove(rel, key1);
+                            }
+                        });
+        methodsMap.put(key, function);
+    }
+    return new ReflectiveRelMetadataProvider(methodsMap, space.metadataClass0, space.providerMap, handlerClass);
+}
+```
+
+
+
+
 
 TODO
 
 | 元数据提供器类型 | 元数据提供器作用 |
 | ---------------------------------- | ---- |
-| RelMdPercentageOriginalRows.SOURCE |      |
+| RelMdPercentageOriginalRows.SOURCE | 用于估计此表达式生成的行数，与去除所有单表筛选条件时生成的行数之间的百分比， |
 | RelMdColumnOrigins.SOURCE          |      |
 | RelMdExpressionLineage.SOURCE      |      |
 | RelMdTableReferences.SOURCE        |      |
