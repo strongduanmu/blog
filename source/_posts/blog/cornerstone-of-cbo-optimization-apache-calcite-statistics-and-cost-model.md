@@ -249,7 +249,11 @@ public static final RelMetadataProvider SOURCE = ChainedRelMetadataProvider.of(I
 );
 ```
 
-我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数
+我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数是 MetadataHandler 实现类，此案例中分别为：`RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost`。
+
+第二个参数则是具体获取元数据的处理器类，也就是处理元数据的目标对象，此案例中分别为：`BuiltInMetadata.PercentageOriginalRows.Handler.class`、`BuiltInMetadata.CumulativeCost.Handler.class` 和 `BuiltInMetadata.NonCumulativeCost.Handler.class`。
+
+`ReflectiveRelMetadataProvider` 类通过反射将元数据方法转发给目标对象上的方法。目标对象上的方法必须是公共且非静态的，并且除了首个参数为 `RelNode` 类型或其子类，其他参数都需要与元数据方法的签名保持相同。
 
 ```java
 @SuppressWarnings("deprecation")
@@ -260,18 +264,18 @@ public static <M extends Metadata> RelMetadataProvider reflectiveSource(Metadata
 
 @Deprecated // to be removed before 2.0
 private static RelMetadataProvider reflectiveSource(final MetadataHandler target, final ImmutableList<Method> methods, final Class<? extends MetadataHandler<?>> handlerClass) {
+  	// 计算哪些方法可以作为给定元数据方法的处理程序，最终的结果记录在 Space2 对象中
     final Space2 space = Space2.create(target, methods);
-    // This needs to be a concurrent map since RelMetadataProvider are cached in static
-    // fields, thus the map is subject to concurrent modifications later.
-    // See map.put in org.apache.calcite.rel.metadata.ReflectiveRelMetadataProvider.apply(
-    // java.lang.Class<? extends org.apache.calcite.rel.RelNode>)
     final ConcurrentMap<Class<RelNode>, UnboundMetadata> methodsMap = new ConcurrentHashMap<>();
+  	// 遍历元数据处理方法支持的 RelNode 类
     for (Class<RelNode> key : space.classes) {
         ImmutableNullableList.Builder<Method> builder = ImmutableNullableList.builder();
         for (final Method method : methods) {
+          	// 根据 RelNode 类和 getPercentageOriginalRows 方法查找处理方法 Method
             builder.add(space.find(key, method));
         }
         final List<Method> handlerMethods = builder.build();
+      	// 动态创建 UnboundMetadata 实现类
         final UnboundMetadata function = (rel, mq) ->
                 (Metadata) Proxy.newProxyInstance(
                         space.metadataClass0.getClassLoader(),
@@ -338,6 +342,8 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
 ```
 
 
+
+![Space2 对象维护的元数据处理方法映射](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/spaces-fields.png)
 
 
 
