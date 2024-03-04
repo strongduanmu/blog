@@ -249,11 +249,11 @@ public static final RelMetadataProvider SOURCE = ChainedRelMetadataProvider.of(I
 );
 ```
 
-我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数是 MetadataHandler 实现类，此案例中分别为：`RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost`。
+我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数是 MetadataHandler 对象，此案例中分别为：`RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost`，他们都继承了 `RelMdPercentageOriginalRows`，这些类负责具体关系代数的元数据获取，提供了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法。
 
-第二个参数则是具体获取元数据的处理器类，也就是处理元数据的目标对象，此案例中分别为：`BuiltInMetadata.PercentageOriginalRows.Handler.class`、`BuiltInMetadata.CumulativeCost.Handler.class` 和 `BuiltInMetadata.NonCumulativeCost.Handler.class`。
+第二个参数则是 MetadataHandler 的子接口，该接口声明了特定 RelNode 获取元数据的方法，此案例中子接口分别为：`BuiltInMetadata.PercentageOriginalRows.Handler.class`、`BuiltInMetadata.CumulativeCost.Handler.class` 和 `BuiltInMetadata.NonCumulativeCost.Handler.class`，这些 Handler 接口分别声明了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法。他们接收的参数为 RelNode，会在后续使用 Janio 动态生成实现类，对不同类型的 RelNode 进行转发，将请求转发到 `RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost` 中对应的具体方法中。
 
-`ReflectiveRelMetadataProvider` 类通过反射将元数据方法转发给目标对象上的方法。目标对象上的方法必须是公共且非静态的，并且除了首个参数为 `RelNode` 类型或其子类，其他参数都需要与元数据方法的签名保持相同。
+`ReflectiveRelMetadataProvider` 类通过反射将元数据方法转发给目标对象上的方法。目标对象上的方法必须是公共且非静态的，并且除了首个参数为 `RelNode` 类型或其子类，其他参数都需要与元数据方法的签名保持相同。下面展示了 `ReflectiveRelMetadataProvider.reflectiveSource` 方法的实现逻辑：
 
 ```java
 @SuppressWarnings("deprecation")
