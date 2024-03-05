@@ -18,7 +18,7 @@ breadcrumb: false
 
 <!-- node 2023/04/27 openGauss 特性直播课 -->
 
-参与 [openGauss 特性直播课](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)栏目，介绍了 ShardingSphere 联邦查询引擎和 openGauss 的适配，通过一些实例指导大家如何使用联邦查询引擎，欢迎观看直播详解。[PPT 下载地址](https://strongduanmu.com/share/ShardingSphere 联邦查询引擎演进与实战.pdf)，[视频观看地址](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)。
+参与 [openGauss 特性直播课](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)，分享 `ShardingSphere 联邦查询引擎演进与实战` 主题演讲，介绍了 ShardingSphere 联邦查询引擎和 openGauss 数据库的适配，通过一些实例指导大家如何使用联邦查询引擎，欢迎观看直播详解。[PPT 下载地址](https://strongduanmu.com/share/ShardingSphere%20%E8%81%94%E9%82%A6%E6%9F%A5%E8%AF%A2%E5%BC%95%E6%93%8E%E6%BC%94%E8%BF%9B%E4%B8%8E%E5%AE%9E%E6%88%98.pdf)，[视频观看地址](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)。
 
 <!-- node 2022/11/14 亚马逊云科技中国峰会 Dev Day -->
 
