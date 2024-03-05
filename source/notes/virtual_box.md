@@ -4,6 +4,7 @@ wiki: notes
 layout: wiki
 title: VirtualBox
 order: 50
+banner: /assets/banner/banner_11.jpg
 ---
 
 ## Kernel driver not installed (rc=-1908)

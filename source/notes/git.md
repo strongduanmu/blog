@@ -4,6 +4,7 @@ wiki: notes
 layout: wiki
 order: 20
 title: Git
+banner: /assets/banner/banner_1.jpg
 ---
 
 ## 常用 Git 命令

@@ -4,6 +4,7 @@ menu_id: notes # 这个跟配置文件中的 `menu.notes` 关联起来，这很�
 layout: wiki
 order: 0
 title: Common
+banner: /assets/banner/banner_7.jpg
 ---
 
 ## 技术论坛

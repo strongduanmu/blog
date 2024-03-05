@@ -4,6 +4,7 @@ wiki: notes
 layout: wiki
 title: IDEA
 order: 30
+banner: /assets/banner/banner_9.jpg
 ---
 
 ## IDEA File size exceeds configured limit

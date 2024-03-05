@@ -5,6 +5,7 @@ order: 001
 title: 前言
 date: 2022-02-29 11:15:27
 comment_id: 'jdbc_4.2_specification'
+banner: /assets/banner/banner_9.jpg
 ---
 
 > 原文链接：https://download.oracle.com/otndocs/jcp/jdbc-4_2-mrel2-spec/

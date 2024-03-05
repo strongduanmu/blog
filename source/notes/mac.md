@@ -4,6 +4,7 @@ wiki: notes
 layout: wiki
 title: Mac
 order: 40
+banner: /assets/banner/banner_10.jpg
 ---
 
 ## Hackintosh 更新驱动

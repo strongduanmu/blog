@@ -16,6 +16,10 @@ breadcrumb: false
 
 {% timeline %}
 
+<!-- node 2023/04/27 openGauss 特性直播课 -->
+
+参与 [openGauss 特性直播课](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)栏目，介绍了 ShardingSphere 联邦查询引擎和 openGauss 的适配，通过一些实例指导大家如何使用联邦查询引擎，欢迎观看直播详解。[PPT 下载地址](https://strongduanmu.com/share/ShardingSphere 联邦查询引擎演进与实战.pdf)，[视频观看地址](https://www.bilibili.com/video/BV1ig4y1L75i/?spm_id_from=333.999.0.0)。
+
 <!-- node 2022/11/14 亚马逊云科技中国峰会 Dev Day -->
 
 参与 [亚马逊云科技中国峰会 Dev Day](https://aws.amazon.com/cn/about-aws/events/summit2022/index/)，分享 `Apache ShardingSphere 分布式数据库生态的云原生实践` 主题演讲，介绍了 Apache ShardingSphere 和 AWS Aurora 联合打造的分布式数据库生态，以及 ShardingSphere 的云原生实践。[PPT 下载地址](https://strongduanmu.com/share/Apache%20ShardingSphere%20%E5%88%86%E5%B8%83%E5%BC%8F%E6%95%B0%E6%8D%AE%E5%BA%93%E7%94%9F%E6%80%81%E7%9A%84%E4%BA%91%E5%8E%9F%E7%94%9F%E5%AE%9E%E8%B7%B5.pdf)，视频观看地址。

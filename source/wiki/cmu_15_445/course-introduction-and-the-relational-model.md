@@ -4,6 +4,7 @@ wiki: cmu_15_445
 order: 002
 title: 课程简介与关系模型
 date: 2024-01-07 09:15:27
+banner: /assets/banner/banner_11.jpg
 ---
 
 ## 课程大纲
