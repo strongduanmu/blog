@@ -249,11 +249,21 @@ public static final RelMetadataProvider SOURCE = ChainedRelMetadataProvider.of(I
 );
 ```
 
-我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法实现逻辑如下，第一个参数是 MetadataHandler 对象，此案例中分别为：`RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost`，他们都继承了 `RelMdPercentageOriginalRows`，这些类负责具体关系代数的元数据获取，提供了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法。
+我们重点关注下 `ReflectiveRelMetadataProvider.reflectiveSource` 的逻辑，该方法的第一个参数是 MetadataHandler 对象，此案例中分别为：
 
-第二个参数则是 MetadataHandler 的子接口，该接口声明了特定 RelNode 获取元数据的方法，此案例中子接口分别为：`BuiltInMetadata.PercentageOriginalRows.Handler.class`、`BuiltInMetadata.CumulativeCost.Handler.class` 和 `BuiltInMetadata.NonCumulativeCost.Handler.class`，这些 Handler 接口分别声明了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法。他们接收的参数为 RelNode，会在后续使用 Janio 动态生成实现类，对不同类型的 RelNode 进行转发，将请求转发到 `RelMdPercentageOriginalRowsHandler`、`RelMdCumulativeCost` 和 `RelMdNonCumulativeCost` 中对应的具体方法中。
+* `RelMdPercentageOriginalRowsHandler`；
+* `RelMdCumulativeCost`；
+* `RelMdNonCumulativeCost`。
 
-`ReflectiveRelMetadataProvider` 类通过反射将元数据方法转发给目标对象上的方法。目标对象上的方法必须是公共且非静态的，并且除了首个参数为 `RelNode` 类型或其子类，其他参数都需要与元数据方法的签名保持相同。下面展示了 `ReflectiveRelMetadataProvider.reflectiveSource` 方法的实现逻辑：
+他们都继承了 `RelMdPercentageOriginalRows`，这些类负责具体关系代数的元数据获取，提供了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法。
+
+第二个参数则是 MetadataHandler 的子接口，该接口声明了特定 RelNode 获取元数据的方法，此案例中子接口分别为：
+
+* `BuiltInMetadata.PercentageOriginalRows.Handler.class`；
+* `BuiltInMetadata.CumulativeCost.Handler.class`；
+* `BuiltInMetadata.NonCumulativeCost.Handler.class`。
+
+这些 Handler 接口分别声明了 `getPercentageOriginalRows`、`getCumulativeCost` 和 `getNonCumulativeCost` 方法，他们接收的参数为 RelNode。那么 Handler 接口里面的方法是如何与 MetadataHandler 对象关联上的呢？我们来具体看下 ReflectiveRelMetadataProvider 类的实现逻辑：
 
 ```java
 @SuppressWarnings("deprecation")
@@ -286,54 +296,10 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
                             //   Selectivity.selectivity(rex)
                             // by calling method
                             //   new SelectivityImpl().selectivity(filter, rex)
-                            if (method.equals(BuiltInMethod.METADATA_REL.method)) {
-                                return rel;
-                            }
-                            if (method.equals(BuiltInMethod.OBJECT_TO_STRING.method)) {
-                                return space.metadataClass0.getSimpleName() + "(" + rel + ")";
-                            }
-                            int i = methods.indexOf(method);
-                            if (i < 0) {
-                                throw new AssertionError("not handled: " + method
-                                        + " for " + rel);
-                            }
-                            final Method handlerMethod = handlerMethods.get(i);
-                            if (handlerMethod == null) {
-                                throw new AssertionError("not handled: " + method + " for " + rel);
-                            }
-                            final Object[] args1;
-                            final List key1;
-                            if (args == null) {
-                                args1 = new Object[]{rel, mq};
-                                key1 = FlatLists.of(rel, method);
-                            } else {
-                                args1 = new Object[args.length + 2];
-                                args1[0] = rel;
-                                args1[1] = mq;
-                                System.arraycopy(args, 0, args1, 2, args.length);
-
-                                final Object[] args2 = args1.clone();
-                                args2[1] = method; // replace RelMetadataQuery with method
-                                for (int j = 0; j < args2.length; j++) {
-                                    if (args2[j] == null) {
-                                        args2[j] = NullSentinel.INSTANCE;
-                                    } else if (args2[j] instanceof RexNode) {
-                                        // Can't use RexNode.equals - it is not deep
-                                        args2[j] = args2[j].toString();
-                                    }
-                                }
-                                key1 = FlatLists.copyOf(args2);
-                            }
-                            if (mq.map.put(rel, key1, NullSentinel.INSTANCE) != null) {
-                                throw new CyclicMetadataException();
-                            }
-                            try {
-                                return handlerMethod.invoke(target, args1);
-                            } catch (InvocationTargetException | UndeclaredThrowableException e) {
-                                throw Util.throwAsRuntime(Util.causeOrSelf(e));
-                            } finally {
-                                mq.map.remove(rel, key1);
-                            }
+                            ...
+                            // 通过反射调用目标对象上的方法，根据上面获取的 handlerMethods 调用对应的 MetadataHandler 方法
+                            return handlerMethod.invoke(target, args1);
+                          	...
                         });
         methodsMap.put(key, function);
     }
@@ -341,13 +307,13 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
 }
 ```
 
+`ReflectiveRelMetadataProvider` 类通过反射将元数据方法转发给目标对象（MetadataHandler 对象）上的方法。目标对象上的方法必须是公共且非静态的，并且除了首个参数为 `RelNode` 类型或其子类，其他参数都需要与元数据方法的签名保持相同。
 
+在 `reflectiveSource` 方法中，首先会计算哪些方法可以作为给定元数据方法的处理程序，最终的结果会记录在 `Space2` 对象中，下图展示了 Space2 对象中记录的 `classes` 和 `handlerMap` 信息。然后遍历 Space2 对象中记录的 classes 集合，并根据 RelNode 类和 getPercentageOriginalRows 方法查找处理方法 Method，再通过 `Proxy.newProxyInstance` 动态代理生成 UnboundMetadata 对象，内部核心逻辑是调用目标对象 MetadataHandler 的对应元数据方法。
 
 ![Space2 对象维护的元数据处理方法映射](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/spaces-fields.png)
 
-
-
-TODO
+其他类型的元数据提供器初始化流程和 `RelMdPercentageOriginalRows.SOURCE` 基本一致，感兴趣的读者可以自行阅读源码，下表整理了 Calcite 中提供的 22 个元数据提供器以及他们的主要作用，希望能够帮助大家理解 Calcite 元数据信息。
 
 | 元数据提供器类型 | 元数据提供器作用 |
 | ---------------------------------- | ---- |
