@@ -9,9 +9,9 @@ coverpage: true
 search:
   filter: /wiki/cmu_15_445/
   placeholder: 在 CMU 15-445 中搜索...
-sidebar: 
-  - toc
+leftbar: 
+  - tree
 base_dir: /wiki/cmu_15_445/
-toc:
+tree:
   - index
   - course-introduction-and-the-relational-model

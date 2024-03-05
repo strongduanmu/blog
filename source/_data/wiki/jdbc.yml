@@ -9,8 +9,8 @@ coverpage: true
 search:
   filter: /wiki/jdbc/
   placeholder: 在 JDBC 4.2 规范中搜索...
-sidebar: 
-  - toc
+leftbar: 
+  - tree
 base_dir: /wiki/jdbc/
-toc:
+tree:
   - preface

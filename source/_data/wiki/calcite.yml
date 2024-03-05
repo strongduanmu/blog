@@ -9,10 +9,10 @@ coverpage: true
 search:
   filter: /wiki/calcite/
   placeholder: 在 Calcite 中搜索...
-sidebar: 
-  - toc
+leftbar: 
+  - tree
 base_dir: /wiki/calcite/
-toc:
+tree:
   '概述':
     - background
     - tutorial

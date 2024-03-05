@@ -9,11 +9,11 @@ search:
   filter: /notes/
   placeholder: 在便笺中搜索...
 
-sidebar: 
-  - toc
+leftbar: 
+  - tree
 
 base_dir: /notes/
-toc:
+tree:
   '常用命令':
     - index
     - docker

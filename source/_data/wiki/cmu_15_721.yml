@@ -9,8 +9,8 @@ coverpage: true
 search:
   filter: /wiki/cmu_15_721/
   placeholder: 在 CMU 15-721 中搜索...
-sidebar: 
-  - toc
+leftbar: 
+  - tree
 base_dir: /wiki/cmu_15_721/
-toc:
+tree:
   - index
