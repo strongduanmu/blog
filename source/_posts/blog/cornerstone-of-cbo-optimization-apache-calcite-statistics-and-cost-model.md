@@ -12,6 +12,7 @@ references:
   - '[Oracle 多列统计信息](https://blog.51cto.com/lhrbest/2712352)'
   - '[【独家】一文看懂 MySQL 直方图](https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA)'
   - '[数据库内核-CBO 优化器采样与代价模型](https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session)'
+  - '[漫谈用 Calcite 搞事情（一）：溯源](https://zhuanlan.zhihu.com/p/668248163)'
 date: 2024-01-09 08:30:21
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
@@ -317,14 +318,14 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
 
 | 元数据提供器类型 | 元数据提供器作用 |
 | ---------------------------------- | ---- |
-| RelMdPercentageOriginalRows.SOURCE | 用于估计此表达式生成的行数，与去除所有单表筛选条件时生成的行数之间的百分比， |
-| RelMdColumnOrigins.SOURCE          |      |
-| RelMdExpressionLineage.SOURCE      |      |
-| RelMdTableReferences.SOURCE        |      |
-| RelMdNodeTypes.SOURCE              |      |
-| RelMdRowCount.SOURCE               |      |
-| RelMdMaxRowCount.SOURCE            |      |
-| RelMdMinRowCount.SOURCE            |      |
+| RelMdPercentageOriginalRows.SOURCE | 用于估计此表达式生成的行数，与去除所有单表筛选条件时生成的行数之间的百分比。 |
+| RelMdColumnOrigins.SOURCE          | 列源信息，即表达式输出的结果列，由哪些基础表的基础列所构成，由于 Union 和 LogicalProject 等表达式，列源信息会返回一个集合。 |
+| RelMdExpressionLineage.SOURCE      | 表达式血缘信息，记录了表达式的来源以及如何被处理，返回结果是表达式集合。 |
+| RelMdTableReferences.SOURCE        | 表引用信息，用于返回给定表达式中使用的所有表，这些表使用 `RexTableInputRef.RelTableRef` 唯一标识。 |
+| RelMdNodeTypes.SOURCE              | RelNode 类型信息，返回结果是 `Multimap`，key 是 RelNode Class，values 是 RelNode 集合。 |
+| RelMdRowCount.SOURCE               | 用于估计关系表达式返回的行数，对于 TableScan 会调用 estimateRowCount 获取统计信息中表的行数，其他关系表达式会通过基数估计的方式获取行数。 |
+| RelMdMaxRowCount.SOURCE            | 用于估计关系表达式返回的最大行数。 |
+| RelMdMinRowCount.SOURCE            | 用于估计关系表达式返回的最小行数。 |
 | RelMdUniqueKeys.SOURCE             |      |
 | RelMdColumnUniqueness.SOURCE       |      |
 | RelMdPopulationSize.SOURCE         |      |
