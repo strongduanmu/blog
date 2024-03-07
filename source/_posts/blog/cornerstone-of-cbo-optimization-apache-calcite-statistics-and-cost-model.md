@@ -13,6 +13,7 @@ references:
   - '[【独家】一文看懂 MySQL 直方图](https://mp.weixin.qq.com/s/1PfzgIh77kosxSyJOpd9UA)'
   - '[数据库内核-CBO 优化器采样与代价模型](https://zhuanlan.zhihu.com/p/669795368?utm_campaign=shareopn&utm_medium=social&utm_oi=985120462346670080&utm_psn=1726928506183983104&utm_source=wechat_session)'
   - '[漫谈用 Calcite 搞事情（一）：溯源](https://zhuanlan.zhihu.com/p/668248163)'
+  - '[SQL 改写系列七：谓词移动](https://www.modb.pro/db/448475)'
 date: 2024-01-09 08:30:21
 updated: 2024-03-06 08:30:21
 cover: /assets/blog/2022/04/05/1649126780.jpg
@@ -40,7 +41,7 @@ topic: calcite
 
 ### 基数估计
 
-有了统计信息后，我们就可以对执行计划中的各个算子进行基数估计（`Cardinality Estimation`），估算这些算子产生结果的行数（或基数）。如下图所示，通过基数估计我们可以选择更优的 `JOIN` 顺序以减少中间结果。`Scan` 算子的行数可以直接从表的统计信息 `Row Count` 获取，而对于 `Filter` 算子，可以使用输入的 `Scan` 算子的行数乘以谓词的选择性。
+有了统计信息后，我们就可以对执行计划中的各个算子进行基数估计（`Cardinality Estimation`），估算这些算子产生结果的行数（或基数）。如下图所示，通过基数估计我们可以选择更优的 `JOIN` 顺序以减少中间结果。`Scan` 算子的行数可以直接从表的统计信息 `Row Count` 获取，而对于 `Filter` 算子，可以使用输入的 `Scan` 算子的行数乘以谓词的选择率。
 
 ![基数估计在执行计划选择中的用途](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/cardinality-estimation-example.png)
 
@@ -64,7 +65,7 @@ topic: calcite
 
 ## Calcite 统计信息实现
 
-Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择性 `Selectivity` 还需要传入谓词 `predicate`：
+Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择率 `Selectivity` 还需要传入谓词 `predicate`：
 
 ```java
 class RelMetadataQuery {
@@ -207,7 +208,7 @@ public interface RelMetadataProvider {
 }
 ```
 
-`RelMetadataProvider#apply` 方法用于为具体的关系代数类或子类，获取特定类型的统计信息，该方法返回的是 `UnboundMetadata` 函数式接口，使用时可以调用 bind 方法返回绑定的元数据对象。该方法的使用示例如下，执行完 bind 方法会返回元数据对象 Selectivity，然后可以调用 getSelectivity 获取选择性统计信息。
+`RelMetadataProvider#apply` 方法用于为具体的关系代数类或子类，获取特定类型的统计信息，该方法返回的是 `UnboundMetadata` 函数式接口，使用时可以调用 bind 方法返回绑定的元数据对象。该方法的使用示例如下，执行完 bind 方法会返回元数据对象 Selectivity，然后可以调用 getSelectivity 获取选择率统计信息。
 
 ```java
 RelMetadataProvider provider;
@@ -327,20 +328,20 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
 | RelMdRowCount.SOURCE               | 用于估计关系表达式返回的行数，对于 TableScan 会调用 estimateRowCount 获取统计信息中表的行数，其他关系表达式会通过基数估计的方式获取行数。 |
 | RelMdMaxRowCount.SOURCE            | 用于估计关系表达式返回的最大行数。 |
 | RelMdMinRowCount.SOURCE            | 用于估计关系表达式返回的最小行数。 |
-| RelMdUniqueKeys.SOURCE             |      |
-| RelMdColumnUniqueness.SOURCE       |      |
-| RelMdPopulationSize.SOURCE         |      |
-| RelMdSize.SOURCE |      |
-| RelMdParallelism.SOURCE |      |
-| RelMdDistribution.SOURCE |      |
-| RelMdLowerBoundCost.SOURCE |      |
-| RelMdMemory.SOURCE |      |
-| RelMdDistinctRowCount.SOURCE |      |
-| RelMdSelectivity.SOURCE |      |
-| RelMdExplainVisibility.SOURCE |      |
-| RelMdPredicates.SOURCE |      |
-| RelMdAllPredicates.SOURCE | |
-| RelMdCollation.SOURCE | |
+| RelMdUniqueKeys.SOURCE             | 获取表达式中的唯一键集合，每个唯一键使用 `ImmutableBitSet` 表示，每个位置表示基于 0 的列序号。 |
+| RelMdColumnUniqueness.SOURCE       | 判断特定关系表达式中的列集合是否唯一，例如：关系表达式 `TableScan` 包含 `T(A, B, C, D)` 四列，唯一键为 `(A, B)`，则 `areColumnsUnique([0, 1])` 返回 true，`areColumnsUnique([0]` 返回 false。 |
+| RelMdPopulationSize.SOURCE         | 用于估计指定的 `groupKey` 原始数据源（通常指基表）中的不同行数，估计时会忽略表达式中的任何过滤条件。 |
+| RelMdSize.SOURCE | 获取特定关系表达式中每行或者每列的平均大小（以 bytes 为单位）。 |
+| RelMdParallelism.SOURCE | 获取关系表达式并行度相关的元数据，`isPhaseTransition` 方法返回当前关系表达式是否支持在其他进程执行，`splitCount` 则返回数据集的分割数，以广播为例 splitCount 为 1。 |
+| RelMdDistribution.SOURCE | 获取数据行的分布信息，返回 RelDistribution 对象。 |
+| RelMdLowerBoundCost.SOURCE | 获取 RelNode 的最小代价。 |
+| RelMdMemory.SOURCE | 获取算子使用内存的元数据信息。 |
+| RelMdDistinctRowCount.SOURCE | 用于估计 groupKey 分组后产生的行数，进行 groupKey 分组的数据行会使用 predicate 进行过滤。 |
+| RelMdSelectivity.SOURCE | 用于估计表达式输出行中满足给定谓词的百分比，也叫选择率。 |
+| RelMdExplainVisibility.SOURCE | 确定关系表达式是否应该在特定级别的 `EXPLAIN PLAN` 输出中可见。 |
+| RelMdPredicates.SOURCE | 获取可以上拉的谓词集合，谓词上拉主要是将内层子查询中的谓词`上拉`到外层查询中，参与外层的谓词推导过程，帮助生成更多有意义的谓词。 |
+| RelMdAllPredicates.SOURCE | 获取所有的谓词集合。 |
+| RelMdCollation.SOURCE | 获取哪些列被排序的元数据信息，返回 RelCollation 集合。 |
 
 #### setMetadataQuerySupplier 初始化
 
