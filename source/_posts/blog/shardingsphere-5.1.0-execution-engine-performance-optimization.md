@@ -3,8 +3,16 @@ title: ShardingSphere 5.1.0 执行引擎性能优化揭秘
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2022-03-03 18:18:18
+updated: 2024-03-08 15:44:00
 cover: /assets/blog/2021/06/25/1624608310.png
 banner: /assets/banner/banner_6.jpg
+references:
+  - '[ShardingSphere 执行引擎](https://shardingsphere.apache.org/document/current/cn/reference/sharding/execute/)'
+  - '[ShardingSphere 社区关于执行引擎连接模式的讨论](https://github.com/apache/shardingsphere/issues/13942)'
+  - '[MySQL UNION 官方文档](https://dev.mysql.com/doc/refman/8.0/en/union.html)'
+  - '[PostgreSQL UNION 官方文档](https://www.postgresql.org/docs/14/sql-select.html)'
+  - '[Oracle UNION 官方文档](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html#GUID-B64FE747-586E-4513-945F-80CB197125EE)'
+  - '[SQLServer UNION 官方文档](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql?view=sql-server-ver15)'
 ---
 
 > 本文首发于 [Apache ShardingSphere 微信公众号](https://mp.weixin.qq.com/s/Mn9K-mn1P7oX0G5PorZRMw)，欢迎关注公众号，后续将会有更多技术分享。
@@ -21,7 +29,7 @@ banner: /assets/banner/banner_6.jpg
 
 在解读执行引擎性能优化之前，让我们先来回顾下 Apache ShardingSphere 微内核及内核流程中执行引擎的原理。如下图所示，Apache ShardingSphere 微内核包含了 `SQL 解析`、`SQL 路由`、`SQL 改写`、`SQL 执行`和`结果归并`等核心流程。
 
-![1646306201](/assets/blog/2022/03/03/1646306201.jpg)
+![ShardingSphere 微内核流程](shardingsphere-5.1.0-execution-engine-performance-optimization/shardingsphere-mirco-kernel-process.jpg)
 
 SQL 解析引擎负责对用户输入的 SQL 语句进行解析，并生成包含上下文信息的 SQLStatement。SQL 路由引擎则根据解析上下文提取出分片条件，再结合用户配置的分片规则，计算出真实 SQL 需要执行的数据源并生成路由结果。SQL 改写引擎根据 SQL 路由引擎返回的结果，对原始 SQL 进行改写，具体包括了正确性改写和优化性改写。SQL 执行引擎则负责将 SQL 路由和改写引擎返回的真实 SQL 安全且高效地发送到底层数据源执行，执行的结果集最终会由归并引擎进行处理，生成统一的结果集返回给用户。
 
@@ -51,7 +59,7 @@ public enum ConnectionMode {
 
 那么，Apache ShardingSphere SQL 执行引擎是如何帮助用户选择连接模式的呢？SQL 执行引擎选择连接模式的逻辑可以参考下图：
 
-![1646306276](/assets/blog/2022/03/03/1646306276.jpg)
+![连接模式选择逻辑](shardingsphere-5.1.0-execution-engine-performance-optimization/connection-mode.jpg)
 
 用户通过配置 `maxConnectionSizePerQuery` 参数，可以指定每条语句在同一个数据源上最大允许的连接数。通过上面的计算公式，当每个数据库连接需执行的 SQL 数量小于等于 1 时，说明当前可以满足每条真实执行的 SQL 都分配一个独立的数据库连接，此时会选择内存限制模式，同一个数据源允许创建多个数据库连接进行并行执行。反之则会选择连接限制模式，同一个数据源只允许创建一个数据库连接进行执行，然后将结果集加载进内存结果集，再提供给归并引擎使用。
 
@@ -177,7 +185,7 @@ rules:
 
 在 `5.0.0` 版本中，我们执行 `SELECT * FROM t_order` 语句后，可以得到如下路由结果，结果中包含 ds_0 和 ds_1 两个数据源，并且各自包含了两个路由结果，由于 `max-connections-size-per-query` 设置为 1，此时无法满足每个真实执行 SQL 都有一个数据库连接，因此会选择连接限制模式。
 
-![1646306369](/assets/blog/2022/03/03/1646306369.jpg)
+![5.0.0 全路由使用连接限制模式](shardingsphere-5.1.0-execution-engine-performance-optimization/5.0.0-code-example.jpg)
 
 同时由于使用了连接限制模式，在并行执行后会将结果集加载至内存中，使用 JDBCMemoryQueryResult 进行存储，当用户结果集较大时，会占用较多的内存。内存结果集的使用也会导致归并时只能使用内存归并，而无法使用流式归并。
 
@@ -189,71 +197,25 @@ private QueryResult createQueryResult(final ResultSet resultSet, final Connectio
 
 在 `5.1.0` 版本中，我们使用了 UNION ALL 对执行的 SQL 进行优化，同一个数据源中多个路由结果会被合并为一条 SQL 执行。由于能够满足一个数据库连接持有一个结果集，因此会选择内存限制模式。在内存限制模式下，会使用流式结果集 JDBCStreamQueryResult 对象持有结果集，在需要使用数据时，可以按照流式查询的方式查询数据。
 
-![1646306402](/assets/blog/2022/03/03/1646306402.jpg)
+![5.1.0 全路由使用内存限制模式](shardingsphere-5.1.0-execution-engine-performance-optimization/5.1.0-code-example.jpg)
 
 ## **性能优化测试**
 
 从前面小节的示例中，我们可以看出使用 UNION ALL 进行优化性改写，可以有效减少对数据库连接的消耗，也能够将内存结果集转换为流式结果集，从而避免过多地占用内存。为了更加具体说明优化对于性能的提升，我们针对优化前后的逻辑进行了压测，压测所采用的软件版本如下，使用 5.0.1-SNAPSHOT 版本的 ShardingSphere-Proxy 以及 5.7.26 版本的 MySQL。
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
-.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<table class="tg">
-<thead>
-  <tr>
-    <th class="tg-0lax">组件</th>
-    <th class="tg-0lax">版本</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-0lax">ShardingSphere-Proxy</td>
-    <td class="tg-0lax">5.0.1-SNAPSHOT (b073e622d58c6c3d4b79295fff261184c50d8968)</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">MySQL</td>
-    <td class="tg-0lax">5.7.26</td>
-  </tr>
-</tbody>
-</table>
+| 组件                 | 版本                                                      |
+| :------------------- | :-------------------------------------------------------- |
+| ShardingSphere-Proxy | 5.0.1-SNAPSHOT (b073e622d58c6c3d4b79295fff261184c50d8968) |
+| MySQL                | 5.7.26                                                    |
 
 压测环境对应的机器配置如下：
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
-.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<table class="tg">
-<thead>
-  <tr>
-    <th class="tg-0lax">组件</th>
-    <th class="tg-0lax">机器配置</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-0lax">ShardingSphere-Proxy</td>
-    <td class="tg-0lax">32C 64G</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">MySQL 5.7</td>
-    <td class="tg-0lax">32C 64G</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">JMH</td>
-    <td class="tg-0lax">32C 64G</td>
-  </tr>
-</tbody>
-</table>
+| 组件                 | 机器配置 |
+| :------------------- | :------- |
+| ShardingSphere-Proxy | 32C 64G  |
+| MySQL 5.7            | 32C 64G  |
+| JMH                  | 32C 64G  |
+
 
 我们参考 sysbench 表结构，创建了 sbtest1~sbtest10 等 10 张分片表，每个分片表又分为 5 库，每个库分为 10 张表，具体的 `config-sharding.yaml` 配置文件如下。
 
@@ -503,60 +465,16 @@ public class QueryOptimizationTest {
 
 性能测试会对每个 CASE 分别测试 3 组，然后取平均值，再切换到优化前的版本 `aab226b72ba574061748d8f94c461ea469f9168f` 进行编译打包，同样测试 3 组取平均值，最终性能测试结果如下。
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-color:#ccc;border-spacing:0;}
-.tg td{background-color:#fff;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{background-color:#f0f0f0;border-color:#ccc;border-style:solid;border-width:1px;color:#333;
-  font-family:Arial, sans-serif;font-size:14px;font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
-<table class="tg">
-<thead>
-  <tr>
-    <th class="tg-0lax">Threads</th>
-    <th class="tg-0lax"> 数据量</th>
-    <th class="tg-0lax">CASE SQL</th>
-    <th class="tg-0lax">Before Optimization</th>
-    <th class="tg-0lax">After Optimization</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td class="tg-0lax">100</td>
-    <td class="tg-0lax">100w</td>
-    <td class="tg-0lax">SELECT COUNT(k) AS countK FROM sbtest1 WHERE id &lt; 200;</td>
-    <td class="tg-0lax">1954.887</td>
-    <td class="tg-0lax">10340.854</td>
-  </tr>
-  <tr>
-    <td class="tg-0lax">100</td>
-    <td class="tg-0lax">100w</td>
-    <td class="tg-0lax">SELECT SUM(k) AS sumK FROM sbtest1 WHERE id &lt; 200;</td>
-    <td class="tg-0lax">1951.675</td>
-    <td class="tg-0lax">10218.098</td>
-  </tr>
-</tbody>
-</table>
+| Threads | 数据量 | CASE SQL                                               | Before Optimization | After Optimization |
+| :------ | :----- | :----------------------------------------------------- | :------------------ | :----------------- |
+| 100     | 100w   | SELECT COUNT(k) AS countK FROM sbtest1 WHERE id < 200; | 1954.887            | 10340.854          |
+| 100     | 100w   | SELECT SUM(k) AS sumK FROM sbtest1 WHERE id < 200;     | 1951.675            | 10218.098          |
 
-![1646306546](/assets/blog/2022/03/03/1646306546.jpg)
+
+![执行引擎性能优化测试](shardingsphere-5.1.0-execution-engine-performance-optimization/performance-test-result.jpg)
 
 CASE 1 与 CASE 2 都是基于 100 万数据量下的 sysbench 表结构进行测试，由于测试表分片数较多，整体性能提升了 4 倍左右，理论上随着分片数的增加，性能提升的效果会更加明显。
 
 ## **结语**
 
 Apache ShardingSphere 5.1.0 进行了大量的性能优化，针对协议层和内核层进行了全面的优化提升，本文限于篇幅只对 SQL 执行引擎进行了解读，后续的系列文章还会带来更加专业和全面的性能优化指南，希望感兴趣的同学继续关注。同时，也欢迎社区的同学积极参与进来，共同提升 Apache ShardingSphere 的性能，为社区提供更好的使用体验。
-
-## **参考文档**
-
-- [ShardingSphere 执行引擎](https://shardingsphere.apache.org/document/current/cn/reference/sharding/execute/)
-
-- [ShardingSphere 社区关于执行引擎连接模式的讨论](https://github.com/apache/shardingsphere/issues/13942)
-
-- [MySQL UNION 官方文档](https://dev.mysql.com/doc/refman/8.0/en/union.html)
-
-- [PostgreSQL UNION 官方文档](https://www.postgresql.org/docs/14/sql-select.html)
-
-- [Oracle UNION 官方文档](https://docs.oracle.com/en/database/oracle/oracle-database/21/sqlrf/The-UNION-ALL-INTERSECT-MINUS-Operators.html#GUID-B64FE747-586E-4513-945F-80CB197125EE)
-
-- [SQLServer UNION 官方文档](https://docs.microsoft.com/en-us/sql/t-sql/language-elements/set-operators-union-transact-sql?view=sql-server-ver15)
