@@ -143,7 +143,22 @@ RelOptCluster(RelOptPlanner planner, RelDataTypeFactory typeFactory, RexBuilder 
 
 #### setMetadataProvider 初始化
 
-我们先来看下 `setMetadataProvider` 方法，该方法会传入 `DefaultRelMetadataProvider.INSTANCE` 实例，该实例初始化逻辑如下，作为默认的元数据提供器，DefaultRelMetadataProvider 定义了所有常用的关系代数 RelNode 的处理器，如果使用调用链方式时（使用 `ChainedRelMetadataProvider`），需要将 DefaultRelMetadataProvider 放在最后一个作为兜底方案。
+我们先来看下 `setMetadataProvider` 方法，该方法会传入 `DefaultRelMetadataProvider.INSTANCE` 实例，方法内部会将 metadataProvider 记录在 RelOptCluster 中，并将 metadataProvider 封装为 `JaninoRelMetadataProvider`，然后设置在 ThreadLocal 中方便上下文进行访问。
+
+```java
+@EnsuresNonNull({"this.metadataProvider", "this.metadataFactory"})
+public void setMetadataProvider(@UnknownInitialization RelOptCluster this, RelMetadataProvider metadataProvider) {
+    this.metadataProvider = metadataProvider;
+  	// 将 metadataProvider 封装在 metadataFactory 中，内部会缓存 UnboundMetadata
+    this.metadataFactory = new org.apache.calcite.rel.metadata.MetadataFactoryImpl(metadataProvider);
+    // Wrap the metadata provider as a JaninoRelMetadataProvider
+    // and set it to the ThreadLocal,
+    // JaninoRelMetadataProvider is required by the RelMetadataQuery.
+    RelMetadataQueryBase.THREAD_PROVIDERS.set(JaninoRelMetadataProvider.of(metadataProvider));
+}
+```
+
+`DefaultRelMetadataProvider.INSTANCE` 实例初始化逻辑如下，作为默认的元数据提供器，DefaultRelMetadataProvider 定义了所有常用的关系代数 RelNode 的处理器，如果使用调用链方式时（使用 `ChainedRelMetadataProvider`），需要将 DefaultRelMetadataProvider 放在最后一个作为兜底方案。
 
 ```java
 /**
@@ -344,6 +359,41 @@ private static RelMetadataProvider reflectiveSource(final MetadataHandler target
 | RelMdCollation.SOURCE | 获取哪些列被排序的元数据信息，返回 RelCollation 集合。 |
 
 #### setMetadataQuerySupplier 初始化
+
+介绍完 setMetadataProvider，我们再来看下 `setMetadataQuerySupplier` 初始化时会处理哪些逻辑。setMetadataQuerySupplier 方法的逻辑很简单，就是将传入的 Supplier 记录在 RelOptCluster 中，使用时通过 getMetadataQuery 获取 RelMetadataQuery 对象。
+
+```java
+/**
+ * Sets up the customized {@link RelMetadataQuery} instance supplier that to
+ * use during rule planning.
+ *
+ * <p>Note that the {@code mqSupplier} should return
+ * a fresh new {@link RelMetadataQuery} instance because the instance would be
+ * cached in this cluster, and we may invalidate and re-generate it
+ * for each {@link RelOptRuleCall} cycle.
+ */
+@EnsuresNonNull("this.mqSupplier")
+public void setMetadataQuerySupplier(@UnknownInitialization RelOptCluster this, Supplier<RelMetadataQuery> mqSupplier) {
+    this.mqSupplier = mqSupplier;
+}
+
+/**
+ * Returns the current RelMetadataQuery.
+ *
+ * <p>This method might be changed or moved in future.
+ * If you have a {@link RelOptRuleCall} available,
+ * for example if you are in a {@link RelOptRule#onMatch(RelOptRuleCall)}
+ * method, then use {@link RelOptRuleCall#getMetadataQuery()} instead.
+ */
+public RelMetadataQuery getMetadataQuery() {
+    if (mq == null) {
+        mq = castNonNull(mqSupplier).get();
+    }
+    return mq;
+}
+```
+
+
 
 TODO
 
