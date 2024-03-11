@@ -409,6 +409,59 @@ protected RelMetadataQuery() {
 
 ### RelMetadataQuery 获取统计信息
 
+前文介绍了 RelMetadataQuery 初始化流程，下面我们再来探究下 RelMetadataQuery 获取统计信息的流程。RelMetadataQuery 是获取统计信息的门面类，内部提供了不同 RelNode 类型对应的元数据获取方法，我们以 `getRowCount` 方法为例，介绍下获取统计信息的内部逻辑。
+
+```java
+/**
+ * Returns the
+ * {@link BuiltInMetadata.RowCount#getRowCount()}
+ * statistic.
+ *
+ * @param rel the relational expression
+ * @return estimated row count, or null if no reliable estimate can be
+ * determined
+ */
+public /* @Nullable: CALCITE-4263 */ Double getRowCount(RelNode rel) {
+    for (; ; ) {
+        try {
+            Double result = rowCountHandler.getRowCount(rel, this);
+            return RelMdUtil.validateResult(castNonNull(result));
+        } catch (MetadataHandlerProvider.NoHandler e) {
+            rowCountHandler = revise(BuiltInMetadata.RowCount.Handler.class);
+        }
+    }
+}
+```
+
+getRowCount 方法的逻辑很简单，会调用 RelMetadataQuery 内部维护的 `rowCountHandler.getRowCount` 方法获取行数统计信息，然后使用 `RelMdUtil` 对结果进行校验并返回。从下图可以看到，首次调用 getRowCount 方法时会抛出 `NoHandler` 异常，此时会调用 `revise` 方法对 rowCountHandler 进行再次初始化。
+
+![首次调用 getRowCount 抛出 NoHandler 异常](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/no-handler-exception.png)
+
+`revise` 方法实现逻辑如下，会调用 MetadataHandlerProvider 的 revise 方法，此处为 JaninoRelMetadataProvider。
+
+```java
+/**
+ * Re-generates the handler for a given kind of metadata, adding support for
+ * {@code class_} if it is not already present.
+ */
+protected <H extends MetadataHandler<?>> H revise(Class<H> def) {
+    return getMetadataHandlerProvider().revise(def);
+}
+
+// JaninoRelMetadataProvider#revise 方法
+public synchronized <H extends MetadataHandler<?>> H revise(Class<H> handlerClass) {
+    try {
+        final Key key = new Key(handlerClass, provider);
+        //noinspection unchecked
+        return handlerClass.cast(HANDLERS.get(key));
+    } catch (UncheckedExecutionException | ExecutionException e) {
+        throw Util.throwAsRuntime(Util.causeOrSelf(e));
+    }
+}
+```
+
+
+
 TODO
 
 ## Calcite 代价模型实现
