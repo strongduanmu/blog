@@ -15,7 +15,7 @@ references:
   - '[漫谈用 Calcite 搞事情（一）：溯源](https://zhuanlan.zhihu.com/p/668248163)'
   - '[SQL 改写系列七：谓词移动](https://www.modb.pro/db/448475)'
 date: 2024-01-09 08:30:21
-updated: 2024-03-10 09:21:00
+updated: 2024-03-12 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
 topic: calcite
@@ -437,7 +437,7 @@ getRowCount 方法的逻辑很简单，会调用 RelMetadataQuery 内部维护�
 
 ![首次调用 getRowCount 抛出 NoHandler 异常](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/no-handler-exception.png)
 
-`revise` 方法实现逻辑如下，会调用 MetadataHandlerProvider 的 revise 方法，此处为 JaninoRelMetadataProvider。
+`revise` 方法实现逻辑如下，会调用 MetadataHandlerProvider 的 revise 方法，此处为 JaninoRelMetadataProvider。revise 方法内部会调用 `HANDLERS.get` 方法从缓存中获取 MetadataHandler。
 
 ```java
 /**
@@ -457,6 +457,181 @@ public synchronized <H extends MetadataHandler<?>> H revise(Class<H> handlerClas
     } catch (UncheckedExecutionException | ExecutionException e) {
         throw Util.throwAsRuntime(Util.causeOrSelf(e));
     }
+}
+```
+
+如果缓存未命中，则调用 `generateCompileAndInstantiate` 方法编译生成 MetadataHandler 对象。generateCompileAndInstantiate 方法第一个参数为 `Class<? extends MetadataHandler<? extends Metadata>>`，此处为 `interface org.apache.calcite.rel.metadata.BuiltInMetadata$RowCount$Handler`。第二个参数为 MetadataHandler 集合，通过 handlers 方法过滤出 `key.handlerClass` 的子类对象。
+
+```java
+/**
+ * Cache of pre-generated handlers by provider and kind of metadata.
+ * For the cache to be effective, providers should implement identity
+ * correctly.
+ */
+private static final LoadingCache<Key, MetadataHandler<?>> HANDLERS = maxSize(CacheBuilder.newBuilder(), CalciteSystemProperty.METADATA_HANDLER_CACHE_MAXIMUM_SIZE.value())
+        .build(CacheLoader.from(key -> generateCompileAndInstantiate(key.handlerClass, key.provider.handlers(key.handlerClass))));
+```
+
+根据下图可知，`key.provider` 主要为 ChainedRelMetadataProvider 和 ReflectiveRelMetadataProvider，ChainedRelMetadataProvider 会按照责任链方式遍历 providers，而 ReflectiveRelMetadataProvider 则会根据 `key.handlerClass` 过滤出子类对象。
+
+![从缓存中获取 MetadataHandler](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/get-metadata-handler-from-cache.png)
+
+ReflectiveRelMetadataProvider#handlers 方法实现逻辑如下，经过过滤我们得到了一个 RelMdRowCount 处理器。
+
+```java
+// ReflectiveRelMetadataProvider#handlers 方法
+@Override
+public List<MetadataHandler<?>> handlers(Class<? extends MetadataHandler<?>> handlerClass) {
+    if (this.handlerClass.isAssignableFrom(handlerClass)) {
+        return handlers;
+    } else {
+        return ImmutableList.of();
+    }
+}
+```
+
+下面会调用 generateCompileAndInstantiate 方法生成最终的 MetadataHandler 对象。`generateHandler` 方法会在 `org.apache.calcite.rel.metadata.janino` 包下生成 `GeneratedMetadata_RowCountHandler` 类，该类包含一个 `getRowCount` 方法，会根据 RelNode 类型将请求转发到 RelMdRowCount 处理器中。
+
+```java
+private static <MH extends MetadataHandler<?>> MH generateCompileAndInstantiate(Class<MH> handlerClass, List<? extends MetadataHandler<? extends Metadata>> handlers) {
+    final List<? extends MetadataHandler<? extends Metadata>> uniqueHandlers = handlers.stream().distinct().collect(Collectors.toList());
+    // 生成代码
+    RelMetadataHandlerGeneratorUtil.HandlerNameAndGeneratedCode handlerNameAndGeneratedCode = RelMetadataHandlerGeneratorUtil.generateHandler(handlerClass, uniqueHandlers);
+    try {
+        return compile(handlerNameAndGeneratedCode.getHandlerName(), handlerNameAndGeneratedCode.getGeneratedCode(), handlerClass, uniqueHandlers);
+    } catch (CompileException | IOException e) {
+        throw new RuntimeException("Error compiling:\n" + handlerNameAndGeneratedCode.getGeneratedCode(), e);
+    }
+}
+```
+
+generateHandler 方法生成的类逻辑如下，可以看到内部还增加了统计信息的缓存以提升性能，如果缓存未命中则通过处理器获取统计信息。
+
+```java
+public final class GeneratedMetadata_RowCountHandler implements org.apache.calcite.rel.metadata.BuiltInMetadata.RowCount.Handler {
+    private final Object methodKey0 = new org.apache.calcite.rel.metadata.janino.DescriptiveCacheKey("Double Handler.getRowCount()");
+    public final org.apache.calcite.rel.metadata.RelMdRowCount provider0;
+
+    public GeneratedMetadata_RowCountHandler(org.apache.calcite.rel.metadata.RelMdRowCount provider0) {
+        // 初始化处理器类
+        this.provider0 = provider0;
+    }
+
+    public org.apache.calcite.rel.metadata.MetadataDef getDef() {
+        return provider0.getDef();
+    }
+
+    public java.lang.Double getRowCount(org.apache.calcite.rel.RelNode r, org.apache.calcite.rel.metadata.RelMetadataQuery mq) {
+        while (r instanceof org.apache.calcite.rel.metadata.DelegatingMetadataRel) {
+            r = ((org.apache.calcite.rel.metadata.DelegatingMetadataRel) r).getMetadataDelegateRel();
+        }
+        final Object key;
+        key = methodKey0;
+        // 先从缓存中获取统计信息
+        final Object v = mq.map.get(r, key);
+        if (v != null) {
+            if (v == org.apache.calcite.rel.metadata.NullSentinel.ACTIVE) {
+                throw new org.apache.calcite.rel.metadata.CyclicMetadataException();
+            }
+            if (v == org.apache.calcite.rel.metadata.NullSentinel.INSTANCE) {
+                return null;
+            }
+            // 命中缓存直接返回
+            return (java.lang.Double) v;
+        }
+        mq.map.put(r, key, org.apache.calcite.rel.metadata.NullSentinel.ACTIVE);
+        try {
+            // 未命中则查询统计信息
+            final java.lang.Double x = getRowCount_(r, mq);
+            mq.map.put(r, key, org.apache.calcite.rel.metadata.NullSentinel.mask(x));
+            return x;
+        } catch (java.lang.Exception e) {
+            mq.map.row(r).clear();
+            throw e;
+        }
+    }
+
+    private java.lang.Double getRowCount_(org.apache.calcite.rel.RelNode r, org.apache.calcite.rel.metadata.RelMetadataQuery mq) {
+        // 根据不同的 RelNode 类型，从处理器中获取统计信息
+        if (r instanceof org.apache.calcite.adapter.enumerable.EnumerableLimit) {
+            return provider0.getRowCount((org.apache.calcite.adapter.enumerable.EnumerableLimit) r, mq);
+        } else if (r instanceof org.apache.calcite.plan.volcano.RelSubset) {
+            return provider0.getRowCount((org.apache.calcite.plan.volcano.RelSubset) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Aggregate) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Aggregate) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Calc) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Calc) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Exchange) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Exchange) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Filter) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Filter) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Intersect) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Intersect) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Join) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Join) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Minus) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Minus) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Project) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Project) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Sort) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Sort) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.TableModify) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.TableModify) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.TableScan) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.TableScan) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Union) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Union) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.core.Values) {
+            return provider0.getRowCount((org.apache.calcite.rel.core.Values) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.SingleRel) {
+            return provider0.getRowCount((org.apache.calcite.rel.SingleRel) r, mq);
+        } else if (r instanceof org.apache.calcite.rel.RelNode) {
+            return provider0.getRowCount((org.apache.calcite.rel.RelNode) r, mq);
+        } else {
+            throw new java.lang.IllegalArgumentException("No handler for method [public abstract java.lang.Double org.apache.calcite.rel.metadata.BuiltInMetadata$RowCount$Handler.getRowCount(org.apache.calcite.rel.RelNode,org.apache.calcite.rel.metadata.RelMetadataQuery)] applied to argument of type [" + r.getClass() + "]; we recommend you create a catch-all (RelNode) handler");
+        }
+    }
+}
+```
+
+最终，getRowCount 方法会调用到 RelMdRowCount 类中的 getRowCount 方法，我们来看下常用的关系代数行数是如何计算的。下面展示了 TableScan 获取行数的方法，首先会判断 RelOptTable 是否实现了 BuiltInMetadata.RowCount.Handler 接口，如果实现了接口则可以直接调用 `handler.getRowCount` 获取，否则调用 `estimateRowCount` 方法进行估算。`TableScan#estimateRowCount` 方法会调用 `table.getStatistic().getRowCount()` 从统计信息中获取行数。
+
+```java
+// RelMdRowCount#getRowCount
+public @Nullable Double getRowCount(TableScan rel, RelMetadataQuery mq) {
+    final BuiltInMetadata.RowCount.Handler handler = rel.getTable().unwrap(BuiltInMetadata.RowCount.Handler.class);
+    if (handler != null) {
+        return handler.getRowCount(rel, mq);
+    }
+    return rel.estimateRowCount(mq);
+}
+
+// TableScan#estimateRowCount
+public double estimateRowCount(RelMetadataQuery mq) {
+    return table.getRowCount();
+}
+
+// RelOptTableImpl#getRowCount
+public double getRowCount() {
+    if (rowCount != null) {
+        return rowCount;
+    }
+    if (table != null) {
+        final Double rowCount = table.getStatistic().getRowCount();
+        if (rowCount != null) {
+            return rowCount;
+        }
+    }
+    return 100d;
+}
+```
+
+对于 Join 等复杂的关系代数表达式，统计信息的获取会更加复杂，此处调用了 `RelMdUtil.getJoinRowCount` 方法。
+
+```java
+// RelMdRowCount#getRowCount
+public @Nullable Double getRowCount(Join rel, RelMetadataQuery mq) {
+    return RelMdUtil.getJoinRowCount(mq, rel, rel.getCondition());
 }
 ```
 
