@@ -4,8 +4,14 @@ menu_id: notes # 这个跟配置文件中的 `menu.notes` 关联起来，这很�
 layout: wiki
 order: 0
 title: Common
+date: 2023-01-09 08:30:21
+updated: 2024-03-13 08:00:00
 banner: /assets/banner/banner_7.jpg
 ---
+
+## 在线课程
+
+{% sites online_course %}
 
 ## 技术论坛
 
