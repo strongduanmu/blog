@@ -505,7 +505,7 @@ private static <MH extends MetadataHandler<?>> MH generateCompileAndInstantiate(
 }
 ```
 
-generateHandler 方法生成的类逻辑如下，可以看到内部还增加了统计信息的缓存以提升性能，如果缓存未命中则通过处理器获取统计信息。
+`generateHandler` 方法生成的类逻辑如下：
 
 ```java
 public final class GeneratedMetadata_RowCountHandler implements org.apache.calcite.rel.metadata.BuiltInMetadata.RowCount.Handler {
@@ -594,6 +594,10 @@ public final class GeneratedMetadata_RowCountHandler implements org.apache.calci
 }
 ```
 
+可以看到生成的 `GeneratedMetadata_RowCountHandler` 内部还增加了统计信息的缓存以提升性能。根据经验来看，关系代数的统计信息在较长时间内会保持不变，Calcite 会监测子节点统计信息，当子节点发生变化时会主动失效缓存数据。
+
+![统计信息缓存](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/statistics-cache.png)
+
 最终，getRowCount 方法会调用到 RelMdRowCount 类中的 getRowCount 方法，我们来看下常用的关系代数行数是如何计算的。下面展示了 TableScan 获取行数的方法，首先会判断 RelOptTable 是否实现了 BuiltInMetadata.RowCount.Handler 接口，如果实现了接口则可以直接调用 `handler.getRowCount` 获取，否则调用 `estimateRowCount` 方法进行估算。`TableScan#estimateRowCount` 方法会调用 `table.getStatistic().getRowCount()` 从统计信息中获取行数。
 
 ```java
@@ -626,18 +630,35 @@ public double getRowCount() {
 }
 ```
 
-对于 Join 等复杂的关系代数表达式，统计信息的获取会更加复杂，此处调用了 `RelMdUtil.getJoinRowCount` 方法。
+对于 Join 等复杂的关系代数表达式，统计信息的获取会更加复杂，此处调用了 `RelMdUtil.getJoinRowCount` 方法。getJoinRowCount 方法中会根据 Join 类型计算统计信息，对于最常用的 `INNER JOIN`，计算 rowCount 时会采用 `left * right * selectivity` 方式，即左侧节点 rowCount 乘以右侧节点 rownCount，再乘以 Join 关联条件的选择率。`LEFT JOIN` 和 `RIGHT JOIN` 则是在 `INNER JOIN` 的基础上，增加了左侧节点或右侧节点的剩余行，`FULL JOIN` 则是计算了左右两侧的剩余行。
 
 ```java
 // RelMdRowCount#getRowCount
 public @Nullable Double getRowCount(Join rel, RelMetadataQuery mq) {
     return RelMdUtil.getJoinRowCount(mq, rel, rel.getCondition());
 }
+
+// RelMdUtil#getJoinRowCount
+Double selectivity = mq.getSelectivity(join, condition);
+if (selectivity == null) {
+    return null;
+}
+double innerRowCount = left * right * selectivity;
+switch (join.getJoinType()) {
+    case INNER:
+        return innerRowCount;
+    case LEFT:
+        return left * (1D - selectivity) + innerRowCount;
+    case RIGHT:
+        return right * (1D - selectivity) + innerRowCount;
+    case FULL:
+        return (left + right) * (1D - selectivity) + innerRowCount;
+    default:
+        throw Util.unexpected(join.getJoinType());
+}
 ```
 
-
-
-TODO
+其他统计信息以及不同关系代数对应的统计信息计算逻辑，大家可以自行阅读[统计信息处理器源码](https://github.com/apache/calcite/blob/7fc3e1b007fd9fd921c7929f27ac6cf3e75a15fd/core/src/main/java/org/apache/calcite/rel/metadata/RelMdRowCount.java#L177)进行探究，有问题欢迎留言探讨。
 
 ## Calcite 代价模型实现
 
