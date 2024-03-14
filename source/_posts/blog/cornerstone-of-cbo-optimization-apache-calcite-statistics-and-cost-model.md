@@ -15,7 +15,7 @@ references:
   - '[漫谈用 Calcite 搞事情（一）：溯源](https://zhuanlan.zhihu.com/p/668248163)'
   - '[SQL 改写系列七：谓词移动](https://www.modb.pro/db/448475)'
 date: 2024-01-09 08:30:21
-updated: 2024-03-13 08:00:00
+updated: 2024-03-14 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
 topic: calcite
@@ -662,9 +662,82 @@ switch (join.getJoinType()) {
 
 ## Calcite 代价模型实现
 
+在上一篇[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)一文中，我们跟随 ValcanoPlanner 内部执行逻辑，已经大致了解过了 Calcite 代价模型的相关逻辑，本节我们再来详细了解下代价模型具体由哪些类组成，使用代价模型计算代价时，它的内部逻辑又是如何？
+
+### Calcite 代价模型组成
+
+如下图所示，Calcite 代价模型主要包含了 `RelOptCostFactory` 代价工厂类和 `RelOptCost` 代价接口。`RelOptCost` 代价接口主要提供了 `Rows`、`Cpu` 和 `Io` 3 个指标，并提供了代价大小比较以及加减乘除运算能力，通过扩展 `RelOptCost` 代价接口，我们可以增加更多指标，例如在分布式数据库中比较重要的网络开销。
+
+![Calcite 代价模型组成](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/cost-related-class.png)
+
+在 Caclite 中，`RelOptCost` 接口有两个实现类：`RelOptCostImpl` 和 `VolcanoCost`。RelOptCostImpl 是 RelOptCost 接口的默认实现，它只关注 Rows 指标，Cpu 和 Io 默认都返回 0，Caclite 中主要在 RBO 优化时使用 RelOptCostImpl 代价。VolcanoCost 与 RelOptCostImpl 不同，它同时考虑了 Rows、Cpu 和 Io 指标，Calcite 中主要在 CBO 优化时使用 VolcanoCost 代价。
+
+`RelOptCostFactory` 工厂类用于创建具体的代价对象，接口中提供了 `makeCost`（创建代价对象）、`makeHugeCost`（创建巨大但非无穷的代价对象）、`makeInfiniteCost`（创建无穷大的代价对象）、`makeTinyCost`（创建很小的正成本代价对象） 和 `makeZeroCost`（创建零成本代价对象） 方法，这些方法会在计算算子代价时使用。
+
+```java
+/**
+ * Cost model for query planning.
+ */
+public interface RelOptCostFactory {
+    /**
+     * Creates a cost object.
+     */
+    RelOptCost makeCost(double rowCount, double cpu, double io);
+
+    /**
+     * Creates a cost object representing an enormous non-infinite cost.
+     */
+    RelOptCost makeHugeCost();
+
+    /**
+     * Creates a cost object representing infinite cost.
+     */
+    RelOptCost makeInfiniteCost();
+
+    /**
+     * Creates a cost object representing a small positive cost.
+     */
+    RelOptCost makeTinyCost();
+
+    /**
+     * Creates a cost object representing zero cost.
+     */
+    RelOptCost makeZeroCost();
+}
+```
+
+Calcite 中每一个 RelNode 都具体实现了 `computeSelfCost` 接口，RelNode 类可以重写改方法以实现自定义的代价计算，也可以复用父类 `AbstractRelNode` 中实现的代价计算逻辑，可以看到 `AbstractRelNode#computeSelfCost` 调用了 `planner.getCostFactory()` 方法，通过优化器对象获取代价工厂类，然后再调用代价创建的方法。
+
+```java
+/**
+ * Returns the cost of this plan (not including children). The base
+ * implementation throws an error; derived classes should override.
+ *
+ * <p>NOTE jvs 29-Mar-2006: Don't call this method directly. Instead, use
+ * {@link RelMetadataQuery#getNonCumulativeCost}, which gives plugins a
+ * chance to override the rel's default ideas about cost.
+ *
+ * @param planner Planner for cost calculation
+ * @param mq      Metadata query
+ * @return Cost of this plan (not including children)
+ */
+// RelNode#computeSelfCost
+@Nullable
+RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq);
+
+// AbstractRelNode#computeSelfCost
+public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
+    // by default, assume cost is proportional to number of rows
+    double rowCount = mq.getRowCount(this);
+    return planner.getCostFactory().makeCost(rowCount, rowCount, 0);
+}
+```
+
+根据 `RelNode#computeSelfCost` 方法注释，我们可以看到不允许直接调用 computeSelfCost 方法，用户获取代价时需要通过 `RelMetadataQuery#getNonCumulativeCost` 方法来获取当前节点的代价。下面部分，我们再来探究下如何通过 RelMetadataQuery 门面类获取代价信息，它的内部又是如何与代价模型交互的。
+
+### Calcite 代价计算逻辑
+
 TODO
-
-
 
 ## 结语
 
