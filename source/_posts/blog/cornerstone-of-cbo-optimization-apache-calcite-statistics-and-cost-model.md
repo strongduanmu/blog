@@ -737,7 +737,76 @@ public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQu
 
 ### Calcite 代价计算逻辑
 
-TODO
+Calcite 代价计算都是通过调用 RelMetadataQuery 进行获取，而 RelMetadataQuery 对象可以从优化器全局对象 RelOptCluster 中获取，用户可以从 `RelOptNode#getCluster` 中快速获取 RelOptCluster， 因此在 Calcite 中访问元数据非常容易。下面展示了前一小节介绍的 `RelMetadataQuery#getNonCumulativeCost` 方法获取当前 RelNode 的代价逻辑：
+
+```java
+/**
+ * Returns the
+ * {@link BuiltInMetadata.NonCumulativeCost#getNonCumulativeCost()}
+ * statistic.
+ *
+ * @param rel the relational expression
+ * @return estimated cost, or null if no reliable estimate can be determined
+ */
+public @Nullable RelOptCost getNonCumulativeCost(RelNode rel) {
+    for (; ; ) {
+        try {
+            return nonCumulativeCostHandler.getNonCumulativeCost(rel, this);
+        } catch (MetadataHandlerProvider.NoHandler e) {
+            nonCumulativeCostHandler = revise(BuiltInMetadata.NonCumulativeCost.Handler.class);
+        }
+    }
+}
+```
+
+该方法最终会调用到 `RelMdPercentageOriginalRows#getNonCumulativeCost`，可以看到该方法内部也是调用 RelNode 对应的 computeSelfCost 方法。
+
+```java
+// RelMdPercentageOriginalRows#getNonCumulativeCost
+public @Nullable RelOptCost getNonCumulativeCost(RelNode rel, RelMetadataQuery mq) {
+    return rel.computeSelfCost(rel.getCluster().getPlanner(), mq);
+}
+```
+
+此案例中 RelNode 为 `JdbcTableScan` 实现类，它继承了 `TableScan`，而 `TableScan` 的 computeSelfCost 实现逻辑如下，它调用了 `VolcanoCost#Factory` 创建了 `VolcanoCost` 对象。
+
+```java
+public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQuery mq) {
+    double dRows = table.getRowCount();
+    double dCpu = dRows + 1; // ensure non-zero cost
+    double dIo = 0;
+    return planner.getCostFactory().makeCost(dRows, dCpu, dIo);
+}
+```
+
+至此，我们就拥有了一个代表 RelNode 代价的 VolcanoCost 对象，VolcanoCost 对象属性及值如下，其中包含了 RelNode 对应的行数、CPU 消耗以及 IO 消耗。
+
+![VolcanoCost 对象](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/valcano-cost.png)
+
+有了 VolcanoCost 对象后，Planner 会在优化过程中调用 VolcanoCost 的内部方法，例如：进行代价的大小比较，以选择代价最小的执行计划。此外，计算当前 RelNode 的累加代价时，会将当前 RelNode 的代价和子节点的代价进行累加。VolcanoCost 大小比较和累加的方法实现如下。
+
+```java
+public boolean isLt(RelOptCost other) {
+  	// 为什么为 true? Calcite 源码未进行说明
+    if (true) {
+      	// 判断 rowCount 是否小于另一个 RelOptCost
+        VolcanoCost that = (VolcanoCost) other;
+        return this.rowCount < that.rowCount;
+    }
+    return isLe(other) && !equals(other);
+}
+
+public RelOptCost plus(RelOptCost other) {
+    VolcanoCost that = (VolcanoCost) other;
+    if ((this == INFINITY) || (that == INFINITY)) {
+        return INFINITY;
+    }
+  	// 将所有的指标相加
+    return new VolcanoCost(this.rowCount + that.rowCount, this.cpu + that.cpu, this.io + that.io);
+}
+```
+
+总体来看 Calcite VolcanoCost 实现逻辑相对简单，在进行代价比较时只考虑了单一的 rowCount 指标，其他指标并未进行充分考虑。在实际使用中，我们需要对代价计算逻辑进行更精细的设计，例如：考虑分布式数据库中关心的网络传输开销，以及为不同的指标设计权重，参照权重进行综合的代价计算，这些都是需要大家不断去打磨提升的。
 
 ## 结语
 
