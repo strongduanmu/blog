@@ -25,7 +25,7 @@ topic: calcite
 
 ## 前言
 
-在上一篇[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)一文中，我们介绍了 Calcite VolcanoPlanner 的理论基础、核心概念和整体流程，VolcanoPlanner 在优化时会计算不同执行计划的代价 Cost，然后通过代价的比较，最终寻找出最小代价的执行计划。代价 Cost 的计算依赖于`统计信息`和`代价模型`，统计信息是否准确，代价模型是否合理，直接影响了 VolcanoPlanner 优化的效果。上一篇文章中，我们对 Calcite 统计信息和代价模型，只进行了简单的介绍，今天我们将结合一个多表关联查询的案例，和大家一起探究下 Calcite 是如何使用统计信息和代价模型，以及在优化过程中，Calcite 会使用哪些优化方式得到最优执行计划。
+在上一篇[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)一文中，我们介绍了 Calcite VolcanoPlanner 的理论基础、核心概念和整体流程，VolcanoPlanner 在优化时会计算不同执行计划的代价 Cost，然后通过代价的比较，最终寻找出最小代价的执行计划。代价 Cost 的计算依赖于`统计信息`和`代价模型`，统计信息是否准确，代价模型是否合理，直接影响了 VolcanoPlanner 优化的效果。上一篇文章中，我们对 Calcite 统计信息和代价模型进行了简单的介绍，今天我们将结合一个多表关联查询的案例，和大家一起探究下 Calcite 是如何使用统计信息和代价模型，以及在优化过程中，Calcite 会使用哪些优化方式得到最优执行计划。
 
 ## 统计信息和代价模型
 
@@ -61,7 +61,7 @@ topic: calcite
 * `Memory`：代表 Memory 的占用量；
 * `IO`：代表磁盘的逻辑 IO 次数；
 * `Net`：代表网络的逻辑 IO 次数（交互次数及传输量）；
-* 最终 Cost = (CPU, Memory, IO, Net) · (w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>)，w 为权重向量。
+* 最终 `Cost` = (CPU, Memory, IO, Net) · (w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>)，w 为权重向量。
 
 ## Calcite 统计信息实现
 
@@ -662,7 +662,7 @@ switch (join.getJoinType()) {
 
 ## Calcite 代价模型实现
 
-在上一篇[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)一文中，我们跟随 ValcanoPlanner 内部执行逻辑，已经大致了解过了 Calcite 代价模型的相关逻辑，本节我们再来详细了解下代价模型具体由哪些类组成，使用代价模型计算代价时，它的内部逻辑又是如何？
+在上一篇[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)一文中，我们跟随 ValcanoPlanner 内部执行逻辑，已经大致了解过了 Calcite 代价模型的相关逻辑，本节我们再来详细了解下代价模型具体由哪些类组成，使用代价模型计算代价时，它的内部逻辑又是如何实现的。
 
 ### Calcite 代价模型组成
 
@@ -706,7 +706,7 @@ public interface RelOptCostFactory {
 }
 ```
 
-Calcite 中每一个 RelNode 都具体实现了 `computeSelfCost` 接口，RelNode 类可以重写改方法以实现自定义的代价计算，也可以复用父类 `AbstractRelNode` 中实现的代价计算逻辑，可以看到 `AbstractRelNode#computeSelfCost` 调用了 `planner.getCostFactory()` 方法，通过优化器对象获取代价工厂类，然后再调用代价创建的方法。
+Calcite 中每一个 RelNode 都具体实现了 `computeSelfCost` 接口，RelNode 类可以重写该方法以实现自定义的代价计算，也可以复用父类 `AbstractRelNode` 中实现的代价计算逻辑，可以看到 `AbstractRelNode#computeSelfCost` 调用了 `planner.getCostFactory()` 方法，通过优化器对象获取代价工厂类，然后再调用代价创建的方法。
 
 ```java
 /**
@@ -733,7 +733,7 @@ public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQu
 }
 ```
 
-根据 `RelNode#computeSelfCost` 方法注释，我们可以看到不允许直接调用 computeSelfCost 方法，用户获取代价时需要通过 `RelMetadataQuery#getNonCumulativeCost` 方法来获取当前节点的代价。下面部分，我们再来探究下如何通过 RelMetadataQuery 门面类获取代价信息，它的内部又是如何与代价模型交互的。
+根据 `RelNode#computeSelfCost` 方法注释，我们可以看到不允许直接调用 computeSelfCost 方法，用户获取代价时需要通过 `RelMetadataQuery#getNonCumulativeCost` 方法来获取当前节点的代价。下面的部分，我们再来探究下如何通过 RelMetadataQuery 门面类获取代价信息，它的内部又是如何与代价模型交互的。
 
 ### Calcite 代价计算逻辑
 
@@ -779,11 +779,11 @@ public @Nullable RelOptCost computeSelfCost(RelOptPlanner planner, RelMetadataQu
 }
 ```
 
-至此，我们就拥有了一个代表 RelNode 代价的 VolcanoCost 对象，VolcanoCost 对象属性及值如下，其中包含了 RelNode 对应的行数、CPU 消耗以及 IO 消耗。
+至此，我们就有了一个代表 RelNode 代价的 VolcanoCost 对象，VolcanoCost 对象属性及值如下，其中包含了 RelNode 对应的行数、CPU 消耗以及 IO 消耗。
 
 ![VolcanoCost 对象](cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model/valcano-cost.png)
 
-有了 VolcanoCost 对象后，Planner 会在优化过程中调用 VolcanoCost 的内部方法，例如：进行代价的大小比较，以选择代价最小的执行计划。此外，计算当前 RelNode 的累加代价时，会将当前 RelNode 的代价和子节点的代价进行累加。VolcanoCost 大小比较和累加的方法实现如下。
+有了 VolcanoCost 对象后，Planner 会在优化过程中调用 VolcanoCost 的内部方法，例如：进行代价的大小比较，以选择代价最小的执行计划。以及计算当前 RelNode 的累加代价，会将当前 RelNode 的代价和子节点的代价进行累加。VolcanoCost 大小比较和累加的方法实现如下。
 
 ```java
 public boolean isLt(RelOptCost other) {
@@ -806,11 +806,17 @@ public RelOptCost plus(RelOptCost other) {
 }
 ```
 
-总体来看 Calcite VolcanoCost 实现逻辑相对简单，在进行代价比较时只考虑了单一的 rowCount 指标，其他指标并未进行充分考虑。在实际使用中，我们需要对代价计算逻辑进行更精细的设计，例如：考虑分布式数据库中关心的网络传输开销，以及为不同的指标设计权重，参照权重进行综合的代价计算，这些都是需要大家不断去打磨提升的。
+总体来看 Calcite VolcanoCost 实现逻辑相对简单，在进行代价比较时只考虑了单一的 rowCount 指标，其他指标并未进行比较。在实际使用中，我们需要对代价计算逻辑进行更精细的设计，例如：考虑分布式数据库中关心的网络传输开销，以及为不同的指标设计权重，参照权重进行综合的代价计算，这些需要大家不断去打磨提升。
 
 ## 结语
 
-TODO
+本文首先介绍了数据库领域的基础知识——统计信息和代价模型，让大家对相关的知识有一些了解。然后我们结合 Calcite 源码，一起学习了 Calcite 统计信息相关的实现逻辑，从 RelMetadataQuery 初始化，一直聊到 RelMetadataQuery 获取统计信息。这部分为大家介绍了初始化过程中涉及到的细节，Calcite 内部提供了 22 种元数据处理器，我们以 `RelMdPercentageOriginalRows.SOURCE` 为例进行了详细介绍，最后以表格的形式总结了所有元数据处理器的作用。此外，我们还介绍了 RelMetadataQuery 获取统计信息时，如何通过 Janio 生成代码，对元数据处理逻辑进行转发，在这个过程中，我们发现 Calcite 对统计信息进行了缓存以提升性能。
+
+最后，本文介绍了 Calcite 代价模型相关的实现，了解了代价模型相关的接口和实现类，我们可以通过扩展接口增加代价模型中的指标。代价模型计算部分，我们以 `getNonCumulativeCost` 方法为例，简单地进行了探索，目前 Calcite 中的计算逻辑较为简单，如果我们想要进行更精细地计算，则需要自己去进行扩展实现，根据权重对不同指标进行计算从而获得一个综合代价。
+
+阅读完本文，想必大家一定还有很多疑惑？Calcite 提供了 22 种元数据处理器，文章中**只看到了如何获取统计信息，如何基于统计信息进行基数估计和代价计算，那么基础的统计信息我们又如何获取呢**？另外，Calcite 代价计算逻辑目前看起来非常简单，那么**生产级别的代价要如何计算，不同指标的权重应当如何设置**？
+
+不仅大家会有这样的疑惑，笔者同样也有，本着打破砂锅问到底的原则，**下一篇文章我们将探索 PolarDB-X 中统计信息和代价模型的相关实现，PolarDB-X 内核采用 Calcite 实现 SQL 优化，内部实现了丰富的统计信息指标收集，并对代价模型进行了扩展**。学习 PolarDB-X 中统计信息和代价模型的实现，能够帮助大家快速了解生产级别的查询优化器是如何实现的，帮助大家在工作中更好地落地实践，欢迎感兴趣的朋友持续关注。
 
 
 
