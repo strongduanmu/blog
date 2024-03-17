@@ -15,7 +15,7 @@ references:
   - '[漫谈用 Calcite 搞事情（一）：溯源](https://zhuanlan.zhihu.com/p/668248163)'
   - '[SQL 改写系列七：谓词移动](https://www.modb.pro/db/448475)'
 date: 2024-01-09 08:30:21
-updated: 2024-03-14 08:00:00
+updated: 2024-03-17 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_5.jpg
 topic: calcite
