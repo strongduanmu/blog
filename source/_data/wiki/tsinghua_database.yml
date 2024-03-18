@@ -1,0 +1,17 @@
+name: 数据库管理系统
+title: 清华李国良教授数据库管理系统
+subtitle: '热门的数据库基础课程 | 目前中文数据库课程的天花板'
+tags: Database
+description: 数据库管理系统课程是清华大学李国良教授出品，一经发布在 B 站引起了热烈反响，是目前中文数据库课程的天花板。课程主要讲述数据库管理系统核心技术，不仅介绍数据库的基本原理，更重要的是介绍数据库的构建方法。欢迎大家一起学习，和李国良教授一起动手构建国产数据库。
+icon: /assets/wiki/tsinghua_database/database_logo.png
+cover: /assets/wiki/tsinghua_database/database_logo.png
+coverpage: true
+search:
+  filter: /wiki/tsinghua_database/
+  placeholder: 在数据库管理系统中搜索...
+leftbar: 
+  - tree
+base_dir: /wiki/tsinghua_database/
+tree:
+  - index
+  - course-introduction-and-the-relational-model
