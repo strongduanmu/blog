@@ -3,9 +3,11 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
+updated: 2024-03-19 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
+  - '[Calcite 官方文档中文版 - JSON/YAML 模型](https://strongduanmu.com/wiki/calcite/model.html)'
   - '[Apache Calcite 框架原理入门和生产应用](https://zhuanlan.zhihu.com/p/548933943)'
   - '[CMU 15-445 Database Storage II](https://15445.courses.cs.cmu.edu/fall2019/slides/04-storage2.pdf)'
   - '[CMU 15-445 Query Planning & Optimization I](https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf)'
@@ -22,23 +24,25 @@ topic: calcite
 
 ## 什么是 System Catalog
 
-![System Catalog 在数据库系统中的作用](/assets/blog/2023/10/30/1698628551.png)
+![System Catalog 在数据库系统中的作用](explore-apache-calcite-system-catalog-implementation/system-catalog.png)
 
 在 [CMU 15-445 Query Planning & Optimization I](https://15445.courses.cs.cmu.edu/fall2019/slides/14-optimization1.pdf) 课程中介绍了数据库系统的整体架构，系统目录（`System Catalog`）主要负责存储数据库的元数据信息，具体包括：表、列、索引、视图、用户、权限以及内部统计信息等。从上图可以看出，系统目录在数据库绑定校验、逻辑计划树改写和执行计划优化等阶段发挥了重要作用。
 
 不同数据库系统都有自己的元数据信息获取方法，ANSI 标准规定通过 [INFORMATION_SCHEMA](https://en.wikipedia.org/wiki/Information_schema) 只读视图查询元数据信息，目前大部分数据库都遵循了这个规范，同时也都提供了一些快捷命令，例如：MySQL `SHOW TABLES` 命令，PostgreSQL `\d` 命令等。
 
-Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是 Calcite 不直接存储系统目录中的元数据信息，用户需要通过 API 将元数据注册到 Calcite 中，才可以使用系统目录提供的能力。下面这个部分，让我们一起来深入了解下 `Calcite System Catalog` 的内部实现。
+Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是 Calcite 不直接存储系统目录中的元数据信息，用户需要通过 API 将元数据注册到 Calcite 中，才可以使用系统目录提供的能力。下面这个部分，让我们一起来深入了解下 `Calcite System Catalog` 体系及其内部实现。
 
-## Calcite System Catalog 实现
+## Calcite System Catalog 体系
 
-在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现类是 `CalciteSchema`（如下所示）。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的作用和内部实现。
+在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现是抽象类 `CalciteSchema`（如下所示），CalciteSchema 有 `CachingCalciteSchema` 和 `SimpleCalciteSchema` 两个子类，他们的区别主要是是否缓存表、函数和子模式。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的作用和内部实现。
 
 ```java
 public abstract class CalciteSchema {
+  	
     private final @Nullable CalciteSchema parent;
     public final Schema schema;
     public final String name;
+  	
     /**
      * Tables explicitly defined in this schema. Does not include tables in
      * {@link #schema}.
@@ -59,7 +63,7 @@ public abstract class CalciteSchema {
 
 如下图所示，Calcite Schema 支持任意层级的嵌套，可以很方便地适配不同的数据库，借助 Schema 的嵌套结构，Calcite 衍生出了 `NameSpace` 概念，通过 NameSpace 可以对不同 Schema 下的对象进行有效地隔离。例如在最底层 SubSchema 中定义的表、函数等对象，只能在当前的 Schema 中使用，如果想要在多个 Schema 中共享对象，则可以考虑在共同的父 Schema 中进行定义。
 
-![Calcite Schema 嵌套结构](/assets/blog/2023/11/09/1699492678.png)
+![Calcite Schema 嵌套结构](explore-apache-calcite-system-catalog-implementation/calcite-schema-nested-structure.png)
 
 [Schema](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/schema/Schema.java) 接口定义如下，可以看到它提供了 `getTable`、`getType`、`getFunctions` 和 `getSubSchema` 等访问方法，常见的 Schema 接口实现类有 AbstractSchema、CsvSchema、JdbcCatalogSchema 等。AbstractSchema 对 Schema 接口的方法进行了实现，并提供了可重写的 `getTableMap`、`getFunctionMultimap` 和 `getSubSchemaMap` 方法，用于向 Schema 中注册表、函数和子 Schema。CsvSchema 和 JdbcCatalogSchema 都是继承了 AbstractSchema 完成 Schema 注册，大家也可以参考该方式简化注册 Schema 的流程。
 
@@ -74,6 +78,7 @@ public interface Schema {
     
     Set<String> getTypeNames();
     
+  	// 根据名称查询具有相同名称，但参数列表不同的重载函数，Calcite 将调用 Schemas.resolve 选择合适的函数
     Collection<Function> getFunctions(String name);
     
     Set<String> getFunctionNames();
@@ -111,13 +116,13 @@ public interface SchemaPlus extends Schema {
 }
 ```
 
-TODO
+此外，在 Schema 接口中有一定较为特殊的 `getType` 方法，它会返回一个 `RelProtoDataType` 类型
 
 * **Table**
 
 TODO
 
-* **RelDataType**
+* **RelProtoDataType**
 
 TODO
 
@@ -125,9 +130,17 @@ TODO
 
 TODO
 
-## Calcite System Catalog 示例
+* **Lattice**
 
 TODO
+
+## Calcite System Catalog 实现
+
+### System Catalog 初始化
+
+TODO
+
+
 
 ## 结语
 
