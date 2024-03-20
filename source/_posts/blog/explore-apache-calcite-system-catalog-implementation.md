@@ -65,7 +65,7 @@ public abstract class CalciteSchema {
 
 ![Calcite Schema 嵌套结构](explore-apache-calcite-system-catalog-implementation/calcite-schema-nested-structure.png)
 
-[Schema](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/schema/Schema.java) 接口定义如下，可以看到它提供了 `getTable`、`getType`、`getFunctions` 和 `getSubSchema` 等访问方法，常见的 Schema 接口实现类有 AbstractSchema、CsvSchema、JdbcCatalogSchema 等。AbstractSchema 对 Schema 接口的方法进行了实现，并提供了可重写的 `getTableMap`、`getFunctionMultimap` 和 `getSubSchemaMap` 方法，用于向 Schema 中注册表、函数和子 Schema。CsvSchema 和 JdbcCatalogSchema 都是继承了 AbstractSchema 完成 Schema 注册，大家也可以参考该方式简化注册 Schema 的流程。
+[Schema](https://github.com/apache/calcite/blob/c4042a34ef054b89cec1c47fefcbc8689bad55be/core/src/main/java/org/apache/calcite/schema/Schema.java) 接口定义如下，可以看到它提供了 `getTable`、`getType`、`getFunctions` 和 `getSubSchema` 等访问方法，常见的 Schema 接口实现类有 AbstractSchema、CsvSchema、JdbcCatalogSchema 等。`AbstractSchema` 对 Schema 接口的方法进行了实现，并提供了可重写的 `getTableMap`、`getFunctionMultimap` 和 `getSubSchemaMap` 方法，用于向 Schema 中注册表、函数和子 Schema。CsvSchema 和 JdbcCatalogSchema 都是继承了 AbstractSchema 完成 Schema 注册，大家也可以参考该方式简化注册 Schema 的流程。
 
 ```java
 public interface Schema {
@@ -116,13 +116,46 @@ public interface SchemaPlus extends Schema {
 }
 ```
 
-此外，在 Schema 接口中有一定较为特殊的 `getType` 方法，它会返回一个 `RelProtoDataType` 类型
+此外，在 Schema 接口中还包含了 `Table`、`RelDataType`、`Function` 等对象，这些和全局共享的  `Table`、`RelProtoDataType`、`Function` 对象作用一样，只是生效的范围不同，我们将在下面的全局对象中分别介绍。
 
 * **Table**
 
-TODO
+`Table` 表示 Calcite 中的一张表，Table 可以定义在某个 Schema 中，也可以定义在全局范围，全局表会在所有 Schema 中生效。Table 接口包含的主要方法如下，`getRowType` 方法用于获取表的行类型，行类型包含了所有列及其类型。`getStatistic` 方法用于获取 `Statistic` 统计信息对象，用于在查询优化阶段计算代价。`getJdbcTableType` 方法则用于获取表类型。
 
-* **RelProtoDataType**
+```java
+public interface Table {
+
+  	// 获取表的行类型
+    RelDataType getRowType(RelDataTypeFactory typeFactory);
+
+    // 获取表的统计信息
+    Statistic getStatistic();
+
+    // 获取表类型
+    Schema.TableType getJdbcTableType();
+}
+```
+
+Calcite Table 接口有很多实现类，分别适用于不同的场景，它的继承体系如下图所示：
+
+![Table 继承体系](explore-apache-calcite-system-catalog-implementation/table-implement-class.png)
+
+`AbstractTable` 抽象类是对 Table 接口的基础实现，Caclite 中的大多数表都是继承 AbstractTable。`TranslatableTable` 、`ProjectableFilterableTable` 和 `FilterableTable` 我们在 [Apache Calcite 快速入门指南 - Calcite 元数据定义](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html#calcite-%E5%85%83%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89) 小节中介绍过他们的区别，具体如下：
+
+- `TranslatableTable`：`TranslatableTable` 则通过 `toRel` 方法将 RelOptTable 对象转换为 RelNode，例如之前文章介绍的 CsvTableScan，后续可以使用优化规则对 CsvTableScan 进行变换从而实现下推等优化；
+- `ScannableTable`：`ScannableTable` 接口，用于扫描全部数据记录，Calcite 会调用 `scan` 方法获取全部数据；
+- `FilterableTable`：`FilterableTable` 接口，可以在扫描数据过程中，根据 scan 方法传入的 `List<RexNode> filters` 参数进行数据过滤。
+
+`ModifiableTable` 类用于处理对表进行更新的场景，例如执行 `INSERT`、`UPDATE` 和 `DELETE` 语句，通过调用 `toModificationRel` 方法将 `RelOptTable` 转换为 `TableModify` 算子。
+
+`ViewTable` 类则用于视图处理，通过将视图定义语句 `viewSql` 转化为 AST 及关系代数，并在 `toRel` 处理过程中将原有的视图查询语句展开，变换为对原始表的查询，从而实现视图语义。
+
+* **RelDataType**
+
+RelDataType 代表了 Calcite Table 的行类型，Calcite 支持了所有的 SQL 数据类型，也包括了结构和数组类型。
+
+```java
+```
 
 TODO
 
