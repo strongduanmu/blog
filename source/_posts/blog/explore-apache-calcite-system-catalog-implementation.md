@@ -152,12 +152,42 @@ Calcite Table 接口有很多实现类，分别适用于不同的场景，它的
 
 * **RelDataType**
 
-RelDataType 代表了 Calcite Table 的行类型，Calcite 支持了所有的 SQL 数据类型，也包括了结构和数组类型。
+`RelDataType` 代表了关系表达式返回的数据行类型或者标量表达式的类型，Calcite 支持了所有的 SQL 数据类型，也包括结构和数组类型。RelDataType 接口中的主要方法如下：
 
 ```java
+public interface RelDataType {
+
+  	// 获取结构类型中的字段，Calcite 中关系表达式返回的数据行类型使用 RelDataType 表示，每一列的类型通过 RelDataTypeField 表示
+  	// RelDataTypeField 内部仍然封装了 RelDataType 表示字段类型
+    List<RelDataTypeField> getFieldList();
+		
+  	// 当前类型是否支持为空
+    boolean isNullable();
+
+    RelDataType getComponentType();
+
+    RelDataType getKeyType();
+
+    RelDataType getValueType();
+		
+  	// 当前类型的字符集编码
+    Charset getCharset();
+		
+  	// 当前类型的排序规则
+    SqlCollation getCollation();
+	
+  	// 获取该类型的 JDBC 精度（字段长度，例如：-4.75，precision 为 3）
+    int getPrecision();
+		
+  	// 获取该类型的范围（小数位数，例如：-4.75，scale 为 3）
+    int getScale();
+	
+  	// 获取 SQL 类型
+    SqlTypeName getSqlTypeName();
+}
 ```
 
-TODO
+`getFieldList` 方法用于获取结构类型中的字段，Calcite 中关系表达式返回的数据行类型使用 RelDataType 表示，每一列的类型通过 `RelDataTypeField` 表示，RelDataTypeField 内部仍然封装了 RelDataType 表示字段类型。`isNullable` 方法表示当前类型是否支持为空，`getCharset` 用于获取当前类型的字符集编码，`getCollation` 用于获取当前类型的排序规则。`getPrecision` 和 `getScale` 方法分别用于获取该类型的精度和范围，精度表示字段的长度，范围则表示小数的位数。
 
 * **Function**
 
