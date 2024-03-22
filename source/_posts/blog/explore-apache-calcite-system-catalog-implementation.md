@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-19 08:00:00
+updated: 2024-03-23 09:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -57,7 +57,7 @@ public abstract class CalciteSchema {
     private @Nullable List<? extends List<String>> path;
 ```
 
-* **Schema**
+### Schema
 
 根据 SQL 标准定义，Schema 是一个描述符的持久命名集合（`a persistent, named collection of descriptors`），Schema 中通常包含了`表`、`列`、`数据类型`、`视图`、`存储过程`、`关系`、`主键`和`外键`等对象。而 Schema 在 Calcite 中，则是针对数据库 Database 或 Catalog 的抽象，Schema 中可以包含子 Schema，也可以包含若干个表。
 
@@ -118,7 +118,7 @@ public interface SchemaPlus extends Schema {
 
 此外，在 Schema 接口中还包含了 `Table`、`RelDataType`、`Function` 等对象，这些和全局共享的  `Table`、`RelProtoDataType`、`Function` 对象作用一样，只是生效的范围不同，我们将在下面的全局对象中分别介绍。
 
-* **Table**
+### Table
 
 `Table` 表示 Calcite 中的一张表，Table 可以定义在某个 Schema 中，也可以定义在全局范围，全局表会在所有 Schema 中生效。Table 接口包含的主要方法如下，`getRowType` 方法用于获取表的行类型，行类型包含了所有列及其类型。`getStatistic` 方法用于获取 `Statistic` 统计信息对象，用于在查询优化阶段计算代价。`getJdbcTableType` 方法则用于获取表类型。
 
@@ -150,7 +150,7 @@ Calcite Table 接口有很多实现类，分别适用于不同的场景，它的
 
 `ViewTable` 类则用于视图处理，通过将视图定义语句 `viewSql` 转化为 AST 及关系代数，并在 `toRel` 处理过程中将原有的视图查询语句展开，变换为对原始表的查询，从而实现视图语义。
 
-* **RelDataType**
+### RelDataType
 
 `RelDataType` 代表了关系表达式返回的数据行类型或者标量表达式的类型，Calcite 支持了所有的 SQL 数据类型，也包括结构和数组类型。RelDataType 接口中的主要方法如下：
 
@@ -189,11 +189,20 @@ public interface RelDataType {
 
 `getFieldList` 方法用于获取结构类型中的字段，Calcite 中关系表达式返回的数据行类型使用 RelDataType 表示，每一列的类型通过 `RelDataTypeField` 表示，RelDataTypeField 内部仍然封装了 RelDataType 表示字段类型。`isNullable` 方法表示当前类型是否支持为空，`getCharset` 用于获取当前类型的字符集编码，`getCollation` 用于获取当前类型的排序规则。`getPrecision` 和 `getScale` 方法分别用于获取该类型的精度和范围，精度表示字段的长度，范围则表示小数的位数。
 
-* **Function**
+### Function
 
-TODO
+Calcite 对函数的定义是：接受参数并返回结果的命名表达式。函数通过 Schema 进行注册，可以通过 `Schema#getFunctions` 获取函数，然后根据参数类型获取对应的函数。
 
-* **Lattice**
+```java
+public interface Function {
+    
+    List<FunctionParameter> getParameters();
+}
+```
+
+TODO 补充函数继承体系
+
+### Lattice
 
 TODO
 
