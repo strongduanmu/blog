@@ -191,20 +191,23 @@ public interface RelDataType {
 
 ### Function
 
-Calcite 对函数的定义是：接受参数并返回结果的命名表达式。函数通过 Schema 进行注册，可以通过 `Schema#getFunctions` 获取函数，然后根据参数类型获取对应的函数。
+Calcite 对函数的定义是：接受参数并返回结果的命名表达式。函数通过 Schema 进行注册，可以通过 `Schema#getFunctions` 获取函数，然后根据参数类型获取对应的函数。下面是 `Function` 接口声明：
 
 ```java
 public interface Function {
     
+  	// 获取函数参数
     List<FunctionParameter> getParameters();
 }
 ```
 
-TODO 补充函数继承体系
+Function 接口提供了 `getParameters` 获取函数参数的方法，Function 接口有 `ScalarFunction`、`AggregateFunction`、`TableFunction` 和 `TableMarco` 等几个主要的子接口。ScalarFunction 对应标量函数，也就是函数返回的结果为一个标量，AggregateFunction 对应聚合函数，会将多个值聚合计算为一个标量返回，TableFunction 对应表函数，会返回
 
-### Lattice
+![Function 接口及子接口](explore-apache-calcite-system-catalog-implementation/function-inheritance.png)
 
 TODO
+
+
 
 ## Calcite System Catalog 实现
 
