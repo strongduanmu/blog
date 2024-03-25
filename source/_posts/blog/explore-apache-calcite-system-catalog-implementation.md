@@ -34,7 +34,7 @@ Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是
 
 ## Calcite System Catalog 体系
 
-在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现是抽象类 `CalciteSchema`（如下所示），CalciteSchema 有 `CachingCalciteSchema` 和 `SimpleCalciteSchema` 两个子类，他们的区别主要是是否缓存表、函数和子模式。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的作用和内部实现。
+在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现是抽象类 `CalciteSchema`（如下所示），CalciteSchema 有 `CachingCalciteSchema` 和 `SimpleCalciteSchema` 两个子类，他们的区别主要是是否缓存表、函数和子模式。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的具体作用。
 
 ```java
 public abstract class CalciteSchema {
@@ -179,7 +179,7 @@ public interface RelDataType {
   	// 获取该类型的 JDBC 精度（字段长度，例如：-4.75，precision 为 3）
     int getPrecision();
 		
-  	// 获取该类型的范围（小数位数，例如：-4.75，scale 为 3）
+  	// 获取该类型的范围（小数位数，例如：-4.75，scale 为 2）
     int getScale();
 	
   	// 获取 SQL 类型
@@ -201,15 +201,28 @@ public interface Function {
 }
 ```
 
-Function 接口提供了 `getParameters` 获取函数参数的方法，Function 接口有 `ScalarFunction`、`AggregateFunction`、`TableFunction` 和 `TableMarco` 等几个主要的子接口。ScalarFunction 对应标量函数，也就是函数返回的结果为一个标量，AggregateFunction 对应聚合函数，会将多个值聚合计算为一个标量返回，TableFunction 对应表函数，会返回
+Function 接口提供了 `getParameters` 获取函数参数的方法，Function 接口有 `ScalarFunction`、`AggregateFunction`、`TableFunction` 和 `TableMarco` 等几个主要的子接口。ScalarFunction 对应标量函数，也就是函数返回的结果为一个标量，AggregateFunction 对应聚合函数，会将多个值聚合计算为一个标量返回。
+
+TableFunction 和 TableMacro 都对应了表函数，会返回一个表，他们的区别是 TableMacro 会在编译期间进行调用，编译器展开表达式允许 Calcite 实现更加强大的查询优化，例如我们可以对视图在编译期进行展开。相比于 TableMacro，TableFunction 则需要在执行阶段才能知道表的结果。
 
 ![Function 接口及子接口](explore-apache-calcite-system-catalog-implementation/function-inheritance.png)
 
-TODO
-
-
+以上我们介绍了 Calcite System Catalog 体系中涉及到的类及其主要作用，下面小节我们将结合源码一起看看 Calcite System Catalog 逻辑是如何实现的。
 
 ## Calcite System Catalog 实现
+
+为了更好地结合源码进行介绍，我们使用 [CsvTest#testPushDownProjectAggregateNested](https://github.com/apache/calcite/blob/2dba40e7a0a5651eac5a30d9e0a72f178bd9bff2/example/csv/src/test/java/org/apache/calcite/test/CsvTest.java#L308) 单测作为示例，测试 Case 中包含了表、列、函数等基本对象，并且涉及了分组查询和子查询等复杂语句，可以很好地覆盖到前文介绍的 Catalog 对象。
+
+```java
+final String sql = "explain plan " + extra + " for\n"
+    + "select gender, max(qty)\n"
+    + "from (\n"
+    + "  select name, gender, count(*) qty\n"
+    + "  from EMPS\n"
+    + "  group by name, gender) t\n"
+    + "group by gender";
+sql("smart", sql).returns(expected).ok();
+```
 
 ### System Catalog 初始化
 
