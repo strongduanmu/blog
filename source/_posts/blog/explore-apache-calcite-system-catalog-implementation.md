@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-23 09:00:00
+updated: 2024-03-26 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -225,6 +225,37 @@ sql("smart", sql).returns(expected).ok();
 ```
 
 ### System Catalog 初始化
+
+下面我们来探究下 System Catalog 初始化流程，单测程序使用了 Calcite JDBC，在初始化时会先创建 `CalciteConnectionImpl` 对象，该方法内部会创建 rootSchema，具体逻辑如下：
+
+```java
+// CalciteConnectionImpl 初始化
+this.rootSchema = requireNonNull(rootSchema !=null ? rootSchema : CalciteSchema.createRootSchema(true));
+```
+
+`CalciteSchema.createRootSchema` 方法会根据参数传递的标识决定是否创建 `metadata` Schema，metadata Schema 会注册 `COLUMNS`、`TABLES` 等系统表以提供相关的查询，具体逻辑可以参考 [MetadataSchema 类](https://github.com/apache/calcite/blob/122db544ca7b2488dadc88f1eaba54447e4af4b2/core/src/main/java/org/apache/calcite/jdbc/MetadataSchema.java#L33)。
+
+![注册 Metadata Schema](explore-apache-calcite-system-catalog-implementation/metadata-schema.png)
+
+业务相关的 Schema 和表信息注册，则是通过单测中配置的 `model` 进行声明，此案例中 model 为 `smart.json`。[ModelHandler 类](https://github.com/apache/calcite/blob/5d93ed4c89f048d30f83e6046159920044f4a8fe/core/src/main/java/org/apache/calcite/model/ModelHandler.java#L72)负责读取 model 文件，并解析 JSON 中的内容，再通过 SchemaPlus 注册新的 Schema，注册完成后会使用 `connection.setSchema(jsonRoot.defaultSchema);` 为当前连接设置默认 Schema。
+
+```java
+public void visit(JsonCustomSchema jsonSchema) {
+    try {
+      	// 获取当前 Schema 对象
+        final SchemaPlus parentSchema = currentMutableSchema("sub-schema");
+      	// 初始化 SchemaFactory
+        final SchemaFactory schemaFactory = AvaticaUtils.instantiatePlugin(SchemaFactory.class, jsonSchema.factory);
+      	// 调用 SchemaFactory 创建 Schema 对象
+        final Schema schema = schemaFactory.create(parentSchema, jsonSchema.name, operandMap(jsonSchema, jsonSchema.operand));
+      	// 通过 SchemaPlus 注册新的 Schema
+        final SchemaPlus schemaPlus = parentSchema.add(jsonSchema.name, schema);
+        populateSchema(jsonSchema, schemaPlus);
+    } catch (Exception e) {
+        throw new RuntimeException("Error instantiating " + jsonSchema, e);
+    }
+}
+```
 
 TODO
 
