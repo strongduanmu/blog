@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-26 08:00:00
+updated: 2024-03-27 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -233,13 +233,53 @@ sql("smart", sql).returns(expected).ok();
 this.rootSchema = requireNonNull(rootSchema !=null ? rootSchema : CalciteSchema.createRootSchema(true));
 ```
 
-`CalciteSchema.createRootSchema` 方法会根据参数传递的标识决定是否创建 `metadata` Schema，metadata Schema 会注册 `COLUMNS`、`TABLES` 等系统表以提供相关的查询，具体逻辑可以参考 [MetadataSchema 类](https://github.com/apache/calcite/blob/122db544ca7b2488dadc88f1eaba54447e4af4b2/core/src/main/java/org/apache/calcite/jdbc/MetadataSchema.java#L33)。
+`CalciteSchema.createRootSchema` 方法会根据参数传递的标识决定是否创建 `metadata` Schema，metadata Schema 会注册 `COLUMNS`、`TABLES` 等系统表以提供相关的查询。
 
 ![注册 Metadata Schema](explore-apache-calcite-system-catalog-implementation/metadata-schema.png)
+
+MetadataSchema 类继承了 AbstractSchema，并提供了 getTableMap 方法来获取表的元数据信息，具体的实现逻辑如下。在定义表的元数据时，案例中使用了 `CalciteMetaImpl.MetadataTable` 类，它继承了 `AbstractQueryableTable` 和 `AbstractTable`，`enumerator` 方法负责返回系统表对应的结果集，`getJdbcTableType` 方法则返回了 `Schema.TableType.SYSTEM_TABLE`，表明当前注册的表是系统表。
+
+```java
+class MetadataSchema extends AbstractSchema {
+  	// 定义表的元数据信息
+    private static final Map<String, Table> TABLE_MAP = ImmutableMap.of("COLUMNS", new CalciteMetaImpl.MetadataTable<MetaColumn>(MetaColumn.class) {
+        @Override
+        public Enumerator<MetaColumn> enumerator(final CalciteMetaImpl meta) {
+            final String catalog;
+            try {
+                catalog = meta.getConnection().getCatalog();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+          	// 查询元数据中注册表的列信息
+            return meta.tables(catalog).selectMany(meta::columns).enumerator();
+        }
+    }, "TABLES", new CalciteMetaImpl.MetadataTable<MetaTable>(MetaTable.class) {
+        @Override
+        public Enumerator<MetaTable> enumerator(CalciteMetaImpl meta) {
+            final String catalog;
+            try {
+                catalog = meta.getConnection().getCatalog();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+            // 查询元数据中注册表信息
+            return meta.tables(catalog).enumerator();
+        }
+    });
+  	
+  	// 重写 AbstractSchema#getTableMap 以提供表的元数据信息
+    @Override
+    protected Map<String, Table> getTableMap() {
+        return TABLE_MAP;
+    }
+}
+```
 
 业务相关的 Schema 和表信息注册，则是通过单测中配置的 `model` 进行声明，此案例中 model 为 `smart.json`。[ModelHandler 类](https://github.com/apache/calcite/blob/5d93ed4c89f048d30f83e6046159920044f4a8fe/core/src/main/java/org/apache/calcite/model/ModelHandler.java#L72)负责读取 model 文件，并解析 JSON 中的内容，再通过 SchemaPlus 注册新的 Schema，注册完成后会使用 `connection.setSchema(jsonRoot.defaultSchema);` 为当前连接设置默认 Schema。
 
 ```java
+// ModelHandler#visit 方法
 public void visit(JsonCustomSchema jsonSchema) {
     try {
       	// 获取当前 Schema 对象
@@ -257,9 +297,13 @@ public void visit(JsonCustomSchema jsonSchema) {
 }
 ```
 
+系统表和业务表 Schema 注册完成后，我们得到了如下的元数据信息，可以看到 `SALES` Schema 中的 tableMap 暂时为空，因为它使用了懒加载的方式，在具体需要使用到这些元数据时，才会去读取 CSV 文件注册表的元数据信息。CSV 元数据注册我们在 [Apache Calcite 快速入门指南 - Calcite 元数据定义](https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html#calcite-%E5%85%83%E6%95%B0%E6%8D%AE%E5%AE%9A%E4%B9%89) 中已经详细进行了介绍，感兴趣的朋友可以阅读学习。
+
+![注册完成的 Schema](explore-apache-calcite-system-catalog-implementation/registered-schema.png)
+
+### System Catalog 使用场景
+
 TODO
-
-
 
 ## 结语
 
