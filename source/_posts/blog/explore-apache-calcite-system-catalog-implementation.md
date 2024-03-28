@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-27 08:00:00
+updated: 2024-03-28 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -226,7 +226,7 @@ sql("smart", sql).returns(expected).ok();
 
 ### System Catalog 初始化
 
-下面我们来探究下 System Catalog 初始化流程，单测程序使用了 Calcite JDBC，在初始化时会先创建 `CalciteConnectionImpl` 对象，该方法内部会创建 rootSchema，具体逻辑如下：
+首先我们来探究下 System Catalog 初始化流程，单测程序使用了 Calcite JDBC，在执行 `DriverManager.getConnection("jdbc:calcite:", info)` 方法获取连接时会进行 Catalog 初始化，该方法内部会创建 `CalciteConnectionImpl` 对象，而 CalciteConnectionImpl 内部又会创建 rootSchema，具体逻辑如下：
 
 ```java
 // CalciteConnectionImpl 初始化
@@ -303,7 +303,37 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ### System Catalog 使用场景
 
-TODO
+完成 System Catalog 初始化后，我们再来探究下 Catalog 具体的使用场景。让我们回到 [CsvTest#testPushDownProjectAggregateNested](https://github.com/apache/calcite/blob/2dba40e7a0a5651eac5a30d9e0a72f178bd9bff2/example/csv/src/test/java/org/apache/calcite/test/CsvTest.java#L308) 单测，`statement.executeQuery(sql);` 方法负责执行 SQL，内部会调用 [CalciteMetaImpl#prepareAndExecute](https://github.com/apache/calcite/blob/9600147e7dcbb062d69a7277d7ba8304b27f5ca1/core/src/main/java/org/apache/calcite/jdbc/CalciteMetaImpl.java#L617) 方法进行准备和执行。准备阶段会调用 [CalcitePrepareImpl#prepareSql](https://github.com/apache/calcite/blob/967bb5acc5448bc8d6ee9b9f5fa3c5f0d71405c2/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L482) 方法，prepareSql 核心逻辑如下，首先会使用 Catalog 信息初始化 `CalciteCatalogReader`，然后通过 Planner Factory 创建优化器 RelOptPlanner，最终使用 prepare2_ 方法对 SQL 进行解析、校验、优化以及代码生成。
+
+```java
+<T> CalciteSignature<T> prepare_(Context context, Query<T> query, Type elementType, long maxRowCount) {
+    if (SIMPLE_SQLS.contains(query.sql)) {
+        return simplePrepare(context, castNonNull(query.sql));
+    }
+    final JavaTypeFactory typeFactory = context.getTypeFactory();
+  	// 初始化 CalciteCatalogReader
+    CalciteCatalogReader catalogReader = new CalciteCatalogReader(context.getRootSchema(), context.getDefaultSchemaPath(), typeFactory, context.config());
+		// 创建 Planner Factory
+  	final List<Function1<Context, RelOptPlanner>> plannerFactories = createPlannerFactories();
+    RuntimeException exception = Util.FoundOne.NULL;
+    for (Function1<Context, RelOptPlanner> plannerFactory : plannerFactories) {
+      	// 获取优化器 RelOptPlanner
+        final RelOptPlanner planner = plannerFactory.apply(context);
+        try {
+            CalcitePreparingStmt preparingStmt = getPreparingStmt(context, elementType, catalogReader, planner);
+          	// 解析、校验、优化并生成执行代码
+            return prepare2_(context, query, elementType, maxRowCount, catalogReader, preparingStmt);
+        } catch (RelOptPlanner.CannotPlanException e) {
+            exception = e;
+        }
+    }
+    throw exception;
+}
+```
+
+由于本文主要探讨 Calcite System Catalog 相关的实现，因此先聚焦在 `CalciteCatalogReader` 类，后续流程中的 SQL 校验、SQL AST 转关系代数 RelNode 都会使用到 CalciteCatalogReader。
+
+TODO CalciteCatalogReader 继承体系，以及内部实现
 
 ## 结语
 
