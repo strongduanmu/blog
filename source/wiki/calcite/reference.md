@@ -236,94 +236,94 @@ windowSpec:
 
 在 `merge` 中，至少必须存在 `WHEN MATCHED` 和 `WHEN NOT MATCHED` 子句之一。
 
-`tablePrimary` 只能在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowExtend--)包含 `EXTEND` 子句；在这些相同的一致性级别中，insert 中的任何列都可以由 `columnDecl` 替换，这与将其包含在 EXTEND 子句中具有类似的效果。
+`tablePrimary` 只能在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowExtend--)中包含 `EXTEND` 子句；在这些相同的一致性级别中，insert 中的任何列都可以由 `columnDecl` 替换，这与将其包含在 EXTEND 子句中具有类似的效果。
 
 在 `orderItem` 中，如果 `expression` 是正整数 n，则表示 SELECT 子句中的第 n 项。
 
-在查询中，`count` 和 `start` 可以分别是无符号整数文字或值为整数的动态参数。
+在查询中，`count` 和 `start` 可以分别是无符号整数字面量或值为整数的动态参数。
 
-TODO
+聚合查询是在 SELECT 子句中包含 GROUP BY 或 HAVING 子句，或包含聚合函数的查询。在聚合查询的 SELECT、HAVING 和 ORDER BY 子句中，所有表达式必须是当前组内的常量（即：由 GROUP BY 子句定义的分组常量或常量）、或者是聚合函数，或者是常量和聚合函数的组合。聚合和分组函数只能出现在聚合查询中，并且只能出现在 SELECT、HAVING 或 ORDER BY 子句中。
 
-聚合查询是在 SELECT 子句中包含 GROUP BY 或 HAVING 子句或聚合函数的查询。在聚合查询的 SELECT、HAVING 和 ORDER BY 子句中，所有表达式必须是当前组内的常量（即，由 GROUP BY 子句定义的分组常量或常量）、聚合函数或常量的组合和聚合函数。聚合和分组函数只能出现在聚合查询中，并且只能出现在 SELECT、HAVING 或 ORDER BY 子句中。
+标量子查询是指用作表达式的子查询。如果子查询没有返回行，则值为 NULL，如果它返回多于一行，则会报错。
 
-标量子查询是用作表达式的子查询。如果子查询没有返回行，则值为NULL；如果它返回多于一行，则出错。
+`IN`、`EXISTS`、`UNIQUE` 和标量子查询，可以出现在任何可以出现表达式的位置（例如 JOIN 的 SELECT 子句、WHERE 子句、ON 子句，或作为聚合函数的参数）。
 
-IN、EXISTS、UNIQUE 和标量子查询可以出现在任何可以出现表达式的位置（例如 JOIN 的 SELECT 子句、WHERE 子句、ON 子句或作为聚合函数的参数）。
+`IN`、`EXISTS`、`UNIQUE` 或标量子查询可以是相关的，即：它可以引用一个封闭查询中 FROM 子句的表。
 
-IN、EXISTS、UNIQUE 或标量子查询可以是相关的；也就是说，它可以引用封闭查询的 FROM 子句中的表。
+`GROUP BY DISTINCT` 删除重复的分组集（例如：`GROUP BY DISTINCT GROUPING SETS ((a), (a, b), (a))` 相当于 `GROUP BY GROUPING SETS ((a), (a, b))`），`GROUP BY ALL` 和 `GROUP BY` 是等价的。
 
-GROUP BY DISTINCT 删除重复的分组集（例如，“GROUP BY DISTINCT GROUPING SETS ((a), (a, b), (a))”相当于“GROUP BY GROUPING SETS ((a), (a, b) ））”）；GROUP BY ALL 相当于 GROUP BY。
+`selectWithoutFrom` 相当于 `VALUES`，但它不是标准 SQL，并且仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
 
-*selectWithoutFrom*相当于 VALUES，但不是标准 SQL，仅在某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isFromRequired--)中允许。
+`MINUS` 相当于 `EXCEPT`，但不是标准 SQL，仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
 
-MINUS 相当于 EXCEPT，但不是标准 SQL，仅在某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
+`CROSS APPLY` 和 `OUTER APPLY` 仅允许在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isApplyAllowed--)中使用。
 
-CROSS APPLY 和 OUTER APPLY 仅允许在某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isApplyAllowed--)中使用。
+`LIMIT start, count` 等价于 `LIMIT count OFFSET start`，但仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isLimitStartCountAllowed--)中允许使用。
 
-“LIMIT start, count” is equivalent to “LIMIT count OFFSET start” but is only allowed in certain [conformance levels](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isLimitStartCountAllowed--).
+在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isOffsetLimitAllowed--)中，`OFFSET start` 可能发生在 `LIMIT count` 之前。
 
-“OFFSET start” may occur before “LIMIT count” in certain [conformance levels](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isOffsetLimitAllowed--).
+`VALUE` 与 `VALUES` 等效，但不是标准 SQL，并且仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isValueAllowed--)中允许使用。
 
-VALUE is equivalent to VALUES, but is not standard SQL and is only allowed in certain [conformance levels](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isValueAllowed--).
+## 关键字
 
-## Keywords
+以下是 SQL 关键字的列表。保留的关键字使用粗体展示。
 
-The following is a list of SQL keywords. Reserved keywords are **bold**.
+A, **ABS**, ABSENT, ABSOLUTE, ACTION, ADA, ADD, ADMIN, AFTER, **ALL**, **ALLOCATE**, **ALLOW**, **ALTER**, ALWAYS, **AND**, **ANY**, APPLY, **ARE**, **ARRAY**, ARRAY_AGG, ARRAY_CONCAT_AGG, **ARRAY_MAX_CARDINALITY**, **AS**, ASC, **ASENSITIVE**, ASSERTION, ASSIGNMENT, **ASYMMETRIC**, **AT**, **ATOMIC**, ATTRIBUTE, ATTRIBUTES, **AUTHORIZATION**, **AVG**, BEFORE, **BEGIN**, **BEGIN_FRAME**, **BEGIN_PARTITION**, BERNOULLI, **BETWEEN**, **BIGINT**, **BINARY**, **BIT**, **BLOB**, **BOOLEAN**, **BOTH**, BREADTH, **BY**, C, **CALL**, **CALLED**, **CARDINALITY**, CASCADE, **CASCADED**, **CASE**, **CAST**, CATALOG, CATALOG_NAME, **CEIL**, **CEILING**, CENTURY, CHAIN, **CHAR**, **CHARACTER**, CHARACTERISTICS, CHARACTERS, **CHARACTER_LENGTH**, CHARACTER_SET_CATALOG, CHARACTER_SET_NAME, CHARACTER_SET_SCHEMA, **CHAR_LENGTH**, **CHECK**, **CLASSIFIER**, CLASS_ORIGIN, **CLOB**, **CLOSE**, **COALESCE**, COBOL, **COLLATE**, COLLATION, COLLATION_CATALOG, COLLATION_NAME, COLLATION_SCHEMA, **COLLECT**, **COLUMN**, COLUMN_NAME, COMMAND_FUNCTION, COMMAND_FUNCTION_CODE, **COMMIT**, COMMITTED, **CONDITION**, CONDITIONAL, CONDITION_NUMBER, **CONNECT**, CONNECTION, CONNECTION_NAME, **CONSTRAINT**, CONSTRAINTS, CONSTRAINT_CATALOG, CONSTRAINT_NAME, CONSTRAINT_SCHEMA, CONSTRUCTOR, **CONTAINS**, CONTAINS_SUBSTR, CONTINUE, **CONVERT**, **CORR**, **CORRESPONDING**, **COUNT**, **COVAR_POP**, **COVAR_SAMP**, **CREATE**, **CROSS**, **CUBE**, **CUME_DIST**, **CURRENT**, **CURRENT_CATALOG**, **CURRENT_DATE**, **CURRENT_DEFAULT_TRANSFORM_GROUP**, **CURRENT_PATH**, **CURRENT_ROLE**, **CURRENT_ROW**, **CURRENT_SCHEMA**, **CURRENT_TIME**, **CURRENT_TIMESTAMP**, **CURRENT_TRANSFORM_GROUP_FOR_TYPE**, **CURRENT_USER**, **CURSOR**, CURSOR_NAME, **CYCLE**, DATA, DATABASE, **DATE**, **DATETIME**, DATETIME_DIFF, DATETIME_INTERVAL_CODE, DATETIME_INTERVAL_PRECISION, DATETIME_TRUNC, DATE_DIFF, DATE_TRUNC, **DAY**, DAYOFWEEK, DAYOFYEAR, DAYS, **DEALLOCATE**, **DEC**, DECADE, **DECIMAL**, **DECLARE**, **DEFAULT**, DEFAULTS, DEFERRABLE, DEFERRED, **DEFINE**, DEFINED, DEFINER, DEGREE, **DELETE**, **DENSE_RANK**, DEPTH, **DEREF**, DERIVED, DESC, **DESCRIBE**, DESCRIPTION, DESCRIPTOR, **DETERMINISTIC**, DIAGNOSTICS, **DISALLOW**, **DISCONNECT**, DISPATCH, **DISTINCT**, DOMAIN, DOT, **DOUBLE**, DOW, DOY, **DROP**, **DYNAMIC**, DYNAMIC_FUNCTION, DYNAMIC_FUNCTION_CODE, **EACH**, **ELEMENT**, **ELSE**, **EMPTY**, ENCODING, **END**, **END-EXEC**, **END_FRAME**, **END_PARTITION**, EPOCH, **EQUALS**, ERROR, **ESCAPE**, **EVERY**, **EXCEPT**, EXCEPTION, EXCLUDE, EXCLUDING, **EXEC**, **EXECUTE**, **EXISTS**, **EXP**, **EXPLAIN**, **EXTEND**, **EXTERNAL**, **EXTRACT**, **FALSE**, **FETCH**, **FILTER**, FINAL, FIRST, **FIRST_VALUE**, **FLOAT**, **FLOOR**, FOLLOWING, **FOR**, **FOREIGN**, FORMAT, FORTRAN, FOUND, FRAC_SECOND, **FRAME_ROW**, **FREE**, **FRIDAY**, **FROM**, **FULL**, **FUNCTION**, **FUSION**, G, GENERAL, GENERATED, GEOMETRY, **GET**, **GLOBAL**, GO, GOTO, **GRANT**, GRANTED, **GROUP**, **GROUPING**, **GROUPS**, GROUP_CONCAT, **HAVING**, HIERARCHY, **HOLD**, HOP, **HOUR**, HOURS, **IDENTITY**, IGNORE, ILIKE, IMMEDIATE, IMMEDIATELY, IMPLEMENTATION, **IMPORT**, **IN**, INCLUDE, INCLUDING, INCREMENT, **INDICATOR**, **INITIAL**, INITIALLY, **INNER**, **INOUT**, INPUT, **INSENSITIVE**, **INSERT**, INSTANCE, INSTANTIABLE, **INT**, **INTEGER**, **INTERSECT**, **INTERSECTION**, **INTERVAL**, **INTO**, INVOKER, **IS**, ISODOW, ISOLATION, ISOYEAR, JAVA, **JOIN**, JSON, **JSON_ARRAY**, **JSON_ARRAYAGG**, **JSON_EXISTS**, **JSON_OBJECT**, **JSON_OBJECTAGG**, **JSON_QUERY**, **JSON_SCOPE**, **JSON_VALUE**, K, KEY, KEY_MEMBER, KEY_TYPE, LABEL, **LAG**, **LANGUAGE**, **LARGE**, LAST, **LAST_VALUE**, **LATERAL**, **LEAD**, **LEADING**, **LEFT**, LENGTH, LEVEL, LIBRARY, **LIKE**, **LIKE_REGEX**, **LIMIT**, **LN**, **LOCAL**, **LOCALTIME**, **LOCALTIMESTAMP**, LOCATOR, **LOWER**, M, MAP, **MATCH**, MATCHED, **MATCHES**, **MATCH_NUMBER**, **MATCH_RECOGNIZE**, **MAX**, MAXVALUE, **MEASURES**, **MEMBER**, **MERGE**, MESSAGE_LENGTH, MESSAGE_OCTET_LENGTH, MESSAGE_TEXT, **METHOD**, MICROSECOND, MILLENNIUM, MILLISECOND, **MIN**, **MINUS**, **MINUTE**, MINUTES, MINVALUE, **MOD**, **MODIFIES**, **MODULE**, **MONDAY**, **MONTH**, MONTHS, MORE, **MULTISET**, MUMPS, NAME, NAMES, NANOSECOND, **NATIONAL**, **NATURAL**, **NCHAR**, **NCLOB**, NESTING, **NEW**, **NEXT**, **NO**, **NONE**, **NORMALIZE**, NORMALIZED, **NOT**, **NTH_VALUE**, **NTILE**, **NULL**, NULLABLE, **NULLIF**, NULLS, NUMBER, **NUMERIC**, OBJECT, **OCCURRENCES_REGEX**, OCTETS, **OCTET_LENGTH**, **OF**, **OFFSET**, **OLD**, **OMIT**, **ON**, **ONE**, **ONLY**, **OPEN**, OPTION, OPTIONS, **OR**, **ORDER**, ORDERING, **ORDINAL**, ORDINALITY, OTHERS, **OUT**, **OUTER**, OUTPUT, **OVER**, **OVERLAPS**, **OVERLAY**, OVERRIDING, PAD, **PARAMETER**, PARAMETER_MODE, PARAMETER_NAME, PARAMETER_ORDINAL_POSITION, PARAMETER_SPECIFIC_CATALOG, PARAMETER_SPECIFIC_NAME, PARAMETER_SPECIFIC_SCHEMA, PARTIAL, **PARTITION**, PASCAL, PASSING, PASSTHROUGH, PAST, PATH, **PATTERN**, **PER**, **PERCENT**, **PERCENTILE_CONT**, **PERCENTILE_DISC**, **PERCENT_RANK**, **PERIOD**, **PERMUTE**, PIVOT, PLACING, PLAN, PLI, **PORTION**, **POSITION**, **POSITION_REGEX**, **POWER**, **PRECEDES**, PRECEDING, **PRECISION**, **PREPARE**, PRESERVE, **PREV**, **PRIMARY**, PRIOR, PRIVILEGES, **PROCEDURE**, PUBLIC, **QUALIFY**, QUARTER, QUARTERS, **RANGE**, **RANK**, READ, **READS**, **REAL**, **RECURSIVE**, **REF**, **REFERENCES**, **REFERENCING**, **REGR_AVGX**, **REGR_AVGY**, **REGR_COUNT**, **REGR_INTERCEPT**, **REGR_R2**, **REGR_SLOPE**, **REGR_SXX**, **REGR_SXY**, **REGR_SYY**, RELATIVE, **RELEASE**, REPEATABLE, REPLACE, **RESET**, RESPECT, RESTART, RESTRICT, **RESULT**, **RETURN**, RETURNED_CARDINALITY, RETURNED_LENGTH, RETURNED_OCTET_LENGTH, RETURNED_SQLSTATE, RETURNING, **RETURNS**, **REVOKE**, **RIGHT**, RLIKE, ROLE, **ROLLBACK**, **ROLLUP**, ROUTINE, ROUTINE_CATALOG, ROUTINE_NAME, ROUTINE_SCHEMA, **ROW**, **ROWS**, ROW_COUNT, **ROW_NUMBER**, **RUNNING**, **SAFE_CAST**, **SAFE_OFFSET**, **SAFE_ORDINAL**, **SATURDAY**, **SAVEPOINT**, SCALAR, SCALE, SCHEMA, SCHEMA_NAME, **SCOPE**, SCOPE_CATALOGS, SCOPE_NAME, SCOPE_SCHEMA, **SCROLL**, **SEARCH**, **SECOND**, SECONDS, SECTION, SECURITY, **SEEK**, **SELECT**, SELF, **SENSITIVE**, SEPARATOR, SEQUENCE, SERIALIZABLE, SERVER, SERVER_NAME, SESSION, **SESSION_USER**, **SET**, SETS, **SHOW**, **SIMILAR**, SIMPLE, SIZE, **SKIP**, **SMALLINT**, **SOME**, SOURCE, SPACE, **SPECIFIC**, **SPECIFICTYPE**, SPECIFIC_NAME, **SQL**, **SQLEXCEPTION**, **SQLSTATE**, **SQLWARNING**, SQL_BIGINT, SQL_BINARY, SQL_BIT, SQL_BLOB, SQL_BOOLEAN, SQL_CHAR, SQL_CLOB, SQL_DATE, SQL_DECIMAL, SQL_DOUBLE, SQL_FLOAT, SQL_INTEGER, SQL_INTERVAL_DAY, SQL_INTERVAL_DAY_TO_HOUR, SQL_INTERVAL_DAY_TO_MINUTE, SQL_INTERVAL_DAY_TO_SECOND, SQL_INTERVAL_HOUR, SQL_INTERVAL_HOUR_TO_MINUTE, SQL_INTERVAL_HOUR_TO_SECOND, SQL_INTERVAL_MINUTE, SQL_INTERVAL_MINUTE_TO_SECOND, SQL_INTERVAL_MONTH, SQL_INTERVAL_SECOND, SQL_INTERVAL_YEAR, SQL_INTERVAL_YEAR_TO_MONTH, SQL_LONGVARBINARY, SQL_LONGVARCHAR, SQL_LONGVARNCHAR, SQL_NCHAR, SQL_NCLOB, SQL_NUMERIC, SQL_NVARCHAR, SQL_REAL, SQL_SMALLINT, SQL_TIME, SQL_TIMESTAMP, SQL_TINYINT, SQL_TSI_DAY, SQL_TSI_FRAC_SECOND, SQL_TSI_HOUR, SQL_TSI_MICROSECOND, SQL_TSI_MINUTE, SQL_TSI_MONTH, SQL_TSI_QUARTER, SQL_TSI_SECOND, SQL_TSI_WEEK, SQL_TSI_YEAR, SQL_VARBINARY, SQL_VARCHAR, **SQRT**, **START**, STATE, STATEMENT, **STATIC**, **STDDEV_POP**, **STDDEV_SAMP**, **STREAM**, STRING_AGG, STRUCTURE, STYLE, SUBCLASS_ORIGIN, **SUBMULTISET**, **SUBSET**, SUBSTITUTE, **SUBSTRING**, **SUBSTRING_REGEX**, **SUCCEEDS**, **SUM**, **SUNDAY**, **SYMMETRIC**, **SYSTEM**, **SYSTEM_TIME**, **SYSTEM_USER**, **TABLE**, **TABLESAMPLE**, TABLE_NAME, TEMPORARY, **THEN**, **THURSDAY**, TIES, **TIME**, **TIMESTAMP**, TIMESTAMPADD, TIMESTAMPDIFF, TIMESTAMP_DIFF, TIMESTAMP_TRUNC, **TIMEZONE_HOUR**, **TIMEZONE_MINUTE**, TIME_DIFF, TIME_TRUNC, **TINYINT**, **TO**, TOP_LEVEL_COUNT, **TRAILING**, TRANSACTION, TRANSACTIONS_ACTIVE, TRANSACTIONS_COMMITTED, TRANSACTIONS_ROLLED_BACK, TRANSFORM, TRANSFORMS, **TRANSLATE**, **TRANSLATE_REGEX**, **TRANSLATION**, **TREAT**, **TRIGGER**, TRIGGER_CATALOG, TRIGGER_NAME, TRIGGER_SCHEMA, **TRIM**, **TRIM_ARRAY**, **TRUE**, **TRUNCATE**, **TRY_CAST**, **TUESDAY**, TUMBLE, TYPE, **UESCAPE**, UNBOUNDED, UNCOMMITTED, UNCONDITIONAL, UNDER, **UNION**, **UNIQUE**, **UNKNOWN**, UNNAMED, **UNNEST**, UNPIVOT, **UPDATE**, **UPPER**, **UPSERT**, USAGE, **USER**, USER_DEFINED_TYPE_CATALOG, USER_DEFINED_TYPE_CODE, USER_DEFINED_TYPE_NAME, USER_DEFINED_TYPE_SCHEMA, **USING**, UTF16, UTF32, UTF8, **VALUE**, **VALUES**, **VALUE_OF**, **VARBINARY**, **VARCHAR**, **VARYING**, **VAR_POP**, **VAR_SAMP**, VERSION, **VERSIONING**, VIEW, **WEDNESDAY**, WEEK, WEEKS, **WHEN**, **WHENEVER**, **WHERE**, **WIDTH_BUCKET**, **WINDOW**, **WITH**, **WITHIN**, **WITHOUT**, WORK, WRAPPER, WRITE, XML, **YEAR**, YEARS, ZONE.
 
-A、 **ABS**、ABSENT、ABSOLUTE、ACTION、ADA、ADD、ADMIN、AFTER、 **ALL**、 **ALLOCATE**、 **ALLOW**、 **ALTER**、ALWAYS、 **AND**、 **ANY**、APPLY、 **ARE**、 **ARRAY**、ARRAY_AGG、ARRAY_CONCAT_AGG、 **ARRAY_MAX_CARDINALITY**、 **AS**、ASC、 **ASENSITIVE**、断言、分配、 **不对称**、 **AT**、 **原子**、属性、属性、授权 **、** AVG **、**之前、 **开始**、 **BEGIN_FRAME**、 **BEGIN_PARTITION**、BERNOULLI、 **BETWEEN**、 **BIGINT**、 **BINARY**、 **BIT**、 **BLOB**、 **BOOLEAN**、 **BOTH**、BREADTH、 **BY**、 C、 **呼叫**、 **CALLED**、 **CARDINALITY**、CASCADE、 **CASCADED**、 **CASE**、 **CAST**、CATALOG、CATALOG_NAME、 **CEIL**、 **CEILING**、CENTURY、CHAIN、 **CHAR**、 **CHARACTER**、CHARACTERISTICS、CHARACTERS、 CHARACTER_LENGTH **、** CHARACTER_SET_CATALOG、CHARACTER_SET_NAME、CHARACTER_SET_SCHEMA、 **CHAR_LENG TH 、****检查**、 **分类器**、CLASS_ORIGIN、 **CLOB**、 **关闭**、 **合并**、COBOL、 **COLLATE**、COLLATION、COLLATION_CATALOG、COLLATION_NAME、COLLATION_SCHEMA、 **COLLECT**、 **COLUMN**、COLUMN_NAME、COMMAND_FUNCTION、COMMAND_FUNCTION_CODE、 **COMMIT**、COMMITTED、 **CONDITION**、CONDITIONAL、CONDITION_NUMBER、 **CONNECT**、CONNECTION、CONNECTION_NAME、 CONSTRA INT 、**约束**、约束目录、约束名称、 CONSTRAINT_SCHEMA、 CONSTRUCTOR、 **CONTAINS**、 CONTAINS_SUBSTR、 CONTINUE、 **CONVERT**、 **CORR**、 **CORRESPONDING**、 **COUNT**、 **COVAR_POP**、 **COVAR_SAMP**、 **CREATE**、 **CROSS**、 **CUBE**、 **CUME_DIST**、 **CURRENT**、 **CURRENT_CATALOG**、 **CURRENT_DATE**、 **CURRENT_DEFAULT_TRANSFORM_GROUP**、 **CURRENT_PATH**、 **CURRENT_ROLE 、** **CURRENT_ROW**、 **CURRENT_SCHEMA**、 **CURRENT_TIME**、 **CURRENT_TIMESTAMP**、 **CURRENT_TRANSFORM_GROUP_FOR_TYPE**、 **CURRENT_USER**、 **CURSOR**、CURSOR_NAME 、 **CYCLE**、DATA、DATABASE 、 **日期、DATETIME** **、** DATETIME_DIFF 、DATETIME_INTERVAL_CODE、 DATETIME_INTERVAL_PRECISION 、DATETIME_TRUNC、DATE_DIFF、DATE_TRUNC、 **DAY**、DAYOFWEEK、DAYOFYEAR、天、 **解除分配**、 **十二月**、十年、小数、声明、 **默认**、 默认、**可推迟**、 **推迟、****定义**、定义、 定义者、学位、删除、密集排名、 **深度**、 **DEREF**、 **派生**、DESC、 **描述**、描述、描述符、 **确定性**、诊断、 **DISALLOW**、 **DISCONNECT**、 DISPATCH 、 **DISTINCT**、 DOMAIN 、 DOT 、 **DOUBLE**、 DOW 、 DOY 、 **DROP**、 **DYNAMIC**、 DYNAMIC_FUNCTION 、 DYNAMIC_FUNCTION_CODE 、 **EACH**、 **ELEMENT**、 **ELSE**、 **EMPTY**、 ENCODING 、 **END**、 **END-EXEC**、 **END_FRAME**、 **END_PARTITION**、 **纪元**，等于，错误、 **转义**、 **每个**、除了、 **异常、****排除**、排除、执行、执行、存在 、 **EXP** **、****解释**、扩展、外部、 **提取**、 **错误**、 获取 **、**过滤 **器**、 **最终**、 **第一**、 **第一**值 、 **浮点**、 **地板**、 **以下**、 **for**、 **FOREIGN**、FORMAT、FORTRAN、FOUND、FRAC_SECOND、 **FRAME_ROW**、 **FREE**、 **FRIDAY**、 **FROM**、 **FULL**、 **FUNCTION**、 **FUSION**、G、GENERAL、GENERATED、GEOMETRY、 **GET**、 **GLOBAL**、GO、GOTO、 **GRANT**、GRANTED、 **GROUP**、 **GROUPING**、 **GROUPS**、GROUP_CONCAT、 **HAVING**、HIERARCHY、 **HOLD**、HOP、 **HOUR**、HOURS、 **IDENTITY**、忽略、喜欢、立即、立即、实施、导入、 **IN** **、包括**、 包括、增量、 **指示器**、 **初始**、初始、 **内部**、 **INOUT**、INPUT、 **INSENSITIVE**、 **INSERT**、INSTANCE、INSTANTIABLE、 **INT**、 **INTEGER**、 **INTERSECT**、 **INTERSECTION**、 **INTERVAL**、 **INTO**、INVOKER、 **IS**、ISODOW、ISOLATION、ISOYEAR、JAVA、 **JOIN**、JSON、 **JSON_ARRAY**、 **JSON_ARRAYAGG**、 **JSON_EXISTS**、 **JSON_OBJECT**、 **JSON_对象标签**， **JSON_QUERY**、 **JSON_SCOPE**、 **JSON_VALUE**、K、KEY、KEY_MEMBER、KEY_TYPE、LABEL、 **LAG**、 **LANGUAGE**、 **LARGE**、LAST、 **LAST_VALUE**、 **LATERAL**、 **LEAD**、 **LEADING**、 **LEFT**、LENGTH、LEVEL、LIBRARY、 **LIKE**、 **LIKE_REGEX**、 **LIMIT**、 **LN**、 **LOCAL**、 **LOCALTIME**、 **LOCALTIMESTAMP**、 LOCATOR 、 **LOWER**、 M 、 MAP 、 **MATCH**、 MATCHED 、 **MATCHES**、 **MATCH_NUMBER**、 **MATCH_RECOGNIZE**、 **MAX**、 MAXVALUE 、 **MEASURES**、 **MEMBER**、 **MERGE**、 MESSAGE_LENGTH 、 MESSAGE_OCTET_LENGTH 、 MESSAGE_TEXT 、 **METHOD**、 MICROSECOND 、 MILLENNIUM 、 **毫秒**、 **分**、减、 **分钟**、分钟、最小值、 **MOD**、 **修改**、 **模块**、 **星期一**、月份、 **月份**、更多、多集、 **腮腺炎**、名称、名称、纳秒、 **国家**、 **自然**、 **NCHAR**、 **NCLOB**、嵌套、 **新**、 **下一个**、 **否**、 **无**, **NORMALIZE** , NORMALIZED, **NOT** , **NTH_VALUE** , **NTILE** , **NULL** , NULLABLE, **NULLIF** , NULLS, NUMBER, **NUMERIC** , OBJECT, **OCCURRENCES_REGEX** , OCTETS, **OCTET_LENGTH** , **OF** , **OFFSET** , **OLD** , **OMIT** , **ON** , **1** , **ONLY** , **OPEN** , OPTION , OP自然科学、 **OR**、 **ORDER**、 ORDERING、 **ORDINAL**、 ORDINALITY 、 OTHERS 、 **OUT**、 **OUTER**、 OUTPUT 、 **OVER**、 **OVERLAPS**、 **OVERLAY**、 OVERRIDING 、 PAD 、 **PARAMETER**、 PARAMETER_MODE 、 PARAMETER_NAME 、 PARAMETER_ORDINAL_POSITION 、 PARAMETER_SPECIFIC_CATALOG 、 PARAMETER_SPECIFIC_NAME 、PARAMETER_SPECIFIC_SCHEMA、部分、分区 **、** PASCAL、通过, PASSTHROUGH, PAST, PATH, **PATTERN** , **PER** , **PERCENT** , **PERCENTILE_CONT** , **PERCENTILE_DISC** , **PERCENT_RANK** , **PERIOD** , **PERMUTE** , PIVOT, PLACING , PLAN , PLI , **PORTION** , **POSITION** , **POSITION_REGEX** , **POWER** , **PRECEDES** , PRECEDING **, PRECISION** , **PREPAR** E、 **保留、上一个**, **主要**, 优先, 特权, 程序, **公共****,**限定, **四分之一,****四分之一**, 范围, 排名, **读取**, 读取, **实数**, **递归**, **参考**, **参考**, **参考**, **REGR_AVGX** , **REGR_AVGY** , **REGR_COUNT** , **REGR_INTERCEPT** , **REGR_R2** , **REGR** **_SLOPE**、 **REGR_SXX**、 REGR_SXY 、 **REGR_SYY**、 RELATIVE 、 **RELEASE**、 REPEATABLE 、 REPLACE 、 **RESET**、 RESPECT 、 RESTART 、 RESTRICT 、 **RESULT**、 **RETURN**、 RETURNED_CARDINALITY 、 RETURNED_LENGTH 、 RETURNED_OCTET_LENGTH 、 RETURNED_SQLSTATE 、 RETURNING 、 **RETURNS**、 **REVOKE**、 **RIGHT**、 RLIKE、 ROLE、 **ROLLBACK**、 **ROLLUP**、 ROUTINE、 ROUTINE_CATALOG、 ROUTINE_NAME、 ROUTINE_SCHEMA、 **ROW**、 **ROWS**、 ROW_COUNT、 **ROW_NUMBER**、 **RUNNING**、 **SAFE_CAST**、 **SAFE_OFFSET**、 **SAFE_ORDINAL**、 **SATURDAY**、 **SAVEPOINT**、 SCALAR、 SCALE、 SCHEMA、 SCHEMA_名称、范围 **、** SCOPE_CATALOGS 、SCOPE_NAME、SCOPE_SCHEMA、 **SCROLL**、 **SEARCH**、 **SECOND**、SECONDS、SECTION、SECURITY、 **SEEK**、 **SELECT**、SELF、 **SENSITIVE**、SEPARATOR、SEQUENCE、SERIALIZABLE、SERVER、SERVER_NAME、 SESSION、 **SESSION_USER**、 **SET**、SETS、 **SHOW**、 **SIMILAR**、SIMPLE、SIZE 、 **SKIP**、 **SMALLINT**、 **SOME**、 SOURCE 、 SPACE 、 **SPECIFIC**、 **SPECIFICTYPE**、 SPECIFIC_NAME 、 **SQL**、 **SQLEXCEPTION**、 **SQLSTATE**、 **SQLWARNING**、 SQL_BIGINT 、 SQL_BINARY 、 SQL_BIT 、 SQL_BLOB 、 SQL_BOOLEAN 、 SQL_CHAR 、 SQL_CLOB 、 SQL_DATE 、 SQL_DECIMAL 、 SQL_DOUBLE 、 SQL_FLO AT、SQL_INTEGER、SQL_INTERVAL_DAY 、 SQL_INTERVAL_DAY_TO_HOUR、SQL_INTERVAL_DAY_TO_MINUTE、SQL_INTERVAL_DAY_TO_SECOND、SQL_INTERVAL_HOUR、SQL_INTERVAL_HOUR_TO_MINUTE、SQL_INTERVAL_HOUR_TO_SECOND、SQL_INTERVAL_MINUTE、SQL_INTERVAL_MINUTE_TO_SECOND、SQL_INTERVAL_MONTH、SQL_INTERVAL_SECOND、SQL_INTERVAL_YEAR 、 SQL_INTERVAL_YEAR_TO_MONTH、SQL_LONGVARBINARY、SQL_LONGVARCHAR、SQL_LONGVARNCHAR、SQL_NCHAR、SQL_NCLOB、SQL_NUMERIC、SQL_NVARCHAR、SQL_REAL、SQL_SMALLINT、SQL_TIME、SQL_TIMESTAMP、SQL_TINYINT、SQL_TSI_DAY 、 SQL_TSI_FRAC_SECOND、SQL_TSI_HOUR、SQL_TSI_MICROSECOND、SQL_TSI_MINUTE、SQL_TSI_MONTH、SQL_TSI_QUARTER、SQL_TSI_SECOND、SQL_TSI_WEEK、SQL_TSI_YEAR、SQL_VARBINARY、SQL_VARCHAR、SQRT、START、STATE、STATIC、STATIC、STDDEV_POP、ST DDEV_SAMP **、**流 **、** STRING_AGG **、**结构 **、**样式 **、** SUBCLASS_ORIGIN **、** SUBMULTISET **、**子 **集**、 SUBSTITUTE、 **SUBSTRING**、 **SUBSTRING_REGEX**、 **SUCCEEDS**、 **SUM**、 **SUNDAY**、 **SYMMETRIC**、 **SYSTEM**、 **SYSTEM_TIME**、 **SYSTEM_USER**、 **TABLE**、 **TABLESAMPLE**、 TABLE_NAME、 TEMPORARY、 **THEN**、 **星期四**、 TIES、 **TIME**、 **TIMESTAMP**、 TIMESTAMPADD、 TIMESTAMPDIFF、 TIMESTAMP_DIFF、 TIMESTAMP_TRUNC、 **TIMEZONE_HOUR** 、 TIMEZONE_MINUTE 、 **TIME_DIFF**、 TIME_TRUNC、 **TINYINT**、 **TO**、 TOP_LEVEL_COUNT、 **TRAILING**、 TRANSAC TION、事务_活动、事务_已提交、事务_ROLLED_BACK、转换、转换、 **TRANSLATE**、 **TRANSLATE_REGEX**、 **TRANSLATION**、 **TREAT**、 **TRIGGER**、 TRIGGER_CATALOG 、 TRIGGER_NAME 、 TRIGGER_SCHEMA 、 **TRIM**、 **TRIM_ARRAY**、 **TRUE**、 **TRUNCATE**、 **TRY_CAST**、 **TUESDAY**、 TUMBLE 、 TYPE 、 **UECAPE**、 UNBOUNDED 、 UNCOMMITTED 、 UNCONDITIONAL 、 UNDER 、联合 **、**唯一 **、**未知 **、**未命名、 **UNNEST**、 UNPIVOT、 **UPDATE**、 **UPPER**、 **UPSERT**、 USAGE 、 **USER**、 USER_DEFINED_TYPE_CATALOG 、 USER_DEFINED_TYPE_CODE 、 USER_DEFINED_TYPE_NAME 、 USER_DEFINED_TYPE_SCHEMA 、 **USING**、 UTF16 、 UTF32 、 UTF8 、 **VALUE**、 **VALUES**、 **VALUE_OF**、 **VARBINARY**、 **VARCHAR**、 **VARYING**、 **VAR_POP**、 **VAR_SAMP**、 版本、 **版本**、视图、 **星期三**、周、周、何时 、 **何时**、 **何处**、 **WIDTH_BUCKET**、 **窗口**、 **WITH** **、****WITHIN**、 **WITHOUT**、 工作、WRAPPER、WRITE、XML、 **YEAR**、YEARS、ZONE。
-
-## 身份标识
+## 标识符
 
 标识符是 SQL 查询中使用的表、列和其他元数据元素的名称。
 
 不带引号的标识符（例如 emp）必须以字母开头，并且只能包含字母、数字和下划线。它们被隐式转换为大写。
 
-带引号的标识符，例如`"Employee Name"`、 以双引号开头和结尾。它们几乎可以包含任何字符，包括空格和其他标点符号。如果您希望在标识符中包含双引号，请使用另一个双引号对其进行转义，如下所示： `"An employee called ""Fred""."`。
+带引号的标识符，例如 `"Employee Name"` ，以双引号开头和结尾。它们几乎可以包含任何字符，包括空格和其他标点符号。如果您希望在标识符中包含双引号，请使用另一个双引号对其进行转义，例如：`"An employee called ""Fred""."`。
 
-在方解石中，将标识符与引用对象的名称匹配是区分大小写的。但请记住，未加引号的标识符在匹配之前会隐式转换为大写，并且如果它引用的对象是使用未加引号的标识符作为其名称创建的，则其名称也将转换为大写。
+在 Calcite 中，将标识符与引用对象的名称匹配是区分大小写的。但请记住，未加引号的标识符在匹配之前会隐式转换为大写，并且如果它引用的对象是使用未加引号的标识符作为其名称创建的，则其名称也将转换为大写。
 
 ## 数据类型
 
 ### 标量类型
 
-| 数据类型                          | 描述                     | 范围和示例文字                                               |
-| :-------------------------------- | :----------------------- | :----------------------------------------------------------- |
-| 布尔值                            | 逻辑值                   | 值：真、假、未知                                             |
-| 天音                              | 1 字节有符号整数         | 范围是 -128 到 127                                           |
-| 小智                              | 2 字节有符号整数         | 范围为 -32768 至 32767                                       |
-| 整数、整型                        | 4 字节有符号整数         | 范围为 -2147483648 至 2147483647                             |
-| BIGINT                            | 8 字节有符号整数         | 范围为 -9223372036854775808 至 9223372036854775807           |
-| 小数（p，s）                      | 固定点                   | 示例：123.45 和 DECIMAL '123.45' 是相同的值，并且类型为 DECIMAL(5, 2) |
-| 数字（p，s）                      | 固定点                   | DECIMAL 的同义词                                             |
-| 真实的                            | 4字节浮点数              | 6位小数精度；示例：CAST(1.2 AS REAL)、CAST('Infinity' AS REAL) |
-| 双倍的                            | 8字节浮点数              | 15位小数精度；示例：1.4E2、CAST('-Infinity' AS DOUBLE)、CAST('NaN' AS DOUBLE) |
-| 漂浮                              | 8字节浮点数              | 双的同义词                                                   |
-| 字符(n)、字符(n)                  | 定宽字符串               | 'Hello'、''（空字符串）、_latin1'Hello'、n'Hello'、_UTF16'Hello'、'Hello' 'there'（文字分为多个部分）、e'Hello\nthere'（包含 C 的文字-式逃脱） |
-| VARCHAR(n)、字符变化(n)           | 变长字符串               | 作为 CHAR(n)                                                 |
-| 二进制(n)                         | 固定宽度的二进制字符串   | x'45F0AB'、x''（空二进制字符串）、x'AB' 'CD'（多部分二进制字符串文字） |
-| VARBINARY(n)、二进制 VARYING(n)   | 变长二进制字符串         | 作为二进制(n)                                                |
-| 日期                              | 日期                     | 示例：日期“1969-07-20”                                       |
-| 时间                              | 一天中的时间             | 示例：时间“20:17:40”                                         |
-| 时间戳[无时区]                    | 日期和时间               | 示例：TIMESTAMP '1969-07-20 20:17:40'                        |
-| 带有本地时区的时间戳              | 带有当地时区的日期和时间 | 示例：TIMESTAMP '1969-07-20 20:17:40 美国/洛杉矶'            |
-| 带时区的时间戳                    | 带时区的日期和时间       | 示例：TIMESTAMP '1969-07-20 20:17:40 美国/洛杉矶'            |
-| INTERVAL 时间单位 [ TO 时间单位 ] | 日期时间间隔             | 示例：间隔“1-5”年月、间隔“45”天、间隔“1 2:34:56.789”天到秒   |
-| 几何学                            | 几何学                   | 示例： ST_GeomFromText('POINT (30 10)')                      |
+| 数据类型                          | 描述                         | 范围和示例字面量                                             |
+| :-------------------------------- | :--------------------------- | :----------------------------------------------------------- |
+| BOOLEAN                           | 逻辑值                       | 值：TRUE, FALSE, UNKNOWN                                     |
+| TINYINT                           | 1 字节有符号整数             | 范围是 -128 到 127                                           |
+| SMALLINT                          | 2 字节有符号整数             | 范围为 -32768 至 32767                                       |
+| INTEGER, INT                      | 4 字节有符号整数             | 范围为 -2147483648 至 2147483647                             |
+| BIGINT                            | 8 字节有符号整数             | 范围为 -9223372036854775808 至 9223372036854775807           |
+| DECIMAL(p, s)                     | 定点数（即：小数点位置固定） | 示例：123.45 和 DECIMAL '123.45' 是相同的值，并且类型为 DECIMAL(5, 2) |
+| NUMERIC(p, s)                     | 定点数（即：小数点位置固定） | DECIMAL 的同义词                                             |
+| REAL                              | 4 字节浮点数                 | 6 位小数精度；示例：CAST(1.2 AS REAL)、CAST('Infinity' AS REAL) |
+| DOUBLE                            | 8 字节浮点数                 | 15 位小数精度；示例：1.4E2、CAST('-Infinity' AS DOUBLE)、CAST('NaN' AS DOUBLE) |
+| FLOAT                             | 8 字节浮点数                 | DOUBLE 的同义词                                              |
+| CHAR(n), CHARACTER(n)             | 定宽字符串                   | 'Hello'、''（空字符串）、_latin1'Hello'、n'Hello'、_UTF16'Hello'、'Hello' 'there'（字面量分为多个部分）、e'Hello\nthere'（字面量包含 C 风格的转义符） |
+| VARCHAR(n), CHARACTER VARYING(n)  | 变长字符串                   | 作为 CHAR(n)                                                 |
+| BINARY(n)                         | 固定宽度的二进制字符串       | x'45F0AB'、x''（空二进制字符串）、x'AB' 'CD'（多部分二进制字符串字面量） |
+| VARBINARY(n), BINARY VARYING(n)   | 变长二进制字符串             | 作为 BINARY(n)                                               |
+| DATE                              | 日期                         | 示例：DATE “1969-07-20”                                      |
+| TIME                              | 一天中的时间                 | 示例：TIME “20:17:40”                                        |
+| TIMESTAMP [ WITHOUT TIME ZONE ]   | 日期和时间                   | 示例：TIMESTAMP '1969-07-20 20:17:40'                        |
+| TIMESTAMP WITH LOCAL TIME ZONE    | 带有当地时区的日期和时间     | 示例：TIMESTAMP ‘1969-07-20 20:17:40 America/Los Angeles’    |
+| TIMESTAMP WITH TIME ZONE          | 带时区的日期和时间           | 示例：TIMESTAMP ‘1969-07-20 20:17:40 America/Los Angeles’    |
+| INTERVAL timeUnit [ TO timeUnit ] | 日期时间间隔                 | 示例：INTERVAL ‘1-5’ YEAR TO MONTH, INTERVAL ‘45’ DAY, INTERVAL ‘1 2:34:56.789’ DAY TO SECOND |
+| GEOMETRY                          | 几何类型                     | 示例： ST_GeomFromText('POINT (30 10)')                      |
 
-在哪里：
+`timeUnit` 包含了以后可选值：
 
-```
+```sql
 timeUnit:
   MILLENNIUM | CENTURY | DECADE | YEAR | QUARTER | MONTH | WEEK | DOY | DOW | DAY | HOUR | MINUTE | SECOND | EPOCH
 ```
 
-笔记：
+注意：
 
 - DATE、TIME 和 TIMESTAMP 没有时区。对于这些类型，甚至没有隐式时区，例如 UTC（如 Java 中）或本地时区。由用户或应用程序提供时区。反过来，TIMESTAMP WITH LOCAL TIME ZONE 不会在内部存储时区，但它将依赖于提供的时区来提供正确的语义。
-- [仅在某些符合级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowGeometry--)中才允许使用几何图形 。
-- 间隔文字只能使用时间单位 YEAR、QUARTER、MONTH、WEEK、DAY、HOUR、MINUTE 和 SECOND。在某些 [一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowPluralTimeUnits--)中，我们还允许使用复数形式：YEARS、QUARTERS、MONTHS、WEEKS、DAYS、HOURS、MINUTES 和 SECONDS。
+- 仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowGeometry--)中才允许使用几何类型。
+- 间隔字面量只能使用时间单位 YEAR、QUARTER、MONTH、WEEK、DAY、HOUR、MINUTE 和 SECOND。在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowPluralTimeUnits--)中，我们还允许使用复数形式：YEARS、QUARTERS、MONTHS、WEEKS、DAYS、HOURS、MINUTES 和 SECONDS。
 
 ### 非标量类型
+
+TODO
 
 | 类型     | 描述                                                       | 示例文字                              |
 | :------- | :--------------------------------------------------------- | :------------------------------------ |
@@ -339,7 +339,7 @@ Note:
 
 - Every `ROW` column type can have an optional [ NULL | NOT NULL ] suffix to indicate if this column type is nullable, default is not nullable.
 
-### Spatial types
+### 空间类型
 
 Spatial data is represented as character strings encoded as [well-known text (WKT)](https://en.wikipedia.org/wiki/Well-known_text) or binary strings encoded as [well-known binary (WKB)](https://en.wikipedia.org/wiki/Well-known_binary).
 
@@ -361,9 +361,9 @@ Where you would use a literal, apply the `ST_GeomFromText` function, for example
 | MULTISURFACE       | -         | generalization of MULTIPOLYGON                               |
 | MULTIPOLYGON       | 6         | `ST_GeomFromText('MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))')` |
 
-## Operators and functions
+## 运算符和函数
 
-### Operator precedence
+### 运算符优先级
 
 The operator precedence and associativity, highest to lowest.
 
@@ -384,7 +384,7 @@ The operator precedence and associativity, highest to lowest.
 
 Note that `::`,`<=>` is dialect-specific, but is shown in this table for completeness.
 
-### Comparison operators
+### 比较运算符
 
 | OPERATOR SYNTAX                                   | DESCRIPTION                                                  |
 | :------------------------------------------------ | :----------------------------------------------------------- |
@@ -427,7 +427,7 @@ comp:
   |   <=>
 ```
 
-### Logical operators
+### 逻辑运算符
 
 | OPERATOR SYNTAX        | DESCRIPTION                                                  |
 | :--------------------- | :----------------------------------------------------------- |
@@ -441,7 +441,7 @@ comp:
 | boolean IS UNKNOWN     | Whether *boolean* is UNKNOWN                                 |
 | boolean IS NOT UNKNOWN | Whether *boolean* is not UNKNOWN                             |
 
-### Arithmetic operators and functions
+### 算术运算符和函数
 
 | OPERATOR SYNTAX                 | DESCRIPTION                                                  |
 | :------------------------------ | :----------------------------------------------------------- |
@@ -479,7 +479,7 @@ comp:
 | TAN(numeric)                    | Returns the tangent of *numeric*                             |
 | TRUNCATE(numeric1 [, numeric2]) | Truncates *numeric1* to optionally *numeric2* (if not specified 0) places right to the decimal point |
 
-### Character string operators and functions
+### 字符串运算符和函数
 
 | OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -500,7 +500,7 @@ Not implemented:
 
 - SUBSTRING(string FROM regexp FOR regexp)
 
-### Binary string operators and functions
+### 二进制字符串运算符和函数
 
 | OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
@@ -512,7 +512,7 @@ Not implemented:
 | SUBSTRING(binary FROM integer)                               | Returns a substring of *binary* starting at a given point    |
 | SUBSTRING(binary FROM integer FOR integer)                   | Returns a substring of *binary* starting at a given point with a given length |
 
-### Date/time functions
+### 日期/时间函数
 
 | OPERATOR SYNTAX                                | DESCRIPTION                                                  |
 | :--------------------------------------------- | :----------------------------------------------------------- |
@@ -552,7 +552,7 @@ Not implemented:
 - 间隔-间隔
 - 间隔/间隔
 
-### 系统功能
+### 系统函数
 
 | 运算符语法     | 描述                                                       |
 | :------------- | :--------------------------------------------------------- |
@@ -716,14 +716,14 @@ Implicit type coercion of following cases are ignored:
 - Type coercion within `CHARACTER` types are always ignored, i.e. from `CHAR(20)` to `VARCHAR(30)`;
 - Type coercion from a numeric to another with higher precedence is ignored, i.e. from `INT` to `LONG`.
 
-##### Strategies for Finding Common Type
+##### 寻找共同类型的策略
 
 - If the operator has expected data types, just take them as the desired one. (e.g. the UDF would have `eval()` method which has reflection argument types);
 - If there is no expected data type but the data type families are registered, try to coerce the arguments to the family’s default data type, i.e. the String family will have a `VARCHAR` type;
 - If neither expected data type nor families are specified, try to find the tightest common type of the node types, i.e. `INTEGER` and `DOUBLE` will return `DOUBLE`, the numeric precision does not lose for this case;
 - If no tightest common type is found, try to find a wider type, i.e. `VARCHAR` and `INTEGER` will return `INTEGER`, we allow some precision loss when widening decimal to fractional, or promote to `VARCHAR` type.
 
-### Value constructors
+### 值构造函数
 
 | OPERATOR SYNTAX                         | DESCRIPTION                                                  |
 | :-------------------------------------- | :----------------------------------------------------------- |
@@ -736,7 +736,7 @@ Implicit type coercion of following cases are ignored:
 | ARRAY ‘[’ value [, value ]* ‘]’         | Creates an array from a list of values.                      |
 | MAP ‘[’ key, value [, key, value ]* ‘]’ | Creates a map from a list of key-value pairs.                |
 
-### Collection functions
+### 集合函数
 
 | OPERATOR SYNTAX                                           | DESCRIPTION                                                  |
 | :-------------------------------------------------------- | :----------------------------------------------------------- |
@@ -755,7 +755,7 @@ Implicit type coercion of following cases are ignored:
 
 See also: the UNNEST relational operator converts a collection to a relation.
 
-### Period predicates
+### 句点谓词
 
 | OPERATOR SYNTAX                      | DESCRIPTION |
 | ------------------------------------ | ----------- |
@@ -778,9 +778,9 @@ period:
   |   PERIOD (datetime, interval)
 ```
 
-### JDBC function escape
+### JDBC 函数转义
 
-#### Numeric
+#### 数字
 
 | OPERATOR SYNTAX                   | DESCRIPTION                                                  |
 | :-------------------------------- | :----------------------------------------------------------- |
@@ -810,7 +810,7 @@ period:
 | {fn TAN(numeric)}                 | Returns the tangent of *numeric*                             |
 | {fn TRUNCATE(numeric1, numeric2)} | Truncates *numeric1* to *numeric2* places right to the decimal point |
 
-#### String
+#### 字符串
 
 | OPERATOR SYNTAX                              | DESCRIPTION                                                  |
 | :------------------------------------------- | :----------------------------------------------------------- |
@@ -830,7 +830,7 @@ period:
 | {fn SUBSTRING(string, offset, length)}       | Returns a character string that consists of *length* characters from *string* starting at the *offset* position |
 | {fn UCASE(string)}                           | Returns a string in which all alphabetic characters in *string* have been converted to upper case |
 
-#### Date/time
+#### 日期/时间
 
 | OPERATOR SYNTAX                                      | DESCRIPTION                                                  |
 | :--------------------------------------------------- | :----------------------------------------------------------- |
@@ -850,7 +850,7 @@ period:
 | {fn TIMESTAMPADD(timeUnit, count, datetime)}         | Adds an interval of *count* *timeUnit*s to a datetime        |
 | {fn TIMESTAMPDIFF(timeUnit, timestamp1, timestamp2)} | Subtracts *timestamp1* from *timestamp2* and returns the result in *timeUnit*s |
 
-#### System
+#### 系统
 
 | OPERATOR SYNTAX             | DESCRIPTION                      |
 | :-------------------------- | :------------------------------- |
@@ -858,13 +858,13 @@ period:
 | {fn IFNULL(value1, value2)} | Returns value2 if value1 is null |
 | {fn USER()}                 | Equivalent to `CURRENT_USER`     |
 
-#### Conversion
+#### 转换
 
 | OPERATOR SYNTAX           | DESCRIPTION              |
 | :------------------------ | :----------------------- |
 | {fn CONVERT(value, type)} | Cast *value* into *type* |
 
-### Aggregate functions
+### 聚合函数
 
 Syntax:
 
@@ -929,7 +929,7 @@ Not implemented:
 - REGR_SLOPE(numeric1, numeric2)
 - REGR_SXY(numeric1, numeric2)
 
-#### Ordered-Set Aggregate Functions
+#### 有序集聚合函数
 
 The syntax is as for *aggregateCall*, except that `WITHIN GROUP` is required.
 
@@ -942,7 +942,7 @@ In the following:
 | PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY orderItem)  | Returns a percentile based on a continuous distribution of the column values, interpolating between adjacent input items if needed |
 | PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY orderItem [, orderItem ]*) | Returns a percentile based on a discrete distribution of the column values returning the first input value whose position in the ordering equals or exceeds the specified fraction |
 
-### Window functions
+### 窗口函数
 
 Syntax:
 
@@ -991,7 +991,7 @@ Not implemented:
 - PERCENT_RANK(value) OVER window
 - CUME_DIST(value) OVER window
 
-### Grouping functions
+### 分组函数
 
 | OPERATOR SYNTAX                          | DESCRIPTION                                                  |
 | :--------------------------------------- | :----------------------------------------------------------- |
@@ -999,13 +999,13 @@ Not implemented:
 | GROUP_ID()                               | Returns an integer that uniquely identifies the combination of grouping keys |
 | GROUPING_ID(expression [, expression ]*) | Synonym for `GROUPING`                                       |
 
-### DESCRIPTOR
+### 描述符
 
 | OPERATOR SYNTAX             | DESCRIPTION                                                  |
 | :-------------------------- | :----------------------------------------------------------- |
 | DESCRIPTOR(name [, name ]*) | DESCRIPTOR appears as an argument in a function to indicate a list of names. The interpretation of names is left to the function. |
 
-### Table functions
+### 表函数
 
 Table functions occur in the `FROM` clause.
 
