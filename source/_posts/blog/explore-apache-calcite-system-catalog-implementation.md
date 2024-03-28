@@ -333,7 +333,11 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 由于本文主要探讨 Calcite System Catalog 相关的实现，因此先聚焦在 `CalciteCatalogReader` 类，后续流程中的 SQL 校验、SQL AST 转关系代数 RelNode 都会使用到 CalciteCatalogReader。
 
-TODO CalciteCatalogReader 继承体系，以及内部实现
+![CatalogReder 相关接口和类](explore-apache-calcite-system-catalog-implementation/catalog-reader-class.png)
+
+
+
+TODO
 
 ## 结语
 
