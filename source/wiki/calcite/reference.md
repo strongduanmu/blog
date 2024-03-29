@@ -296,7 +296,7 @@ A, **ABS**, ABSENT, ABSOLUTE, ACTION, ADA, ADD, ADMIN, AFTER, **ALL**, **ALLOCAT
 | REAL                              | 4 字节浮点数                 | 6 位小数精度；示例：CAST(1.2 AS REAL)、CAST('Infinity' AS REAL) |
 | DOUBLE                            | 8 字节浮点数                 | 15 位小数精度；示例：1.4E2、CAST('-Infinity' AS DOUBLE)、CAST('NaN' AS DOUBLE) |
 | FLOAT                             | 8 字节浮点数                 | DOUBLE 的同义词                                              |
-| CHAR(n), CHARACTER(n)             | 定宽字符串                   | 'Hello'、''（空字符串）、_latin1'Hello'、n'Hello'、_UTF16'Hello'、'Hello' 'there'（字面量分为多个部分）、e'Hello\nthere'（字面量包含 C 风格的转义符） |
+| CHAR(n), CHARACTER(n)             | 定长字符串                   | 'Hello'、''（空字符串）、_latin1'Hello'、n'Hello'、_UTF16'Hello'、'Hello' 'there'（字面量分为多个部分）、e'Hello\nthere'（字面量包含 C 风格的转义符） |
 | VARCHAR(n), CHARACTER VARYING(n)  | 变长字符串                   | 作为 CHAR(n)                                                 |
 | BINARY(n)                         | 固定宽度的二进制字符串       | x'45F0AB'、x''（空二进制字符串）、x'AB' 'CD'（多部分二进制字符串字面量） |
 | VARBINARY(n), BINARY VARYING(n)   | 变长二进制字符串             | 作为 BINARY(n)                                               |
@@ -308,7 +308,7 @@ A, **ABS**, ABSENT, ABSOLUTE, ACTION, ADA, ADD, ADMIN, AFTER, **ALL**, **ALLOCAT
 | INTERVAL timeUnit [ TO timeUnit ] | 日期时间间隔                 | 示例：INTERVAL ‘1-5’ YEAR TO MONTH, INTERVAL ‘45’ DAY, INTERVAL ‘1 2:34:56.789’ DAY TO SECOND |
 | GEOMETRY                          | 几何类型                     | 示例： ST_GeomFromText('POINT (30 10)')                      |
 
-`timeUnit` 包含了以后可选值：
+`timeUnit` 包含了以下可选值：
 
 ```sql
 timeUnit:
@@ -323,43 +323,43 @@ timeUnit:
 
 ### 非标量类型
 
-TODO
+| 类型     | 描述                         | 示例字面量                         |
+| :------- | :--------------------------- | :--------------------------------- |
+| ANY      | 所有类型的联合               |                                    |
+| UNKNOWN  | 未知类型的值，用作占位符     |                                    |
+| ROW      | 具有 1 列或多列的行          | 示例：row(f0 int null, f1 varchar) |
+| MAP      | 键值对集合                   | 示例：(int, varchar) map           |
+| MULTISET | 可能包含重复项的无序集合     | 示例：int multiset                 |
+| ARRAY    | 可能包含重复项的有序连续集合 | 示例：varchar(10) array            |
+| CURSOR   | 执行结果之上的游标           |                                    |
 
-| 类型     | 描述                                                       | 示例文字                              |
-| :------- | :--------------------------------------------------------- | :------------------------------------ |
-| 任何     | 所有类型的联合                                             |                                       |
-| 未知     | 未知类型的值；用作占位符                                   |                                       |
-| 排       | 具有 1 列或多列的行                                        | Example: row(f0 int null, f1 varchar) |
-| MAP      | Collection of keys mapped to values                        | Example: (int, varchar) map           |
-| MULTISET | Unordered collection that may contain duplicates           | Example: int multiset                 |
-| ARRAY    | Ordered, contiguous collection that may contain duplicates | Example: varchar(10) array            |
-| CURSOR   | Cursor over the result of executing a query                |                                       |
+注意：
 
-Note:
-
-- Every `ROW` column type can have an optional [ NULL | NOT NULL ] suffix to indicate if this column type is nullable, default is not nullable.
+- 每个 `ROW` 列类型，都可以有一个可选的 `[ NULL | NOT NULL ]` 后缀，用来声明此列类型是否可为空，默认值是不可为空。
 
 ### 空间类型
 
-Spatial data is represented as character strings encoded as [well-known text (WKT)](https://en.wikipedia.org/wiki/Well-known_text) or binary strings encoded as [well-known binary (WKB)](https://en.wikipedia.org/wiki/Well-known_binary).
+空间数据使用字符串（众所周知的 [text (WKT)](https://en.wikipedia.org/wiki/Well-known_text) 编码）或者二进制字符串进行表示（众所周知的 [binary (WKB)](https://en.wikipedia.org/wiki/Well-known_binary) 编码）。
 
-Where you would use a literal, apply the `ST_GeomFromText` function, for example `ST_GeomFromText('POINT (30 10)')`.
+在要使用字面量的地方，应用 `ST_GeomFromText` 函数，例如 `ST_GeomFromText('POINT (30 10)')` 。
 
-| DATA TYPE          | TYPE CODE | EXAMPLES IN WKT                                              |
-| :----------------- | :-------- | :----------------------------------------------------------- |
-| GEOMETRY           | 0         | generalization of Point, Curve, Surface, GEOMETRYCOLLECTION  |
-| POINT              | 1         | `ST_GeomFromText('POINT (30 10)')` is a point in 2D space; `ST_GeomFromText('POINT Z(30 10 2)')` is point in 3D space |
-| CURVE              | 13        | generalization of LINESTRING                                 |
-| LINESTRING         | 2         | `ST_GeomFromText('LINESTRING (30 10, 10 30, 40 40)')`        |
-| SURFACE            | 14        | generalization of Polygon, PolyhedralSurface                 |
-| POLYGON            | 3         | `ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')` is a pentagon; `ST_GeomFromText('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))')` is a pentagon with a quadrilateral hole |
-| POLYHEDRALSURFACE  | 15        |                                                              |
-| GEOMETRYCOLLECTION | 7         | a collection of zero or more GEOMETRY instances; a generalization of MULTIPOINT, MULTILINESTRING, MULTIPOLYGON |
-| MULTIPOINT         | 4         | `ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))')` is equivalent to `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)')` |
-| MULTICURVE         | -         | generalization of MULTILINESTRING                            |
-| MULTILINESTRING    | 5         | `ST_GeomFromText('MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))')` |
-| MULTISURFACE       | -         | generalization of MULTIPOLYGON                               |
-| MULTIPOLYGON       | 6         | `ST_GeomFromText('MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))')` |
+TODO
+
+| 数据类型           | 类型编码 | WKT 中的示例                                                 |
+| :----------------- | :------- | :----------------------------------------------------------- |
+| GEOMETRY           | 0        | generalization of Point, Curve, Surface, GEOMETRYCOLLECTION  |
+| POINT              | 1        | `ST_GeomFromText('POINT (30 10)')` is a point in 2D space; `ST_GeomFromText('POINT Z(30 10 2)')` is point in 3D space |
+| CURVE              | 13       | generalization of LINESTRING                                 |
+| LINESTRING         | 2        | `ST_GeomFromText('LINESTRING (30 10, 10 30, 40 40)')`        |
+| SURFACE            | 14       | generalization of Polygon, PolyhedralSurface                 |
+| POLYGON            | 3        | `ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')` is a pentagon; `ST_GeomFromText('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))')` is a pentagon with a quadrilateral hole |
+| POLYHEDRALSURFACE  | 15       |                                                              |
+| GEOMETRYCOLLECTION | 7        | a collection of zero or more GEOMETRY instances; a generalization of MULTIPOINT, MULTILINESTRING, MULTIPOLYGON |
+| MULTIPOINT         | 4        | `ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))')` is equivalent to `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)')` |
+| MULTICURVE         | -        | generalization of MULTILINESTRING                            |
+| MULTILINESTRING    | 5        | `ST_GeomFromText('MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))')` |
+| MULTISURFACE       | -        | generalization of MULTIPOLYGON                               |
+| MULTIPOLYGON       | 6        | `ST_GeomFromText('MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))')` |
 
 ## 运算符和函数
 
