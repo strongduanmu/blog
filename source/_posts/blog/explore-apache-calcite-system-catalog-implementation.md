@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-28 08:00:00
+updated: 2024-03-29 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -335,9 +335,64 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ![CatalogReder 相关接口和类](explore-apache-calcite-system-catalog-implementation/catalog-reader-class.png)
 
-上图展示了 `CatalogReder` 相关接口和类，CatalogReder 是校验器和优化器读取表元数据的接口，它继承了 `RelOptSchema`、`SqlValidatorCatalogReader` 和 `SqlOperatorTable`。
+上图展示了 `CatalogReder` 相关接口和类，CatalogReder 是校验器和优化器读取表元数据的接口，它继承了 `RelOptSchema`、`SqlValidatorCatalogReader` 和 `SqlOperatorTable` 接口。RelOptSchema 接口是 `RelOptTable` 对象的集合，接口提供了 `getTableForMember` 方法用于获取指定名称的 RelOptTable 对象。SqlValidatorCatalogReader 接口用于为 SqlValidator 提供元数据信息，SqlValidatorCatalogReader 接口的主要方法如下：
 
+```java
+public interface SqlValidatorCatalogReader extends Wrapper {
 
+  	// 根据名称查找表
+    SqlValidatorTable getTable(List<String> names);
+		
+  	// 根据名称查找自定义类型
+    RelDataType getNamedType(SqlIdentifier typeName);
+		
+  	// 根据名称查找模式中的对象
+    List<SqlMoniker> getAllSchemaObjectNames(List<String> names);
+
+  	// 返回用于查找表的所有 schema 路径
+    List<List<String>> getSchemaPaths();
+		
+  	// 返回 SqlNameMatcher 对象，用于大小写匹配
+    SqlNameMatcher nameMatcher();
+
+  	// 根据 projection 创建对应的 RelDataType
+    RelDataType createTypeFromProjection(RelDataType type, List<String> columnNameList);    
+  	
+  	// 获取 root schema
+    CalciteSchema getRootSchema();
+    
+    CalciteConnectionConfig getConfig();
+}
+```
+
+SqlOperatorTable 接口用于查找 SQL 运算符和函数，内部提供了 `lookupOperatorOverloads` 方法，会根据运算符名称以及语法类型进行查找，并根据 SqlNameMatcher 决定是否区分大小写，查找到的结果会追加到 operatorList 中返回。
+
+```java
+public interface SqlOperatorTable {
+    /**
+     * Retrieves a list of operators with a given name and syntax. For example,
+     * by passing SqlSyntax.Function, the returned list is narrowed to only
+     * matching SqlFunction objects.
+     *
+     * @param opName       name of operator
+     * @param category     function category to look up, or null for any matching operator
+     * @param syntax       syntax type of operator
+     * @param operatorList mutable list to which to append matches
+     * @param nameMatcher  Name matcher
+     */
+    void lookupOperatorOverloads(SqlIdentifier opName, @Nullable SqlFunctionCategory category, SqlSyntax syntax, List<SqlOperator> operatorList, SqlNameMatcher nameMatcher);
+
+    /**
+     * Retrieves a list of all functions and operators in this table. Used for
+     * automated testing. Depending on the table type, may or may not be mutable.
+     *
+     * @return list of SqlOperator objects
+     */
+    List<SqlOperator> getOperatorList();
+}
+```
+
+了解了这三个接口主要提供的方法后，我们来看下 CalciteCatalogReader 中具体的实现逻辑。
 
 TODO
 
