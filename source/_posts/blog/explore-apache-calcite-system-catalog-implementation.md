@@ -335,6 +335,8 @@ public void visit(JsonCustomSchema jsonSchema) {
 
 ![CatalogReder 相关接口和类](explore-apache-calcite-system-catalog-implementation/catalog-reader-class.png)
 
+上图展示了 `CatalogReder` 相关接口和类，CatalogReder 是校验器和优化器读取表元数据的接口，它继承了 `RelOptSchema`、`SqlValidatorCatalogReader` 和 `SqlOperatorTable`。
+
 
 
 TODO

@@ -1812,12 +1812,7 @@ BigQuery’s type system uses confusingly different names for types and function
 
 - `JSON_LENGTH`//如果第一个参数为null则返回`JSON_KEYS`null`JSON_REMOVE`
 
-- ```plaintext
-  JSON_TYPE
-  ```
-
-  通常返回一个大写字符串标志，指示 JSON 输入的类型。目前支持的类型标志有：
-
+- `JSON_TYPE` 通常返回一个大写字符串标志，指示 JSON 输入的类型。目前支持的类型标志有：
   - 整数
   - 细绳
   - 漂浮
@@ -1828,23 +1823,13 @@ BigQuery’s type system uses confusingly different names for types and function
   - 目的
   - 大批
   - 无效的
-
-- ```plaintext
-  JSON_DEPTH
-  ```
-
-  定义 JSON 值的深度如下：
-
+  
+- `JSON_DEPTH` 定义 JSON 值的深度如下：
   - 空数组、空对象或标量值的深度为 1；
   - 仅包含深度为 1 的元素的非空数组或仅包含深度为 1 的成员值的非空对象的深度为 2；
   - 否则，JSON 文档的深度大于 2。
-
-- ```plaintext
-  JSON_LENGTH
-  ```
-
-  定义 JSON 值的长度如下：
-
+  
+- `JSON_LENGTH` 定义 JSON 值的长度如下：
   - 标量值的长度为 1；
   - 数组或对象的长度是包含的元素数量。
 
@@ -2077,7 +2062,7 @@ FROM (VALUES (true)) AS t(f0);
 | :---------: | :---------: | :---------: | :---------: |
 | Aa_Bb_CcD_d | Aa_Bb_CcD_d | Aa_Bb_CcD_d | Aa_Bb_CcD_d |
 
-## 用户定义函数
+### 用户定义函数
 
 方解石是可延伸的。您可以使用用户代码定义每种函数。对于每种函数，通常有多种定义函数的方法，从方便到高效。
 
@@ -2090,7 +2075,7 @@ FROM (VALUES (true)) AS t(f0);
 要实现*聚合函数*，有两种选择：
 
 - 创建一个具有 public static 和方法的类`init`，`add`并`result`注册该类；
-- 创建一个具有公共非静态 和 方法的类`init`，以及一个不带参数的公共构造函数，并注册该类。`add``result`
+- 创建一个具有公共非静态 和 方法的类`init`，以及一个不带参数的公共构造函数，并注册该类。
 
 `merge`（可选）向类添加公共方法；这允许 Calcite 生成合并小计的代码。
 
@@ -2110,7 +2095,7 @@ FROM (VALUES (true)) AS t(f0);
 
 Calcite 从实现函数的 Java 方法的参数和返回类型推导出函数的参数类型和结果类型。[此外，您可以使用参数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/linq4j/function/Parameter.html)注释指定每个参数的名称和可选性 。
 
-### 使用命名参数和可选参数调用函数
+#### 使用命名参数和可选参数调用函数
 
 通常，当您调用函数时，需要按顺序指定其所有参数。但如果函数有很多参数，特别是如果您想随着时间的推移添加更多参数，这可能会成为问题。
 
@@ -2127,7 +2112,7 @@ FUNCTION f(
   INTEGER e DEFAULT NULL) RETURNS INTEGER
 ```
 
-该函数的所有参数都有名称和parameters，并且 有默认值`b`，因此都是可选的。（在方解石中，是可选参数唯一允许的默认值； [将来](https://issues.apache.org/jira/browse/CALCITE-947)可能会改变。）`d``e``NULL``NULL`
+该函数的所有参数都有名称和parameters，并且 有默认值`b`，因此都是可选的。（在方解石中，是可选参数唯一允许的默认值； [将来](https://issues.apache.org/jira/browse/CALCITE-947)可能会改变。）
 
 当调用带有可选参数的函数时，可以省略列表末尾的可选参数，或者`DEFAULT` 对任何可选参数使用关键字。这里有些例子：
 
@@ -2143,7 +2128,7 @@ FUNCTION f(
 - `f(c => 3, d => 1, a => 0)`相当于`f(0, NULL, 3, 1, NULL)`；
 - `f(c => 3, d => 1)`不合法，因为您尚未指定 的值 `a`并且`a`不是可选的。
 
-### SQL Hint
+#### SQL Hint
 
 提示是给优化器的指令。在编写SQL时，您可能会知道优化器未知的数据信息。提示使您能够做出通常由优化器做出的决策。
 
@@ -2151,7 +2136,7 @@ FUNCTION f(
 - 附加元数据/统计信息：一些统计信息，例如“扫描的表索引”或“某些洗牌键的倾斜信息”对于查询来说是动态的，用提示配置它们会非常方便，因为我们来自规划器的规划元数据非常方便通常不太准确；
 - 算子资源限制：在很多情况下，我们会给执行算子一个默认的资源配置，即最小并行度、内存（资源消耗 UDF）、特殊资源要求（GPU 或 SSD 磁盘）……对资源进行分析会非常灵活每个查询都有提示（不是作业）。
 
-#### 句法
+##### 句法
 
 方解石支持两个位置的提示：
 
@@ -2202,13 +2187,13 @@ hintOption:
 
 我们还没有添加任何内置提示项，如果我们认为提示足够稳定，我们会引入更多。
 
-### MATCH_识别
+#### MATCH_识别
 
 `MATCH_RECOGNIZE`是一个 SQL 扩展，用于识别复杂事件处理 (CEP) 中的事件序列。
 
 它在方解石中处于实验阶段，但尚未完全实施。
 
-#### 句法
+##### 句法
 
 ```
 matchRecognize:
