@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-29 08:00:00
+updated: 2024-03-31 10:30:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -392,7 +392,69 @@ public interface SqlOperatorTable {
 }
 ```
 
-了解了这三个接口主要提供的方法后，我们来看下 CalciteCatalogReader 中具体的实现逻辑。
+了解了这三个接口主要提供的方法后，我们来看下 CalciteCatalogReader 中具体的实现逻辑。CalciteCatalogReader 在初始化时，会传入 `rootSchema`、`defaultSchema`、`typeFactory` 和 `config`，然后根据 config 中的 caseSensitive 属性初始化 SqlNameMatcher，用于名称的大小写匹配。
+
+```java
+public CalciteCatalogReader(CalciteSchema rootSchema, List<String> defaultSchema, RelDataTypeFactory typeFactory, CalciteConnectionConfig config) {
+    this(rootSchema, SqlNameMatchers.withCaseSensitive(config != null && config.caseSensitive()), ImmutableList.of(Objects.requireNonNull(defaultSchema, "defaultSchema"), ImmutableList.of()), typeFactory, config);
+}
+```
+
+CalciteCatalogReader 提供的主要方法包括 `getTable` 和 `lookupOperatorOverloads`：
+
+TODO
+
+```java
+@Override
+public void lookupOperatorOverloads(final SqlIdentifier opName, @Nullable SqlFunctionCategory category, SqlSyntax syntax, List<SqlOperator> operatorList, SqlNameMatcher nameMatcher) {
+    if (syntax != SqlSyntax.FUNCTION) {
+        return;
+    }
+    final Predicate<org.apache.calcite.schema.Function> predicate;
+    if (category == null) {
+        predicate = function -> true;
+    } else if (category.isTableFunction()) {
+        predicate = function -> function instanceof TableMacro || function instanceof TableFunction;
+    } else {
+        predicate = function -> !(function instanceof TableMacro || function instanceof TableFunction);
+    }
+    getFunctionsFrom(opName.names).stream().filter(predicate).map(function -> toOp(opName, function)).forEachOrdered(operatorList::add);
+}
+
+private Collection<org.apache.calcite.schema.Function> getFunctionsFrom(List<String> names) {
+    final List<org.apache.calcite.schema.Function> functions2 = new ArrayList<>();
+    final List<List<String>> schemaNameList = new ArrayList<>();
+    if (names.size() > 1) {
+        // Name qualified: ignore path. But we do look in "/catalog" and "/",
+        // the last 2 items in the path.
+        if (schemaPaths.size() > 1) {
+            schemaNameList.addAll(Util.skip(schemaPaths));
+        } else {
+            schemaNameList.addAll(schemaPaths);
+        }
+    } else {
+        for (List<String> schemaPath : schemaPaths) {
+            CalciteSchema schema = SqlValidatorUtil.getSchema(rootSchema, schemaPath, nameMatcher);
+            if (schema != null) {
+                schemaNameList.addAll(schema.getPath());
+            }
+        }
+    }
+    for (List<String> schemaNames : schemaNameList) {
+        CalciteSchema schema = SqlValidatorUtil.getSchema(rootSchema, Iterables.concat(schemaNames, Util.skipLast(names)), nameMatcher);
+        if (schema != null) {
+            final String name = Util.last(names);
+            boolean caseSensitive = nameMatcher.isCaseSensitive();
+            functions2.addAll(schema.getFunctions(name, caseSensitive));
+        }
+    }
+    return functions2;
+}
+```
+
+
+
+
 
 TODO
 
