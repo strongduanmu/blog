@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-03-31 10:30:00
+updated: 2024-04-01 08:30:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -331,7 +331,7 @@ public void visit(JsonCustomSchema jsonSchema) {
 }
 ```
 
-由于本文主要探讨 Calcite System Catalog 相关的实现，因此先聚焦在 `CalciteCatalogReader` 类，后续流程中的 SQL 校验、SQL AST 转关系代数 RelNode 都会使用到 CalciteCatalogReader。
+由于本文主要探讨 Calcite System Catalog 相关的实现，因此主要聚焦在 `CalciteCatalogReader` 类，后续流程中的 SQL 校验、SQL AST 转关系代数 RelNode 都会使用到 CalciteCatalogReader。
 
 ![CatalogReder 相关接口和类](explore-apache-calcite-system-catalog-implementation/catalog-reader-class.png)
 
@@ -400,7 +400,29 @@ public CalciteCatalogReader(CalciteSchema rootSchema, List<String> defaultSchema
 }
 ```
 
-CalciteCatalogReader 提供的主要方法包括 `getTable` 和 `lookupOperatorOverloads`：
+CalciteCatalogReader 类主要提供了 `getTable` 和 `lookupOperatorOverloads` 方法，getTable 用于获取表的元数据信息，主要实现逻辑如下，`names` 参数会传入表的完整路径，此案例中为 `SALES -> EMPS` 表示 SALES schema 下的 EMPS 表。然后调用 `SqlValidatorUtil.getTableEntry` 方法先获取 schema 信息，再从 schema 中获取 table，如果 table 实现了 Wrapper 接口则转换为 Prepare.PreparingTable，否则使用 `RelOptTableImpl.create` 直接创建一个 RelOptTableImpl 对象。
+
+```java
+@Override
+public Prepare.@Nullable PreparingTable getTable(final List<String> names) {
+  	// 通过 getTableEntry 查找 TableEntry，先获取 schema，再获取 table
+    CalciteSchema.TableEntry entry = SqlValidatorUtil.getTableEntry(this, names);
+    if (entry != null) {
+        final Table table = entry.getTable();
+      	// 如果实现了 Wrapper 接口则转换为 Prepare.PreparingTable
+        if (table instanceof Wrapper) {
+            final Prepare.PreparingTable relOptTable = ((Wrapper) table).unwrap(Prepare.PreparingTable.class);
+            if (relOptTable != null) {
+                return relOptTable;
+            }
+        }
+        return RelOptTableImpl.create(this, table.getRowType(typeFactory), entry, null);
+    }
+    return null;
+}
+```
+
+lookupOperatorOverloads 方法：
 
 TODO
 
