@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-04-01 08:30:00
+updated: 2024-04-02 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -422,9 +422,7 @@ public Prepare.@Nullable PreparingTable getTable(final List<String> names) {
 }
 ```
 
-lookupOperatorOverloads 方法：
-
-TODO
+lookupOperatorOverloads 方法则用于查找指定的运算符，单测程序中使用了 `MAX` 和 `COUNT` 函数，我们结合函数来看下 lookupOperatorOverloads 方法的内部实现。首先，会判断当前 `syntax` 是否是 FUNCTION，然后根据 `category` 决定 predicate 过滤逻辑，如果是表函数则过滤 `TableMacro` 和 `TableFunction`，否则过滤表函数之外的函数类型。
 
 ```java
 @Override
@@ -442,26 +440,17 @@ public void lookupOperatorOverloads(final SqlIdentifier opName, @Nullable SqlFun
     }
     getFunctionsFrom(opName.names).stream().filter(predicate).map(function -> toOp(opName, function)).forEachOrdered(operatorList::add);
 }
+```
 
+然后调用 getFunctionsFrom 方法，根据函数名称获取匹配的函数集合，
+
+```java
 private Collection<org.apache.calcite.schema.Function> getFunctionsFrom(List<String> names) {
     final List<org.apache.calcite.schema.Function> functions2 = new ArrayList<>();
     final List<List<String>> schemaNameList = new ArrayList<>();
-    if (names.size() > 1) {
-        // Name qualified: ignore path. But we do look in "/catalog" and "/",
-        // the last 2 items in the path.
-        if (schemaPaths.size() > 1) {
-            schemaNameList.addAll(Util.skip(schemaPaths));
-        } else {
-            schemaNameList.addAll(schemaPaths);
-        }
-    } else {
-        for (List<String> schemaPath : schemaPaths) {
-            CalciteSchema schema = SqlValidatorUtil.getSchema(rootSchema, schemaPath, nameMatcher);
-            if (schema != null) {
-                schemaNameList.addAll(schema.getPath());
-            }
-        }
-    }
+  	// 获取 schemaNameList
+		...
+    // 遍历 schemaNameList，并调用 CalciteSchema#getFunctions 获取函数
     for (List<String> schemaNames : schemaNameList) {
         CalciteSchema schema = SqlValidatorUtil.getSchema(rootSchema, Iterables.concat(schemaNames, Util.skipLast(names)), nameMatcher);
         if (schema != null) {
@@ -474,9 +463,52 @@ private Collection<org.apache.calcite.schema.Function> getFunctionsFrom(List<Str
 }
 ```
 
+`CalciteSchema#getFunctions` 会先从全局的 `functionMap` 函数中获取 MAX 函数，然后再从 schema 内部定义的函数中获取，由于我们没有在 schema 中定义函数，因此 getFunctions 返回结果为空。
 
+```java
+/**
+ * Returns a collection of all functions, explicit and implicit, with a given
+ * name. Never null.
+ */
+public final Collection<Function> getFunctions(String name, boolean caseSensitive) {
+    final ImmutableList.Builder<Function> builder = ImmutableList.builder();
+    // Add explicit functions.
+    for (FunctionEntry functionEntry : Pair.right(functionMap.range(name, caseSensitive))) {
+        builder.add(functionEntry.getFunction());
+    }
+    // Add implicit functions.
+    addImplicitFunctionsToBuilder(builder, name, caseSensitive);
+    return builder.build();
+}
+```
 
+但是跟踪代码可以发现，此时 `operatorList` 中已经查找到了 MAX 函数，那这个函数是从哪里获取的呢？
 
+![lookupOperatorOverloads 代码跟踪](explore-apache-calcite-system-catalog-implementation/lookupOperatorOverloads 代码跟踪.png)
+
+顺着调用链路可以发现，`ChainedSqlOperatorTable#lookupOperatorOverloads` 方法会循环 SqlOperatorTable，依次执行 lookupOperatorOverloads 方法，并且优先从 SqlStdOperatorTable 中查找 MAX 函数，如果标准函数表中未查找到，再从 schema 中用户定义的函数进行查找。
+
+![ChainedSqlOperatorTable lookupOperatorOverloads 逻辑](explore-apache-calcite-system-catalog-implementation/chained-sql-operator-table.png)
+
+ChainedSqlOperatorTable 则是在 Calcite 初始化 SqlValidator 时创建的，首先会根据上下文信息中定义的数据库获取数据库特有函数和标准函数，然后依次注册数据库内置函数和标准函数，再将这些 SqlOperatorTable 封装为 ChainedSqlOperatorTable 进行使用。
+
+```java
+private static SqlValidator createSqlValidator(Context context, CalciteCatalogReader catalogReader) {
+    // 获取当前数据库特有函数和标准函数
+    final SqlOperatorTable opTab0 = context.config().fun(SqlOperatorTable.class, SqlStdOperatorTable.instance());
+    final List<SqlOperatorTable> list = new ArrayList<>();
+    // 注册数据库内置函数
+    list.add(opTab0);
+    // 注册用户自定义函数
+    list.add(catalogReader);
+    // 封装为 ChainedSqlOperatorTable
+    final SqlOperatorTable opTab = SqlOperatorTables.chain(list);
+    final JavaTypeFactory typeFactory = context.getTypeFactory();
+    final CalciteConnectionConfig connectionConfig = context.config();
+    final SqlValidator.Config config = SqlValidator.Config.DEFAULT.withLenientOperatorLookup(connectionConfig.lenientOperatorLookup()).withConformance(connectionConfig.conformance()).withDefaultNullCollation(connectionConfig.defaultNullCollation()).withIdentifierExpansion(true);
+    return new CalciteSqlValidator(opTab, catalogReader, typeFactory, config);
+}
+```
 
 TODO
 
