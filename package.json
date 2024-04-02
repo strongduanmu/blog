@@ -31,6 +31,6 @@
     "hexo-server": "3.0.0",
     "hexo-theme-stellar": "1.27.0",
     "hexo-uglify": "2.0.0",
-    "hexo-util": "^3.2.0"
+    "hexo-util": "^3.3.0"
   }
 }
