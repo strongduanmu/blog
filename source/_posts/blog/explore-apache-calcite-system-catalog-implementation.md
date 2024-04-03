@@ -3,7 +3,7 @@ title: Apache Calcite System Catalog 实现探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38
-updated: 2024-04-02 08:00:00
+updated: 2024-04-03 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 references:
   - '[Introduction to Apache Calcite Catalog](https://note.youdao.com/s/YCJgUjNd)'
@@ -30,7 +30,7 @@ topic: calcite
 
 不同数据库系统都有自己的元数据信息获取方法，ANSI 标准规定通过 [INFORMATION_SCHEMA](https://en.wikipedia.org/wiki/Information_schema) 只读视图查询元数据信息，目前大部分数据库都遵循了这个规范，同时也都提供了一些快捷命令，例如：MySQL `SHOW TABLES` 命令，PostgreSQL `\d` 命令等。
 
-Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是 Calcite 不直接存储系统目录中的元数据信息，用户需要通过 API 将元数据注册到 Calcite 中，才可以使用系统目录提供的能力。下面这个部分，让我们一起来深入了解下 `Calcite System Catalog` 体系及其内部实现。
+Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是 Calcite 不直接存储系统目录中的元数据信息，用户需要通过 API 将元数据注册到 Calcite 中，才可以使用系统目录提供的能力。下面让我们一起来深入了解下 `Calcite System Catalog` 体系及其内部实现。
 
 ## Calcite System Catalog 体系
 
@@ -442,7 +442,7 @@ public void lookupOperatorOverloads(final SqlIdentifier opName, @Nullable SqlFun
 }
 ```
 
-然后调用 getFunctionsFrom 方法，根据函数名称获取匹配的函数集合，
+然后调用 getFunctionsFrom 方法，根据函数名称获取匹配的函数集合，getFunctionsFrom 方法具体实现如下，会遍历 schemaNameList 并调用 `CalciteSchema#getFunctions` 获取函数。
 
 ```java
 private Collection<org.apache.calcite.schema.Function> getFunctionsFrom(List<String> names) {
@@ -463,7 +463,7 @@ private Collection<org.apache.calcite.schema.Function> getFunctionsFrom(List<Str
 }
 ```
 
-`CalciteSchema#getFunctions` 会先从全局的 `functionMap` 函数中获取 MAX 函数，然后再从 schema 内部定义的函数中获取，由于我们没有在 schema 中定义函数，因此 getFunctions 返回结果为空。
+`CalciteSchema#getFunctions` 方法会先从全局的 `functionMap` 函数中获取 MAX 函数，然后再从 schema 内部定义的函数中获取，由于我们没有在 schema 中定义函数，因此 getFunctions 返回结果为空。
 
 ```java
 /**
@@ -510,11 +510,13 @@ private static SqlValidator createSqlValidator(Context context, CalciteCatalogRe
 }
 ```
 
-TODO
+到这里，我们就大致了解了 Caclite System Catalog 的主要使用场景，在下一篇探究 Calcite 校验器的文章中，我们还会遇到更多调用 CalciteCatalogReader 获取元数据的场景，到时候可以结合校验器逻辑再加深一下理解。
 
 ## 结语
 
-TODO
+本文主要介绍了 System Catalog 的概念和用途，以及 Calcite System Catalog 体系中包含了哪些关键的类，他们各自有什么样的作用。然后我们结合 Calcite CsvTest 中的单测程序，具体了解了 System Catalog 初始化的逻辑。初始化时我们发现 **Calcite 元数据都是通过 CalciteCatalogReader 对外提供访问方法**，并介绍了主要的 `getTable` 和 `lookupOperatorOverloads` 方法，让大家对表和运算符元数据的使用有了一定的了解。
+
+了解了 Caclite System Catalog 后，下一篇文章我们将关注 Calcite SqlValidator 的实现逻辑，**一起探究下 Calcite 校验器具体校验了哪些 SQL 对象，在校验过程中它又进行了哪些处理，这些处理在后续生成关系代数表达式时有什么作用**？欢迎感兴趣的朋友持续关注。
 
 
 
