@@ -343,80 +343,78 @@ timeUnit:
 
 在要使用字面量的地方，应用 `ST_GeomFromText` 函数，例如 `ST_GeomFromText('POINT (30 10)')` 。
 
-TODO
-
 | 数据类型           | 类型编码 | WKT 中的示例                                                 |
 | :----------------- | :------- | :----------------------------------------------------------- |
-| GEOMETRY           | 0        | generalization of Point, Curve, Surface, GEOMETRYCOLLECTION  |
-| POINT              | 1        | `ST_GeomFromText('POINT (30 10)')` is a point in 2D space; `ST_GeomFromText('POINT Z(30 10 2)')` is point in 3D space |
-| CURVE              | 13       | generalization of LINESTRING                                 |
+| GEOMETRY           | 0        | 点、曲线、曲面、几何集合的泛化                               |
+| POINT              | 1        | `ST_GeomFromText('POINT (30 10)')` 是 2D 空间中的点； `ST_GeomFromText('POINT Z(30 10 2)')` 是 3D 空间中的点 |
+| CURVE              | 13       | LINESTRING 的泛化                                            |
 | LINESTRING         | 2        | `ST_GeomFromText('LINESTRING (30 10, 10 30, 40 40)')`        |
-| SURFACE            | 14       | generalization of Polygon, PolyhedralSurface                 |
-| POLYGON            | 3        | `ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')` is a pentagon; `ST_GeomFromText('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))')` is a pentagon with a quadrilateral hole |
+| SURFACE            | 14       | 多边形、多面体曲面的泛化                                     |
+| POLYGON            | 3        | `ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')` 是五边形； `ST_GeomFromText('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))')` 是一个有四边形孔的五边形 |
 | POLYHEDRALSURFACE  | 15       |                                                              |
-| GEOMETRYCOLLECTION | 7        | a collection of zero or more GEOMETRY instances; a generalization of MULTIPOINT, MULTILINESTRING, MULTIPOLYGON |
-| MULTIPOINT         | 4        | `ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))')` is equivalent to `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)')` |
-| MULTICURVE         | -        | generalization of MULTILINESTRING                            |
+| GEOMETRYCOLLECTION | 7        | 零个或多个 GEOMETRY 实例的集合；多点、多线、多多边形的概括   |
+| MULTIPOINT         | 4        | ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))') ` 相当于 `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)') |
+| MULTICURVE         | -        | MULTILINESTRING 的泛化                                       |
 | MULTILINESTRING    | 5        | `ST_GeomFromText('MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))')` |
-| MULTISURFACE       | -        | generalization of MULTIPOLYGON                               |
+| MULTISURFACE       | -        | MULTIPOLYGON 的泛化                                          |
 | MULTIPOLYGON       | 6        | `ST_GeomFromText('MULTIPOLYGON (((30 20, 45 40, 10 40, 30 20)), ((15 5, 40 10, 10 20, 5 10, 15 5)))')` |
 
 ## 运算符和函数
 
 ### 运算符优先级
 
-The operator precedence and associativity, highest to lowest.
+运算符优先级和结合性，从高到低。
 
-| OPERATOR                                            | ASSOCIATIVITY |
-| :-------------------------------------------------- | :------------ |
-| .                                                   | left          |
-| ::                                                  | left          |
-| [ ] (collection element)                            | left          |
-| + - (unary plus, minus)                             | right         |
-| * / % \|\|                                          | left          |
-| + -                                                 | left          |
-| BETWEEN, IN, LIKE, SIMILAR, OVERLAPS, CONTAINS etc. | -             |
-| < > = <= >= <> != <=>                               | left          |
-| IS NULL, IS FALSE, IS NOT TRUE etc.                 | -             |
-| NOT                                                 | right         |
-| AND                                                 | left          |
-| OR                                                  | left          |
+| 运算符                                            | 结合性 |
+| :------------------------------------------------ | :----- |
+| .                                                 | 左     |
+| ::                                                | 左     |
+| [ ]（集合元素）                                   | 左     |
+| + -（一元加、减）                                 | 右     |
+| * / % \|\|                                        | 左     |
+| + -                                               | 左     |
+| BETWEEN, IN, LIKE, SIMILAR, OVERLAPS, CONTAINS 等 | -      |
+| < > = <= >= <> != <=>                             | 左     |
+| IS NULL, IS FALSE, IS NOT TRUE 等                 | -      |
+| NOT                                               | 右     |
+| AND                                               | 左     |
+| OR                                                | 左     |
 
-Note that `::`,`<=>` is dialect-specific, but is shown in this table for completeness.
+注意：`::` 、 `<=>` 是特定于方言的，但为了完整性起见在此表中显示。
 
 ### 比较运算符
 
-| OPERATOR SYNTAX                                   | DESCRIPTION                                                  |
+| 运算符语法                                        | 描述                                                         |
 | :------------------------------------------------ | :----------------------------------------------------------- |
-| value1 = value2                                   | Equals                                                       |
-| value1 <> value2                                  | Not equal                                                    |
-| value1 != value2                                  | Not equal (only in certain [conformance levels](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isBangEqualAllowed--)) |
-| value1 > value2                                   | Greater than                                                 |
-| value1 >= value2                                  | Greater than or equal                                        |
-| value1 < value2                                   | Less than                                                    |
-| value1 <= value2                                  | Less than or equal                                           |
-| value1 <=> value2                                 | Whether two values are equal, treating null values as the same |
-| value IS NULL                                     | Whether *value* is null                                      |
-| value IS NOT NULL                                 | Whether *value* is not null                                  |
-| value1 IS DISTINCT FROM value2                    | Whether two values are not equal, treating null values as the same |
-| value1 IS NOT DISTINCT FROM value2                | Whether two values are equal, treating null values as the same |
-| value1 BETWEEN value2 AND value3                  | Whether *value1* is greater than or equal to *value2* and less than or equal to *value3* |
-| value1 NOT BETWEEN value2 AND value3              | Whether *value1* is less than *value2* or greater than *value3* |
-| string1 LIKE string2 [ ESCAPE string3 ]           | Whether *string1* matches pattern *string2*                  |
-| string1 NOT LIKE string2 [ ESCAPE string3 ]       | Whether *string1* does not match pattern *string2*           |
-| string1 SIMILAR TO string2 [ ESCAPE string3 ]     | Whether *string1* matches regular expression *string2*       |
-| string1 NOT SIMILAR TO string2 [ ESCAPE string3 ] | Whether *string1* does not match regular expression *string2* |
-| value IN (value [, value ]*)                      | Whether *value* is equal to a value in a list                |
-| value NOT IN (value [, value ]*)                  | Whether *value* is not equal to every value in a list        |
-| value IN (sub-query)                              | Whether *value* is equal to a row returned by *sub-query*    |
-| value NOT IN (sub-query)                          | Whether *value* is not equal to every row returned by *sub-query* |
-| value comparison SOME (sub-query or collection)   | Whether *value* *comparison* at least one row returned by *sub-query* or *collection* |
-| value comparison ANY (sub-query or collection)    | Synonym for `SOME`                                           |
-| value comparison ALL (sub-query or collection)    | Whether *value* *comparison* every row returned by *sub-query* or *collection* |
-| EXISTS (sub-query)                                | Whether *sub-query* returns at least one row                 |
-| UNIQUE (sub-query)                                | Whether the rows returned by *sub-query* are unique (ignoring null values) |
+| value1 = value2                                   | 等于                                                         |
+| value1 <> value2                                  | 不等于                                                       |
+| value1 != value2                                  | 不相等（仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isBangEqualAllowed--)） |
+| value1 > value2                                   | 大于                                                         |
+| value1 >= value2                                  | 大于等于                                                     |
+| value1 < value2                                   | 小于                                                         |
+| value1 <= value2                                  | 小于等于                                                     |
+| value1 <=> value2                                 | 两个值是否相等，将 null 值视为相同                           |
+| value IS NULL                                     | 值是否为 null                                                |
+| value IS NOT NULL                                 | 值是否不为 null                                              |
+| value1 IS DISTINCT FROM value2                    | 两个值是否不相等，将 null 值视为相同                         |
+| value1 IS NOT DISTINCT FROM value2                | 两个值是否相等，将 null 值视为相同                           |
+| value1 BETWEEN value2 AND value3                  | value1 是否大于等于 value2 且小于等于 value3                 |
+| value1 NOT BETWEEN value2 AND value3              | value1 是否小于 value2 并且大于 value3                       |
+| string1 LIKE string2 [ ESCAPE string3 ]           | string1 是否与模式 string2 匹配                              |
+| string1 NOT LIKE string2 [ ESCAPE string3 ]       | string1 是否与模式 string2 不匹配                            |
+| string1 SIMILAR TO string2 [ ESCAPE string3 ]     | string1 是否与正则表达式 string2 匹配                        |
+| string1 NOT SIMILAR TO string2 [ ESCAPE string3 ] | string1 是否与正则表达式 string2 不匹配                      |
+| value IN (value [, value ]*)                      | value 是否等于列表中的值                                     |
+| value NOT IN (value [, value ]*)                  | value 是否不等于列表中的每个值                               |
+| value IN (sub-query)                              | value 是否等于子查询返回的行                                 |
+| value NOT IN (sub-query)                          | value 是否不等于子查询返回的每一行                           |
+| value comparison SOME (sub-query or collection)   | 是否值比较 SOME 的子查询或集合至少返回一行                   |
+| value comparison ANY (sub-query or collection)    | `SOME` 的同义词                                              |
+| value comparison ALL (sub-query or collection)    | 是否值比较 ALL 的子查询或集合返回所有值                      |
+| EXISTS (sub-query)                                | 子查询是否至少返回一行                                       |
+| UNIQUE (sub-query)                                | 子查询返回的行是否唯一（忽略空值）                           |
 
-```
+```sql
 comp:
       =
   |   <>
@@ -429,57 +427,59 @@ comp:
 
 ### 逻辑运算符
 
-| OPERATOR SYNTAX        | DESCRIPTION                                                  |
-| :--------------------- | :----------------------------------------------------------- |
-| boolean1 OR boolean2   | Whether *boolean1* is TRUE or *boolean2* is TRUE             |
-| boolean1 AND boolean2  | Whether *boolean1* and *boolean2* are both TRUE              |
-| NOT boolean            | Whether *boolean* is not TRUE; returns UNKNOWN if *boolean* is UNKNOWN |
-| boolean IS FALSE       | Whether *boolean* is FALSE; returns FALSE if *boolean* is UNKNOWN |
-| boolean IS NOT FALSE   | Whether *boolean* is not FALSE; returns TRUE if *boolean* is UNKNOWN |
-| boolean IS TRUE        | Whether *boolean* is TRUE; returns FALSE if *boolean* is UNKNOWN |
-| boolean IS NOT TRUE    | Whether *boolean* is not TRUE; returns TRUE if *boolean* is UNKNOWN |
-| boolean IS UNKNOWN     | Whether *boolean* is UNKNOWN                                 |
-| boolean IS NOT UNKNOWN | Whether *boolean* is not UNKNOWN                             |
+| 运算符语法             | 描述                                                |
+| :--------------------- | :-------------------------------------------------- |
+| boolean1 OR boolean2   | boolean1 为 TRUE 或者 boolean2 为 TRUE              |
+| boolean1 AND boolean2  | boolean1 为 TRUE 并且 boolean2 为 TRUE              |
+| NOT boolean            | 布尔值是否不为 TRUE；如果布尔值未知，则返回 UNKNOWN |
+| boolean IS FALSE       | 布尔值是否为FALSE；如果布尔值未知则返回 FALSE       |
+| boolean IS NOT FALSE   | 布尔值是否不为 FALSE；如果布尔值未知则返回 TRUE     |
+| boolean IS TRUE        | 布尔值是否为 TRUE；如果布尔值未知则返回 FALSE       |
+| boolean IS NOT TRUE    | 布尔值是否不为 TRUE；如果布尔值未知则返回 TRUE      |
+| boolean IS UNKNOWN     | 布尔值是否未知                                      |
+| boolean IS NOT UNKNOWN | 布尔值是否不为 UNKNOWN                              |
 
 ### 算术运算符和函数
 
-| OPERATOR SYNTAX                 | DESCRIPTION                                                  |
+| 运算符语法                      | 描述                                                         |
 | :------------------------------ | :----------------------------------------------------------- |
-| + numeric                       | Returns *numeric*                                            |
-| - numeric                       | Returns negative *numeric*                                   |
-| numeric1 + numeric2             | Returns *numeric1* plus *numeric2*                           |
-| numeric1 - numeric2             | Returns *numeric1* minus *numeric2*                          |
-| numeric1 * numeric2             | Returns *numeric1* multiplied by *numeric2*                  |
-| numeric1 / numeric2             | Returns *numeric1* divided by *numeric2*                     |
-| numeric1 % numeric2             | As *MOD(numeric1, numeric2)* (only in certain [conformance levels](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isPercentRemainderAllowed--)) |
-| POWER(numeric1, numeric2)       | Returns *numeric1* raised to the power of *numeric2*         |
-| ABS(numeric)                    | Returns the absolute value of *numeric*                      |
-| MOD(numeric1, numeric2)         | Returns the remainder (modulus) of *numeric1* divided by *numeric2*. The result is negative only if *numeric1* is negative |
-| SQRT(numeric)                   | Returns the square root of *numeric*                         |
-| LN(numeric)                     | Returns the natural logarithm (base *e*) of *numeric*        |
-| LOG10(numeric)                  | Returns the base 10 logarithm of *numeric*                   |
-| EXP(numeric)                    | Returns *e* raised to the power of *numeric*                 |
-| CEIL(numeric)                   | Rounds *numeric* up, returning the smallest integer that is greater than or equal to *numeric* |
-| FLOOR(numeric)                  | Rounds *numeric* down, returning the largest integer that is less than or equal to *numeric* |
-| RAND([seed])                    | Generates a random double between 0 and 1 inclusive, optionally initializing the random number generator with *seed* |
-| RAND_INTEGER([seed, ] numeric)  | Generates a random integer between 0 and *numeric* - 1 inclusive, optionally initializing the random number generator with *seed* |
-| ACOS(numeric)                   | Returns the arc cosine of *numeric*                          |
-| ASIN(numeric)                   | Returns the arc sine of *numeric*                            |
-| ATAN(numeric)                   | Returns the arc tangent of *numeric*                         |
-| ATAN2(numeric, numeric)         | Returns the arc tangent of the *numeric* coordinates         |
-| CBRT(numeric)                   | Returns the cube root of *numeric*                           |
-| COS(numeric)                    | Returns the cosine of *numeric*                              |
-| COT(numeric)                    | Returns the cotangent of *numeric*                           |
-| DEGREES(numeric)                | Converts *numeric* from radians to degrees                   |
-| PI()                            | Returns a value that is closer than any other value to *pi*  |
-| RADIANS(numeric)                | Converts *numeric* from degrees to radians                   |
-| ROUND(numeric1 [, numeric2])    | Rounds *numeric1* to optionally *numeric2* (if not specified 0) places right to the decimal point |
-| SIGN(numeric)                   | Returns the signum of *numeric*                              |
-| SIN(numeric)                    | Returns the sine of *numeric*                                |
-| TAN(numeric)                    | Returns the tangent of *numeric*                             |
-| TRUNCATE(numeric1 [, numeric2]) | Truncates *numeric1* to optionally *numeric2* (if not specified 0) places right to the decimal point |
+| + numeric                       | 返回数字                                                     |
+| - numeric                       | 返回负数                                                     |
+| numeric1 + numeric2             | 返回 numeric1 加 numeric2                                    |
+| numeric1 - numeric2             | 返回 numeric1 减去 numeric2                                  |
+| numeric1 * numeric2             | 返回 numeric1 乘以 numeric2                                  |
+| numeric1 / numeric2             | 返回 numeric1 除以 numeric2                                  |
+| numeric1 % numeric2             | 作为 MOD(numeric1, numeric2)（仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isPercentRemainderAllowed--)） |
+| POWER(numeric1, numeric2)       | 返回 numeric1 的 numeric2 次方                               |
+| ABS(numeric)                    | 返回数字的绝对值                                             |
+| MOD(numeric1, numeric2)         | 返回 numeric1 除以 numeric2 的余数（模）。仅当 numeric1 为负数时结果才为负数 |
+| SQRT(numeric)                   | 返回数字的平方根                                             |
+| LN(numeric)                     | 返回数值的自然对数（以 e 为底）                              |
+| LOG10(numeric)                  | 返回 numeric 以 10 为底的对数                                |
+| EXP(numeric)                    | 返回 e 的数值次方                                            |
+| CEIL(numeric)                   | 将 numeric 向上舍入，返回大于或等于 numeric 的最小整数       |
+| FLOOR(numeric)                  | 将数字向下舍入，返回小于或等于数字的最大整数                 |
+| RAND([seed])                    | 生成 0 到 1（含）之间的随机双精度数，可选择使用种子初始化随机数生成器 |
+| RAND_INTEGER([seed, ] numeric)  | 生成 0 到 numeric - 1（含）之间的随机整数，可选择使用种子初始化随机数生成器 |
+| ACOS(numeric)                   | 返回数值的反余弦                                             |
+| ASIN(numeric)                   | 返回数字的反正弦值                                           |
+| ATAN(numeric)                   | 返回数值的反正切值                                           |
+| ATAN2(numeric, numeric)         | 返回数字坐标的反正切值                                       |
+| CBRT(numeric)                   | 返回数字的立方根                                             |
+| COS(numeric)                    | 返回数字的余弦值                                             |
+| COT(numeric)                    | 返回数值的余切值                                             |
+| DEGREES(numeric)                | 将数值从弧度转换为度数                                       |
+| PI()                            | 返回比任何其他值更接近 pi 的值                               |
+| RADIANS(numeric)                | 将数值从度数转换为弧度                                       |
+| ROUND(numeric1 [, numeric2])    | 将 numeric1 舍入到小数点右边可选的 numeric2（如果未指定 0）位 |
+| SIGN(numeric)                   | 返回数字的符号                                               |
+| SIN(numeric)                    | 返回数字的正弦值                                             |
+| TAN(numeric)                    | 返回数字的正切值                                             |
+| TRUNCATE(numeric1 [, numeric2]) | 将 numeric1 截断为可选的 numeric2（如果未指定 0）小数点右边的位置 |
 
 ### 字符串运算符和函数
+
+TODO
 
 | OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
