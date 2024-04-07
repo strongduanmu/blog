@@ -7,6 +7,7 @@ references:
   - '[Apache Calcite 校验流程源码解读](https://segmentfault.com/a/1190000040931285)'
   - '[Apache Calcite SQL 验证](https://zhuanlan.zhihu.com/p/513399371)'
   - '[Calcite SQL 元数据验证原理与实战](https://juejin.cn/post/7209852117297037368)'
+  - '[Apache Calcite SQL 验证](https://liebing.org.cn/apache-calcite-sql-validator.html)'
 date: 2024-04-07 08:40:58
 updated: 2024-04-07 09:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
@@ -18,7 +19,7 @@ topic: calcite
 
 ## 前言
 
-
+在上一篇 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)中，我们介绍了经典的数据库的处理流程，包括：SQL 解析、SQL 绑定、SQL 优化以及计划执行。SQL 绑定 TODO
 
 ## 结语
 
