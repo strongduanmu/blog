@@ -1,0 +1,16 @@
+name: MAT
+title: MAT 官方文档中文版
+subtitle: '功能丰富的 Java 堆分析器 | 快速查找内存泄漏并减少内存消耗'
+tags: JVM
+description: MAT 全称 Memory Analyzer Tool，它提供了用于分析 Java 应用程序中的堆转储，并识别应用程序中内存问题的工具。MAT 能有效帮助开发人员发现内存泄漏和高内存消耗问题，提升 Java 系统的稳定性。
+icon: /assets/wiki/mat/mat_logo.png
+cover: /assets/wiki/mat/mat_logo.png
+coverpage: true
+search:
+  filter: /wiki/mat/
+  placeholder: 在 MAT 中搜索...
+leftbar: 
+  - tree
+base_dir: /wiki/mat/
+tree:
+  - introduction
