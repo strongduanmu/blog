@@ -10,7 +10,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-03 08:00:00
+updated: 2024-05-05 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -65,7 +65,7 @@ public interface SqlValidator {
 }
 ```
 
-此外，为了对 SqlValidator 校验过程中的一些行为进行控制，Calcite 提供了 SqlValidator#Config 配置类，通过 `with` 方法可以方便地设置校验器的属性，常见的属性设置方法如下。
+此外，为了对 SqlValidator 校验过程中的一些行为进行控制，Calcite 提供了 `SqlValidator#Config` 配置类，通过 `withXxx` 方法可以方便地设置校验器的属性，常见的属性设置方法如下，`withDefaultNullCollation` 可以设置 NULL 值排序规则，`withColumnReferenceExpansion` 则可以用于指定 `Order By` 语句中的列引用是否展开，`withConformance` 方法用于设置 SQL 兼容模式。
 
 ```java
 interface Config {
