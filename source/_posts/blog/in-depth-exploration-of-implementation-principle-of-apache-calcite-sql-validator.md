@@ -9,8 +9,8 @@ references:
   - '[Calcite SQL 元数据验证原理与实战](https://juejin.cn/post/7209852117297037368)'
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
-date: 2024-04-22 08:00:00
-updated: 2024-04-22 08:00:00
+date: 2024-05-03 08:00:00
+updated: 2024-05-05 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -32,7 +32,57 @@ SQL 校验器的核心类为 `SqlValidator`，它负责使用 Calcite 元数据�
 
 ### SqlValidator
 
-TODO
+`SqlValidator` 校验器根据元数据对 SQL 解析的 AST 进行校验，得到具有语义信息的绑定 AST。SqlValidator 通过访问者模式对 AST 进行校验，调用 `SqlNode#validate` 方法时，校验器内部会调用 validateXxx 方法，例如：调用 `SqlLiteral.validate(SqlValidator, SqlValidatorScope)` 会调用 `validateLiteral(SqlLiteral);` ，调用 `SqlCall.validate(SqlValidator, SqlValidatorScope)` 则会调用 `validCall(SqlCall, SqlValidatorScope);`。
+
+SqlValidator 接口定义了 Calcite 校验器的主要方法，它提供了基础的 `getCatalogReader` 和 `getOperatorTable` 方法，分别用于获取元数据信息和运算符、函数。校验 SqlNode 则是通过 `validate` 方法，会按照 AST 结构进行遍历校验，最终返回已校验 SqlNode。
+
+```java
+public interface SqlValidator {
+  	
+  	// 获取校验器使用的 CatalogReader，用于获取元数据信息
+    SqlValidatorCatalogReader getCatalogReader();
+
+  	// 获取校验器使用的 SqlOperatorTable，用于获取运算符和函数
+    SqlOperatorTable getOperatorTable();
+
+  	// 校验 SqlNode 对应的表达式树，返回已校验的树
+    SqlNode validate(SqlNode topNode);
+
+  	// 获取已验证节点的类型
+    RelDataType getValidatedNodeType(SqlNode node);
+
+  	// 获取 SqlNode 所属的 Namespace
+    SqlValidatorNamespace getNamespace(SqlNode node);
+
+  	// 展开 * 号对应的列
+    SqlNodeList expandStar(SqlNodeList selectList, SqlSelect query, boolean includeSystemVars);
+
+    // 展开 order by 子句中的序号和别名列
+    SqlNode expandOrderExpr(SqlSelect select, SqlNode orderExpr);
+
+  	// 返回 SqlNode 结果集列的原始类型，该类型中包含 catalog, schema, table, column
+    List<@Nullable List<String>> getFieldOrigins(SqlNode sqlQuery);
+}
+```
+
+此外，为了对 SqlValidator 校验过程中的一些行为进行控制，Calcite 提供了 `SqlValidator#Config` 配置类，通过 `withXxx` 方法可以方便地设置校验器的属性，常见的属性设置方法如下，`withDefaultNullCollation` 可以设置 NULL 值排序规则，`withColumnReferenceExpansion` 则可以用于指定 `Order By` 语句中的列引用是否展开，`withConformance` 方法用于设置 SQL 兼容模式。
+
+```java
+interface Config {
+
+  	// 默认 SqlValidator 配置类
+    SqlValidator.Config DEFAULT = ImmutableSqlValidator.Config.builder().withTypeCoercionFactory(TypeCoercions::createTypeCoercion).build();
+		
+  	// 配置默认 NULL 值排序规则
+    Config withDefaultNullCollation(NullCollation nullCollation);
+
+  	// 配置列引用是否展开
+    Config withColumnReferenceExpansion(boolean expand);
+
+  	// 配置 SQL 兼容模式
+    Config withConformance(SqlConformance conformance);
+}
+```
 
 ### SqlValidatorScope
 
