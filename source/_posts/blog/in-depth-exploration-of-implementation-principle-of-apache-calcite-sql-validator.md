@@ -10,7 +10,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-06 08:00:00
+updated: 2024-05-07 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -92,9 +92,31 @@ Calcite 根据不同的 SQL 类型实现了众多 SqlValidatorScope 子类，以
 
 ![SqlValidatorScope 继承体系](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/sql-validator-scope-inheritance-system.png)
 
-TODO
+SqlValidatorScope 接口定义了 TODO
+
+`SelectScope` 表示查询语句的名称解析范围，该范围中可见的对象包含了 FROM 子句的对象以及从父节点继承的对象。如下展示了一个常见的查询语句，该语句中包含了关联查询、子查询以及排序。
+
+```sql
+SELECT expr1
+  FROM t1,
+      t2,
+      (SELECT expr2 FROM t3) AS q3
+  WHERE c1 IN (SELECT expr3 FROM t4)
+  ORDER BY expr4
+```
+
+Calcite 会将该语句拆分为 4 个 SelectScope 分别表示不同表达式对象的可见范围。
+
+* `expr1` 可以访问 `t1, t2, q3` 中的对象；
+* `expr2` 可以访问 `t3` 中的对象；
+* `expr3` 可以访问 `t4, t1, t2` 中的对象；
+* `expr4` 可以访问 `t1, t2, q3`, 以及在 SELECT 子句中定义的任何别名（取决于方言）。
 
 ### SqlValidatorNamespace
+
+![SqlValidatorNamespace 继承体系](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/sql-validator-namespace-inheritance-system.png)
+
+
 
 TODO
 
