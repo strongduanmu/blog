@@ -4,13 +4,12 @@ tags: [Calcite]
 categories: [Calcite]
 references:
   - '[Apache Calcite 教程 - validate 校验](https://blog.csdn.net/QXC1281/article/details/90343560)'
-  - '[Apache Calcite 校验流程源码解读](https://segmentfault.com/a/1190000040931285)'
   - '[Apache Calcite SQL 验证](https://zhuanlan.zhihu.com/p/513399371)'
   - '[Calcite SQL 元数据验证原理与实战](https://juejin.cn/post/7209852117297037368)'
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-07 08:00:00
+updated: 2024-05-09 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -28,7 +27,7 @@ Calcite 通过 SQL 校验器实现 SQL 绑定，SQL 校验器所需的 System Ca
 
 SQL 校验器的核心类为 `SqlValidator`，它负责使用 Calcite 元数据信息对 AST 进行验证，最终生成具有语义信息的 AST。在 Calcite 中，可以通过 `SqlValidatorUtil.newValidator` 方法快速创建一个 SqlValidator。
 
-除了 SqlValidator 校验器类之外，Calcite 为了将 SQL 中的名称解析为对象，还在校验器内部构建了两个对象：`SqlValidatorScope` 和 `SqlValidatorNamespace`，SqlValidatorScope 表示名称解析的范围，代表了在查询中的某一个位置，当前可见的字段名和表名。`SqlValidatorNamespace` 则表示了校验过程中查询语句的数据源，不同的查询位置都有不同类型的 namespace 类，例如：表名对应的 `IdentifierNamespace`，Select 语句对应的 `SelectNamespace`，以及 `UNION`、`EXCEPT`、`INTERSECT` 对应的 `SetopNamespace`。下面我们针对核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 分别进行探究，了解其设计细节以及适用场景。
+除了 SqlValidator 校验器类之外，Calcite 为了将 SQL 中的名称解析为对象，还在校验器内部构建了两个对象：`SqlValidatorScope` 和 `SqlValidatorNamespace`，SqlValidatorScope 表示名称解析的范围，代表了在查询中的某一个位置，当前可见的字段名和表名。`SqlValidatorNamespace` 则表示了校验过程中查询语句的数据来源，不同的查询位置都有不同类型的 namespace 类，例如：表名对应的 `IdentifierNamespace`，Select 语句对应的 `SelectNamespace`，以及 `UNION`、`EXCEPT`、`INTERSECT` 对应的 `SetopNamespace`。下面我们针对核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 分别进行探究，了解其设计细节以及适用场景。
 
 ### SqlValidator
 
@@ -92,8 +91,6 @@ Calcite 根据不同的 SQL 类型实现了众多 SqlValidatorScope 子类，以
 
 ![SqlValidatorScope 继承体系](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/sql-validator-scope-inheritance-system.png)
 
-SqlValidatorScope 接口定义了 TODO
-
 `SelectScope` 表示查询语句的名称解析范围，该范围中可见的对象包含了 FROM 子句的对象以及从父节点继承的对象。如下展示了一个常见的查询语句，该语句中包含了关联查询、子查询以及排序。
 
 ```sql
@@ -114,13 +111,31 @@ Calcite 会将该语句拆分为 4 个 SelectScope 分别表示不同表达式�
 
 ### SqlValidatorNamespace
 
+`SqlValidatorNamespace` 描述了由 SQL 查询某个部分返回的关系（`Relation`，关系是一组无序的元素或记录，这些元素或记录的属性用来表示实体），例如：在查询 `SELECT emp.deptno, age FROM emp, dept` 时，FROM 子句形成了一个包含 `emp` 和 `dept` 两张表，以及这些表中列组成的行类型在内的命名空间。不同的 RelNode 类型有与之对应的 Namespace 对象，下图展示了 Calcite 中定义的常见 SqlValidatorNamespace 实现类。
+
 ![SqlValidatorNamespace 继承体系](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/sql-validator-namespace-inheritance-system.png)
 
+`SelectNamespace` 表示了查询语句对应的命名空间，我们同样以如下的查询语句为例：
 
+```sql
+SELECT expr1
+  FROM t1,
+      t2,
+      (SELECT expr2 FROM t3) AS q3
+  WHERE c1 IN (SELECT expr3 FROM t4)
+  ORDER BY expr4
+```
 
-TODO
+Calcite 会从查询语句中提取出 4 个命名空间，分别如下所示，命名空间代表的关系，简单理解可以认为是查询过程中的数据来源。
+
+* `t1`：t1 表所代表的关系；
+* `t2`：t2 表所代表的关系；
+* `(SELECT expr2 FROM t3) AS q3`：子查询所代表的关系；
+* `(SELECT expr3 FROM t4)`：子查询所代表的关系。
 
 ## SQL 校验器执行流程
+
+前文我们对 Caclite 校验器中核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 类进行了介绍，想必大家对校验器有了一些基础的认识。本节我们通过 `CsvTest#testPushDownProjectAggregateNested` 单测，来跟踪下 SQL 校验器的执行流程，了解这些核心类在校验流程中是如何使用的。
 
 TODO
 
