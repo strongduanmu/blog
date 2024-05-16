@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-09 08:00:00
+updated: 2024-05-16 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -21,7 +21,7 @@ topic: calcite
 
 在上一篇 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)中，我们介绍了经典的数据库的处理流程，包括：`SQL 解析`、`SQL 绑定`、`SQL 优化`以及`计划执行`。SQL 绑定主要的作用是将 SQL 解析生成的 AST 和数据库的元数据进行绑定，从而生成具有语义的 AST。SQL 绑定会通过自底向上的方式遍历 AST，对抽象语法树中的节点进行绑定分析，绑定的过程中会将表、列等元数据附在语法树上，最后生成具有语义的语法树 `Bounded AST`。
 
-Calcite 通过 SQL 校验器实现 SQL 绑定，SQL 校验器所需的 System Catalog 信息，我们在上篇文章已经做了详细的介绍，感兴趣的读者可以阅读回顾相关内容。本文将重点介绍 Calcite SQL 校验器的整体设计，梳理校验器中不同类的用途，然后通过一些案例来展示 SQL 校验器的整体流程，并对流程中的关键方法进行代码级别的分析，力求让大家能够深刻理解 Calcite 的 SQL 校验器。
+Calcite 通过 SQL 校验器实现 SQL 绑定，SQL 校验器所需的 System Catalog 信息，我们在上篇文章已经做了详细的介绍，感兴趣的读者可以阅读回顾相关内容。本文将重点介绍 Calcite SQL 校验器的整体设计，梳理校验器中不同类的用途，然后通过具体案例来展示 SQL 校验器的整体流程，并对流程中的关键方法进行代码级别的分析，力求让大家能够深刻理解 Calcite 的 SQL 校验器。
 
 ## SQL 校验器整体设计
 
@@ -106,8 +106,8 @@ Calcite 会将该语句拆分为 4 个 SelectScope 分别表示不同表达式�
 
 * `expr1` 可以访问 `t1, t2, q3` 中的对象；
 * `expr2` 可以访问 `t3` 中的对象；
-* `expr3` 可以访问 `t4, t1, t2` 中的对象；
-* `expr4` 可以访问 `t1, t2, q3`, 以及在 SELECT 子句中定义的任何别名（取决于方言）。
+* `expr3` 可以访问 `t4, t1, t2` 中的对象（实际测试 MySQL，`expr3` 同样可以访问 `q3` 临时表）；
+* `expr4` 可以访问 `t1, t2, q3`, 以及在 SELECT 子句中定义的任何列别名（取决于方言）。
 
 ### SqlValidatorNamespace
 
@@ -135,7 +135,31 @@ Calcite 会从查询语句中提取出 4 个命名空间，分别如下所示，
 
 ## SQL 校验器执行流程
 
-前文我们对 Caclite 校验器中核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 类进行了介绍，想必大家对校验器有了一些基础的认识。本节我们通过 `CsvTest#testPushDownProjectAggregateNested` 单测，来跟踪下 SQL 校验器的执行流程，了解这些核心类在校验流程中是如何使用的。
+前文我们对 Caclite 校验器中核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 类进行了介绍，想必大家对校验器有了一些基础的认识。本节我们通过如下所示的 `CsvTest#testPushDownProjectAggregateNested` 单测，来跟踪下 SQL 校验器的执行流程，该示例 SQL 中包含了常用的子查询、聚合查询以及 `MAX` 和 `COUNT` 聚合函数，可以帮助大家了解这些核心类在校验流程中是如何使用的。
+
+```sql
+final String sql = "explain plan " + extra + " for\n" 
+        + "select gender, max(qty)\n"
+        + "from (\n"
+        + "  select name, gender, count(*) qty\n"
+        + "  from EMPS\n"
+        + "  group by name, gender) t\n"
+        + "group by gender";
+```
+
+### validate
+
+```java
+@Override
+public SqlNode validate(SqlNode topNode) {
+    SqlValidatorScope scope = new EmptyScope(this);
+    scope = new CatalogScope(scope, ImmutableList.of("CATALOG"));
+    final SqlNode topNode2 = validateScopedExpression(topNode, scope);
+    final RelDataType type = getValidatedNodeType(topNode2);
+    Util.discard(type);
+    return topNode2;
+}
+```
 
 TODO
 
