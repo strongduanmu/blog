@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-16 08:00:00
+updated: 2024-05-20 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -147,7 +147,43 @@ final String sql = "explain plan " + extra + " for\n"
         + "group by gender";
 ```
 
+### SqlValidator 初始化
+
+首先，会初始化 SqlValidator 对象，初始化时会将校验器所需的 SqlOperatorTable 和 SqlValidatorCatalogReader 等对象传入进来，SqlOperatorTable 用于查找 SQL 运算符和函数，SqlValidatorCatalogReader 则用于校验时查找元数据信息。此外，初始化时还会创建不同的 AggFinder 对象，用于后续从 AST 中提取不同的聚合函数，以及创建 TypeCoercion 类型转换类，它主要用于 SQL 中可能存在的隐式类型转换。
+
+```java
+protected SqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader catalogReader, RelDataTypeFactory typeFactory, Config config) {
+		// 初始化 SqlOperatorTable，用于查找 SQL 运算符和函数
+  	this.opTab = requireNonNull(opTab, "opTab");
+  	// 用于查找元数据信息
+    this.catalogReader = requireNonNull(catalogReader, "catalogReader");
+    this.typeFactory = requireNonNull(typeFactory, "typeFactory");
+    final RelDataTypeSystem typeSystem = typeFactory.getTypeSystem();
+  	// 获取类型系统中的时间框架集合
+    this.timeFrameSet = requireNonNull(typeSystem.deriveTimeFrameSet(TimeFrames.CORE), "timeFrameSet");
+    this.config = requireNonNull(config, "config");
+
+    // It is assumed that unknown type is nullable by default
+    unknownType = typeFactory.createTypeWithNullability(typeFactory.createUnknownType(), true);
+    booleanType = typeFactory.createSqlType(SqlTypeName.BOOLEAN);
+
+    final SqlNameMatcher nameMatcher = catalogReader.nameMatcher();
+  	// 初始化 AggFinder，用于从 AST 中遍历获取不同的聚合函数
+    aggFinder = new AggFinder(opTab, false, true, false, null, nameMatcher);
+    aggOrOverFinder = new AggFinder(opTab, true, true, false, null, nameMatcher);
+    overFinder = new AggFinder(opTab, true, false, false, aggOrOverFinder, nameMatcher);
+    groupFinder = new AggFinder(opTab, false, false, true, null, nameMatcher);
+    aggOrOverOrGroupFinder = new AggFinder(opTab, true, true, true, null, nameMatcher);
+    // 初始化类型转换类，用于隐式类型转换
+	  TypeCoercion typeCoercion = config.typeCoercionFactory().create(typeFactory, this);
+  	this.typeCoercion = typeCoercion;
+		...
+}
+```
+
 ### validate
+
+介绍完 SqlValidator 初始化逻辑，我们再来深入探究下校验器的核心逻辑 `validate` 方法，其实现逻辑如下：
 
 ```java
 @Override
@@ -160,10 +196,6 @@ public SqlNode validate(SqlNode topNode) {
     return topNode2;
 }
 ```
-
-TODO
-
-### 隐式类型转换
 
 TODO
 
