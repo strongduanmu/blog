@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-03 08:00:00
-updated: 2024-05-20 08:00:00
+updated: 2024-05-23 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -153,13 +153,13 @@ final String sql = "explain plan " + extra + " for\n"
 
 ```java
 protected SqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader catalogReader, RelDataTypeFactory typeFactory, Config config) {
-		// 初始化 SqlOperatorTable，用于查找 SQL 运算符和函数
-  	this.opTab = requireNonNull(opTab, "opTab");
-  	// 用于查找元数据信息
+    // 初始化 SqlOperatorTable，用于查找 SQL 运算符和函数
+    this.opTab = requireNonNull(opTab, "opTab");
+    // 用于查找元数据信息
     this.catalogReader = requireNonNull(catalogReader, "catalogReader");
     this.typeFactory = requireNonNull(typeFactory, "typeFactory");
     final RelDataTypeSystem typeSystem = typeFactory.getTypeSystem();
-  	// 获取类型系统中的时间框架集合
+    // 获取类型系统中的时间框架集合
     this.timeFrameSet = requireNonNull(typeSystem.deriveTimeFrameSet(TimeFrames.CORE), "timeFrameSet");
     this.config = requireNonNull(config, "config");
 
@@ -168,36 +168,82 @@ protected SqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader cat
     booleanType = typeFactory.createSqlType(SqlTypeName.BOOLEAN);
 
     final SqlNameMatcher nameMatcher = catalogReader.nameMatcher();
-  	// 初始化 AggFinder，用于从 AST 中遍历获取不同的聚合函数
+    // 初始化 AggFinder，用于从 AST 中遍历获取不同的聚合函数
     aggFinder = new AggFinder(opTab, false, true, false, null, nameMatcher);
     aggOrOverFinder = new AggFinder(opTab, true, true, false, null, nameMatcher);
     overFinder = new AggFinder(opTab, true, false, false, aggOrOverFinder, nameMatcher);
     groupFinder = new AggFinder(opTab, false, false, true, null, nameMatcher);
     aggOrOverOrGroupFinder = new AggFinder(opTab, true, true, true, null, nameMatcher);
     // 初始化类型转换类，用于隐式类型转换
-	  TypeCoercion typeCoercion = config.typeCoercionFactory().create(typeFactory, this);
-  	this.typeCoercion = typeCoercion;
-		...
+    TypeCoercion typeCoercion = config.typeCoercionFactory().create(typeFactory, this);
+    this.typeCoercion = typeCoercion;
+    ...
 }
 ```
 
-### validate
+### validate 流程
 
-介绍完 SqlValidator 初始化逻辑，我们再来深入探究下校验器的核心逻辑 `validate` 方法，其实现逻辑如下：
+介绍完 SqlValidator 初始化逻辑，我们再来深入探究下校验器的核心逻辑 `validate` 方法，其实现逻辑如下。首先会创建用于 root 节点校验的 EmptyScope，并将 EmptyScope 作为 CatalogScope 的父类，CatalogScope 可以查看所有 Schema 中的元数据，在校验过程中能够帮助对 `schema.table.column` 进行列解析。
 
 ```java
 @Override
 public SqlNode validate(SqlNode topNode) {
+  	// 创建 EmptyScope 用于 root 节点校验
     SqlValidatorScope scope = new EmptyScope(this);
+  	// CatalogScope 可以查看所有 Schema 中的元数据，它的父类是 EmptyScope
     scope = new CatalogScope(scope, ImmutableList.of("CATALOG"));
+  	// 校验名称解析范围内的表达式
     final SqlNode topNode2 = validateScopedExpression(topNode, scope);
+  	// 获取校验后的节点类型
     final RelDataType type = getValidatedNodeType(topNode2);
     Util.discard(type);
     return topNode2;
 }
 ```
 
+然后会调用 `validateScopedExpression` 进行校验，这部分是 SQL 校验器的核心逻辑。下面展示了该方法的代码实现，内部依次调用了 `performUnconditionalRewrites`、`registerQuery`、`validate` 和 `deriveType` 方法，我们将对这些方法内部实现细节进行深入探究。
+
+```java
+private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scope) {
+  	// 重写 SqlNode 进行标准化，以方便后续的逻辑计划优化
+    SqlNode outermostNode = performUnconditionalRewrites(topNode, false);
+    cursorSet.add(outermostNode);
+    top = outermostNode;
+    if (outermostNode.isA(SqlKind.TOP_LEVEL)) {
+      	// 注册 Scope 和 Namespace
+        registerQuery(scope, null, outermostNode, outermostNode, null, false);
+    }
+  	// 校验 SqlNode
+    outermostNode.validate(this, scope);
+    if (!outermostNode.isA(SqlKind.TOP_LEVEL)) {
+        // 推断类型
+        deriveType(scope, outermostNode);
+    }
+    return outermostNode;
+}
+```
+
+#### performUnconditionalRewrites
+
+首先，我们来探究下 `performUnconditionalRewrites` 的内部实现逻辑，它主要用于 SqlNode 重写标准化，从而方便后续的逻辑计划优化。
+
 TODO
+
+#### registerQuery
+
+
+
+#### validate
+
+
+
+#### deriveType
+
+
+
+### 流程总结
+
+
 
 ## 结语
 
