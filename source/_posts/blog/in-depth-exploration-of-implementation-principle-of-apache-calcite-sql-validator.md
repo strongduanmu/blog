@@ -8,8 +8,8 @@ references:
   - '[Calcite SQL 元数据验证原理与实战](https://juejin.cn/post/7209852117297037368)'
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
-date: 2024-05-03 08:00:00
-updated: 2024-05-23 08:00:00
+date: 2024-05-28 08:00:00
+updated: 2024-05-28 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -225,7 +225,76 @@ private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scop
 
 #### performUnconditionalRewrites
 
-首先，我们来探究下 `performUnconditionalRewrites` 的内部实现逻辑，它主要用于 SqlNode 重写标准化，从而方便后续的逻辑计划优化。
+首先，我们来探究下 `performUnconditionalRewrites` 的内部实现逻辑，它主要用于 SqlNode 重写标准化，从而方便后续的逻辑计划优化。首先，方法内部会判断当前 SqlNode 的类型，根据 `SqlCall` 和 `SqlNodeList` 分别进行处理。Calcite SqlNode 体系我们之前在 [Apache Calcite SQL Parser 原理剖析](https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html#calcite-sqlnode-%E4%BD%93%E7%B3%BB-sql-%E7%94%9F%E6%88%90)中已经进行了详细介绍，不熟悉的朋友可以阅读下这篇文章。
+
+如果当前 SqlNode 是 SqlCall（SqlCall 代表了对 SqlOperator 的调用，Calcite 中每个操作都可以对应一个 SqlCall，例如查询操作是 SqlSelectOperator，对应的 SqlNode 是 `SqlSelect`），则会获取 SqlCall 对应的 `SqlKind` 和 `OperandList`。SqlKind 是一个枚举类，表示了 SqlNode 对应的类型，常用的类型有：SELECT、INSERT、ORDER_BY、WITH 等，更多类型可以查看 [SqlKind 源码](https://github.com/apache/calcite/blob/fb6f43192c4253caea63c0705067a9aa12a3fa74/core/src/main/java/org/apache/calcite/sql/SqlKind.java#L81)。
+
+TODO
+
+```java
+// 判断当前 SqlNode 是否为 SqlCall
+if (node instanceof SqlCall) {
+...
+    SqlCall call = (SqlCall) node;
+    // 获取 SqlKind 类型
+    final SqlKind kind = call.getKind();
+    // 获取 SqlNode 中包含的运算符
+    final List<SqlNode> operands = call.getOperandList();
+    for (int i = 0; i < operands.size(); i++) {
+        SqlNode operand = operands.get(i);
+        boolean childUnderFrom;
+        if (kind == SqlKind.SELECT) {
+            childUnderFrom = i == SqlSelect.FROM_OPERAND;
+        } else if (kind == SqlKind.AS && (i == 0)) {
+            // for an aliased expression, it is under FROM if
+            // the AS expression is under FROM
+            childUnderFrom = underFrom;
+        } else {
+            childUnderFrom = false;
+        }
+        SqlNode newOperand = performUnconditionalRewrites(operand, childUnderFrom);
+        if (newOperand != null && newOperand != operand) {
+            call.setOperand(i, newOperand);
+        }
+    }
+
+    if (call.getOperator() instanceof SqlUnresolvedFunction) {
+        assert call instanceof SqlBasicCall;
+        final SqlUnresolvedFunction function = (SqlUnresolvedFunction) call.getOperator();
+        // This function hasn't been resolved yet.  Perform
+        // a half-hearted resolution now in case it's a
+        // builtin function requiring special casing.  If it's
+        // not, we'll handle it later during overload resolution.
+        final List<SqlOperator> overloads = new ArrayList<>();
+        opTab.lookupOperatorOverloads(function.getNameAsId(), function.getFunctionType(), SqlSyntax.FUNCTION, overloads, catalogReader.nameMatcher());
+        if (overloads.size() == 1) {
+            ((SqlBasicCall) call).setOperator(overloads.get(0));
+        }
+    }
+    if (config.callRewrite()) {
+        node = call.getOperator().rewriteCall(this, call);
+    }
+}
+```
+
+如果 SqlNode 是否为 SqlNodeList，则会遍历其中的 SqlNode，并调用 performUnconditionalRewrites，然后将新的 SqlNode 设置到 SqlNodeList 中。
+
+```java
+// 判断当前 SqlNode 是否为 SqlNodeList
+} else if (node instanceof SqlNodeList) {
+    // SqlNodeList 会遍历其中的 SqlNode 并调用 performUnconditionalRewrites，并将新的 SqlNode 设置到 SqlNodeList 中
+    final SqlNodeList list = (SqlNodeList) node;
+    for (int i = 0; i < list.size(); i++) {
+        SqlNode operand = list.get(i);
+        SqlNode newOperand = performUnconditionalRewrites(operand, false);
+        if (newOperand != null) {
+            list.set(i, newOperand);
+        }
+    }
+}
+```
+
+
 
 TODO
 
