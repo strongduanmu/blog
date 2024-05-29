@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-05-28 08:00:00
+updated: 2024-05-29 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -229,12 +229,10 @@ private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scop
 
 如果当前 SqlNode 是 SqlCall（SqlCall 代表了对 SqlOperator 的调用，Calcite 中每个操作都可以对应一个 SqlCall，例如查询操作是 SqlSelectOperator，对应的 SqlNode 是 `SqlSelect`），则会获取 SqlCall 对应的 `SqlKind` 和 `OperandList`。SqlKind 是一个枚举类，表示了 SqlNode 对应的类型，常用的类型有：SELECT、INSERT、ORDER_BY、WITH 等，更多类型可以查看 [SqlKind 源码](https://github.com/apache/calcite/blob/fb6f43192c4253caea63c0705067a9aa12a3fa74/core/src/main/java/org/apache/calcite/sql/SqlKind.java#L81)。
 
-TODO
-
 ```java
 // 判断当前 SqlNode 是否为 SqlCall
 if (node instanceof SqlCall) {
-...
+    ...
     SqlCall call = (SqlCall) node;
     // 获取 SqlKind 类型
     final SqlKind kind = call.getKind();
@@ -242,42 +240,35 @@ if (node instanceof SqlCall) {
     final List<SqlNode> operands = call.getOperandList();
     for (int i = 0; i < operands.size(); i++) {
         SqlNode operand = operands.get(i);
-        boolean childUnderFrom;
-        if (kind == SqlKind.SELECT) {
-            childUnderFrom = i == SqlSelect.FROM_OPERAND;
-        } else if (kind == SqlKind.AS && (i == 0)) {
-            // for an aliased expression, it is under FROM if
-            // the AS expression is under FROM
-            childUnderFrom = underFrom;
-        } else {
-            childUnderFrom = false;
-        }
+        ...
+        // 每一个运算法调用 performUnconditionalRewrites 并设置到 SqlCall 中
         SqlNode newOperand = performUnconditionalRewrites(operand, childUnderFrom);
         if (newOperand != null && newOperand != operand) {
             call.setOperand(i, newOperand);
         }
     }
 
+    // 当前运算符为未解析函数 SqlUnresolvedFunction
     if (call.getOperator() instanceof SqlUnresolvedFunction) {
-        assert call instanceof SqlBasicCall;
         final SqlUnresolvedFunction function = (SqlUnresolvedFunction) call.getOperator();
-        // This function hasn't been resolved yet.  Perform
-        // a half-hearted resolution now in case it's a
-        // builtin function requiring special casing.  If it's
-        // not, we'll handle it later during overload resolution.
         final List<SqlOperator> overloads = new ArrayList<>();
+        // 从 SqlOperatorTable 中查找函数，查找的范围包括内置函数以及元数据中注册的函数
         opTab.lookupOperatorOverloads(function.getNameAsId(), function.getFunctionType(), SqlSyntax.FUNCTION, overloads, catalogReader.nameMatcher());
         if (overloads.size() == 1) {
+          	// 查找到函数则设置新的运算符
             ((SqlBasicCall) call).setOperator(overloads.get(0));
         }
-    }
-    if (config.callRewrite()) {
-        node = call.getOperator().rewriteCall(this, call);
     }
 }
 ```
 
-如果 SqlNode 是否为 SqlNodeList，则会遍历其中的 SqlNode，并调用 performUnconditionalRewrites，然后将新的 SqlNode 设置到 SqlNodeList 中。
+然后对 OperandList 进行遍历，此处 SqlCall 为 SqlSelect，而 SqlSelect 中的 OperandList 会按照 `keywordList, selectList, from, where, groupBy, having, windowDecls, qualify, orderBy, offset, fetch, hints` 的顺序进行返回，后续操作都会基于这个从 0 开始的顺序进行处理。下图展示了单测中 SQL 对应的初始 SqlNode，OperandList 包含了下图所示的 keywordList、selectList 等运算符，会逐个调用 performUnconditionalRewrites 进行处理。
+
+如果当前 SqlCall 运算符为未解析函数 `SqlUnresolvedFunction`，则会调用 `SqlOperatorTable#lookupOperatorOverloads` 方法，从内置函数以及元数据中查找函数，并重新设置运算符。
+
+![未执行 performUnconditionalRewrites 的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/not-perform-unconditional-rewrite-sqlnode.png)
+
+如果 SqlNode 为 SqlNodeList，则会遍历其中的 SqlNode。本案例中 selectList 就是 SqlNodeList 类型，此时会遍历 SqlNode 并调用 performUnconditionalRewrites，然后将新的 SqlNode 设置到 SqlNodeList 中。
 
 ```java
 // 判断当前 SqlNode 是否为 SqlNodeList
@@ -294,9 +285,89 @@ if (node instanceof SqlCall) {
 }
 ```
 
+除了前面介绍的会将 SqlUnresolvedFunction 转换为对应解析函数外，performUnconditionalRewrites 主要会将如下的非标准 SqlNode 转换为标准的 SqlNode，具体包括：`VALUES`、`ORDER_BY`、`EXPLICIT_TABLE`、`DELETE`、`UPDATE` 和 `MERGE`。VALUES 改写由于在类似 `FROM (VALUES(...)) [ AS alias ]` 场景中存在问题，目前已经不进行改写。ORDER_BY 语句则会被改写为 SqlSelect 和 SqlWith，并将排序相关的子句下沉到 SqlSelect 中。EXPLICIT_TABLE 则会将 将 `Table t` 子句改写为 `SELECT * FROM t` 语句。DELETE 和 UPDATE 会根据条件改写生成 SqlSelect，代表了删除和更新语句所需要删除和更新的数据。MERGE 改写会将 SqlMerge 改写为 SqlUpdate 或 SqlInsert，以复用 SqlUpdate 和 SqlInsert 的处理逻辑。
 
+```java
+final SqlKind kind = node.getKind();
+switch (kind) {
+    case VALUES:
+        // VALUES 改写由于在类似 FROM (VALUES(...)) [ AS alias ] 场景中存在问题，目前已经不进行改写
+        return node;
+    case ORDER_BY: {
+        SqlOrderBy orderBy = (SqlOrderBy) node;
+        handleOffsetFetch(orderBy.offset, orderBy.fetch);
+        if (orderBy.query instanceof SqlSelect) {
+            SqlSelect select = (SqlSelect) orderBy.query;
+            // 将 SqlOrderBy 转换为 SqlSelect，排序子句下沉到 SqlSelect 中
+            if (select.getOrderList() == null) {
+                // push ORDER BY into existing select
+                select.setOrderBy(orderBy.orderList);
+                select.setOffset(orderBy.offset);
+                select.setFetch(orderBy.fetch);
+                return select;
+            }
+        }
+        // 将 SqlOrderBy 转换为 SqlWith，排序子句下沉到 SqlWith 的 SqlSelect 子句中
+        if (orderBy.query instanceof SqlWith && ((SqlWith) orderBy.query).body instanceof SqlSelect) {
+            SqlWith with = (SqlWith) orderBy.query;
+            SqlSelect select = (SqlSelect) with.body;
+            if (select.getOrderList() == null) {
+                // push ORDER BY into existing select
+                select.setOrderBy(orderBy.orderList);
+                select.setOffset(orderBy.offset);
+                select.setFetch(orderBy.fetch);
+                return with;
+            }
+        }
+        final SqlNodeList selectList = new SqlNodeList(SqlParserPos.ZERO);
+        selectList.add(SqlIdentifier.star(SqlParserPos.ZERO));
+        final SqlNodeList orderList;
+        SqlSelect innerSelect = getInnerSelect(node);
+        ...
+        return new SqlSelect(SqlParserPos.ZERO, null, selectList, orderBy.query, null, null, null, null, null, orderList, orderBy.offset, orderBy.fetch, null);
+    }
 
-TODO
+    case EXPLICIT_TABLE: {
+        // 将 Table t 子句改写为 SELECT * FROM t
+        // (TABLE t) is equivalent to (SELECT * FROM t)
+        SqlCall call = (SqlCall) node;
+        final SqlNodeList selectList = new SqlNodeList(SqlParserPos.ZERO);
+        selectList.add(SqlIdentifier.star(SqlParserPos.ZERO));
+        return new SqlSelect(SqlParserPos.ZERO, null, selectList, call.operand(0), null, null, null, null, null, null, null, null, null);
+    }
+
+    case DELETE: {
+        SqlDelete call = (SqlDelete) node;
+        SqlSelect select = createSourceSelectForDelete(call);
+      	// 为 SqlDelete 增加待删除数据的 SqlSelect 子句
+        call.setSourceSelect(select);
+        break;
+    }
+
+    case UPDATE: {
+        SqlUpdate call = (SqlUpdate) node;
+        SqlSelect select = createSourceSelectForUpdate(call);
+        // 为 SqlUpdate 增加待删除数据的 SqlSelect 子句
+        call.setSourceSelect(select);
+        ...
+        break;
+    }
+
+    case MERGE: {
+      	// 将 SqlMerge 改写为 SqlUpdate 或 SqlInsert
+        SqlMerge call = (SqlMerge) node;
+        rewriteMerge(call);
+        break;
+    }
+    default:
+        break;
+}
+return node;
+```
+
+执行完 performUnconditionalRewrites 方法，最终生成的 SqlNode 如下图所示，可以看到 SqlUnresolvedFunction 函数已经被改写为对应的内置函数，由于本示例中没有包含 OrderBy、Update 等语句，感兴趣的读者可以自行调整单测中的 SQL 以覆盖对应的逻辑。
+
+![执行 performUnconditionalRewrites 后的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/perform-unconditional-rewrite-sqlnode.png)
 
 #### registerQuery
 
