@@ -250,11 +250,11 @@ windowSpec:
 
 `IN`、`EXISTS`、`UNIQUE` 或标量子查询可以是相关的，即：它可以引用一个封闭查询中 FROM 子句的表。
 
-`GROUP BY DISTINCT` 删除重复的分组集（例如：`GROUP BY DISTINCT GROUPING SETS ((a), (a, b), (a))` 相当于 `GROUP BY GROUPING SETS ((a), (a, b))`），`GROUP BY ALL` 和 `GROUP BY` 是等价的。
+`GROUP BY DISTINCT` 删除重复的分组集（例如：`GROUP BY DISTINCT GROUPING SETS ((a), (a, b), (a))` 等价于 `GROUP BY GROUPING SETS ((a), (a, b))`），`GROUP BY ALL` 和 `GROUP BY` 是等价的。
 
-`selectWithoutFrom` 相当于 `VALUES`，但它不是标准 SQL，并且仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
+`selectWithoutFrom` 等价于 `VALUES`，但它不是标准 SQL，并且仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
 
-`MINUS` 相当于 `EXCEPT`，但不是标准 SQL，仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
+`MINUS` 等价于 `EXCEPT`，但不是标准 SQL，仅在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isMinusAllowed--)中允许使用。
 
 `CROSS APPLY` 和 `OUTER APPLY` 仅允许在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#isApplyAllowed--)中使用。
 
@@ -276,7 +276,7 @@ A, **ABS**, ABSENT, ABSOLUTE, ACTION, ADA, ADD, ADMIN, AFTER, **ALL**, **ALLOCAT
 
 不带引号的标识符（例如 emp）必须以字母开头，并且只能包含字母、数字和下划线。它们被隐式转换为大写。
 
-带引号的标识符，例如 `"Employee Name"` ，以双引号开头和结尾。它们几乎可以包含任何字符，包括空格和其他标点符号。如果您希望在标识符中包含双引号，请使用另一个双引号对其进行转义，例如：`"An employee called ""Fred""."`。
+带引号的标识符，例如 `"Employee Name"` ，以双引号开头和结尾。它们几乎可以包含任何字符，包括空格和其他标点符号。如果你希望在标识符中包含双引号，请使用另一个双引号对其进行转义，例如：`"An employee called ""Fred""."`。
 
 在 Calcite 中，将标识符与引用对象的名称匹配是区分大小写的。但请记住，未加引号的标识符在匹配之前会隐式转换为大写，并且如果它引用的对象是使用未加引号的标识符作为其名称创建的，则其名称也将转换为大写。
 
@@ -353,7 +353,7 @@ timeUnit:
 | POLYGON            | 3        | `ST_GeomFromText('POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))')` 是五边形； `ST_GeomFromText('POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10), (20 30, 35 35, 30 20, 20 30))')` 是一个有四边形孔的五边形 |
 | POLYHEDRALSURFACE  | 15       |                                                              |
 | GEOMETRYCOLLECTION | 7        | 零个或多个 GEOMETRY 实例的集合；多点、多线、多多边形的概括   |
-| MULTIPOINT         | 4        | ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))') ` 相当于 `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)') |
+| MULTIPOINT         | 4        | ST_GeomFromText('MULTIPOINT ((10 40), (40 30), (20 20), (30 10))') ` 等价于 `ST_GeomFromText('MULTIPOINT (10 40, 40 30, 20 20, 30 10)') |
 | MULTICURVE         | -        | MULTILINESTRING 的泛化                                       |
 | MULTILINESTRING    | 5        | `ST_GeomFromText('MULTILINESTRING ((10 10, 20 20, 10 40), (40 40, 30 30, 40 20, 30 10))')` |
 | MULTISURFACE       | -        | MULTIPOLYGON 的泛化                                          |
@@ -479,126 +479,126 @@ comp:
 
 ### 字符串运算符和函数
 
-TODO
-
-| OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
+| 运算符语法                                                   | 描述                                                         |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| string \|\| string                                           | Concatenates two character strings                           |
-| CHAR_LENGTH(string)                                          | Returns the number of characters in a character string       |
-| CHARACTER_LENGTH(string)                                     | As CHAR_LENGTH(*string*)                                     |
-| UPPER(string)                                                | Returns a character string converted to upper case           |
-| LOWER(string)                                                | Returns a character string converted to lower case           |
-| POSITION(substring IN string)                                | Returns the position of the first occurrence of *substring* in *string* |
-| POSITION(substring IN string FROM integer)                   | Returns the position of the first occurrence of *substring* in *string* starting at a given point (not standard SQL) |
-| TRIM( { BOTH \| LEADING \| TRAILING } string1 FROM string2)  | Removes the longest string containing only the characters in *string1* from the start/end/both ends of *string1* |
-| OVERLAY(string1 PLACING string2 FROM integer [ FOR integer2 ]) | Replaces a substring of *string1* with *string2*             |
-| SUBSTRING(string FROM integer)                               | Returns a substring of a character string starting at a given point |
-| SUBSTRING(string FROM integer FOR integer)                   | Returns a substring of a character string starting at a given point with a given length |
-| INITCAP(string)                                              | Returns *string* with the first letter of each word converter to upper case and the rest to lower case. Words are sequences of alphanumeric characters separated by non-alphanumeric characters. |
-
-Not implemented:
-
-- SUBSTRING(string FROM regexp FOR regexp)
-
-### 二进制字符串运算符和函数
-
-| OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| binary \|\| binary                                           | Concatenates two binary strings                              |
-| OCTET_LENGTH(binary)                                         | Returns the number of bytes in *binary*                      |
-| POSITION(binary1 IN binary2)                                 | Returns the position of the first occurrence of *binary1* in *binary2* |
-| POSITION(binary1 IN binary2 FROM integer)                    | Returns the position of the first occurrence of *binary1* in *binary2* starting at a given point (not standard SQL) |
-| OVERLAY(binary1 PLACING binary2 FROM integer [ FOR integer2 ]) | Replaces a substring of *binary1* with *binary2*             |
-| SUBSTRING(binary FROM integer)                               | Returns a substring of *binary* starting at a given point    |
-| SUBSTRING(binary FROM integer FOR integer)                   | Returns a substring of *binary* starting at a given point with a given length |
-
-### 日期/时间函数
-
-| OPERATOR SYNTAX                                | DESCRIPTION                                                  |
-| :--------------------------------------------- | :----------------------------------------------------------- |
-| LOCALTIME                                      | Returns the current date and time in the session time zone in a value of datatype TIME |
-| LOCALTIME(precision)                           | Returns the current date and time in the session time zone in a value of datatype TIME, with *precision* digits of precision |
-| 本地时间戳                                     | 以数据类型 TIMESTAMP 的值返回会话时区中的当前日期和时间      |
-| 本地时间戳（精度）                             | 以数据类型 TIMESTAMP 的值返回会话时区中的当前日期和时间，精度为*precision* |
-| 当前时间                                       | 返回会话时区中的当前时间，采用数据类型 TIMESTAMP WITH TIME ZONE 的值 |
-| 当前日期                                       | 以数据类型 DATE 的值返回会话时区中的当前日期                 |
-| CURRENT_TIMESTAMP                              | 返回会话时区中的当前日期和时间，采用数据类型 TIMESTAMP WITH TIME ZONE 的值 |
-| EXTRACT(timeUnit FROM 日期时间)                | 从日期时间值表达式中提取并返回指定日期时间字段的值           |
-| FLOOR(日期时间 TO 时间单位)                    | 将*日期时间*向下舍入为*timeUnit*                             |
-| CEIL(日期时间 TO 时间单位)                     | 将*日期时间*向上舍入到*timeUnit*                             |
-| 年（日期）                                     | 相当于`EXTRACT(YEAR FROM date)`。返回一个整数。              |
-| 季度（日期）                                   | 相当于`EXTRACT(QUARTER FROM date)`。返回 1 到 4 之间的整数。 |
-| 月（日期）                                     | 相当于`EXTRACT(MONTH FROM date)`。返回 1 到 12 之间的整数。  |
-| 周（日期）                                     | 相当于`EXTRACT(WEEK FROM date)`。返回 1 到 53 之间的整数。   |
-| 当年某日（日期）                               | 相当于`EXTRACT(DOY FROM date)`。返回 1 到 366 之间的整数。   |
-| 某月某日（日期）                               | 相当于`EXTRACT(DAY FROM date)`。返回 1 到 31 之间的整数。    |
-| 星期几（日期）                                 | 相当于`EXTRACT(DOW FROM date)`。返回 1 到 7 之间的整数。     |
-| 小时（日期）                                   | 相当于`EXTRACT(HOUR FROM date)`。返回 0 到 23 之间的整数。   |
-| 分钟（日期）                                   | 相当于`EXTRACT(MINUTE FROM date)`。返回 0 到 59 之间的整数。 |
-| 第二（日期）                                   | 相当于`EXTRACT(SECOND FROM date)`。返回 0 到 59 之间的整数。 |
-| TIMESTAMPADD（时间单位，整数，日期时间）       | 返回添加了（有符号）*整数**timeUnit*间隔的*日期时间*。相当于 `datetime + INTERVAL 'integer' timeUnit` |
-| TIMESTAMPDIFF（时间单位，日期时间，日期时间2） | *返回datetime*和*datetime2之间的**timeUnit*间隔数（有符号）。相当于`(datetime2 - datetime) timeUnit` |
-| LAST_DAY（日期）                               | 以数据类型 DATE 的值返回该月最后一天的日期；例如，对于 DATE'2020-02-10' 和 TIMESTAMP'2020-02-10 10:10:10' 均返回 DATE'2020-02-29' |
-
-对 niladic 函数的调用（例如，`CURRENT_DATE`在标准 SQL 中不接受括号）。带括号的调用，例如在某些[一致性级别](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/validate/SqlConformance.html#allowNiladicParentheses--)`CURRENT_DATE()`中被接受 。
+| string \|\| string                                           | 连接两个字符串                                               |
+| CHAR_LENGTH(string)                                          | 返回字符串中的字符数                                         |
+| CHARACTER_LENGTH(string)                                     | 像 CHAR_LENGTH(string) 一样，返回字符串中的字符数            |
+| UPPER(string)                                                | 返回转换为大写字母的字符串                                   |
+| LOWER(string)                                                | 返回转换为小写字母的字符串                                   |
+| POSITION(substring IN string)                                | 返回 *string* 中 *substring* 第一次出现的位置                |
+| POSITION(substring IN string FROM integer)                   | 返回从给定点开始在 *string* 中第一次出现 *substring* 的位置（非标准 SQL） |
+| TRIM( { BOTH \| LEADING \| TRAILING } string1 FROM string2)  | 从 *string1* 的**开始/结束/两端**删除仅包含 *string1* 中字符的最长字符串 |
+| OVERLAY(string1 PLACING string2 FROM integer [ FOR integer2 ]) | 用 *string2* 替换 *string1* 的子字符串                       |
+| SUBSTRING(string FROM integer)                               | 返回从给定点开始的字符串的子字符串                           |
+| SUBSTRING(string FROM integer FOR integer)                   | 返回从给定点开始、具有给定长度的字符串子字符串。             |
+| INITCAP(string)                                              | 返回 *string*，其中每个单词的首字母转换为大写，其余字母转换为小写。单词是由非字母数字字符分隔的字母数字字符序列。 |
 
 未实现：
 
-- CEIL(间隔)
-- 楼层（间隔）
-- \+ 间隔
-- \- 间隔
-- 间隔+间隔
-- 间隔-间隔
-- 间隔/间隔
+- `SUBSTRING(string FROM regexp FOR regexp)`
+
+### 二进制字符串运算符和函数
+
+| 运算符语法                                                   | 描述                                                         |
+| :----------------------------------------------------------- | :----------------------------------------------------------- |
+| binary \|\| binary                                           | 连接两个二进制字符串                                         |
+| OCTET_LENGTH(binary)                                         | 返回*二进制*的字节数                                         |
+| POSITION(binary1 IN binary2)                                 | 返回 *binary1* 在 *binary2* 中第一次出现的位置               |
+| POSITION(binary1 IN binary2 FROM integer)                    | 返回从给定点开始 *binary1* 在 *binary2* 中第一次出现的位置（非标准 SQL） |
+| OVERLAY(binary1 PLACING binary2 FROM integer [ FOR integer2 ]) | 用 *binary2* 替换 *binary1* 的子字符串                       |
+| SUBSTRING(binary FROM integer)                               | 返回从给定点开始的 *binary* 子字符串                         |
+| SUBSTRING(binary FROM integer FOR integer)                   | 返回从给定点开始、具有给定长度的 *binary* 子字符串           |
+
+### 日期/时间函数
+
+| 运算符语法                                   | 描述                                                         |
+| :------------------------------------------- | :----------------------------------------------------------- |
+| LOCALTIME                                    | 以 TIME 数据类型的值返回会话时区的当前日期和时间             |
+| LOCALTIME(precision)                         | 以 TIME 数据类型的值返回会话时区中的当前日期和时间，精度为 *precision* 位 |
+| LOCALTIMESTAMP                               | 以 TIMESTAMP 数据类型的值返回会话时区的当前日期和时间        |
+| LOCALTIMESTAMP(precision)                    | 以 TIMESTAMP 数据类型的值返回会话时区中的当前日期和时间，精度为 precision 位 |
+| CURRENT_TIME                                 | 返回会话时区中的当前时间，数据类型为 TIMESTAMP WITH TIME ZONE |
+| CURRENT_DATE                                 | 以 DATE 数据类型的值返回会话时区的当前日期                   |
+| CURRENT_TIMESTAMP                            | 返回会话时区中的当前日期和时间，数据类型为 TIMESTAMP WITH TIME ZONE |
+| EXTRACT(timeUnit FROM datetime)              | 从日期时间值表达式中提取并返回指定日期时间字段的值           |
+| FLOOR(datetime TO timeUnit)                  | 将日期时间向下舍入为时间单位                                 |
+| CEIL(datetime TO timeUnit)                   | 将日期时间向上舍入为时间单位                                 |
+| YEAR(date)                                   | 等价于 EXTRACT(YEAR FROM date)，返回一个整数                 |
+| QUARTER(date)                                | 等价于 EXTRACT(QUARTER FROM date)，返回 1 到 4 之间的整数    |
+| MONTH(date)                                  | 等价于 EXTRACT(MONTH FROM date)。返回 1 到 12 之间的整数     |
+| WEEK(date)                                   | 等价于 EXTRACT(WEEK FROM date)。返回 1 到 53 之间的整数      |
+| DAYOFYEAR(date)                              | 等价于 EXTRACT(DOY FROM date)。返回 1 到 366 之间的整数      |
+| DAYOFMONTH(date)                             | 等价于 EXTRACT(DAY FROM date)。返回 1 到 31 之间的整数       |
+| DAYOFWEEK(date)                              | 等价于 EXTRACT(DOW FROM date)。返回 1 到 7 之间的整数        |
+| HOUR(date)                                   | 等价于 EXTRACT(HOUR FROM date)。返回 0 到 23 之间的整数      |
+| MINUTE(date)                                 | 等价于 EXTRACT(MINUTE FROM date)。返回 0 到 59 之间的整数    |
+| SECOND(date)                                 | 等价于 EXTRACT(SECOND FROM date)。返回 0 到 59 之间的整数    |
+| TIMESTAMPADD(timeUnit, integer, datetime)    | 返回添加了（有符号）整数时间单位间隔的日期时间。等价于 `datetime + INTERVAL 'integer' timeUnit` |
+| TIMESTAMPDIFF(timeUnit, datetime, datetime2) | 返回 datetime 和 datetime2 之间的 timeUnit 间隔数（有符号）。等价于 `(datetime2 - datetime) timeUnit` |
+| LAST_DAY(date)                               | 以 DATE 数据类型的值返回月份最后一天的日期；例如，对于 DATE’2020-02-10’ 和 TIMESTAMP’2020-02-10 10:10:10’，它均返回 DATE’2020-02-29’ |
+
+在标准 SQL 中，对 niladic 函数（例如 CURRENT_DATE）的调用不接受括号。在某些一致性级别中，可以接受带括号的调用（例如 CURRENT_DATE()）。
+
+未实现：
+
+- `CEIL(interval)`
+- `FLOOR(interval)`
+- `+ interval`
+- `- interval`
+- `interval + interval`
+- `interval - interval`
+- `interval / interval`
 
 ### 系统函数
 
 | 运算符语法     | 描述                                                       |
 | :------------- | :--------------------------------------------------------- |
-| 用户           | 相当于 CURRENT_USER                                        |
-| 当前用户       | 当前执行上下文的用户名                                     |
+| USER           | 等价于 CURRENT_USER                                        |
+| CURRENT_USER   | 当前执行上下文的用户名                                     |
 | SESSION_USER   | 会话用户名                                                 |
-| 系统用户       | 返回操作系统识别的当前数据存储用户的名称                   |
-| 当前_路径      | 返回一个字符串，表示当前查找范围以引用用户定义的例程和类型 |
-| 当前角色       | 返回当前活动角色                                           |
+| SYSTEM_USER    | 返回操作系统识别的当前数据存储用户的名称                   |
+| CURRENT_PATH   | 返回一个字符串，表示当前查找范围以引用用户定义的例程和类型 |
+| CURRENT_ROLE   | 返回当前活动角色                                           |
 | CURRENT_SCHEMA | 返回当前模式                                               |
 
 ### 条件函数和运算符
 
 | 运算符语法                                                   | 描述                                                         |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| CASE 值 WHEN value1 [, value11 ]* THEN result1 [ WHEN valueN [, valueN1 ]* THEN resultN ]* [ ELSE resultZ ] END | 简单案例                                                     |
-| CASE WHEN 条件 1 THEN 结果 1 [ WHEN 条件 N THEN 结果 N ]* [ ELSE 结果 Z ] END | 搜索案例                                                     |
-| NULLIF（值，值）                                             | 如果值相同则返回 NULL。  例如，`NULLIF(5, 5)`返回NULL；`NULLIF(5, 0)`返回 5。 |
-| COALESCE(值, 值[, 值]*)                                      | 如果第一个值为 null，则提供一个值。  例如，`COALESCE(NULL, 5)`返回 5。 |
+| CASE value<br/>WHEN value1 [, value11 ]* THEN result1<br/>[ WHEN valueN [, valueN1 ]* THEN resultN ]*<br/>[ ELSE resultZ ]<br/>END | 简单案例                                                     |
+| CASE<br/>WHEN condition1 THEN result1<br/>[ WHEN conditionN THEN resultN ]*<br/>[ ELSE resultZ ]<br/>END | 搜索案例                                                     |
+| NULLIF(value, value)                                         | 如果值相同则返回 NULL。例如，`NULLIF(5, 5)` 返回NULL；`NULLIF(5, 0)` 返回 5。 |
+| COALESCE(value, value [, value ]*)                           | 如果第一个值为 null，则提供一个值。  例如，`COALESCE(NULL, 5)` 返回 5。 |
 
 ### 类型转换
 
-通常，表达式不能包含不同数据类型的值。例如，表达式不能将 5 乘以 10，然后添加“JULIAN”。但是，Calcite 支持将值从一种数据类型隐式和显式转换为另一种数据类型。
+通常，表达式不能包含不同数据类型的值。例如，表达式不能将 5 乘以 10，然后添加 `JULIAN`。但是，Calcite 支持将值从一种数据类型隐式和显式转换为另一种数据类型。
 
 #### 隐式和显式类型转换
 
-Calcite 建议您指定显式转换，而不是依赖隐式或自动转换，原因如下：
+Calcite 建议你指定显式转换，而不是依赖隐式或自动转换，原因如下：
 
-- 使用显式数据类型转换函数时，SQL 语句更容易理解。
-- 隐式数据类型转换可能会对性能产生负面影响，尤其是当列值的数据类型转换为常量数据类型而不是相反时。
+- 使用显式数据类型转换函数时，SQL 语句更容易理解；
+- 隐式数据类型转换可能会对性能产生负面影响，尤其是当列值的数据类型转换为常量数据类型而不是与之相反时；
 - 隐式转换取决于它发生的上下文，并且在每种情况下可能不会以相同的方式工作。例如，从日期时间值到 VARCHAR 值的隐式转换可能会返回意外的格式。
 
-隐式转换的算法可能会在 Calcite 版本之间发生变化。显式转换的行为更可预测。
+隐式转换的算法可能会在 Calcite 版本之间发生变化，显式转换的行为更可预测。
 
 #### 显式类型转换
 
-| 运算符语法                          | 描述                                            |
-| :---------------------------------- | :---------------------------------------------- |
-| CAST（值 AS 类型）                  | 将值转换为给定类型。整数类型之间的转换朝 0 截断 |
-| CONVERT（字符串，字符集1，字符集2） | *将字符串*从*charSet1*转换为*charSet2*          |
-| CONVERT（使用转码名称的值）         | 将*值*从一种基本字符集更改为*transcodingName*   |
-| TRANSLATE（值使用转码名称）         | 将*值*从一种基本字符集更改为*transcodingName*   |
+| 运算符语法                             | 描述                                              |
+| :------------------------------------- | :------------------------------------------------ |
+| CAST(value AS type)                    | 将值转换为给定类型。整数类型之间的转换会向 0 截断 |
+| CONVERT(string, charSet1, charSet2)    | 将字符串从 charSet1 转换为 charSet2               |
+| CONVERT(value USING transcodingName)   | 将值从一个基本字符集更改为 transcodingName        |
+| TRANSLATE(value USING transcodingName) | 将值从一个基本字符集更改为 transcodingName        |
+
+将字符串转换为 BINARY 或 VARBINARY 类型会生成字符串字符集中字符串编码的字节列表。如果字符串的字符无法使用其字符集表示，则会产生运行时错误。
 
 支持的数据类型语法：
 
-```
+```sql
 type:
       typeName
       [ collectionsTypeName ]*
@@ -671,89 +671,99 @@ timeZone:
 
 #### 隐式类型转换
 
-当转换有意义时，方解石会自动将值从一种数据类型转换为另一种数据类型。下表是方解石类型转换的矩阵。该表显示了所有可能的转换，而不考虑进行转换的上下文。管理这些细节的规则如下表所示。
+当这种转换有意义时，Calcite 会自动将值从一种数据类型转换为另一种数据类型。下表是 Calcite 类型转换矩阵，该表显示了所有可能的转换，而不考虑转换的上下文。管理这些细节的规则遵循该表。
 
-| 从到               | 无效的 | 布尔值 | 天音 | 小智 | INT  | BIGINT | 十进制 | 浮点数或实数 | 双倍的 | 间隔 | 日期 | 时间 | 时间戳 | CHAR 或 VARCHAR | 二进制或 VARBINARY | 几何学 | 大批 |
-| :----------------- | :----- | :----- | :--- | :--- | :--- | :----- | :----- | :----------- | :----- | :--- | :--- | :--- | :----- | :-------------- | :----------------- | :----- | :--- |
-| 无效的             | 我     | 我     | 我   | 我   | 我   | 我     | 我     | 我           | 我     | 我   | 我   | 我   | 我     | 我              | 我                 | 我     | X    |
-| 布尔值             | X      | 我     | X    | X    | X    | X      | X      | X            | X      | X    | X    | X    | X      | 我              | X                  | X      | X    |
-| 天音               | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | e    | X    | X    | e      | 我              | X                  | X      | X    |
-| 小智               | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | e    | X    | X    | e      | 我              | X                  | X      | X    |
-| INT                | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | e    | X    | X    | e      | 我              | X                  | X      | X    |
-| BIGINT             | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | e    | X    | X    | e      | 我              | X                  | X      | X    |
-| 十进制             | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | e    | X    | X    | e      | 我              | X                  | X      | X    |
-| 浮点/实数          | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | X    | X    | X    | e      | 我              | X                  | X      | X    |
-| 双倍的             | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | X    | X    | X    | e      | 我              | X                  | X      | X    |
-| 间隔               | X      | X      | e    | e    | e    | e      | e      | X            | X      | 我   | X    | X    | X      | e               | X                  | X      | X    |
-| 日期               | X      | X      | X    | X    | X    | X      | X      | X            | X      | X    | 我   | X    | 我     | 我              | X                  | X      | X    |
-| 时间               | X      | X      | X    | X    | X    | X      | X      | X            | X      | X    | X    | 我   | e      | 我              | X                  | X      | X    |
-| 时间戳             | X      | X      | e    | e    | e    | e      | e      | e            | e      | X    | 我   | e    | 我     | 我              | X                  | X      | X    |
-| CHAR 或 VARCHAR    | X      | e      | 我   | 我   | 我   | 我     | 我     | 我           | 我     | 我   | 我   | 我   | 我     | 我              | 我                 | 我     | 我   |
-| 二进制或 VARBINARY | X      | X      | X    | X    | X    | X      | X      | X            | X      | X    | e    | e    | e      | 我              | 我                 | X      | X    |
-| 几何学             | X      | X      | X    | X    | X    | X      | X      | X            | X      | X    | X    | X    | X      | 我              | X                  | 我     | X    |
-| 大批               | X      | X      | X    | X    | X    | X      | X      | X            | X      | X    | X    | X    | X      | X               | X                  | X      | 我   |
+| 从 - 到             | NULL | BOOLEAN | TINYINT | SMALLINT | INT  | BIGINT | DECIMAL | FLOAT OR REAL | DOUBLE | INTERVAL | DATE | TIME | TIMESTAMP | CHAR OR VARCHAR | BINARY OR VARBINARY | GEOMETRY | ARRAY |
+| :------------------ | :--- | :------ | :------ | :------- | :--- | :----- | :------ | :------------ | :----- | :------- | :--- | :--- | :-------- | :-------------- | :------------------ | :------- | :---- |
+| NULL                | i    | i       | i       | i        | i    | i      | i       | i             | i      | i        | i    | i    | i         | i               | i                   | i        | x     |
+| BOOLEAN             | x    | i       | x       | x        | x    | x      | x       | x             | x      | x        | x    | x    | x         | i               | x                   | x        | x     |
+| TINYINT             | x    | e       | i       | i        | i    | i      | i       | i             | i      | e        | x    | x    | e         | i               | x                   | x        | x     |
+| SMALLINT            | x    | e       | i       | i        | i    | i      | i       | i             | i      | e        | x    | x    | e         | i               | x                   | x        | x     |
+| INT                 | x    | e       | i       | i        | i    | i      | i       | i             | i      | e        | x    | x    | e         | i               | x                   | x        | x     |
+| BIGINT              | x    | e       | i       | i        | i    | i      | i       | i             | i      | e        | x    | x    | e         | i               | x                   | x        | x     |
+| DECIMAL             | x    | e       | i       | i        | i    | i      | i       | i             | i      | e        | x    | x    | e         | i               | x                   | x        | x     |
+| FLOAT/REAL          | x    | e       | i       | i        | i    | i      | i       | i             | i      | x        | x    | x    | e         | i               | x                   | x        | x     |
+| DOUBLE              | x    | e       | i       | i        | i    | i      | i       | i             | i      | x        | x    | x    | e         | i               | x                   | x        | x     |
+| INTERVAL            | x    | x       | e       | e        | e    | e      | e       | x             | x      | i        | x    | x    | x         | e               | x                   | x        | x     |
+| DATE                | x    | x       | x       | x        | x    | x      | x       | x             | x      | x        | i    | x    | i         | i               | x                   | x        | x     |
+| TIME                | x    | x       | x       | x        | x    | x      | x       | x             | x      | x        | x    | i    | e         | i               | x                   | x        | x     |
+| TIMESTAMP           | x    | x       | e       | e        | e    | e      | e       | e             | e      | x        | i    | e    | i         | i               | x                   | x        | x     |
+| CHAR or VARCHAR     | x    | e       | i       | i        | i    | i      | i       | i             | i      | i        | i    | i    | i         | i               | i                   | i        | i     |
+| BINARY or VARBINARY | x    | x       | x       | x        | x    | x      | x       | x             | x      | x        | e    | e    | e         | i               | i                   | x        | x     |
+| GEOMETRY            | x    | x       | x       | x        | x    | x      | x       | x             | x      | x        | x    | x    | x         | i               | x                   | i        | x     |
+| ARRAY               | x    | x       | x       | x        | x    | x      | x       | x             | x      | x        | x    | x    | x         | x               | x                   | x        | i     |
 
-i：隐式转换 / e：显式转换 / x：不允许
+`i`：隐式转换 / `e`：显式转换 / `x`：不允许
 
-##### 转化背景和策略
+##### 转化条件和策略
 
-- Set operation (`UNION`, `EXCEPT`, `INTERSECT`): compare every branch row data type and find the common type of each fields pair;
-- Binary arithmetic expression (`+`, `-`, `&`, `^`, `/`, `%`): promote string operand to data type of the other numeric operand;
-- Binary comparison (`=`, `<`, `<=`, `<>`, `>`, `>=`): if operands are `STRING` and `TIMESTAMP`, promote to `TIMESTAMP`; make `1 = true` and `0 = false` always evaluate to `TRUE`; if there is numeric type operand, find common type for both operands.
-- `IN` sub-query: compare type of LHS and RHS, and find the common type; if it is struct type, find wider type for every field;
-- `IN` expression list: compare every expression to find the common type;
-- `CASE WHEN` expression or `COALESCE`: find the common wider type of the `THEN` and `ELSE` operands;
-- Character + `INTERVAL` or character - `INTERVAL`: promote character to `TIMESTAMP`;
-- Built-in function: look up the type families registered in the checker, find the family default type if checker rules allow it;
-- User-defined function (UDF): coerce based on the declared argument types of the `eval()` method;
-- `INSERT` and `UPDATE`: coerce a source field to counterpart target table field’s type if the two fields differ with type name or precision(scale).
+- 集合运算（`UNION`、`EXCEPT`、`INTERSECT`）：比较各分支行的数据类型，找出各字段对的公共类型；
+- 二进制算术表达式（`+`、`-`、`&`、`^`、`/`、`%`）：将字符串操作数提升为另一个数字操作数的数据类型；
+- 二进制比较（`=`、`<`、`<=`、`<>`、`>`、`>=`）：如果操作数为 `STRING` 和 `TIMESTAMP`，则提升为 `TIMESTAMP`；使 `1 = true` 和 `0 = false` 始终计算为 `TRUE`；如果有数字类型操作数，则为两个操作数找到共同的类型。
+- `IN` 子查询：比较 LHS 和 RHS 的类型，找出共同的类型；如果是结构体类型，则为每个字段找到更宽的类型；
+- `IN` 表达式列表：比较每个表达式以找到共同类型；
+- `CASE WHEN` 表达式或 `COALESCE`：找到 `THEN` 和 `ELSE` 操作数的共同更宽类型；
+- 字符 + `INTERVAL` 或字符 - `INTERVAL` ：将字符提升为 `TIMESTAMP`；
+- 内置函数：查找检查器中注册的类型系列，如果检查器规则允许，则查找系列默认类型；
+- 用户定义函数（UDF）：根据 `eval()` 方法声明的参数类型进行强制转换；
+- `INSERT` 和 `UPDATE`：如果两个字段的类型名称或精度（比例）不同，则将源字段强制转换为对应的目标表字段的类型。
 
-Note:
+注意：
 
-Implicit type coercion of following cases are ignored:
+以下情况的隐式类型强制将被忽略：
 
-- One of the type is `ANY`;
-- Type coercion within `CHARACTER` types are always ignored, i.e. from `CHAR(20)` to `VARCHAR(30)`;
-- Type coercion from a numeric to another with higher precedence is ignored, i.e. from `INT` to `LONG`.
+- 其中一个类型是 `ANY`；
+- `CHARACTER` 类型中的类型强制始终被忽略，即从 `CHAR(20)` 到 `VARCHAR(30)`；
+- 从一个数字到另一个具有更高优先级的类型强制将被忽略，即从 `INT` 到 `LONG`。
 
-##### 寻找共同类型的策略
+##### 寻找相同类型的策略
 
-- If the operator has expected data types, just take them as the desired one. (e.g. the UDF would have `eval()` method which has reflection argument types);
-- If there is no expected data type but the data type families are registered, try to coerce the arguments to the family’s default data type, i.e. the String family will have a `VARCHAR` type;
-- If neither expected data type nor families are specified, try to find the tightest common type of the node types, i.e. `INTEGER` and `DOUBLE` will return `DOUBLE`, the numeric precision does not lose for this case;
-- If no tightest common type is found, try to find a wider type, i.e. `VARCHAR` and `INTEGER` will return `INTEGER`, we allow some precision loss when widening decimal to fractional, or promote to `VARCHAR` type.
+- 如果操作符有预期的数据类型，则直接将其作为所需类型。（例如，UDF 会有 `eval()` 方法，该方法有反射参数类型）；
+- 如果没有预期的数据类型，但已注册数据类型系列，则尝试将参数强制转换为系列的默认数据类型，即 String 系列将具有 `VARCHAR` 类型；
+- 如果既未指定预期的数据类型也未指定系列，则尝试找到节点类型中最紧密的公共类型，即 `INTEGER` 和 `DOUBLE` 将返回 `DOUBLE`，这种情况下数字精度不会丢失；
+- 如果没有找到最紧密的公共类型，则尝试找到更宽的类型，即 `VARCHAR` 和 `INTEGER` 将返回 `INTEGER`，在将小数扩展为小数时，我们允许一些精度损失，或者提升为 `VARCHAR` 类型。
 
 ### 值构造函数
 
-| OPERATOR SYNTAX                         | DESCRIPTION                                                  |
-| :-------------------------------------- | :----------------------------------------------------------- |
-| ROW (value [, value ]*)                 | Creates a row from a list of values.                         |
-| (value [, value ]* )                    | Creates a row from a list of values.                         |
-| row ‘[’ index ‘]’                       | Returns the element at a particular location in a row (1-based index). |
-| row ‘[’ name ‘]’                        | Returns the element of a row with a particular name.         |
-| map ‘[’ key ‘]’                         | Returns the element of a map with a particular key.          |
-| array ‘[’ index ‘]’                     | Returns the element at a particular location in an array (1-based index). |
-| ARRAY ‘[’ value [, value ]* ‘]’         | Creates an array from a list of values.                      |
-| MAP ‘[’ key, value [, key, value ]* ‘]’ | Creates a map from a list of key-value pairs.                |
+| 运算符语法                              | 描述                                          |
+| :-------------------------------------- | :-------------------------------------------- |
+| ROW (value [, value ]*)                 | 根据值列表创建一行。                          |
+| (value [, value ]* )                    | 根据值列表创建一行。                          |
+| row ‘[’ index ‘]’                       | 返回行中特定位置的元素（从 1 开始的索引）。   |
+| row ‘[’ name ‘]’                        | 返回具有特定名称的行元素。                    |
+| map ‘[’ key ‘]’                         | 返回具有特定键的映射元素。                    |
+| array ‘[’ index ‘]’                     | 返回数组中特定位置的元素（从 1 开始的索引）。 |
+| ARRAY ‘[’ value [, value ]* ‘]’         | 根据值列表创建一个数组。                      |
+| MAP ‘[’ key, value [, key, value ]* ‘]’ | 根据键值对列表创建映射。                      |
+
+### 查询值构造函数
+
+| 运算符语法           | 描述                                                         |
+| :------------------- | :----------------------------------------------------------- |
+| ARRAY (sub-query)    | 根据子查询的结果创建一个数组。示例：`ARRAY(SELECT empno FROM emp ORDER BY empno)` |
+| MAP (sub-query)      | 根据键值对子查询的结果创建映射。示例：`MAP(SELECT empno, deptno FROM emp)` |
+| MULTISET (sub-query) | 从子查询的结果中创建一个多重集。示例：`MULTISET(SELECT empno FROM emp)` |
 
 ### 集合函数
 
-| OPERATOR SYNTAX                                           | DESCRIPTION                                                  |
+| 运算符语法                                                | 描述                                                         |
 | :-------------------------------------------------------- | :----------------------------------------------------------- |
-| ELEMENT(value)                                            | Returns the sole element of an array or multiset; null if the collection is empty; throws if it has more than one element. |
-| CARDINALITY(value)                                        | Returns the number of elements in an array or multiset.      |
-| value MEMBER OF multiset                                  | Returns whether the *value* is a member of *multiset*.       |
-| multiset IS A SET                                         | Whether *multiset* is a set (has no duplicates).             |
-| multiset IS NOT A SET                                     | Whether *multiset* is not a set (has duplicates).            |
-| multiset IS EMPTY                                         | Whether *multiset* contains zero elements.                   |
-| multiset IS NOT EMPTY                                     | Whether *multiset* contains one or more elements.            |
-| multiset SUBMULTISET OF multiset2                         | Whether *multiset* is a submultiset of *multiset2*.          |
-| multiset NOT SUBMULTISET OF multiset2                     | Whether *multiset* is not a submultiset of *multiset2*.      |
-| multiset MULTISET UNION [ ALL \| DISTINCT ] multiset2     | Returns the union *multiset* and *multiset2*, eliminating duplicates if DISTINCT is specified (ALL is the default). |
-| multiset MULTISET INTERSECT [ ALL \| DISTINCT ] multiset2 | Returns the intersection of *multiset* and *multiset2*, eliminating duplicates if DISTINCT is specified (ALL is the default). |
-| multiset MULTISET EXCEPT [ ALL \| DISTINCT ] multiset2    | Returns the difference of *multiset* and *multiset2*, eliminating duplicates if DISTINCT is specified (ALL is the default). |
+| ELEMENT(value)                                            | 返回数组或多集的唯一元素；如果集合为空，则返回 null；如果有多个元素，则抛出。 |
+| CARDINALITY(value)                                        | 返回数组或多集内的元素数量。                                 |
+| value MEMBER OF multiset                                  | 返回 *value* 是否是 *multiset* 的成员。                      |
+| multiset IS A SET                                         | *multiset* 是否是一个集合（没有重复）。                      |
+| multiset IS NOT A SET                                     | *multiset* 是否不是一个集合（有重复）。                      |
+| multiset IS EMPTY                                         | *multiset* 是否包含零个元素。                                |
+| multiset IS NOT EMPTY                                     | *multiset* 是否包含一个或多个元素。                          |
+| multiset SUBMULTISET OF multiset2                         | *multiset* 是否是 *multiset2* 的子多集。                     |
+| multiset NOT SUBMULTISET OF multiset2                     | *multiset* 是否不是 *multiset2* 的子多集。                   |
+| multiset MULTISET UNION [ ALL \| DISTINCT ] multiset2     | 返回并集 *multiset* 和 *multiset2*，如果指定了 DISTINCT（ALL 为默认值），则消除重复项。 |
+| multiset MULTISET INTERSECT [ ALL \| DISTINCT ] multiset2 | 返回 *multiset* 和 *multiset2* 的交集，如果指定了 DISTINCT（ALL 是默认值），则消除重复项。 |
+| multiset MULTISET EXCEPT [ ALL \| DISTINCT ] multiset2    | 返回 *multiset* 和 *multiset2* 的差异，如果指定了 DISTINCT（ALL 是默认值），则消除重复项。 |
 
-See also: the UNNEST relational operator converts a collection to a relation.
+另请参阅：UNNEST 关系运算符将集合转换为关系。
+
+TODO
 
 ### 句点谓词
 
@@ -1132,7 +1142,7 @@ SELECT * FROM TABLE(
 
 ### 分组辅助功能
 
-分组辅助函数允许您访问由分组窗口函数定义的窗口的属性。
+分组辅助函数允许你访问由分组窗口函数定义的窗口的属性。
 
 | 运算符语法                           | 描述                                                |
 | :----------------------------------- | :-------------------------------------------------- |
@@ -1677,14 +1687,14 @@ BigQuery’s type system uses confusingly different names for types and function
 | HS           | FORMAT_NUMBER（值，格式）                                    | 将数字*值*格式化为 MySQL 的 FORMAT*格式*，例如 '#,###,###.##0.00' |
 | 乙           | FORMAT_TIME（字符串，时间）                                  | 根据指定的格式*字符串*格式化*时间*                           |
 | 乙           | FORMAT_TIMESTAMP（字符串时间戳）                             | 根据指定的格式*字符串*格式化*时间戳*                         |
-| s            | GETBIT（值，位置）                                           | 相当于`BIT_GET(value, position)`                             |
+| s            | GETBIT（值，位置）                                           | 等价于`BIT_GET(value, position)`                             |
 | 博           | GREATEST(expr [, expr ]*)                                    | 返回最大的表达式                                             |
 | 黑社会       | IF(条件, 值1, 值2)                                           | 如果*条件*为 TRUE，则返回*value1* ，否则返回*value2*         |
-| 乙           | IFNULL(值1,值2)                                              | 相当于`NVL(value1, value2)`                                  |
+| 乙           | IFNULL(值1,值2)                                              | 等价于`NVL(value1, value2)`                                  |
 | p            | string1 ILIKE string2 [ ESCAPE string3 ]                     | *string1*是否匹配模式*string2*，忽略大小写（类似于`LIKE`）   |
 | p            | string1 不喜欢 string2 [ ESCAPE string3 ]                    | *string1*是否与模式*string2*不匹配，忽略大小写（类似于`NOT LIKE`） |
 | 博           | INSTR(字符串, 子字符串 [, 来自 [, 出现次数 ] ])              | *返回子字符串*在*string*中的位置，*从 from* （默认 1）开始搜索，直到找到*子字符串第 n 次**出现*（默认 1） |
-| 米           | INSTR（字符串，子字符串）                                    | 相当于`POSITION(substring IN string)`                        |
+| 米           | INSTR（字符串，子字符串）                                    | 等价于`POSITION(substring IN string)`                        |
 | 乙           | IS_INF（值）                                                 | 返回*值*是否为无穷大                                         |
 | 乙           | IS_NAN（值）                                                 | 返回*值*是否为 NaN                                           |
 | 米           | JSON_TYPE(json值)                                            | *返回一个字符串值，表示jsonValue*的类型                      |
@@ -1699,7 +1709,7 @@ BigQuery’s type system uses confusingly different names for types and function
 | 米           | JSON_STORAGE_SIZE（json值）                                  | *返回用于存储jsonValue*的二进制表示形式的字节数              |
 | 博           | LEAST(expr [, expr ]* )                                      | 返回最少的表达式                                             |
 | 图像格式     | 左（字符串，长度）                                           | 返回*字符串*中最左边的*长度字符*                             |
-| 乙           | 长度（字符串）                                               | 相当于`CHAR_LENGTH(string)`                                  |
+| 乙           | 长度（字符串）                                               | 等价于`CHAR_LENGTH(string)`                                  |
 | HS           | LEVENSHTEIN(字符串1, 字符串2)                                | *返回string1*和*string2*之间的编辑距离                       |
 | 乙           | LOG(数字1 [, 数字2 ])                                        | *返回numeric1以**numeric2*为底的对数，如果*numeric2*不存在，则返回以 e 为底的对数 |
 | 博           | LPAD(字符串, 长度[, 模式])                                   | 返回一个字符串或字节值，该值由前面带有*模式*的*长度**字符串*组成 |
@@ -1842,14 +1852,14 @@ BigQuery’s type system uses confusingly different names for types and function
 | BP   | ARRAY_CONCAT_AGG([ ALL \| DISTINCT ] 值 [ ORDER BY orderItem [, orderItem ]* ] ) | 将数组连接成数组                                             |
 | p    | BOOL_AND（条件）                                             | 同义词`EVERY`                                                |
 | p    | BOOL_OR（条件）                                              | 同义词`SOME`                                                 |
-| 乙   | COUNTIF(条件)                                                | *返回条件*为 TRUE 的行数；相当于`COUNT(*) FILTER (WHERE condition)` |
+| 乙   | COUNTIF(条件)                                                | *返回条件*为 TRUE 的行数；等价于`COUNT(*) FILTER (WHERE condition)` |
 | 米   | GROUP_CONCAT( [ ALL \| DISTINCT ] value [, value ]* [ ORDER BY orderItem [, orderItem ]* ] [ SEPARATOR 分隔符 ] ) | MySQL 特定的变体`LISTAGG`                                    |
 | 乙   | 逻辑与（条件）                                               | 同义词`EVERY`                                                |
 | 乙   | LOGICAL_OR（条件）                                           | 同义词`SOME`                                                 |
 | s    | MAX_BY（值，补偿）                                           | 同义词`ARG_MAX`                                              |
 | s    | MIN_BY（值，补偿）                                           | 同义词`ARG_MIN`                                              |
-| 乙   | PERCENTILE_CONT(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_CONT`，`PERCENTILE_CONT(value, fraction) OVER (ORDER BY value)`相当于标准`PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY value)` |
-| 乙   | PERCENTILE_DISC(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_DISC`，`PERCENTILE_DISC(value, fraction) OVER (ORDER BY value)`相当于标准`PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY value)` |
+| 乙   | PERCENTILE_CONT(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_CONT`，`PERCENTILE_CONT(value, fraction) OVER (ORDER BY value)`等价于标准`PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY value)` |
+| 乙   | PERCENTILE_DISC(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_DISC`，`PERCENTILE_DISC(value, fraction) OVER (ORDER BY value)`等价于标准`PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY value)` |
 | BP   | STRING_AGG( [ ALL \| DISTINCT ] 值 [, 分隔符] [ ORDER BY orderItem [, orderItem ]* ] ) | 同义词`LISTAGG`                                              |
 
 用法示例：
@@ -2064,7 +2074,7 @@ FROM (VALUES (true)) AS t(f0);
 
 ### 用户定义函数
 
-方解石是可延伸的。您可以使用用户代码定义每种函数。对于每种函数，通常有多种定义函数的方法，从方便到高效。
+方解石是可延伸的。你可以使用用户代码定义每种函数。对于每种函数，通常有多种定义函数的方法，从方便到高效。
 
 要实现*标量函数*，有 3 个选项：
 
@@ -2079,7 +2089,7 @@ FROM (VALUES (true)) AS t(f0);
 
 `merge`（可选）向类添加公共方法；这允许 Calcite 生成合并小计的代码。
 
-（可选）让您的类实现 [SqlSplittableAggFunction](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlSplittableAggFunction.html) 接口；这使得 Calcite 可以跨多个聚合阶段分解函数，从汇总表中汇总，并通过连接推送它。
+（可选）让你的类实现 [SqlSplittableAggFunction](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlSplittableAggFunction.html) 接口；这使得 Calcite 可以跨多个聚合阶段分解函数，从汇总表中汇总，并通过连接推送它。
 
 要实现*表函数*，有 3 个选项：
 
@@ -2093,15 +2103,15 @@ FROM (VALUES (true)) AS t(f0);
 - `eval`创建一个具有返回 [TranslatableTable 的](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)非静态方法的类，并注册该类；
 - 创建一个具有一个或多个返回 [TranslatableTable 的](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)公共静态方法的类，并注册每个类/方法组合。
 
-Calcite 从实现函数的 Java 方法的参数和返回类型推导出函数的参数类型和结果类型。[此外，您可以使用参数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/linq4j/function/Parameter.html)注释指定每个参数的名称和可选性 。
+Calcite 从实现函数的 Java 方法的参数和返回类型推导出函数的参数类型和结果类型。[此外，你可以使用参数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/linq4j/function/Parameter.html)注释指定每个参数的名称和可选性 。
 
 #### 使用命名参数和可选参数调用函数
 
-通常，当您调用函数时，需要按顺序指定其所有参数。但如果函数有很多参数，特别是如果您想随着时间的推移添加更多参数，这可能会成为问题。
+通常，当你调用函数时，需要按顺序指定其所有参数。但如果函数有很多参数，特别是如果你想随着时间的推移添加更多参数，这可能会成为问题。
 
-为了解决这个问题，SQL 标准允许您按名称传递参数，并定义可选参数（即，具有默认值，如果未指定则使用默认值）。
+为了解决这个问题，SQL 标准允许你按名称传递参数，并定义可选参数（即，具有默认值，如果未指定则使用默认值）。
 
-假设您有一个 function `f`，声明如下伪语法：
+假设你有一个 function `f`，声明如下伪语法：
 
 ```
 FUNCTION f(
@@ -2123,14 +2133,14 @@ FUNCTION f(
 - `f(1, 2)`不合法，因为`c`不是可选的；
 - `f(1, 2, DEFAULT, 4)`不合法，因为`c`不是可选的。
 
-您可以使用语法按名称指定参数`=>`。如果一个参数被命名，那么它们都必须被命名。参数可以是任何其他参数，但不得多次指定任何参数，并且您需要为每个参数提供一个不可选的值。这里有些例子：
+你可以使用语法按名称指定参数`=>`。如果一个参数被命名，那么它们都必须被命名。参数可以是任何其他参数，但不得多次指定任何参数，并且你需要为每个参数提供一个不可选的值。这里有些例子：
 
-- `f(c => 3, d => 1, a => 0)`相当于`f(0, NULL, 3, 1, NULL)`；
-- `f(c => 3, d => 1)`不合法，因为您尚未指定 的值 `a`并且`a`不是可选的。
+- `f(c => 3, d => 1, a => 0)`等价于`f(0, NULL, 3, 1, NULL)`；
+- `f(c => 3, d => 1)`不合法，因为你尚未指定 的值 `a`并且`a`不是可选的。
 
 #### SQL Hint
 
-提示是给优化器的指令。在编写SQL时，您可能会知道优化器未知的数据信息。提示使您能够做出通常由优化器做出的决策。
+提示是给优化器的指令。在编写SQL时，你可能会知道优化器未知的数据信息。提示使你能够做出通常由优化器做出的决策。
 
 - 规划器执行者：没有完美的规划器，因此实现提示以允许用户更好地控制执行是有意义的。例如：“永远不要将此子查询与其他子查询合并”( `/*+ no_merge */`)；“将这些表视为前导表”( `/*+ leading */`) 以影响连接顺序等；
 - 附加元数据/统计信息：一些统计信息，例如“扫描的表索引”或“某些洗牌键的倾斜信息”对于查询来说是动态的，用提示配置它们会非常方便，因为我们来自规划器的规划元数据非常方便通常不太准确；
@@ -2386,7 +2396,7 @@ dropFunctionStatement:
 
 #### 声明用户定义类型的对象
 
-在架构中定义并安装对象类型后，您可以使用它在任何 SQL 块中声明对象。例如，您可以使用对象类型来指定属性、列、变量、绑定变量、记录字段、表元素、形式参数或函数结果的数据类型。在运行时，创建对象类型的实例；也就是说，该类型的对象被实例化。每个对象可以保存不同的值。
+在架构中定义并安装对象类型后，你可以使用它在任何 SQL 块中声明对象。例如，你可以使用对象类型来指定属性、列、变量、绑定变量、记录字段、表元素、形式参数或函数结果的数据类型。在运行时，创建对象类型的实例；也就是说，该类型的对象被实例化。每个对象可以保存不同的值。
 
 例如，我们可以声明类型`address_typ`和`employee_typ`：
 
@@ -2412,7 +2422,7 @@ CREATE TYPE employee_typ AS (
   address           address_typ);
 ```
 
-使用这些类型，您可以实例化对象，如下所示：
+使用这些类型，你可以实例化对象，如下所示：
 
 ```
 employee_typ(315, 'Francis', 'Logan', 'FLOGAN',
