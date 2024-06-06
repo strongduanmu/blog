@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-05-29 08:00:00
+updated: 2024-06-06 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -370,6 +370,38 @@ return node;
 ![执行 performUnconditionalRewrites 后的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/perform-unconditional-rewrite-sqlnode.png)
 
 #### registerQuery
+
+对 SqlNode 重写标准化之后，Calcite 会调用 `registerQuery` 方法生成 SqlValidatorScope 和 SqlValidatorNamespace 对象，这两个对象在前文中已经进行了介绍，他们分别用于声明校验过程中**名称解析的范围**，以及描述由 SQL 查询某个部分返回的关系（简单理解可以认为是查询过程中的数据来源）。
+
+在调用 registerQuery 方法前，Calcite 会判断当前的 SqlNode 是否为顶层节点，SqlKind 类中定义的顶层节点包含了 `QUERY`、`DML` 和 `DDL` 语句，而 QUERY 中又包含了 `SELECT`、`UNION`、`INTERSECT`、`EXCEPT`、`VALUES`、`WITH`、`ORDER_BY` 和 `EXPLICIT_TABLE` 等具体类型，更多类型可以参考 [SqlKind 源码](https://github.com/apache/calcite/blob/fb6f43192c4253caea63c0705067a9aa12a3fa74/core/src/main/java/org/apache/calcite/sql/SqlKind.java#L1347)。
+
+```java
+private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scope) {
+    ...
+    // 判断 SqlNode 是否为顶层节点  
+    if (outermostNode.isA(SqlKind.TOP_LEVEL)) {
+        registerQuery(scope, null, outermostNode, outermostNode, null, false);
+    }
+    ...
+    return outermostNode;
+}
+
+// SqlKind 中定义的 TOP_LEVEL
+public static final EnumSet<SqlKind> TOP_LEVEL = concat(QUERY, DML, DDL);
+
+public static final EnumSet<SqlKind> QUERY = EnumSet.of(SELECT, UNION, INTERSECT, EXCEPT, VALUES, WITH, ORDER_BY, EXPLICIT_TABLE);
+```
+
+判断 SqlNode 为顶层节点后， 会继续调用 registerQuery 方法并传入参数，下面展示了 registerQuery 方法的实现，`parentScope` 表示当前 SqlNode 的父名称解析范围，顶层节点的 parentScope 为 `CatalogScope`（CatalogScope 可以查看所有 Schema 中的元数据，它的父类是 EmptyScope）。`usingScope` 则用于添加当前 Scope 需要使用的子 Scope，`node` 表示当前的 SqlNode，`enclosingNode` 和 `node` 通常是相同的，enclosingNode 通常表示 FROM 子句最顶层的节点 ，可以从 enclosingNode 中获取别名等信息，`alias` 表当前查询在父查询中的名称，如果 usingScope 不为空则必须指定 alias。
+
+```java
+private void registerQuery(SqlValidatorScope parentScope, @Nullable SqlValidatorScope usingScope, SqlNode node, SqlNode enclosingNode, @Nullable String alias, boolean forceNullable) {
+    Preconditions.checkArgument(usingScope == null || alias != null);
+    registerQuery(parentScope, usingScope, node, enclosingNode, alias, forceNullable, true);
+}
+```
+
+TODO
 
 
 
