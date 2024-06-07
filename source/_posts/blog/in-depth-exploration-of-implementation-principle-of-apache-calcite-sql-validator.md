@@ -401,7 +401,98 @@ private void registerQuery(SqlValidatorScope parentScope, @Nullable SqlValidator
 }
 ```
 
+`registerQuery` 方法内部会根据 SqlKind 进行判断，对不同类型的 SQL 进行处理，本文示例为 SELECT 语句，因此我们先专注于 SELECT 相关的逻辑。下面展示了 registerQuery 方法的实现逻辑，首先会创建 SelectNamespace 对象，该对象会记录 SqlSelect 及当前的校验器。然后调用 registerNamespace 方法，将 SelectNamespace 记录在 namespaces 对象中，namespaces 的结构为 `<SqlNode, SqlValidatorNamespace>`，如果 usingScope 不为 null，则将当前 SelectNamespace 注册为 usingScope 的子节点。
+
+```java
+SqlCall call;
+List<SqlNode> operands;
+switch (node.getKind()) {
+    case SELECT:
+        final SqlSelect select = (SqlSelect) node;
+        // 创建 SelectNamespace，记录 SqlSelect 和当前的校验器
+        final SelectNamespace selectNs = createSelectNamespace(select, enclosingNode);
+        // 将 SelectNamespace 记录在 namespaces 对象中，namespaces 的结构为 `<SqlNode, SqlValidatorNamespace>`
+        // 如果 usingScope 不为 null，则将当前 SelectNamespace 注册为 usingScope 的子节点
+        registerNamespace(usingScope, alias, selectNs, forceNullable);
+        // 选择第一个不为 null 的 scope 作为 windowParentScope，此处为 CatalogScope
+        final SqlValidatorScope windowParentScope = first(usingScope, parentScope);
+        // 创建 SelectScope，会记录 parentScope，windowParentScope 以及 SqlSelect
+        SelectScope selectScope = new SelectScope(parentScope, windowParentScope, select);
+        // 将 selectScope 记录到全局的 scopes 中, scopes 的结构为 <SqlNode, SqlValidatorScope>
+        scopes.put(select, selectScope);
+        // Start by registering the WHERE clause
+        // clauseScopes 用于记录 Select 中的子句，用于后续子句的注册
+        clauseScopes.put(IdPair.of(select, Clause.WHERE), selectScope);
+        // 注册 WHERE 运算符中的子查询
+        registerOperandSubQueries(selectScope, select, SqlSelect.WHERE_OPERAND);
+        ...
+}
+```
+
 TODO
+
+```java
+SqlCall call;
+List<SqlNode> operands;
+switch (node.getKind()) {
+    case SELECT:
+        ...
+        // Register subqueries in the QUALIFY clause
+        registerOperandSubQueries(selectScope, select, SqlSelect.QUALIFY_OPERAND);
+        
+        // Register FROM with the inherited scope 'parentScope', not
+        // 'selectScope', otherwise tables in the FROM clause would be
+        // able to see each other.
+        final SqlNode from = select.getFrom();
+        if (from != null) {
+            final SqlNode newFrom = registerFrom(parentScope, selectScope, true, from, from, null, null, false, false);
+            if (newFrom != from) {
+                select.setFrom(newFrom);
+            }
+        }
+        
+        // If this is an aggregating query, the SELECT list and HAVING
+        // clause use a different scope, where you can only reference
+        // columns which are in the GROUP BY clause.
+        SqlValidatorScope aggScope = selectScope;
+        if (isAggregate(select)) {
+            aggScope = new AggregatingSelectScope(selectScope, select, false);
+            clauseScopes.put(IdPair.of(select, Clause.SELECT), aggScope);
+        } else {
+            clauseScopes.put(IdPair.of(select, Clause.SELECT), selectScope);
+        }
+        if (select.getGroup() != null) {
+            GroupByScope groupByScope = new GroupByScope(selectScope, select.getGroup(), select);
+            clauseScopes.put(IdPair.of(select, Clause.GROUP_BY), groupByScope);
+            registerSubQueries(groupByScope, select.getGroup());
+        }
+        registerOperandSubQueries(aggScope, select, SqlSelect.HAVING_OPERAND);
+        registerSubQueries(aggScope, SqlNonNullableAccessors.getSelectList(select));
+        final SqlNodeList orderList = select.getOrderList();
+        if (orderList != null) {
+            // If the query is 'SELECT DISTINCT', restrict the columns
+            // available to the ORDER BY clause.
+            if (select.isDistinct()) {
+                aggScope = new AggregatingSelectScope(selectScope, select, true);
+            }
+            OrderByScope orderScope = new OrderByScope(aggScope, orderList, select);
+            clauseScopes.put(IdPair.of(select, Clause.ORDER), orderScope);
+            registerSubQueries(orderScope, orderList);
+            
+            if (!isAggregate(select)) {
+                // Since this is not an aggregating query,
+                // there cannot be any aggregates in the ORDER BY clause.
+                SqlNode agg = aggFinder.findAgg(orderList);
+                if (agg != null) {
+                    throw newValidationError(agg, RESOURCE.aggregateIllegalInOrderBy());
+                }
+            }
+        }
+        break;
+}
+```
+
+
 
 
 
