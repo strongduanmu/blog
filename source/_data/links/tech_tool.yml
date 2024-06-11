@@ -3,3 +3,13 @@
   screenshot: /assets/blog/2023/12/29/1703826306.png
   avatar: /assets/blog/2023/12/29/1703826270.png
   description: Arthas - Java 应用诊断利器
+- title: GCEasy
+  url: https://gceasy.io/gc-dashboard.jsp
+  screenshot: /assets/links/tech-tool/gceasy-screenshot.png
+  avatar: /assets/links/tech-tool/gceasy-favicon.ico
+  description: GCEasy - Java GC 日志分析工具
+- title: FastThread
+  url: https://fastthread.io/
+  screenshot: /assets/links/tech-tool/fastthread-screenshot.png
+  avatar: /assets/links/tech-tool/fastthread-favicon.ico
+  description: FastThread - Java 线程分析工具
