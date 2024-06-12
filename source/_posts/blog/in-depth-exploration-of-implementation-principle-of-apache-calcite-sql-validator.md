@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-06-06 08:00:00
+updated: 2024-06-12 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -401,7 +401,7 @@ private void registerQuery(SqlValidatorScope parentScope, @Nullable SqlValidator
 }
 ```
 
-`registerQuery` 方法内部会根据 SqlKind 进行判断，对不同类型的 SQL 进行处理，本文示例为 SELECT 语句，因此我们先专注于 SELECT 相关的逻辑。下面展示了 registerQuery 方法的实现逻辑，首先会创建 SelectNamespace 对象，该对象会记录 SqlSelect 及当前的校验器。然后调用 registerNamespace 方法，将 SelectNamespace 记录在 namespaces 对象中，namespaces 的结构为 `<SqlNode, SqlValidatorNamespace>`，如果 usingScope 不为 null，则将当前 SelectNamespace 注册为 usingScope 的子节点。
+`registerQuery` 方法内部会根据 SqlKind 进行判断，对不同类型的 SQL 进行处理，本文示例为 SELECT 语句，因此我们先专注于 SELECT 相关的逻辑。下面展示了 registerQuery 方法的实现逻辑，首先会创建 SelectNamespace 对象，该对象会记录 SqlSelect 及当前的校验器。然后调用 registerNamespace 方法，将 SelectNamespace 记录在 namespaces 对象中，namespaces 的结构为 `<SqlNode, SqlValidatorNamespace>`，如果 usingScope 不为 null，则将当前 SelectNamespace 注册为 usingScope 的子节点。再创建 SelectScope，并将其记录到全局的 scopes 中，scopes 的结构为 `<SqlNode, SqlValidatorScope>`。
 
 ```java
 SqlCall call;
@@ -420,11 +420,6 @@ switch (node.getKind()) {
         SelectScope selectScope = new SelectScope(parentScope, windowParentScope, select);
         // 将 selectScope 记录到全局的 scopes 中, scopes 的结构为 <SqlNode, SqlValidatorScope>
         scopes.put(select, selectScope);
-        // Start by registering the WHERE clause
-        // clauseScopes 用于记录 Select 中的子句，用于后续子句的注册
-        clauseScopes.put(IdPair.of(select, Clause.WHERE), selectScope);
-        // 注册 WHERE 运算符中的子查询
-        registerOperandSubQueries(selectScope, select, SqlSelect.WHERE_OPERAND);
         ...
 }
 ```
@@ -437,8 +432,17 @@ List<SqlNode> operands;
 switch (node.getKind()) {
     case SELECT:
         ...
-        // Register subqueries in the QUALIFY clause
-        registerOperandSubQueries(selectScope, select, SqlSelect.QUALIFY_OPERAND);
+        // Start by registering the WHERE clause
+        // clauseScopes 用于记录 Select 中的子句，用于后续子句的注册
+        clauseScopes.put(IdPair.of(select, Clause.WHERE), selectScope);
+        // 注册 WHERE 运算符中的子查询
+        registerOperandSubQueries(selectScope, select, SqlSelect.WHERE_OPERAND);
+        
+        // 注册 QUALIFY 子句中的子查询，QUALIFY 子句通常用于 WINDOW 函数结果的过滤
+        registerOperandSubQueries(
+            selectScope,
+            select,
+            SqlSelect.QUALIFY_OPERAND);
         
         // Register FROM with the inherited scope 'parentScope', not
         // 'selectScope', otherwise tables in the FROM clause would be

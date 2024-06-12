@@ -15,52 +15,52 @@ Eclipse 内存分析器是一款快速且功能丰富的 Java 堆分析器，可
 
 ## 入门
 
-[Basic Tutorial](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/gettingstarted/basictutorial.html)
+* [Basic Tutorial](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/gettingstarted/basictutorial.html)
 
 ## 概念
 
-[Heap Dump](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/heapdump.html)
+* [Heap Dump](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/heapdump.html)
 
-[Reachability](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/reachability.html)
+* [Reachability](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/reachability.html)
 
-[Shallow vs. Retained Heap](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/shallowretainedheap.html)
+* [Shallow vs. Retained Heap](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/shallowretainedheap.html)
 
-[Dominator Tree](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/dominatortree.html)
+* [Dominator Tree](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/dominatortree.html)
 
-[Garbage Collection Roots](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/gcroots.html)
+* [Garbage Collection Roots](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/concepts/gcroots.html)
 
 ## 任务
 
-[Acquiring Heap Dumps](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/acquiringheapdump.html)
+* [Acquiring Heap Dumps](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/acquiringheapdump.html)
 
-[Installing IBM DTFJ feature for IBM dumps](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/installDTFJ.html)
+* [Installing IBM DTFJ feature for IBM dumps](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/installDTFJ.html)
 
-[Running Leak Suspect Report](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/runningleaksuspectreport.html)
+* [Running Leak Suspect Report](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/runningleaksuspectreport.html)
 
-[List the Biggest Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/listbiggestobjects.html)
+* [List the Biggest Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/listbiggestobjects.html)
 
-[Finding Responsible Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/findingresponsibleobjects.html)
+* [Finding Responsible Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/findingresponsibleobjects.html)
 
-[Querying Heap Objects (OQL)](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/queryingheapobjects.html)
+* [Querying Heap Objects (OQL)](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/queryingheapobjects.html)
 
-[Analyze Class Loader](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingclassloader.html)
+* [Analyze Class Loader](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingclassloader.html)
 
-[Analyzing Threads](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingthreads.html)
+* [Analyzing Threads](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingthreads.html)
 
-[Analyzing Java Collection Usage](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingjavacollectionusage.html)
+* [Analyzing Java Collection Usage](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingjavacollectionusage.html)
 
-[Analyzing Finalizer](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingfinalizer.html)
+* [Analyzing Finalizer](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/analyzingfinalizer.html)
 
-[Eclipse Equinox Bundle Registry](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/bundleregistry.html)
+* [Eclipse Equinox Bundle Registry](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/bundleregistry.html)
 
-[Comparing Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/comparingdata.html)
+* [Comparing Objects](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/comparingdata.html)
 
-[Export Data](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/exportdata.html)
+* [Export Data](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/exportdata.html)
 
-[Export Heap Dump](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/exportdump.html)
+* [Export Heap Dump](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/exportdump.html)
 
-[Batch mode](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/batch.html)
+* [Batch mode](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/batch.html)
 
-[Problems displaying reports](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/report.html)
+* [Problems displaying reports](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/report.html)
 
-[Memory Analyzer Configuration](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/configure_mat.html)
+* [Memory Analyzer Configuration](https://help.eclipse.org/latest/topic/org.eclipse.mat.ui.help/tasks/configure_mat.html)
