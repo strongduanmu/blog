@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-06-12 08:00:00
+updated: 2024-06-14 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -424,7 +424,7 @@ switch (node.getKind()) {
 }
 ```
 
-TODO
+然后 Calcite 会对各个不同的子句进行注册，首先会从 WHERE 语句开始，并将 WHERE 对应的 Scope 存储到 clauseScopes 中，再调用 `registerOperandSubQueries` 注册 WHERE 运算符中的子查询，最终整个方法会将 SELECT 语句中的 `Projection`、`From`、`Where`、`Order By`、`Group By`、`Having` 等子句都进行注册，生成对应的 Scope 和 Namespace 对象。
 
 ```java
 SqlCall call;
@@ -449,6 +449,7 @@ switch (node.getKind()) {
         // able to see each other.
         final SqlNode from = select.getFrom();
         if (from != null) {
+            // 注册 FROM，本示例中包含了 FROM 子查询，因此子查询会再次调用 registerQuery
             final SqlNode newFrom = registerFrom(parentScope, selectScope, true, from, from, null, null, false, false);
             if (newFrom != from) {
                 select.setFrom(newFrom);
@@ -468,9 +469,12 @@ switch (node.getKind()) {
         if (select.getGroup() != null) {
             GroupByScope groupByScope = new GroupByScope(selectScope, select.getGroup(), select);
             clauseScopes.put(IdPair.of(select, Clause.GROUP_BY), groupByScope);
+            // 注册 GROUP BY 中的子句
             registerSubQueries(groupByScope, select.getGroup());
         }
+        // 注册 HAVING 运算符中的子查询
         registerOperandSubQueries(aggScope, select, SqlSelect.HAVING_OPERAND);
+        // 注册投影列中的子查询，并会将子查询转换为标量子查询
         registerSubQueries(aggScope, SqlNonNullableAccessors.getSelectList(select));
         final SqlNodeList orderList = select.getOrderList();
         if (orderList != null) {
@@ -481,28 +485,36 @@ switch (node.getKind()) {
             }
             OrderByScope orderScope = new OrderByScope(aggScope, orderList, select);
             clauseScopes.put(IdPair.of(select, Clause.ORDER), orderScope);
+            // 注册 ORDER BY 中的子句
             registerSubQueries(orderScope, orderList);
-            
-            if (!isAggregate(select)) {
-                // Since this is not an aggregating query,
-                // there cannot be any aggregates in the ORDER BY clause.
-                SqlNode agg = aggFinder.findAgg(orderList);
-                if (agg != null) {
-                    throw newValidationError(agg, RESOURCE.aggregateIllegalInOrderBy());
-                }
-            }
+            // ...
         }
         break;
 }
 ```
 
+registerQuery 执行完成后，注册的信息会存储在 SqlValidatorImpl 对象中，下图展示了对象中存储的内容，分别包括了 `scopes`、`clauseScopes` 和 `namespaces`。`scopes` 对象用于存储查询节点和它们对应的 SqlValidatorScope 之间的映射，此案例中查询节点为两个 SELECT 语句，分别对应了不同的 SelectScope 对象。`clauseScopes` 对象则用于存储子句和 SqlValidatorScope 之间的映射，用于表示当前子句可见的范围。`namespaces` 代表了数据来源，此案例中共有 3 个 namespace，分别是：`EMPS` 代表的表数据源，以及另外两个查询数据源。
 
-
-
+![注册完成后的 Scope 和 NameSpace](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/scope-namespace-after-register.png)
 
 #### validate
 
+完成 registerQuery 后，校验器中以及包含了校验所需的 Scope 和 Namespace 对象，下面我们再来探究下核心的校验逻辑。校验器首先会调用 `SqlNode#validate` 方法，该方法在不同的 SqlNode 中具有不同的实现。由于本文案例为查询语句，因此先关注 SqlSelect 的实现逻辑，其它类型的 SqlNode 读者可以自行探究。
 
+```java
+// 校验 SqlNode
+outermostNode.validate(this, scope);
+
+// SqlSelect#validate 实现
+@Override
+public void validate(SqlValidator validator, SqlValidatorScope scope) {
+    validator.validateQuery(this, scope, validator.getUnknownType());
+}
+```
+
+从上面的源码可以看到，`SqlSelect#validate` 方法会调用校验器的 validateQuery 方法，
+
+TODO
 
 #### deriveType
 
