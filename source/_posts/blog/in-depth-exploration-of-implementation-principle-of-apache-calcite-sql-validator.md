@@ -538,6 +538,8 @@ public void validateQuery(SqlNode node, SqlValidatorScope scope, RelDataType tar
 }
 ```
 
+##### validateNamespace
+
 `validateNamespace` 方法内部会调用 `SqlValidatorNamespace#validate` 方法，然后设置校验后的节点类型。
 
 ```java
@@ -588,7 +590,7 @@ public final void validate(RelDataType targetRowType) {
 protected abstract RelDataType validateImpl(RelDataType targetRowType);
 ```
 
-`SelectNamespace#validateImpl` 内部则会调用 `validator.validateSelect` 方法，`SqlValidatorImpl#validateSelect` 具体实现逻辑如下：
+`SelectNamespace#validateImpl` 内部则会调用 `validator.validateSelect` 方法，`SqlValidatorImpl#validateSelect` 具体实现逻辑如下，方法内会依次调用 `validateFrom`、`validateWhereClause`、`validateGroupClause`、`validateHavingClause`、`validateWindowClause`、`validateQualifyClause`、`validateSelectList` 和 `validateOrderList` 子句。
 
 ```java
 protected void validateSelect(SqlSelect select, RelDataType targetRowType) {
@@ -609,39 +611,35 @@ protected void validateSelect(SqlSelect select, RelDataType targetRowType) {
         // 校验 From 子句
         validateFrom(select.getFrom(), fromType, fromScope);
     }
-    
+    // 校验 Where 子句
     validateWhereClause(select);
+    // 校验 Group 子句
     validateGroupClause(select);
+    // 校验 Having 子句
     validateHavingClause(select);
+    // 校验 Window 子句
     validateWindowClause(select);
+    // 校验 Qualify 子句
     validateQualifyClause(select);
     handleOffsetFetch(select.getOffset(), select.getFetch());
     
     // Validate the SELECT clause late, because a select item might
     // depend on the GROUP BY list, or the window function might reference
     // window name in the WINDOW clause etc.
+    // 校验 Select 投影列
     final RelDataType rowType = validateSelectList(selectItems, select, targetRowType);
     ns.setType(rowType);
     
     // Validate ORDER BY after we have set ns.rowType because in some
     // dialects you can refer to columns of the select list, e.g.
     // "SELECT empno AS x FROM emp ORDER BY x"
+    // 校验 Order 子句
     validateOrderList(select);
-    
-    if (shouldCheckForRollUp(select.getFrom())) {
-        checkRollUpInSelectList(select);
-        checkRollUp(null, select, select.getWhere(), getWhereScope(select));
-        checkRollUp(null, select, select.getHaving(), getHavingScope(select));
-        checkRollUpInWindowDecl(select);
-        checkRollUpInGroupBy(select);
-        checkRollUpInOrderBy(select);
-    }
+    ...
 }
 ```
 
-
-
-`IdentifierNamespace#validateImpl` 实现逻辑如下：
+从前文 `registerQuery` 结果可以看出，From 子句对应的 Namespace 为 IdentifierNamespace，执行 validateFrom 时内部会调用 `IdentifierNamespace#validateImpl` 方法，该方法内部实现逻辑如下。
 
 ```java
 @Override
@@ -651,6 +649,7 @@ public RelDataType validateImpl(RelDataType targetRowType) {
     if (resolvedNamespace instanceof TableNamespace) {
         // 从 TableNamespace 中获取 table
         SqlValidatorTable table = ((TableNamespace) resolvedNamespace).getTable();
+        // 判断是否需要将 identifier 展开为全限定名称
         if (validator.config().identifierExpansion()) {
             // TODO:  expand qualifiers for column references also
             List<String> qualifiedNames = table.getQualifiedName();
@@ -661,8 +660,7 @@ public RelDataType validateImpl(RelDataType targetRowType) {
                 List<SqlParserPos> poses = new ArrayList<>(Collections.nCopies(qualifiedNames.size(), id.getParserPosition()));
                 int offset = qualifiedNames.size() - id.names.size();
                 
-                // Test offset in case catalog supports fewer qualifiers than catalog
-                // reader.
+                // Test offset in case catalog supports fewer qualifiers than catalog reader.
                 if (offset >= 0) {
                     for (int i = 0; i < id.names.size(); i++) {
                         poses.set(i + offset, id.getComponentParserPosition(i));
@@ -674,35 +672,43 @@ public RelDataType validateImpl(RelDataType targetRowType) {
     }
     
     RelDataType rowType = resolvedNamespace.getRowType();
-    
-    if (extendList != null) {
-        if (!(resolvedNamespace instanceof TableNamespace)) {
-            throw new RuntimeException("cannot convert");
-        }
-        resolvedNamespace = ((TableNamespace) resolvedNamespace).extend(extendList);
-        rowType = resolvedNamespace.getRowType();
-    }
-    
-    // Build a list of monotonic expressions.
-    final ImmutableList.Builder<Pair<SqlNode, SqlMonotonicity>> builder = ImmutableList.builder();
-    List<RelDataTypeField> fields = rowType.getFieldList();
-    for (RelDataTypeField field : fields) {
-        final String fieldName = field.getName();
-        final SqlMonotonicity monotonicity = resolvedNamespace.getMonotonicity(fieldName);
-        if (monotonicity != null && monotonicity != SqlMonotonicity.NOT_MONOTONIC) {
-            builder.add(Pair.of(new SqlIdentifier(fieldName, SqlParserPos.ZERO), monotonicity));
-        }
-    }
-    monotonicExprs = builder.build();
-    
-    // Validation successful.
+    ...
     return rowType;
 }
 ```
 
+`resolveImpl` 方法会根据 id 从元数据中解析出表名，并封装为 TableNamespace 对象，下图展示了解析之后的对象，对象中包含了从元数据中获取的 table 对象。然后会判断是否需要将 identifier 展开为全限定名称，此案例中会将 `EMPS` 展开为 `SALES.EMPS` 并设置到 names 属性中。
+
 ![IdentifierNamespace 校验解析表名](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/identifier-namespace-validate-resolve-table-name.png)
 
+TODO validate select list
 
+##### validateAccess
+
+`validateAccess` 方法用于校验当前节点对表是否具有访问权限，`node` 参数表示当前节点，`table` 表示要访问的表，`requiredAccess` 则表示需要访问的类型。`table.getAllowedAccess()` 会从 `RelOptTableImpl#getAllowedAccess` 获取可访问类型，会返回全部类型，包括：SELECT、UPDATE、INSERT 和 DELETE，如果不具有访问权限，则抛出异常。
+
+```java
+/**
+ * Validates access to a table.
+ *
+ * @param table Table
+ * @param requiredAccess Access requested on table
+ */
+private void validateAccess(SqlNode node, @Nullable SqlValidatorTable table, SqlAccessEnum requiredAccess) {
+    if (table != null) {
+        // RelOptTableImpl#getAllowedAccess 返回全局访问类型，包括了 SELECT、UPDATE、INSERT 和 DELETE
+        SqlAccessType access = table.getAllowedAccess();
+        // 如果不具有访问权限，则抛出异常
+        if (!access.allowsAccess(requiredAccess)) {
+            throw newValidationError(node, RESOURCE.accessNotAllowed(requiredAccess.name(), table.getQualifiedName().toString()));
+        }
+    }
+}
+```
+
+完成校验后，返回的 outermostNode 结构如下，可以看到 SqlNode 的 Identifier 都进行了全限定名展开，根据 names 属性可以很快速地获取到列对象所属的表，以及表对象所属的 Schema，函数对象则会查找到 Calcite 内置的函数，或者用户在元数据中定义的函数。
+
+![已校验的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/validated-sql-node.png)
 
 
 
