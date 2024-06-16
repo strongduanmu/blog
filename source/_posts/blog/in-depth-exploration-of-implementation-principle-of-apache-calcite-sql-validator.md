@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-06-14 08:00:00
+updated: 2024-06-16 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -512,7 +512,199 @@ public void validate(SqlValidator validator, SqlValidatorScope scope) {
 }
 ```
 
-从上面的源码可以看到，`SqlSelect#validate` 方法会调用校验器的 validateQuery 方法，
+从上面的源码可以看到，`SqlSelect#validate` 方法会调用校验器的 validateQuery 方法，validateQuery 中核心的处理逻辑为 `validateNamespace` 和 `validateAccess`，分别校验 Namespace 以及对表的访问。
+
+```java
+@Override
+public void validateQuery(SqlNode node, SqlValidatorScope scope, RelDataType targetRowType) {
+    ...
+    // 校验 Namespace
+    validateNamespace(ns, targetRowType);
+    switch (node.getKind()) {
+        case EXTEND:
+            // Until we have a dedicated namespace for EXTEND
+            deriveType(requireNonNull(scope, "scope"), node);
+            break;
+        default:
+            break;
+    }
+    if (node == top) {
+        validateModality(node);
+    }
+    // 校验对表的访问
+    validateAccess(node, ns.getTable(), SqlAccessEnum.SELECT);
+    
+    validateSnapshot(node, scope, ns);
+}
+```
+
+`validateNamespace` 方法内部会调用 `SqlValidatorNamespace#validate` 方法，然后设置校验后的节点类型。
+
+```java
+/**
+ * Validates a namespace.
+ *
+ * @param namespace Namespace
+ * @param targetRowType Desired row type, must not be null, may be the data
+ * type 'unknown'.
+ */
+protected void validateNamespace(final SqlValidatorNamespace namespace, RelDataType targetRowType) {
+    // 调用 SqlValidatorNamespace 实现类的 validate
+    namespace.validate(targetRowType);
+    SqlNode node = namespace.getNode();
+    if (node != null) {
+        // 设置已校验节点类型
+        setValidatedNodeType(node, namespace.getType());
+    }
+}
+```
+
+本案例中 SqlValidatorNamespace 实现类为 `SelectNamespace`，SelectNamespace 则继承了抽象类 `AbstractNamespace`，在调用 `SelectNamespace#validate` 方法时，会调用父类 `AbstractNamespace#validate` 方法，该方法会根据 AbstractNamespace 中记录的 status 状态决定如何处理。如果 status 为 `UNVALIDATED` 状态，则会调用 `validateImpl` 方法，validateImpl 方法是一个抽象方法，具体的实现逻辑在 AbstractNamespace 子类中。
+
+```java
+@Override
+public final void validate(RelDataType targetRowType) {
+    switch (status) {
+        case UNVALIDATED:
+            try {
+                status = SqlValidatorImpl.Status.IN_PROGRESS;
+                Preconditions.checkArgument(rowType == null, "Namespace.rowType must be null before validate has been called");
+                RelDataType type = validateImpl(targetRowType);
+                Preconditions.checkArgument(type != null, "validateImpl() returned null");
+                setType(type);
+            } finally {
+                status = SqlValidatorImpl.Status.VALID;
+            }
+            break;
+        case IN_PROGRESS:
+            throw new AssertionError("Cycle detected during type-checking");
+        case VALID:
+            break;
+        default:
+            throw Util.unexpected(status);
+    }
+}
+
+protected abstract RelDataType validateImpl(RelDataType targetRowType);
+```
+
+`SelectNamespace#validateImpl` 内部则会调用 `validator.validateSelect` 方法，`SqlValidatorImpl#validateSelect` 具体实现逻辑如下：
+
+```java
+protected void validateSelect(SqlSelect select, RelDataType targetRowType) {
+    // Namespace is either a select namespace or a wrapper around one.
+    final SelectNamespace ns = getNamespaceOrThrow(select).unwrap(SelectNamespace.class);
+    // 获取 Select 语句中的投影列表
+    final SqlNodeList selectItems = SqlNonNullableAccessors.getSelectList(select);
+    RelDataType fromType = unknownType;
+    ...
+    // Make sure that items in FROM clause have distinct aliases.
+    final SelectScope fromScope = (SelectScope) getFromScope(select);
+    ...
+    if (select.getFrom() == null) {
+        if (this.config.conformance().isFromRequired()) {
+            throw newValidationError(select, RESOURCE.selectMissingFrom());
+        }
+    } else {
+        // 校验 From 子句
+        validateFrom(select.getFrom(), fromType, fromScope);
+    }
+    
+    validateWhereClause(select);
+    validateGroupClause(select);
+    validateHavingClause(select);
+    validateWindowClause(select);
+    validateQualifyClause(select);
+    handleOffsetFetch(select.getOffset(), select.getFetch());
+    
+    // Validate the SELECT clause late, because a select item might
+    // depend on the GROUP BY list, or the window function might reference
+    // window name in the WINDOW clause etc.
+    final RelDataType rowType = validateSelectList(selectItems, select, targetRowType);
+    ns.setType(rowType);
+    
+    // Validate ORDER BY after we have set ns.rowType because in some
+    // dialects you can refer to columns of the select list, e.g.
+    // "SELECT empno AS x FROM emp ORDER BY x"
+    validateOrderList(select);
+    
+    if (shouldCheckForRollUp(select.getFrom())) {
+        checkRollUpInSelectList(select);
+        checkRollUp(null, select, select.getWhere(), getWhereScope(select));
+        checkRollUp(null, select, select.getHaving(), getHavingScope(select));
+        checkRollUpInWindowDecl(select);
+        checkRollUpInGroupBy(select);
+        checkRollUpInOrderBy(select);
+    }
+}
+```
+
+
+
+`IdentifierNamespace#validateImpl` 实现逻辑如下：
+
+```java
+@Override
+public RelDataType validateImpl(RelDataType targetRowType) {
+    // 从元数据中解析表名，并组装为 TableNamespace
+    resolvedNamespace = resolveImpl(id);
+    if (resolvedNamespace instanceof TableNamespace) {
+        // 从 TableNamespace 中获取 table
+        SqlValidatorTable table = ((TableNamespace) resolvedNamespace).getTable();
+        if (validator.config().identifierExpansion()) {
+            // TODO:  expand qualifiers for column references also
+            List<String> qualifiedNames = table.getQualifiedName();
+            if (qualifiedNames != null) {
+                // Assign positions to the components of the fully-qualified
+                // identifier, as best we can. We assume that qualification
+                // adds names to the front, e.g. FOO.BAR becomes BAZ.FOO.BAR.
+                List<SqlParserPos> poses = new ArrayList<>(Collections.nCopies(qualifiedNames.size(), id.getParserPosition()));
+                int offset = qualifiedNames.size() - id.names.size();
+                
+                // Test offset in case catalog supports fewer qualifiers than catalog
+                // reader.
+                if (offset >= 0) {
+                    for (int i = 0; i < id.names.size(); i++) {
+                        poses.set(i + offset, id.getComponentParserPosition(i));
+                    }
+                }
+                id.setNames(qualifiedNames, poses);
+            }
+        }
+    }
+    
+    RelDataType rowType = resolvedNamespace.getRowType();
+    
+    if (extendList != null) {
+        if (!(resolvedNamespace instanceof TableNamespace)) {
+            throw new RuntimeException("cannot convert");
+        }
+        resolvedNamespace = ((TableNamespace) resolvedNamespace).extend(extendList);
+        rowType = resolvedNamespace.getRowType();
+    }
+    
+    // Build a list of monotonic expressions.
+    final ImmutableList.Builder<Pair<SqlNode, SqlMonotonicity>> builder = ImmutableList.builder();
+    List<RelDataTypeField> fields = rowType.getFieldList();
+    for (RelDataTypeField field : fields) {
+        final String fieldName = field.getName();
+        final SqlMonotonicity monotonicity = resolvedNamespace.getMonotonicity(fieldName);
+        if (monotonicity != null && monotonicity != SqlMonotonicity.NOT_MONOTONIC) {
+            builder.add(Pair.of(new SqlIdentifier(fieldName, SqlParserPos.ZERO), monotonicity));
+        }
+    }
+    monotonicExprs = builder.build();
+    
+    // Validation successful.
+    return rowType;
+}
+```
+
+![IdentifierNamespace 校验解析表名](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/identifier-namespace-validate-resolve-table-name.png)
+
+
+
+
 
 TODO
 
