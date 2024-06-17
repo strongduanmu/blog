@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-06-16 08:00:00
+updated: 2024-06-17 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -201,7 +201,7 @@ public SqlNode validate(SqlNode topNode) {
 }
 ```
 
-然后会调用 `validateScopedExpression` 进行校验，这部分是 SQL 校验器的核心逻辑。下面展示了该方法的代码实现，内部依次调用了 `performUnconditionalRewrites`、`registerQuery`、`validate` 和 `deriveType` 方法，我们将对这些方法内部实现细节进行深入探究。
+然后会调用 `validateScopedExpression` 进行校验，这部分是 SQL 校验器的核心逻辑。下面展示了该方法的代码实现，内部依次调用了 `performUnconditionalRewrites`、`registerQuery` 和 `validate` 方法，我们将对这些方法内部实现细节进行深入探究。
 
 ```java
 private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scope) {
@@ -499,7 +499,7 @@ registerQuery 执行完成后，注册的信息会存储在 SqlValidatorImpl 对
 
 #### validate
 
-完成 registerQuery 后，校验器中以及包含了校验所需的 Scope 和 Namespace 对象，下面我们再来探究下核心的校验逻辑。校验器首先会调用 `SqlNode#validate` 方法，该方法在不同的 SqlNode 中具有不同的实现。由于本文案例为查询语句，因此先关注 SqlSelect 的实现逻辑，其它类型的 SqlNode 读者可以自行探究。
+完成 registerQuery 后，校验器中已经包含了校验所需的 Scope 和 Namespace 对象，下面我们再来探究下核心的校验逻辑。校验器首先会调用 `SqlNode#validate` 方法，该方法在不同的 SqlNode 中具有不同的实现。由于本文案例为查询语句，因此先关注 SqlSelect 的实现逻辑，其它类型的 SqlNode 读者可以自行探究。
 
 ```java
 // 校验 SqlNode
@@ -540,7 +540,7 @@ public void validateQuery(SqlNode node, SqlValidatorScope scope, RelDataType tar
 
 ##### validateNamespace
 
-`validateNamespace` 方法内部会调用 `SqlValidatorNamespace#validate` 方法，然后设置校验后的节点类型。
+`validateNamespace` 方法实现逻辑如下，内部会调用 `SqlValidatorNamespace#validate` 方法，然后设置校验后的节点类型。
 
 ```java
 /**
@@ -681,7 +681,54 @@ public RelDataType validateImpl(RelDataType targetRowType) {
 
 ![IdentifierNamespace 校验解析表名](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/identifier-namespace-validate-resolve-table-name.png)
 
-TODO validate select list
+看完 From 子句校验，我们再来看下 Select 投影列校验逻辑，首先会遍历 SELECT 投影列，如果投影列仍然是一个子查询，则会调用 `handleScalarSubQuery` 处理标量子查询，判断是否符合标量子查询的规范。否则会调用 `expandSelectItem` 方法展开投影列，将 NAME 展开为 EMPS.NAME。展开后的投影列 `newSelectList` 会分别设置到 select 节点和 selectScope 中，方便后续校验继续使用。
+
+```java
+protected RelDataType validateSelectList(final SqlNodeList selectItems, SqlSelect select, RelDataType targetRowType) {
+    // Validate SELECT list. Expand terms of the form "*" or "TABLE.*".
+    final SqlValidatorScope selectScope = getSelectScope(select);
+    final List<SqlNode> expandedSelectItems = new ArrayList<>();
+    final Set<String> aliases = new HashSet<>();
+    final PairList<String, RelDataType> fieldList = PairList.of();
+    // 遍历 selectItems 投影列，如果是 SqlSelect 则处理标量子查询
+    for (SqlNode selectItem : selectItems) {
+        if (selectItem instanceof SqlSelect) {
+            handleScalarSubQuery(select, (SqlSelect) selectItem, expandedSelectItems, aliases, fieldList);
+        } else {
+            // Use the field list size to record the field index
+            // because the select item may be a STAR(*), which could have been expanded.
+            final int fieldIdx = fieldList.size();
+            final RelDataType fieldType = targetRowType.isStruct() && targetRowType.getFieldCount() > fieldIdx ? targetRowType.getFieldList().get(fieldIdx).getType() : unknownType;
+            // 展开投影列，将 NAME 展开为 EMPS.NAME
+            expandSelectItem(selectItem, select, fieldType, expandedSelectItems, aliases, fieldList, false);
+        }
+    }
+    
+    // Create the new select list with expanded items.  Pass through
+    // the original parser position so that any overall failures can
+    // still reference the original input text.
+    SqlNodeList newSelectList = new SqlNodeList(expandedSelectItems, selectItems.getParserPosition());
+    if (config.identifierExpansion()) {
+        // 将展开后的 newSelectList 设置到 select 中
+        select.setSelectList(newSelectList);
+    }
+    // 将展开后的 newSelectList 设置到 selectScope 中
+    getRawSelectScopeNonNull(select).setExpandedSelectList(expandedSelectItems);
+    
+    // TODO: when SELECT appears as a value sub-query, should be using
+    // something other than unknownType for targetRowType
+    inferUnknownTypes(targetRowType, selectScope, newSelectList);
+    
+    for (SqlNode selectItem : expandedSelectItems) {
+        validateNoAggs(groupFinder, selectItem, "SELECT");
+        validateExpr(selectItem, selectScope);
+    }
+    
+    return typeFactory.createStructType(fieldList);
+}
+```
+
+其他子句的校验作用类似，会将 Identifier 展开为全限定名，并对语句的合法性进行校验，感兴趣的读者可以使用前文的案例进行 Debug 探究，如有疑问可以留言交流。
 
 ##### validateAccess
 
@@ -706,19 +753,11 @@ private void validateAccess(SqlNode node, @Nullable SqlValidatorTable table, Sql
 }
 ```
 
-完成校验后，返回的 outermostNode 结构如下，可以看到 SqlNode 的 Identifier 都进行了全限定名展开，根据 names 属性可以很快速地获取到列对象所属的表，以及表对象所属的 Schema，函数对象则会查找到 Calcite 内置的函数，或者用户在元数据中定义的函数。
+完成校验后，返回的 outermostNode 结构如下，可以看到 SqlNode 的 Identifier 都进行了全限定名展开，根据 names 属性可以很快速地获取到列对象所属的表，以及表对象所属的 Schema，函数对象则会查找到 Calcite 内置的函数，或者用户在元数据中定义的函数，这些校验后的对象将在后续 SqlNode 转换 RelNode 过程中发挥重要作用。
 
 ![已校验的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/validated-sql-node.png)
 
-
-
-TODO
-
-#### deriveType
-
-
-
-### 流程总结
+### 整体流程总结
 
 
 
