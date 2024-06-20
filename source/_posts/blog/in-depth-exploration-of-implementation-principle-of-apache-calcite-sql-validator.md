@@ -9,7 +9,7 @@ references:
   - '[Apache Calcite 处理流程详解（一）](https://matt33.com/2019/03/07/apache-calcite-process-flow/#SqlValidatorImpl-%E6%A3%80%E6%9F%A5%E8%BF%87%E7%A8%8B)'
   - '[数据库内核杂谈（四）：执行模式](https://www.infoq.cn/article/spfiSuFZENC6UtrftSDD)'
 date: 2024-05-28 08:00:00
-updated: 2024-06-17 08:00:00
+updated: 2024-06-20 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_9.jpg
 topic: calcite
@@ -19,7 +19,7 @@ topic: calcite
 
 ## 前言
 
-在上一篇 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)中，我们介绍了经典的数据库的处理流程，包括：`SQL 解析`、`SQL 绑定`、`SQL 优化`以及`计划执行`。SQL 绑定主要的作用是将 SQL 解析生成的 AST 和数据库的元数据进行绑定，从而生成具有语义的 AST。SQL 绑定会通过自底向上的方式遍历 AST，对抽象语法树中的节点进行绑定分析，绑定的过程中会将表、列等元数据附在语法树上，最后生成具有语义的语法树 `Bounded AST`。
+在上一篇 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)中，我们介绍了经典的数据库处理流程，包括：`SQL 解析`、`SQL 绑定`、`SQL 优化`以及`计划执行`。SQL 绑定主要的作用是将 SQL 解析生成的 AST 和数据库的元数据进行绑定，从而生成具有语义的 AST。SQL 绑定会通过自底向上的方式遍历 AST，对抽象语法树中的节点进行绑定分析，绑定的过程中会将表、列等元数据附在语法树上，最后生成具有语义的语法树 `Bounded AST`。
 
 Calcite 通过 SQL 校验器实现 SQL 绑定，SQL 校验器所需的 System Catalog 信息，我们在上篇文章已经做了详细的介绍，感兴趣的读者可以阅读回顾相关内容。本文将重点介绍 Calcite SQL 校验器的整体设计，梳理校验器中不同类的用途，然后通过具体案例来展示 SQL 校验器的整体流程，并对流程中的关键方法进行代码级别的分析，力求让大家能够深刻理解 Calcite 的 SQL 校验器。
 
@@ -149,7 +149,7 @@ final String sql = "explain plan " + extra + " for\n"
 
 ### SqlValidator 初始化
 
-首先，会初始化 SqlValidator 对象，初始化时会将校验器所需的 SqlOperatorTable 和 SqlValidatorCatalogReader 等对象传入进来，SqlOperatorTable 用于查找 SQL 运算符和函数，SqlValidatorCatalogReader 则用于校验时查找元数据信息。此外，初始化时还会创建不同的 AggFinder 对象，用于后续从 AST 中提取不同的聚合函数，以及创建 TypeCoercion 类型转换类，它主要用于 SQL 中可能存在的隐式类型转换。
+首先，会初始化 SqlValidator 对象，初始化时会将校验器所需的 `SqlOperatorTable` 和 `SqlValidatorCatalogReader` 等对象传入进来，SqlOperatorTable 用于查找 SQL 运算符和函数，SqlValidatorCatalogReader 则用于校验时查找元数据信息。此外，初始化时还会创建不同的 `AggFinder` 对象，用于后续从 AST 中提取不同的聚合函数，以及创建 `TypeCoercion` 类型转换类，它主要用于 SQL 中可能存在的隐式类型转换。
 
 ```java
 protected SqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader catalogReader, RelDataTypeFactory typeFactory, Config config) {
@@ -183,7 +183,7 @@ protected SqlValidatorImpl(SqlOperatorTable opTab, SqlValidatorCatalogReader cat
 
 ### validate 流程
 
-介绍完 SqlValidator 初始化逻辑，我们再来深入探究下校验器的核心逻辑 `validate` 方法，其实现逻辑如下。首先会创建用于 root 节点校验的 EmptyScope，并将 EmptyScope 作为 CatalogScope 的父类，CatalogScope 可以查看所有 Schema 中的元数据，在校验过程中能够帮助对 `schema.table.column` 进行列解析。
+介绍完 SqlValidator 初始化逻辑，我们再来深入探究下校验器的核心逻辑 `validate` 方法，其实现逻辑如下。首先会创建用于 root 节点校验的 `EmptyScope`，并将 EmptyScope 作为 `CatalogScope` 的父类，CatalogScope 可以查看所有 Schema 中的元数据，在校验过程中能够帮助对 `schema.table.column` 进行列解析。
 
 ```java
 @Override
@@ -225,7 +225,7 @@ private SqlNode validateScopedExpression(SqlNode topNode, SqlValidatorScope scop
 
 #### performUnconditionalRewrites
 
-首先，我们来探究下 `performUnconditionalRewrites` 的内部实现逻辑，它主要用于 SqlNode 重写标准化，从而方便后续的逻辑计划优化。首先，方法内部会判断当前 SqlNode 的类型，根据 `SqlCall` 和 `SqlNodeList` 分别进行处理。Calcite SqlNode 体系我们之前在 [Apache Calcite SQL Parser 原理剖析](https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html#calcite-sqlnode-%E4%BD%93%E7%B3%BB-sql-%E7%94%9F%E6%88%90)中已经进行了详细介绍，不熟悉的朋友可以阅读下这篇文章。
+首先，我们来探究下 `performUnconditionalRewrites` 的内部实现逻辑，它主要用于 SqlNode 重写标准化，从而方便后续的逻辑计划优化。方法内部会先判断当前 SqlNode 的类型，根据 `SqlCall` 和 `SqlNodeList` 分别进行处理。Calcite SqlNode 体系我们之前在 [Apache Calcite SQL Parser 原理剖析](https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html#calcite-sqlnode-%E4%BD%93%E7%B3%BB-sql-%E7%94%9F%E6%88%90)中已经进行了详细介绍，不熟悉的朋友可以阅读下这篇文章。
 
 如果当前 SqlNode 是 SqlCall（SqlCall 代表了对 SqlOperator 的调用，Calcite 中每个操作都可以对应一个 SqlCall，例如查询操作是 SqlSelectOperator，对应的 SqlNode 是 `SqlSelect`），则会获取 SqlCall 对应的 `SqlKind` 和 `OperandList`。SqlKind 是一个枚举类，表示了 SqlNode 对应的类型，常用的类型有：SELECT、INSERT、ORDER_BY、WITH 等，更多类型可以查看 [SqlKind 源码](https://github.com/apache/calcite/blob/fb6f43192c4253caea63c0705067a9aa12a3fa74/core/src/main/java/org/apache/calcite/sql/SqlKind.java#L81)。
 
@@ -681,7 +681,7 @@ public RelDataType validateImpl(RelDataType targetRowType) {
 
 ![IdentifierNamespace 校验解析表名](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/identifier-namespace-validate-resolve-table-name.png)
 
-看完 From 子句校验，我们再来看下 Select 投影列校验逻辑，首先会遍历 SELECT 投影列，如果投影列仍然是一个子查询，则会调用 `handleScalarSubQuery` 处理标量子查询，判断是否符合标量子查询的规范。否则会调用 `expandSelectItem` 方法展开投影列，将 NAME 展开为 EMPS.NAME。展开后的投影列 `newSelectList` 会分别设置到 select 节点和 selectScope 中，方便后续校验继续使用。
+看完 From 子句校验，我们再来看下 Select 投影列校验逻辑，首先会遍历 SELECT 投影列，如果投影列仍然是一个子查询，则会调用 `handleScalarSubQuery` 处理标量子查询，判断是否符合标量子查询的规范。否则会调用 `expandSelectItem` 方法展开投影列，将 NAME 展开为 EMPS.NAME（**expandSelectItem 方法也可以将星号展开为全部列，本示例中没有涉及，感兴趣读者可以自行探究**）。展开后的投影列 `newSelectList` 会分别设置到 select 节点和 selectScope 中，方便后续校验继续使用。
 
 ```java
 protected RelDataType validateSelectList(final SqlNodeList selectItems, SqlSelect select, RelDataType targetRowType) {
@@ -753,17 +753,26 @@ private void validateAccess(SqlNode node, @Nullable SqlValidatorTable table, Sql
 }
 ```
 
-完成校验后，返回的 outermostNode 结构如下，可以看到 SqlNode 的 Identifier 都进行了全限定名展开，根据 names 属性可以很快速地获取到列对象所属的表，以及表对象所属的 Schema，函数对象则会查找到 Calcite 内置的函数，或者用户在元数据中定义的函数，这些校验后的对象将在后续 SqlNode 转换 RelNode 过程中发挥重要作用。
+完成校验后，返回的 outermostNode 结构如下，可以看到 SqlNode 的 Identifier 都进行了全限定名展开，根据 names 属性可以很快速地获取到列对象所属的表，以及表对象所属的 Schema。使用 `SqlValidator#getFieldOrigins` 方法可以获取列的原始类型，该类型中包含 `catalog, schema, table, column`，可以用来实现 SQL 血缘分析等需求。函数对象则会查找到 Calcite 内置的函数，或者用户在元数据中定义的函数，这些校验后的对象将在后续 SqlNode 转换 RelNode 过程中发挥重要作用。
 
 ![已校验的 SqlNode](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/validated-sql-node.png)
 
 ### 整体流程总结
 
+![SQL 校验流程](in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/validate-sequence.png)
 
+前面我们对 Calcite SQL 校验器的执行流程进行了详细的分析，为了避免过于陷入代码细节，最后我们来总结下 SQL 校验的整体流程，帮助大家进行理解。Calcite SQL 校验总体上可以分为 4 个步骤：
+
+1. 第一步：SqlValidatorImpl 初始化。在这个步骤中，会将校验器所需的 SqlOperatorTable 和 SqlValidatorCatalogReader 等对象传入进来，SqlOperatorTable 用于查找 SQL 运算符和函数，SqlValidatorCatalogReader 则用于校验时查找元数据信息；
+2. 第二步：重写 SqlNode 进行标准化。Calcite 会将非标准的 SqlNode 转换为标准的 SqlNode，具体包括：`VALUES`、`ORDER_BY`、`EXPLICIT_TABLE`、`DELETE`、`UPDATE` 和 `MERGE`；
+3. 第三步：注册 Scope 和 Namespace。通过 registerQuery 方法生成 SqlValidatorScope 和 SqlValidatorNamespace 对象，分别用于声明校验过程中**名称解析的范围**，以及描述由 SQL 查询某个部分返回的关系（简单理解可以认为是查询过程中的数据来源）；
+4. 第四步：校验 Select 语句。校验器依次调用 `validateFrom`、`validateWhereClause`、`validateGroupClause`、`validateHavingClause`、`validateWindowClause`、`validateQualifyClause`、`validateSelectList` 和 `validateOrderList` 方法校验不同的子句，不存在的表或列会抛出异常，存在则进行全限定名展开，例如将 `EMPS` 展开为 `SALES.EMPS`。
 
 ## 结语
 
-TODO
+本文介绍了 Caclite 校验器的整体设计，带大家一起了解了校验器中核心的 `SqlValidator`、`SqlValidatorScope`、`SqlValidatorNamespace` 类，并通过一个简单的单测，和大家一起跟踪了 SQL 校验器的执行流程，经过校验器处理，Caclite SqlNode 最终包含了展开的全限定名，以及经过解析的函数对象。
+
+SQL 校验的目的是为了将 SqlNode 进行标准化，并分析出 SQL 上下文的语义关系，以方便后续将 SqlNode 对象转换为 RelNode 关系代数对象。下一篇，我们将继续探究 Calcite SqlNode 转换 RelNode 的实现原理，看看 Calcite 如何表示关系代数，以及 SqlNode AST 如何转换为 SqlNode 关系代数？在转换过程中，Calcite 又包含了哪些隐藏的优化方式？欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
 
 
 
