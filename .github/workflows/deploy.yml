@@ -47,6 +47,7 @@ jobs:
         run: |
           npm i -g cnpm --registry=https://r.cnpmjs.org/
           cnpm install
+          hexo clean
 
       - name: Deploy hexo
         run: |
