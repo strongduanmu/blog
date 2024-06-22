@@ -763,24 +763,22 @@ timeZone:
 
 另请参阅：UNNEST 关系运算符将集合转换为关系。
 
-TODO
+### 时间段谓词
 
-### 句点谓词
+| 运算符语法                           | 描述                            |
+| ------------------------------------ | ------------------------------- |
+| period1 CONTAINS datetime            | period1 包含 datetime           |
+| period1 CONTAINS period2             | period1 包含 period2            |
+| period1 OVERLAPS period2             | period1 与 period2 重叠         |
+| period1 EQUALS period2               | period1 等于 period2            |
+| period1 PRECEDES period2             | period1 早于 period2            |
+| period1 IMMEDIATELY PRECEDES period2 | period1 早于 period2 并没有间隔 |
+| period1 SUCCEEDS period2             | period1 晚于 period2            |
+| period1 IMMEDIATELY SUCCEEDS period2 | period1 晚于 period2 并没有间隔 |
 
-| OPERATOR SYNTAX                      | DESCRIPTION |
-| ------------------------------------ | ----------- |
-| period1 CONTAINS datetime            |             |
-| period1 CONTAINS period2             |             |
-| period1 OVERLAPS period2             |             |
-| period1 EQUALS period2               |             |
-| period1 PRECEDES period2             |             |
-| period1 IMMEDIATELY PRECEDES period2 |             |
-| period1 SUCCEEDS period2             |             |
-| period1 IMMEDIATELY SUCCEEDS period2 |             |
+其中 `period1` 和 `period2` 是时间段表达式：
 
-Where *period1* and *period2* are period expressions:
-
-```
+```sql
 period:
       (datetime, datetime)
   |   (datetime, interval)
@@ -792,7 +790,9 @@ period:
 
 #### 数字
 
-| OPERATOR SYNTAX                   | DESCRIPTION                                                  |
+TODO
+
+| 运算符语法                        | 描述                                                         |
 | :-------------------------------- | :----------------------------------------------------------- |
 | {fn ABS(numeric)}                 | Returns the absolute value of *numeric*                      |
 | {fn ACOS(numeric)}                | Returns the arc cosine of *numeric*                          |
