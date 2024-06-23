@@ -790,95 +790,93 @@ period:
 
 #### 数字
 
-TODO
-
 | 运算符语法                        | 描述                                                         |
 | :-------------------------------- | :----------------------------------------------------------- |
-| {fn ABS(numeric)}                 | Returns the absolute value of *numeric*                      |
-| {fn ACOS(numeric)}                | Returns the arc cosine of *numeric*                          |
-| {fn ASIN(numeric)}                | Returns the arc sine of *numeric*                            |
-| {fn ATAN(numeric)}                | Returns the arc tangent of *numeric*                         |
-| {fn ATAN2(numeric, numeric)}      | Returns the arc tangent of the *numeric* coordinates         |
-| {fn CBRT(numeric)}                | Returns the cube root of *numeric*                           |
-| {fn CEILING(numeric)}             | Rounds *numeric* up, and returns the smallest number that is greater than or equal to *numeric* |
-| {fn COS(numeric)}                 | Returns the cosine of *numeric*                              |
-| {fn COT(numeric)}                 | Returns the cotangent of *numeric*                           |
-| {fn DEGREES(numeric)}             | Converts *numeric* from radians to degrees                   |
-| {fn EXP(numeric)}                 | Returns *e* raised to the power of *numeric*                 |
-| {fn FLOOR(numeric)}               | Rounds *numeric* down, and returns the largest number that is less than or equal to *numeric* |
-| {fn LOG(numeric)}                 | Returns the natural logarithm (base *e*) of *numeric*        |
-| {fn LOG10(numeric)}               | Returns the base-10 logarithm of *numeric*                   |
-| {fn MOD(numeric1, numeric2)}      | Returns the remainder (modulus) of *numeric1* divided by *numeric2*. The result is negative only if *numeric1* is negative |
-| {fn PI()}                         | Returns a value that is closer than any other value to *pi*  |
-| {fn POWER(numeric1, numeric2)}    | Returns *numeric1* raised to the power of *numeric2*         |
-| {fn RADIANS(numeric)}             | Converts *numeric* from degrees to radians                   |
-| {fn RAND(numeric)}                | Returns a random double using *numeric* as the seed value    |
-| {fn ROUND(numeric1, numeric2)}    | Rounds *numeric1* to *numeric2* places right to the decimal point |
-| {fn SIGN(numeric)}                | Returns the signum of *numeric*                              |
-| {fn SIN(numeric)}                 | Returns the sine of *numeric*                                |
-| {fn SQRT(numeric)}                | Returns the square root of *numeric*                         |
-| {fn TAN(numeric)}                 | Returns the tangent of *numeric*                             |
-| {fn TRUNCATE(numeric1, numeric2)} | Truncates *numeric1* to *numeric2* places right to the decimal point |
+| {fn ABS(numeric)}                 | 返回 *numeric* 的绝对值                                      |
+| {fn ACOS(numeric)}                | 返回 *numeric* 的反余弦                                      |
+| {fn ASIN(numeric)}                | 返回 *numeric* 的反正弦值                                    |
+| {fn ATAN(numeric)}                | 返回 *numeric* 的反正切                                      |
+| {fn ATAN2(numeric, numeric)}      | 返回 *numeric* 坐标的反正切                                  |
+| {fn CBRT(numeric)}                | 返回 *numeric* 的立方根                                      |
+| {fn CEILING(numeric)}             | 将 *numeric* 向上舍入，并返回大于或等于 *numeric* 的最小数字 |
+| {fn COS(numeric)}                 | 返回 *numeric* 的余弦                                        |
+| {fn COT(numeric)}                 | 返回 *numeric* 的余切                                        |
+| {fn DEGREES(numeric)}             | 将 *numeric* 从弧度转换为度                                  |
+| {fn EXP(numeric)}                 | 返回 *e* 的 *numeric* 次方                                   |
+| {fn FLOOR(numeric)}               | 将 *numeric* 向下舍入，并返回小于或等于 *numeric* 的最大数字 |
+| {fn LOG(numeric)}                 | 返回 *numeric* 的自然对数（底数 *e*）                        |
+| {fn LOG10(numeric)}               | 返回 *numeric* 的以 10 为底的对数                            |
+| {fn MOD(numeric1, numeric2)}      | 返回 *numeric1* 除以 *numeric2* 的余数（模数），仅当 *numeric1* 为负数时，结果才为负数 |
+| {fn PI()}                         | 返回一个比任何其他值都更接近 *pi* 的值                       |
+| {fn POWER(numeric1, numeric2)}    | 返回 *numeric1* 的 *numeric2* 次幂                           |
+| {fn RADIANS(numeric)}             | 将 *numeric* 从度数转换为弧度                                |
+| {fn RAND(numeric)}                | 使用 *numeric* 作为种子值返回随机双精度值                    |
+| {fn ROUND(numeric1, numeric2)}    | 将 *numeric1* 四舍五入为 *numeric2* 位，保留小数点后一位     |
+| {fn SIGN(numeric)}                | 返回 *numeric* 的符号                                        |
+| {fn SIN(numeric)}                 | 返回 *numeric* 的正弦值                                      |
+| {fn SQRT(numeric)}                | 返回 *numeric* 的平方根                                      |
+| {fn TAN(numeric)}                 | 返回 *numeric* 的正切                                        |
+| {fn TRUNCATE(numeric1, numeric2)} | 将 *numeric1* 截断为 *numeric2* 位，保留小数点后一位         |
 
 #### 字符串
 
-| OPERATOR SYNTAX                              | DESCRIPTION                                                  |
+| 运算符语法                                   | 描述                                                         |
 | :------------------------------------------- | :----------------------------------------------------------- |
-| {fn ASCII(string)}                           | Returns the ASCII code of the first character of *string*; if the first character is a non-ASCII character, returns its Unicode code point; returns 0 if *string* is empty |
-| {fn CHAR(integer)}                           | Returns the character whose ASCII code is *integer* % 256, or null if *integer* < 0 |
-| {fn CONCAT(character, character)}            | Returns the concatenation of character strings               |
-| {fn INSERT(string1, start, length, string2)} | Inserts *string2* into a slot in *string1*                   |
-| {fn LCASE(string)}                           | Returns a string in which all alphabetic characters in *string* have been converted to lower case |
-| {fn LENGTH(string)}                          | Returns the number of characters in a string                 |
-| {fn LOCATE(string1, string2 [, integer])}    | Returns the position in *string2* of the first occurrence of *string1*. Searches from the beginning of *string2*, unless *integer* is specified. |
-| {fn LEFT(string, length)}                    | Returns the leftmost *length* characters from *string*       |
-| {fn LTRIM(string)}                           | Returns *string* with leading space characters removed       |
-| {fn REPLACE(string, search, replacement)}    | Returns a string in which all the occurrences of *search* in *string* are replaced with *replacement*; if *replacement* is the empty string, the occurrences of *search* are removed |
-| {fn REVERSE(string)}                         | Returns *string* with the order of the characters reversed   |
-| {fn RIGHT(string, length)}                   | Returns the rightmost *length* characters from *string*      |
-| {fn RTRIM(string)}                           | Returns *string* with trailing space characters removed      |
-| {fn SUBSTRING(string, offset, length)}       | Returns a character string that consists of *length* characters from *string* starting at the *offset* position |
-| {fn UCASE(string)}                           | Returns a string in which all alphabetic characters in *string* have been converted to upper case |
+| {fn ASCII(string)}                           | 返回 *string* 第一个字符的 ASCII 码；如果第一个字符是非 ASCII 字符，则返回其 Unicode 代码点；如果 *string* 为空，则返回 0 |
+| {fn CHAR(integer)}                           | 返回 ASCII 码为 *integer* % 256 的字符，如果 *integer* < 0，则返回 null |
+| {fn CONCAT(character, character)}            | 返回字符串的连接                                             |
+| {fn INSERT(string1, start, length, string2)} | 将 *string2* 插入到 *string1* 中的插槽中                     |
+| {fn LCASE(string)}                           | 返回一个字符串，其中 *string* 中的所有字母字符都已转换为小写 |
+| {fn LENGTH(string)}                          | 返回字符串中的字符数                                         |
+| {fn LOCATE(string1, string2 [, integer])}    | 返回 *string1* 在 *string2* 中第一次出现的位置。除非指定了 *integer*，否则将从 *string2* 的开头进行搜索。 |
+| {fn LEFT(string, length)}                    | 返回 *string* 最左边的 *length* 个字符                       |
+| {fn LTRIM(string)}                           | 返回删除了前导空格字符的*字符串*                             |
+| {fn REPLACE(string, search, replacement)}    | 返回一个字符串，其中 *string* 中出现的所有 *search* 均被 *replacement* 替换；如果 *replacement* 为空字符串，则删除出现的 *search* |
+| {fn REVERSE(string)}                         | 返回字符顺序颠倒的*字符串*                                   |
+| {fn RIGHT(string, length)}                   | 返回 *string* 最右边的 *length* 个字符                       |
+| {fn RTRIM(string)}                           | 返回删除了尾随空格字符的 *string*                            |
+| {fn SUBSTRING(string, offset, length)}       | 返回从 *string* 开始，由 *length* 个字符组成的字符串，起始于 *offset* 位置 |
+| {fn UCASE(string)}                           | 返回一个字符串，其中 *string* 中的所有字母字符都已转换为大写 |
 
 #### 日期/时间
 
-| OPERATOR SYNTAX                                      | DESCRIPTION                                                  |
+| 运算符语法                                           | 描述                                                         |
 | :--------------------------------------------------- | :----------------------------------------------------------- |
-| {fn CURDATE()}                                       | Equivalent to `CURRENT_DATE`                                 |
-| {fn CURTIME()}                                       | Equivalent to `LOCALTIME`                                    |
-| {fn NOW()}                                           | Equivalent to `LOCALTIMESTAMP`                               |
-| {fn YEAR(date)}                                      | Equivalent to `EXTRACT(YEAR FROM date)`. Returns an integer. |
-| {fn QUARTER(date)}                                   | Equivalent to `EXTRACT(QUARTER FROM date)`. Returns an integer between 1 and 4. |
-| {fn MONTH(date)}                                     | Equivalent to `EXTRACT(MONTH FROM date)`. Returns an integer between 1 and 12. |
-| {fn WEEK(date)}                                      | Equivalent to `EXTRACT(WEEK FROM date)`. Returns an integer between 1 and 53. |
-| {fn DAYOFYEAR(date)}                                 | Equivalent to `EXTRACT(DOY FROM date)`. Returns an integer between 1 and 366. |
-| {fn DAYOFMONTH(date)}                                | Equivalent to `EXTRACT(DAY FROM date)`. Returns an integer between 1 and 31. |
-| {fn DAYOFWEEK(date)}                                 | Equivalent to `EXTRACT(DOW FROM date)`. Returns an integer between 1 and 7. |
-| {fn HOUR(date)}                                      | Equivalent to `EXTRACT(HOUR FROM date)`. Returns an integer between 0 and 23. |
-| {fn MINUTE(date)}                                    | Equivalent to `EXTRACT(MINUTE FROM date)`. Returns an integer between 0 and 59. |
-| {fn SECOND(date)}                                    | Equivalent to `EXTRACT(SECOND FROM date)`. Returns an integer between 0 and 59. |
-| {fn TIMESTAMPADD(timeUnit, count, datetime)}         | Adds an interval of *count* *timeUnit*s to a datetime        |
-| {fn TIMESTAMPDIFF(timeUnit, timestamp1, timestamp2)} | Subtracts *timestamp1* from *timestamp2* and returns the result in *timeUnit*s |
+| {fn CURDATE()}                                       | 相当于 `CURRENT_DATE`                                        |
+| {fn CURTIME()}                                       | 相当于 `LOCALTIME`                                           |
+| {fn NOW()}                                           | 相当于`LOCALTIMESTAMP`                                       |
+| {fn YEAR(date)}                                      | 相当于 `EXTRACT(YEAR FROM date)`。返回一个整数。             |
+| {fn QUARTER(date)}                                   | 相当于 `EXTRACT(QUARTER FROM date)`。返回 1 到 4 之间的整数。 |
+| {fn MONTH(date)}                                     | 相当于 `EXTRACT(MONTH FROM date)`。返回 1 到 12 之间的整数。 |
+| {fn WEEK(date)}                                      | 相当于 `EXTRACT(WEEK FROM date)`。返回 1 到 53 之间的整数。  |
+| {fn DAYOFYEAR(date)}                                 | 相当于 `EXTRACT(DOY FROM date)`。返回 1 到 366 之间的整数。  |
+| {fn DAYOFMONTH(date)}                                | 相当于 `EXTRACT(DAY FROM date)`。返回 1 到 31 之间的整数。   |
+| {fn DAYOFWEEK(date)}                                 | 相当于 `EXTRACT(DOW FROM date)`。返回 1 到 7 之间的整数。    |
+| {fn HOUR(date)}                                      | 相当于 `EXTRACT(HOUR FROM date)`。返回 0 到 23 之间的整数。  |
+| {fn MINUTE(date)}                                    | 相当于 `EXTRACT(MINUTE FROM date)`。返回 0 到 59 之间的整数。 |
+| {fn SECOND(date)}                                    | 相当于 `EXTRACT(SECOND FROM date)`。返回 0 到 59 之间的整数。 |
+| {fn TIMESTAMPADD(timeUnit, count, datetime)}         | 将 *count* *timeUnit*s 的间隔添加到日期时间                  |
+| {fn TIMESTAMPDIFF(timeUnit, timestamp1, timestamp2)} | 从 *timestamp2* 中减去 *timestamp1* 并以 *timeUnit*s 形式返回结果 |
 
 #### 系统
 
-| OPERATOR SYNTAX             | DESCRIPTION                      |
-| :-------------------------- | :------------------------------- |
-| {fn DATABASE()}             | Equivalent to `CURRENT_CATALOG`  |
-| {fn IFNULL(value1, value2)} | Returns value2 if value1 is null |
-| {fn USER()}                 | Equivalent to `CURRENT_USER`     |
+| 运算符语法                  | 描述                            |
+| :-------------------------- | :------------------------------ |
+| {fn DATABASE()}             | 相当于 `CURRENT_CATALOG`        |
+| {fn IFNULL(value1, value2)} | 如果 value1 为空，则返回 value2 |
+| {fn USER()}                 | 相当于 `CURRENT_USER`           |
 
 #### 转换
 
-| OPERATOR SYNTAX           | DESCRIPTION              |
-| :------------------------ | :----------------------- |
-| {fn CONVERT(value, type)} | Cast *value* into *type* |
+| 运算符语法                | 描述                  |
+| :------------------------ | :-------------------- |
+| {fn CONVERT(value, type)} | 将 *值* 转换为 *类型* |
 
 ### 聚合函数
 
-Syntax:
+语法：
 
-```
+```sql
 aggregateCall:
       agg '(' [ ALL | DISTINCT ] value [, value ]* ')'
       [ WITHIN DISTINCT '(' expression [, expression ]* ')' ]
@@ -887,50 +885,50 @@ aggregateCall:
   |   agg '(' '*' ')' [ FILTER (WHERE condition) ]
 ```
 
-其中*agg*是下表中的运算符之一，或者是用户定义的聚合函数。
+其中 *agg* 是下表中的运算符之一，或者是用户定义的聚合函数。
 
-如果`FILTER`存在，则聚合函数仅考虑 *条件*评估为 TRUE 的行。
+如果存在 `FILTER`，则聚合函数仅考虑*条件*计算结果为 TRUE 的行。
 
-如果`DISTINCT`存在，则在传递给聚合函数之前消除重复的参数值。
+如果存在 `DISTINCT`，则重复的参数值在传递给聚合函数之前会被消除。
 
-如果`WITHIN DISTINCT`存在，则在传递给聚合函数之前，参数值在指定键的每个值中都是不同的。
+如果存在 `WITHIN DISTINCT`，则在传递给聚合函数之前，参数值在指定键的每个值内都会有所不同。
 
-如果`WITHIN GROUP`存在，则聚合函数在聚合值之前根据`ORDER BY`内部子句对输入行进行排序`WITHIN GROUP`。`WITHIN GROUP`仅允许用于假设集合函数 ( `RANK`、 `DENSE_RANK`和)、逆分布函数 (`PERCENT_RANK`和)和集合函数 ( 和)。`CUME_DIST``PERCENTILE_CONT``PERCENTILE_DISC``COLLECT``LISTAGG`
+如果存在 `WITHIN GROUP`，则聚合函数会在聚合值之前根据 `WITHIN GROUP` 内的 `ORDER BY` 子句对输入行进行排序。`WITHIN GROUP` 仅允许用于假设集合函数（`RANK`、`DENSE_RANK`、`PERCENT_RANK` 和 `CUME_DIST`）、逆分布函数（`PERCENTILE_CONT` 和 `PERCENTILE_DISC`）和集合函数（`COLLECT` 和 `LISTAGG`）。
 
 | 运算符语法                                        | 描述                                                         |
 | :------------------------------------------------ | :----------------------------------------------------------- |
-| ANY_VALUE（[ 全部 \| DISTINCT ] 值）              | 返回所有输入值中*value*的值之一；SQL 标准中没有指定这一点    |
-| ARG_MAX（值，补偿）                               | 返回组中*comp*的*最大值*                                     |
-| ARG_MIN（值，补偿）                               | 返回组中*comp*的*最小值*                                     |
-| APPROX_COUNT_DISTINCT（值[，值]*）                | *返回value*的不同值的近似数量；数据库可以使用近似值，但不要求 |
-| AVG（[ ALL \| DISTINCT ] 数字）                   | 返回所有输入值的*平均值（算术平均值）*                       |
-| BIT_AND（[ 全部 \| DISTINCT ] 值）                | 返回所有非空输入值的按位与，如果没有则返回 null；支持整数和二进制类型 |
-| BIT_OR( [ 全部 \| DISTINCT ] 值)                  | 返回所有非空输入值的按位或，如果没有则返回 null；支持整数和二进制类型 |
-| BIT_XOR（[全部\|不同]值）                         | 返回所有非空输入值的按位异或，如果没有则返回 null；支持整数和二进制类型 |
-| 收集（[全部\|不同]值）                            | 返回值的多重集                                               |
-| 数数（*）                                         | 返回输入行数                                                 |
-| COUNT([ 全部 \| DISTINCT ] 值 [, 值 ]*)           | *返回值*不为空的输入行数（如果*值*是复合值则完全不为空）     |
-| COVAR_POP（数字1，数字2）                         | *返回所有输入值对 ( numeric1* , *numeric2* )的总体协方差     |
-| COVAR_SAMP（数字1，数字2）                        | *返回所有输入值对 ( numeric1* , *numeric2* )的样本协方差     |
-| 每个（条件）                                      | *如果条件*的所有值都为TRUE，则返回 TRUE                      |
-| FUSION(多组)                                      | Returns the multiset union of *multiset* across all input values |
-| INTERSECTION(multiset)                            | Returns the multiset intersection of *multiset* across all input values |
-| LISTAGG( [ ALL \| DISTINCT ] value [, separator]) | Returns values concatenated into a string, delimited by separator (default ‘,’) |
-| MAX( [ ALL \| DISTINCT ] value)                   | Returns the maximum value of *value* across all input values |
-| MIN( [ ALL \| DISTINCT ] value)                   | Returns the minimum value of *value* across all input values |
-| MODE(value)                                       | Returns the most frequent value of *value* across all input values |
-| REGR_COUNT(numeric1, numeric2)                    | Returns the number of rows where both dependent and independent expressions are not null |
-| REGR_SXX(numeric1, numeric2)                      | Returns the sum of squares of the dependent expression in a linear regression model |
-| REGR_SYY(numeric1, numeric2)                      | Returns the sum of squares of the independent expression in a linear regression model |
-| SOME(condition)                                   | Returns TRUE if one or more of the values of *condition* is TRUE |
-| STDDEV( [ ALL \| DISTINCT ] numeric)              | Synonym for `STDDEV_SAMP`                                    |
-| STDDEV_POP( [ ALL \| DISTINCT ] numeric)          | Returns the population standard deviation of *numeric* across all input values |
-| STDDEV_SAMP( [ ALL \| DISTINCT ] numeric)         | Returns the sample standard deviation of *numeric* across all input values |
-| SUM( [ ALL \| DISTINCT ] numeric)                 | Returns the sum of *numeric* across all input values         |
-| VAR_POP( [ ALL \| DISTINCT ] value)               | Returns the population variance (square of the population standard deviation) of *numeric* across all input values |
-| VAR_SAMP( [ ALL \| DISTINCT ] numeric)            | Returns the sample variance (square of the sample standard deviation) of *numeric* across all input values |
+| ANY_VALUE( [ ALL \| DISTINCT ] value)             | 返回所有输入值中的一个值；这在 SQL 标准中没有指定            |
+| ARG_MAX(value, comp)                              | 返回组中 comp 的最大值                                       |
+| ARG_MIN(value, comp)                              | 返回组中 comp 的最小值                                       |
+| APPROX_COUNT_DISTINCT(value [, value ]*)          | 返回 value 的不同值的近似数量；数据库可以使用近似值，但不需要 |
+| AVG( [ ALL \| DISTINCT ] numeric)                 | 返回所有输入值的平均值（算术平均值）                         |
+| BIT_AND( [ ALL \| DISTINCT ] value)               | 返回所有非空输入值的按位与，如果没有则返回空；支持整数和二进制类型 |
+| BIT_OR( [ ALL \| DISTINCT ] value)                | 返回所有非空输入值的按位或，如果没有则返回空；支持整数和二进制类型 |
+| BIT_XOR( [ ALL \| DISTINCT ] value)               | 返回所有非空输入值的按位异或，若无则返回空；支持整数和二进制类型 |
+| COLLECT( [ ALL \| DISTINCT ] value)               | 返回值的多集                                                 |
+| COUNT(*)                                          | 返回输入行的数量                                             |
+| COUNT( [ ALL \| DISTINCT ] value [, value ]*)     | 返回值不为空的输入行数（如果值为复合值，则完全不为空）       |
+| COVAR_POP(numeric1, numeric2)                     | 返回所有输入值对 (numeric1, numeric2) 的总体协方差           |
+| COVAR_SAMP(numeric1, numeric2)                    | 返回所有输入值对 (numeric1, numeric2) 的样本协方差           |
+| EVERY(condition)                                  | 如果条件的所有值都为 TRUE，则返回 TRUE                       |
+| FUSION(multiset)                                  | 返回所有输入值的多重集的多重集并集                           |
+| INTERSECTION(multiset)                            | 返回所有输入值的多重集的多重集交集                           |
+| LISTAGG( [ ALL \| DISTINCT ] value [, separator]) | 返回连接成字符串的值，以分隔符分隔（默认为‘，’）             |
+| MAX( [ ALL \| DISTINCT ] value)                   | 返回所有输入值中的最大值                                     |
+| MIN( [ ALL \| DISTINCT ] value)                   | 返回所有输入值中的最小值                                     |
+| MODE(value)                                       | 返回所有输入值中出现频率最高的值                             |
+| REGR_COUNT(numeric1, numeric2)                    | 返回依赖表达式和独立表达式均不为空的行数                     |
+| REGR_SXX(numeric1, numeric2)                      | 返回线性回归模型中因变量表达式的平方和                       |
+| REGR_SYY(numeric1, numeric2)                      | 返回线性回归模型中独立表达式的平方和                         |
+| SOME(condition)                                   | 如果条件中的一个或多个值为 TRUE，则返回 TRUE                 |
+| STDDEV( [ ALL \| DISTINCT ] numeric)              | STDDEV_SAMP 的同义词                                         |
+| STDDEV_POP( [ ALL \| DISTINCT ] numeric)          | 返回所有输入值的总体标准差                                   |
+| STDDEV_SAMP( [ ALL \| DISTINCT ] numeric)         | 返回所有输入值的数字样本标准差                               |
+| SUM( [ ALL \| DISTINCT ] numeric)                 | 返回所有输入值的数字总和                                     |
+| VAR_POP( [ ALL \| DISTINCT ] value)               | 返回所有输入值的总体方差（总体标准差的平方）                 |
+| VAR_SAMP( [ ALL \| DISTINCT ] numeric)            | 返回所有输入值的样本方差（样本标准差的平方）                 |
 
-Not implemented:
+未实现的：
 
 - REGR_AVGX(numeric1, numeric2)
 - REGR_AVGY(numeric1, numeric2)
@@ -940,6 +938,8 @@ Not implemented:
 - REGR_SXY(numeric1, numeric2)
 
 #### 有序集聚合函数
+
+TODO
 
 The syntax is as for *aggregateCall*, except that `WITHIN GROUP` is required.
 
