@@ -29,7 +29,7 @@
     "hexo-renderer-markdown-it-plus": "^1.0.6",
     "hexo-renderer-stylus": "3.0.1",
     "hexo-server": "3.0.0",
-    "hexo-theme-stellar": "1.29.0",
+    "hexo-theme-stellar": "1.28.1",
     "hexo-uglify": "2.0.0",
     "hexo-util": "^3.3.0"
   }
