@@ -939,24 +939,22 @@ aggregateCall:
 
 #### 有序集聚合函数
 
-TODO
+语法与 *aggregateCall* 相同，但需要 `WITHIN GROUP`。
 
-The syntax is as for *aggregateCall*, except that `WITHIN GROUP` is required.
+例如下面的：
 
-In the following:
+- *分数* 是 0 到 1 之间的数字文字（包括 0 和 1），代表百分比；
 
-- *fraction* is a numeric literal between 0 and 1, inclusive, and represents a percentage
-
-| OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
+| 运算符语法                                                   | 描述                                                         |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY orderItem)  | Returns a percentile based on a continuous distribution of the column values, interpolating between adjacent input items if needed |
-| PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY orderItem [, orderItem ]*) | Returns a percentile based on a discrete distribution of the column values returning the first input value whose position in the ordering equals or exceeds the specified fraction |
+| PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY orderItem)  | 根据列值的连续分布返回百分位数，如果需要，则在相邻的输入项之间进行插值 |
+| PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY orderItem [, orderItem ]*) | 根据列值的离散分布返回百分位数，返回排序中位置等于或超过指定分数的第一个输入值 |
 
 ### 窗口函数
 
-Syntax:
+语法：
 
-```
+```sql
 windowedAggregateCall:
       agg '(' [ ALL | DISTINCT ] value [, value ]* ')'
       [ RESPECT NULLS | IGNORE NULLS ]
@@ -968,33 +966,33 @@ windowedAggregateCall:
       OVER window
 ```
 
-其中*agg*是下表中的运算符之一，或者是用户定义的聚合函数。
+其中 agg 是下表中的运算符之一，或者是用户定义的聚合函数。
 
-`DISTINCT`，`FILTER`并且`WITHIN GROUP`如聚合函数所述。
+`DISTINCT`、`FILTER` 和 `WITHIN GROUP` 与聚合函数的描述一致。
 
-| 运算符语法                        | 描述                                                         |
-| :-------------------------------- | :----------------------------------------------------------- |
-| COUNT(值 [, 值 ]*) OVER 窗口      | *返回窗口中**值*不为空的行数（如果值为复合值则完全不为*空*） |
-| COUNT(*) OVER 窗口                | *返回窗口*中的行数                                           |
-| AVG(数字) OVER 窗口               | *返回窗口*中所有值的*数值*平均值（算术平均值）               |
-| SUM(数字) OVER 窗口               | *返回窗口*中所有值的*数值*总和                               |
-| MAX(值) OVER 窗口                 | *返回窗口*中所有值*的*最大值                                 |
-| MIN(值) OVER 窗口                 | *返回窗口*中所有值*的*最小值                                 |
-| RANK() OVER 窗口                  | 返回当前行有间隙的排名；与其第一个对等点的 ROW_NUMBER 相同   |
-| DENSE_RANK() 超过窗口             | 返回当前行的排名，没有间隙；该函数对同级组进行计数           |
-| ROW_NUMBER() 超过窗口             | 返回其分区内当前行的编号，从 1 开始计数                      |
-| FIRST_VALUE(值) 超过窗口          | 返回在窗口框架第一行的行处计算的*值*                         |
-| LAST_VALUE(值) 超过窗口           | 返回在窗框最后一行计算的*值*                                 |
-| LEAD(值、偏移、默认) OVER 窗口    | 返回在分区内当前行之后的*偏移*行处计算的*值；*如果没有这样的行，则返回*default*。偏移*量*和*默认值*都是相对于当前行进行评估的。如果省略，*offset*默认为 1，*默认*为 NULL |
-| LAG(值、偏移量、默认值) OVER 窗口 | 返回在分区内当前行之前的*偏移*行处计算的*值；*如果没有这样的行，则返回*default*。偏移*量*和*默认值*都是相对于当前行进行评估的。如果省略，*offset*默认为 1，*默认*为 NULL |
-| NTH_VALUE(值, 第 n) OVER 窗口     | 返回在窗口框架的第*n*行处计算的*值*                          |
-| NTILE(value) OVER 窗口            | 返回一个从 1 到*value 的*整数，尽可能均等地划分分区          |
+| 运算符语法                               | 描述                                                         |
+| :--------------------------------------- | :----------------------------------------------------------- |
+| COUNT(value [, value ]*) OVER window     | 返回 *window* 中 *value* 不为空的行数（如果 *value* 是复合的，则完全不为空） |
+| COUNT(*) OVER window                     | 返回 *window* 中的行数                                       |
+| AVG(numeric) OVER window                 | 返回 *window* 中所有值的 *numeric* 的平均值（算术平均值）    |
+| SUM(numeric) OVER window                 | 返回 *window* 中所有值的 *numeric* 之和                      |
+| MAX(value) OVER window                   | 返回 *window* 中所有值中 *value* 的最大值                    |
+| MIN(value) OVER window                   | 返回 *window* 中所有值中 *value* 的最小值                    |
+| RANK() OVER window                       | 返回当前行的排名（有间隙）；与其第一个对等行的 ROW_NUMBER 相同 |
+| DENSE_RANK() OVER window                 | 返回当前行的排名，无间隙；该函数计算同组                     |
+| ROW_NUMBER() OVER window                 | 返回分区内当前行的编号，从 1 开始计数                        |
+| FIRST_VALUE(value) OVER window           | 返回在窗口框架第一行计算的值                                 |
+| LAST_VALUE(value) OVER window            | 返回在窗口框架最后一行计算的值                               |
+| LEAD(value, offset, default) OVER window | 返回在分区内当前行之后 *offset* 行处求值的 *value*；如果没有这样的行，则返回 *default*。*offset* 和 *default* 都是针对当前行求值的。如果省略，*offset* 默认为 1，*default* 默认为 NULL |
+| LAG(value, offset, default) OVER window  | 返回在分区内当前行之前 *offset* 行处求值的 *value*；如果没有这样的行，则返回 *default*。*offset* 和 *default* 都是针对当前行求值的。如果省略，*offset* 默认为 1，*default* 默认为 NULL |
+| NTH_VALUE(value, nth) OVER window        | 返回在窗口框架的第 *n* 行计算的值                            |
+| NTILE(value) OVER window                 | 返回从 1 到 *value* 的整数，尽可能均匀地划分分区             |
 
-笔记：
+注意：
 
-- You may specify null treatment (`IGNORE NULLS`, `RESPECT NULLS`) for `FIRST_VALUE`, `LAST_VALUE`, `NTH_VALUE`, `LEAD` and `LAG` functions. The syntax handled by the parser, but only `RESPECT NULLS` is implemented at runtime.
+- 你可以为 FIRST_VALUE、LAST_VALUE、NTH_VALUE、LEAD 和 LAG 函数指定空处理（IGNORE NULLS、RESPECT NULLS）。语法由解析器处理，但只有 RESPECT NULLS 在运行时实现。
 
-Not implemented:
+未实现：
 
 - COUNT(DISTINCT value [, value ]*) OVER window
 - APPROX_COUNT_DISTINCT(value [, value ]*) OVER window
@@ -1003,52 +1001,52 @@ Not implemented:
 
 ### 分组函数
 
-| OPERATOR SYNTAX                          | DESCRIPTION                                                  |
-| :--------------------------------------- | :----------------------------------------------------------- |
-| GROUPING(expression [, expression ]*)    | Returns a bit vector of the given grouping expressions       |
-| GROUP_ID()                               | Returns an integer that uniquely identifies the combination of grouping keys |
-| GROUPING_ID(expression [, expression ]*) | Synonym for `GROUPING`                                       |
+| 运算符语法                               | 描述                         |
+| :--------------------------------------- | :--------------------------- |
+| GROUPING(expression [, expression ]*)    | 返回给定分组表达式的位向量   |
+| GROUP_ID()                               | 返回唯一标识分组键组合的整数 |
+| GROUPING_ID(expression [, expression ]*) | `GROUPING` 的同义词          |
 
 ### 描述符
 
-| OPERATOR SYNTAX             | DESCRIPTION                                                  |
+| 运算符语法                  | 描述                                                         |
 | :-------------------------- | :----------------------------------------------------------- |
-| DESCRIPTOR(name [, name ]*) | DESCRIPTOR appears as an argument in a function to indicate a list of names. The interpretation of names is left to the function. |
+| DESCRIPTOR(name [, name ]*) | DESCRIPTOR 作为函数中的参数出现，表示名称列表。名称的解释留给函数。 |
 
 ### 表函数
 
-Table functions occur in the `FROM` clause.
+表函数出现在 `FROM` 子句中。
 
-Table functions may have generic table parameters (i.e., no row type is declared when the table function is created), and the row type of the result might depend on the row type(s) of the input tables. Besides, input tables are classified by three characteristics. The first characteristic is semantics. Input tables have either row semantics or set semantics, as follows:
+表函数可能具有通用表参数（即，创建表函数时未声明任何行类型），并且结果的行类型可能取决于输入表的行类型。此外，输入表按三个特征分类。第一个特征是语义。输入表具有行语义或集合语义，如下所示：
 
-- Row semantics means that the result of the table function depends on a row-by-row basis.
-- Set semantics means that the outcome of the function depends on how the data is partitioned.
+- 行语义意味着表函数的结果依赖于逐行；
+- 集合语义意味着函数的结果取决于数据的分区方式。
 
-The second characteristic, which applies only to input tables with set semantics, is whether the table function can generate a result row even if the input table is empty.
+第二个特性仅适用于具有集合语义的输入表，即即使输入表为空，表函数是否可以生成结果行。
 
-- If the table function can generate a result row on empty input, the table is said to be “keep when empty”.
-- The alternative is called “prune when empty”, meaning that the result would be pruned out if the input table is empty.
+- 如果表函数可以在空输入时生成结果行，则该表被称为`空时保留`；
+- 另一种选择是`空时修剪`，这意味着如果输入表为空，结果将被修剪掉。
 
-The third characteristic is whether the input table supports pass-through columns or not. Pass-through columns is a mechanism enabling the table function to copy every column of an input row into columns of an output row.
+第三个特征是输入表是否支持传递列。传递列是一种机制，允许表函数将输入行的每一列复制到输出行的列中。
 
-The input tables with set semantics may be partitioned on one or more columns. The input tables with set semantics may be ordered on one or more columns.
+具有集合语义的输入表可以按一列或多列进行分区。具有集合语义的输入表可以按一列或多列进行排序。
 
-Note:
+注意：
 
-- The input tables with row semantics may not be partitioned or ordered.
-- A polymorphic table function may have multiple input tables. However, at most one input table could have row semantics.
+- 具有行语义的输入表可能未被分区或排序；
+- 多态表函数可能有多个输入表。但是，最多只有一个输入表可以具有行语义。
 
 #### TUMBLE
 
-In streaming queries, TUMBLE assigns a window for each row of a relation based on a timestamp column. An assigned window is specified by its beginning and ending. All assigned windows have the same length, and that’s why tumbling sometimes is named as “fixed windowing”. The first parameter of the TUMBLE table function is a generic table parameter. The input table has row semantics and supports pass-through columns.
+在流式查询中，TUMBLE 根据时间戳列为关系的每一行分配一个窗口。分配的窗口由其开始和结束指定。所有分配的窗口都具有相同的长度，这就是为什么翻转有时被称为“固定窗口”。TUMBLE 表函数的第一个参数是通用表参数。输入表具有行语义并支持传递列。
 
-| OPERATOR SYNTAX                                     | DESCRIPTION                                                  |
-| :-------------------------------------------------- | :----------------------------------------------------------- |
-| TUMBLE(data, DESCRIPTOR(timecol), size [, offset ]) | *指示timecol的**大小*间隔的翻滚窗口，可以选择在*offset*处对齐。 |
+| 运算符语法                                          | 描述                                                  |
+| :-------------------------------------------------- | :---------------------------------------------------- |
+| TUMBLE(data, DESCRIPTOR(timecol), size [, offset ]) | 表示 timecol 大小间隔的滚动窗口，可选择在偏移处对齐。 |
 
-这是一个例子：
+下面是一个例子：
 
-```
+```sql
 SELECT * FROM TABLE(
   TUMBLE(
     TABLE orders,
@@ -1064,19 +1062,19 @@ SELECT * FROM TABLE(
     SIZE => INTERVAL '1' MINUTE));
 ```
 
-将范围为一分钟的滚动窗口应用于`orders` 表中的行。`rowtime`是表中带水印的列`orders`，用于通知数据是否完整。
+将一分钟范围的滚动窗口应用于订单表中的行。rowtime 是订单表的水印列，用于告知数据是否完整。
 
-#### 跳
+#### HOP
 
-*在流式查询中，HOP 分配覆盖大小*间隔内的行的窗口，并根据时间戳列移动每张*幻灯片。*分配的窗口可能有重叠，因此有时跳跃被称为“滑动窗口”。HOP 表函数的第一个参数是通用表参数。输入表具有行语义并支持传递列。
+在流式查询中，HOP 会分配覆盖大小间隔内的行的窗口，并根据时间戳列移动每个滑动窗口。分配的窗口可能会重叠，因此有时跳跃被称为`滑动窗口`。HOP 表函数的第一个参数是通用表参数。输入表具有行语义并支持传递列。
 
 | 运算符语法                                              | 描述                                                         |
 | :------------------------------------------------------ | :----------------------------------------------------------- |
-| HOP(数据, DESCRIPTOR(timecol), 幻灯片, 大小 [, 偏移量]) | *指示timecol*的跳跃窗口，覆盖*size*间隔内的行，移动每张*幻灯片*并可选择以*offset*对齐。 |
+| HOP(data, DESCRIPTOR(timecol), slide, size [, offset ]) | 表示 timecol 的跳跃窗口，覆盖 size 间隔内的行，移动每个幻灯片并可选择在偏移处对齐。 |
 
-这是一个例子：
+下面是一个例子：
 
-```
+```sql
 SELECT * FROM TABLE(
   HOP(
     TABLE orders,
@@ -1094,19 +1092,19 @@ SELECT * FROM TABLE(
     SIZE => INTERVAL '5' MINUTE));
 ```
 
-对桌子上的行应用 5 分钟间隔大小的跳跃`orders` ，并每 2 分钟移动一次。`rowtime`是表顺序的带水印的列，表明数据的完整性。
+对订单表的行应用 5 分钟间隔大小的跳跃，每 2 分钟移动一次。rowtime 是订单表的水印列，用于指示数据的完整性。
 
-#### 会议
+#### SESSION
 
-在流式查询中，SESSION 分配基于*datetime*覆盖行的窗口。在会话窗口内，行的距离小于*间隔*。会话窗口适用于每个*键*。SESSION 表函数的第一个参数是通用表参数。输入表具有设定的语义并支持传递列。此外，如果输入表为空，SESSION 表函数将不会生成结果行。
+在流式查询中，SESSION 根据日期时间分配覆盖行的窗口。在会话窗口内，行之间的距离小于间隔。会话窗口按键应用。SESSION 表函数的第一个参数是通用表参数。输入表具有设置语义并支持传递列。此外，如果输入表为空，SESSION 表函数将不会生成结果行。
 
-| 运算符语法                                         | 描述                                                         |
-| :------------------------------------------------- | :----------------------------------------------------------- |
-| 会话（数据，描述符（时间列），描述符（键），大小） | *指示timecol的**大小*间隔的会话窗口。会话窗口适用于每个*键*。 |
+| 运算符语法                                                | 描述                                                        |
+| :-------------------------------------------------------- | :---------------------------------------------------------- |
+| session(data, DESCRIPTOR(timecol), DESCRIPTOR(key), size) | 表示 timecol 大小为 interval 的会话窗口。会话窗口按键应用。 |
 
-这是一个例子：
+下面是一个例子：
 
-```
+```sql
 SELECT * FROM TABLE(
   SESSION(
     TABLE orders PARTITION BY product,
@@ -1122,54 +1120,56 @@ SELECT * FROM TABLE(
     SIZE => INTERVAL '20' MINUTE));
 ```
 
-对表 中的行应用具有 20 分钟非活动间隙的会话`orders`。 `rowtime`是表顺序的带水印的列，表明数据的完整性。会话适用于每个产品。
+对订单表中的行应用具有 20 分钟非活动间隔的会话。rowtime 是订单表中带水印的列，用于指示数据的完整性。会话按产品应用。
 
-**注意**：`Tumble`、`Hop`和`Session`窗口表函数将原始表中的每一行分配给一个窗口。输出表具有与原始表相同的所有列以及两个附加列`window_start` 和`window_end`，分别表示窗口间隔的开始和结束。
+**注意**：Tumble、Hop 和 Session 窗口表函数将原始表中的每一行分配给一个窗口。输出表具有与原始表相同的所有列，以及两个附加列 window_start 和 window_end，分别表示窗口间隔的开始和结束。
 
 ### 分组窗口函数
 
-**警告**：不推荐使用分组窗口函数。
+**警告**：分组窗口函数已被弃用。
 
-分组窗口函数出现在`GROUP BY`子句中，并定义一个表示包含多行的窗口的键值。
+分组窗口函数出现在 GROUP BY 子句中，并定义一个表示包含多行的窗口的键值。
 
-在某些窗口函数中，一行可能属于多个窗口。例如，如果使用 分组查询 `HOP(t, INTERVAL '2' HOUR, INTERVAL '1' HOUR)`，则时间戳为“10:15:00”的行将出现在 10:00 - 11:00 和 11:00 - 12:00 总计中。
+在某些窗口函数中，一行可能属于多个窗口。例如，如果使用 `HOP(t, INTERVAL '2' HOUR, INTERVAL '1' HOUR)` 对查询进行分组，则带有时间戳 `10:15:00` 的行将同时出现在 `10:00 - 11:00` 和 `11:00 - 12:00` 总计中。
 
 | 运算符语法                            | 描述                                                         |
 | :------------------------------------ | :----------------------------------------------------------- |
-| HOP（日期时间，幻灯片，大小[，时间]） | *表示日期时间*的跳跃窗口，覆盖*大小*间隔内的行，移动每张*幻灯片*，并且可以选择在*时间上对齐。* |
-| 会话（日期时间，间隔[，时间]）        | *指示datetime**间隔*的会话窗口，可以选择在*时间*上对齐       |
-| TUMBLE(日期时间, 间隔 [, 时间 ])      | *指示datetime*的*时间间隔*的滚动窗口，可以选择在*时间*上对齐 |
+| HOP(datetime, slide, size [, time ])  | 表示日期时间的跳跃窗口，覆盖大小间隔内的行，移动每张幻灯片，并可选择在时间上对齐 |
+| SESSION(datetime, interval [, time ]) | 表示日期时间间隔的会话窗口，可选择在时间上对齐               |
+| TUMBLE(datetime, interval [, time ])  | 表示日期时间间隔的滚动窗口，可选择在时间上对齐               |
 
-### 分组辅助功能
+### 分组辅助函数
 
-分组辅助函数允许你访问由分组窗口函数定义的窗口的属性。
+分组辅助函数允许您访问由分组窗口函数定义的窗口的属性。
 
-| 运算符语法                           | 描述                                                |
-| :----------------------------------- | :-------------------------------------------------- |
-| HOP_END(表情,幻灯片,大小[,时间])     | 返回由函数调用定义的窗口末尾的*表达式*的值`HOP`     |
-| HOP_START(表情,幻灯片,大小[,时间])   | 返回由函数调用定义的窗口开头的*表达式*的值`HOP`     |
-| SESSION_END（表达式，间隔[，时间]）  | 返回由函数调用定义的窗口末尾的*表达式*的值`SESSION` |
-| SESSION_START(表达式, 间隔[, 时间])  | 返回由函数调用定义的窗口开头的*表达式*的值`SESSION` |
-| TUMBLE_END(表达式, 间隔 [, 时间 ])   | 返回由函数调用定义的窗口末尾的*表达式*的值`TUMBLE`  |
-| TUMBLE_START(表达式, 间隔 [, 时间 ]) | 返回由函数调用定义的窗口开头的*表达式*的值`TUMBLE`  |
+| 运算符语法                                   | 描述                                                        |
+| :------------------------------------------- | :---------------------------------------------------------- |
+| HOP_END(expression, slide, size [, time ])   | 返回由 `HOP` 函数调用定义的窗口末尾的 *expression* 的值     |
+| HOP_START(expression, slide, size [, time ]) | 返回由 `HOP` 函数调用定义的窗口开头的 *expression* 的值     |
+| SESSION_END(expression, interval [, time])   | 返回由 `SESSION` 函数调用定义的窗口末尾的 *expression* 的值 |
+| SESSION_START(expression, interval [, time]) | 返回由 `SESSION` 函数调用定义的窗口开头的 *expression* 的值 |
+| TUMBLE_END(expression, interval [, time ])   | 返回由 `TUMBLE` 函数调用定义的窗口末尾的 *expression* 的值  |
+| TUMBLE_START(expression, interval [, time ]) | 返回由 `TUMBLE` 函数调用定义的窗口开头的 *expression* 的值  |
 
-### 空间功能
+### 空间函数
 
-在下面的：
+在以下内容中：
 
-- *geom*是几何；
-- *geomCollection*是一个 GEOMETRYCOLLECTION；
-- *点*是一个点；
-- *lineString*是一个 LINESTRING；
-- *iMatrix*是[DE-9IM 交集矩阵](https://en.wikipedia.org/wiki/DE-9IM)；
-- *distance*、*tolerance*、*segmentLengthFraction*、*offsetDistance*均为 double 类型；
-- *维度*、*quadSegs*、*srid*、*zoom*都是整数类型；
-- *LayerType*为字符串；
-- *gml是包含*[地理标记语言（GML）的](https://en.wikipedia.org/wiki/Geography_Markup_Language)字符串；
-- *wkt是包含*[众所周知文本（WKT）的](https://en.wikipedia.org/wiki/Well-known_text)字符串；
-- *wkb是包含*[众所周知的二进制 (WKB) 的](https://en.wikipedia.org/wiki/Well-known_binary)二进制字符串。
+- *geom* 是一个 `GEOMETRY`；
+- *geomCollection* 是一个 `GEOMETRYCOLLECTION`；
+- *point* 是一个 `POINT`；
+- *lineString* 是一个 `LINESTRING`；
+- *iMatrix* 是 [DE-9IM 交叉矩阵](https://en.wikipedia.org/wiki/DE-9IM)；
+- *distance*、*tolerance*、*segmentLengthFraction*、*offsetDistance* 都是 double 类型；
+- *dimension*、*quadSegs*、*srid*、*zoom* 是整数类型；
+- *layerType*是一个字符串；
+- *gml* 是包含[地理标记语言 (GML)](https://en.wikipedia.org/wiki/Geography_Markup_Language) 的字符串；
+- *wkt* 是包含 [众所周知的文本 (WKT)](https://en.wikipedia.org/wiki/Well-known_text) 的字符串；
+- *wkb* 是包含 [[众所周知的二进制 (WKB)](https://en.wikipedia.org/wiki/Well-known_binary) 的二进制字符串。
 
-在“C”（“兼容性”）列中，“o”表示该函数实现了 OpenGIS Simple Features Implementing Specific for SQL [版本 1.2.1](https://www.opengeospatial.org/standards/sfs)；“p”表示该函数是 [PostGIS](https://www.postgis.net/docs/reference.html)对OpenGIS的扩展；“h”表示该函数是 [H2GIS](http://www.h2gis.org/docs/dev/functions/)扩展。
+在 `C`（代表`兼容性`）列中，`o` 表示该函数实现了 SQL 的 OpenGIS 简单功能实现规范，版本 1.2.1；`p` 表示该函数是 OpenGIS 的 PostGIS 扩展；`h` 表示该函数是 H2GIS 扩展。
+
+TODO
 
 #### 几何转换函数（2D）
 
