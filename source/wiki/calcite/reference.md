@@ -1165,7 +1165,7 @@ SELECT * FROM TABLE(
 - *layerType*是一个字符串；
 - *gml* 是包含[地理标记语言 (GML)](https://en.wikipedia.org/wiki/Geography_Markup_Language) 的字符串；
 - *wkt* 是包含 [众所周知的文本 (WKT)](https://en.wikipedia.org/wiki/Well-known_text) 的字符串；
-- *wkb* 是包含 [[众所周知的二进制 (WKB)](https://en.wikipedia.org/wiki/Well-known_binary) 的二进制字符串。
+- *wkb* 是包含 [众所周知的二进制 (WKB)](https://en.wikipedia.org/wiki/Well-known_binary) 的二进制字符串。
 
 在 `C`（代表`兼容性`）列中，`o` 表示该函数实现了 SQL 的 OpenGIS 简单功能实现规范，版本 1.2.1；`p` 表示该函数是 OpenGIS 的 PostGIS 扩展；`h` 表示该函数是 H2GIS 扩展。
 
