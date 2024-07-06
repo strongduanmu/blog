@@ -1173,154 +1173,156 @@ TODO
 
 #### 几何转换函数（2D）
 
-| C    | 运算符语法                                                  | 描述                                                         |
-| :--- | :---------------------------------------------------------- | :----------------------------------------------------------- |
-| p    | ST_AsBinary（几何）                                         | 同义词`ST_AsWKB`                                             |
-| p    | ST_AsEWKB(几何)                                             | 同义词`ST_AsWKB`                                             |
-| p    | ST_AsEWKT(几何)                                             | Converts GEOMETRY → EWKT                                     |
-| p    | ST_AsGeoJSON(geom)                                          | Converts GEOMETRY → GeoJSON                                  |
-| p    | ST_AsGML(geom)                                              | Converts GEOMETRY → GML                                      |
-| p    | ST_AsText(geom)                                             | Synonym for `ST_AsWKT`                                       |
-| o    | ST_AsWKB(geom)                                              | Converts GEOMETRY → WKB                                      |
-| o    | ST_AsWKT(geom)                                              | Converts GEOMETRY → WKT                                      |
-| o    | ST_Force2D(geom)                                            | 3D GEOMETRY → 2D GEOMETRY                                    |
-| o    | ST_GeomFromEWKB(wkb [, srid ])                              | Synonym for `ST_GeomFromWKB`                                 |
-| o    | ST_GeomFromEWKT(wkb [, srid ])                              | Converts EWKT → GEOMETRY                                     |
-| o    | ST_GeomFromGeoJSON(json)                                    | Converts GeoJSON → GEOMETRY                                  |
-| o    | ST_GeomFromGML(wkb [, srid ])                               | Converts GML → GEOMETRY                                      |
-| o    | ST_GeomFromText(wkt [, srid ])                              | Synonym for `ST_GeomFromWKT`                                 |
-| o    | ST_GeomFromWKB(wkb [, srid ])                               | Converts WKB → GEOMETRY                                      |
-| o    | ST_GeomFromWKT(wkb [, srid ])                               | Converts WKT → GEOMETRY                                      |
-| o    | ST_LineFromText(wkt [, srid ])                              | Converts WKT → LINESTRING                                    |
-| o    | ST_LineFromWKB(wkt [, srid ])                               | Converts WKT → LINESTRING                                    |
-| o    | ST_MLineFromText(wkt [, srid ])                             | Converts WKT → MULTILINESTRING                               |
-| o    | ST_MPointFromText(wkt [, srid ])                            | Converts WKT → MULTIPOINT                                    |
-| o    | ST_MPolyFromText(wkt [, srid ]) Converts WKT → MULTIPOLYGON |                                                              |
-| o    | ST_PointFromText(wkt [, srid ])                             | Converts WKT → POINT                                         |
-| o    | ST_PointFromWKB(wkt [, srid ])                              | Converts WKB → POINT                                         |
-| o    | ST_PolyFromText(wkt [, srid ])                              | Converts WKT → POLYGON                                       |
-| o    | ST_PolyFromWKB(wkt [, srid ])                               | Converts WKB → POLYGON                                       |
-| p    | ST_ReducePrecision(geom, gridSize)                          | Reduces the precision of a *geom* to the provided *gridSize* |
-| h    | ST_ToMultiPoint(geom)                                       | Converts the coordinates of *geom* (which may be a GEOMETRYCOLLECTION) into a MULTIPOINT |
-| h    | ST_ToMultiLine(geom)                                        | Converts the coordinates of *geom* (which may be a GEOMETRYCOLLECTION) into a MULTILINESTRING |
-| h    | ST_ToMultiSegments(geom)                                    | Converts *geom* (which may be a GEOMETRYCOLLECTION) into a set of distinct segments stored in a MULTILINESTRING |
+| C  （兼容性） | 运算符语法                                                  | 描述                                                         |
+| :------------ | :---------------------------------------------------------- | :----------------------------------------------------------- |
+| p             | ST_AsBinary(geom)                                           | `ST_AsWKB` 的同义词                                          |
+| p             | ST_AsEWKB(geom)                                             | `ST_AsWKB` 的同义词                                          |
+| p             | ST_AsEWKT(geom)                                             | 转换 GEOMETRY → EWKT                                         |
+| p             | ST_AsGeoJSON(geom)                                          | 转换 GEOMETRY → GeoJSON                                      |
+| p             | ST_AsGML(geom)                                              | 转换 GEOMETRY → GML                                          |
+| p             | ST_AsText(geom)                                             | `ST_AsWKT` 的同义词                                          |
+| o             | ST_AsWKB(geom)                                              | 转换 GEOMETRY → WKB                                          |
+| o             | ST_AsWKT(geom)                                              | 转换 GEOMETRY → WKT                                          |
+| o             | ST_Force2D(geom)                                            | 3D GEOMETRY → 2D GEOMETRY                                    |
+| o             | ST_GeomFromEWKB(wkb [, srid ])                              | `ST_GeomFromWKB` 的同义词                                    |
+| o             | ST_GeomFromEWKT(wkb [, srid ])                              | 转换 WKT → GEOMETRY                                          |
+| o             | ST_GeomFromGeoJSON(json)                                    | 转换 GeoJSON → GEOMETRY                                      |
+| o             | ST_GeomFromGML(wkb [, srid ])                               | 转换 GML → GEOMETRY                                          |
+| o             | ST_GeomFromText(wkt [, srid ])                              | `ST_GeomFromWKT` 的同义词                                    |
+| o             | ST_GeomFromWKB(wkb [, srid ])                               | 转换 WKB → GEOMETRY                                          |
+| o             | ST_GeomFromWKT(wkb [, srid ])                               | 转换 WKT → GEOMETRY                                          |
+| o             | ST_LineFromText(wkt [, srid ])                              | 转换 WKT → LINESTRING                                        |
+| o             | ST_LineFromWKB(wkt [, srid ])                               | 转换 WKT → LINESTRING                                        |
+| o             | ST_MLineFromText(wkt [, srid ])                             | 转换 WKT → MULTILINESTRING                                   |
+| o             | ST_MPointFromText(wkt [, srid ])                            | 转换 WKT → MULTIPOINT                                        |
+| o             | ST_MPolyFromText(wkt [, srid ]) Converts WKT → MULTIPOLYGON |                                                              |
+| o             | ST_PointFromText(wkt [, srid ])                             | 转换 WKT → POINT                                             |
+| o             | ST_PointFromWKB(wkt [, srid ])                              | 转换 WKB → POINT                                             |
+| o             | ST_PolyFromText(wkt [, srid ])                              | 转换 WKT → POLYGON                                           |
+| o             | ST_PolyFromWKB(wkt [, srid ])                               | 转换 WKB → POLYGON                                           |
+| p             | ST_ReducePrecision(geom, gridSize)                          | 将 *geom* 的精度降低至提供的 *gridSize*                      |
+| h             | ST_ToMultiPoint(geom)                                       | 将 *geom* 的坐标（可能是 GEOMETRYCOLLECTION）转换为 MULTIPOINT |
+| h             | ST_ToMultiLine(geom)                                        | 将 *geom* 的坐标（可能是 GEOMETRYCOLLECTION）转换为 MULTILINESTRING |
+| h             | ST_ToMultiSegments(geom)                                    | 将 *geom*（可能是 GEOMETRYCOLLECTION）转换为存储在 MULTILINESTRING 中的一组不同段 |
 
-Not implemented:
+未实现：
 
 - ST_GoogleMapLink(geom [, layerType [, zoom ]]) GEOMETRY → Google map link
 - ST_OSMMapLink(geom [, marker ]) GEOMETRY → OSM map link
 
-#### Geometry conversion functions (3D)
+#### 几何转换函数（3D）
 
-| C    | OPERATOR SYNTAX  | DESCRIPTION               |
-| :--- | :--------------- | :------------------------ |
-| o    | ST_Force3D(geom) | 2D GEOMETRY → 3D GEOMETRY |
+| C（兼容性） | 运算符语法       | 描述                      |
+| :---------- | :--------------- | :------------------------ |
+| o           | ST_Force3D(geom) | 2D GEOMETRY → 3D GEOMETRY |
 
-#### Geometry creation functions (2D)
+#### 几何创建函数（2D）
 
-| C    | OPERATOR SYNTAX                                   | DESCRIPTION                                                  |
-| :--- | :------------------------------------------------ | :----------------------------------------------------------- |
-| h    | ST_BoundingCircle(geom)                           | Returns the minimum bounding circle of *geom*                |
-| h    | ST_Expand(geom, distance)                         | Expands *geom*’s envelope                                    |
-| h    | ST_Expand(geom, deltaX, deltaY)                   | Expands *geom*’s envelope                                    |
-| h    | ST_MakeEllipse(point, width, height)              | Constructs an ellipse                                        |
-| p    | ST_MakeEnvelope(xMin, yMin, xMax, yMax [, srid ]) | Creates a rectangular POLYGON                                |
-| h    | ST_MakeGrid(geom, deltaX, deltaY)                 | Calculates a regular grid of POLYGONs based on *geom*        |
-| h    | ST_MakeGridPoints(geom, deltaX, deltaY)           | Calculates a regular grid of points based on *geom*          |
-| o    | ST_MakeLine(point1 [, point ]*)                   | Creates a line-string from the given POINTs (or MULTIPOINTs) |
-| p    | ST_MakePoint(x, y [, z ])                         | Synonym for `ST_Point`                                       |
-| p    | ST_MakePolygon(lineString [, hole ]*)             | Creates a POLYGON from *lineString* with the given holes (which are required to be closed LINESTRINGs) |
-| h    | ST_MinimumDiameter(geom)                          | Returns the minimum diameter of *geom*                       |
-| h    | ST_MinimumRectangle(geom)                         | Returns the minimum rectangle enclosing *geom*               |
-| h    | ST_OctogonalEnvelope(geom)                        | Returns the octogonal envelope of *geom*                     |
-| o    | ST_Point(x, y [, z ])                             | Constructs a point from two or three coordinates             |
+| C（兼容性） | 运算符语法                                        | 描述                                                         |
+| :---------- | :------------------------------------------------ | :----------------------------------------------------------- |
+| h           | ST_BoundingCircle(geom)                           | 返回 *geom* 的最小边界圆                                     |
+| h           | ST_Expand(geom, distance)                         | 扩展 *geom* 的包络                                           |
+| h           | ST_Expand(geom, deltaX, deltaY)                   | 扩展 *geom* 的包络                                           |
+| h           | ST_MakeEllipse(point, width, height)              | 构造一个椭圆                                                 |
+| p           | ST_MakeEnvelope(xMin, yMin, xMax, yMax [, srid ]) | 创建一个矩形 POLYGON                                         |
+| h           | ST_MakeGrid(geom, deltaX, deltaY)                 | 根据 *geom* 计算多边形的规则网格                             |
+| h           | ST_MakeGridPoints(geom, deltaX, deltaY)           | 根据 *geom* 计算规则的点网格                                 |
+| o           | ST_MakeLine(point1 [, point ]*)                   | 根据给定的 POINT（或 MULTIPOINT）创建线串                    |
+| p           | ST_MakePoint(x, y [, z ])                         | `ST_Point` 的同义词                                          |
+| p           | ST_MakePolygon(lineString [, hole ]*)             | 使用给定的孔（需要封闭的 LINESTRING）从 *lineString* 创建 POLYGON |
+| h           | ST_MinimumDiameter(geom)                          | 返回 *geom* 的最小直径                                       |
+| h           | ST_MinimumRectangle(geom)                         | 返回包围 *geom* 的最小矩形                                   |
+| h           | ST_OctogonalEnvelope(geom)                        | 返回 *geom* 的八边形包络                                     |
+| o           | ST_Point(x, y [, z ])                             | 根据两个或三个坐标构造一个点                                 |
 
-Not implemented:
+未实现：
 
-- ST_RingBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]]) Returns a MULTIPOLYGON of buffers centered at *geom* and of increasing buffer size
+- `ST_RingBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])` 返回以 *geom* 为中心且缓冲区大小不断增加的 MULTIPOLYGON 缓冲区。
 
-### Geometry creation functions (3D)
+### 几何创建函数（3D）
 
-Not implemented:
+未实现：
 
-- ST_Extrude(geom, height [, flag]) Extrudes a GEOMETRY
-- ST_GeometryShadow(geom, point, height) Computes the shadow footprint of *geom*
-- ST_GeometryShadow(geom, azimuth, altitude, height [, unify ]) Computes the shadow footprint of *geom*
+- `ST Extrude(from, height [, flag])` 挤出几何图形；
+- `ST_Geometry Shadow(geom_point, height)` 计算 *geom* 的阴影足迹；
+- `ST_GeometryShadow(geom, azimuth, elevation, height [, unify ])` 计算 *geom* 的阴影覆盖范围。
 
-#### Geometry properties (2D)
+#### 几何属性（2D）
 
-| C    | OPERATOR SYNTAX                 | DESCRIPTION                                                  |
-| :--- | :------------------------------ | :----------------------------------------------------------- |
-| o    | ST_Boundary(geom [, srid ])     | Returns the boundary of *geom*                               |
-| o    | ST_Centroid(geom)               | Returns the centroid of *geom*                               |
-| o    | ST_CoordDim(geom)               | Returns the dimension of the coordinates of *geom*           |
-| o    | ST_Dimension(geom)              | Returns the dimension of *geom*                              |
-| o    | ST_Distance(geom1, geom2)       | Returns the distance between *geom1* and *geom2*             |
-| h    | ST_ExteriorRing(geom)           | Returns the exterior ring of *geom*, or null if *geom* is not a polygon |
-| o    | ST_GeometryType(geom)           | Returns the type of *geom*                                   |
-| o    | ST_GeometryTypeCode(geom)       | Returns the OGC SFS type code of *geom*                      |
-| p    | ST_EndPoint(lineString)         | Returns the last coordinate of *geom*                        |
-| o    | ST_Envelope(geom [, srid ])     | Returns the envelope of *geom* (which may be a GEOMETRYCOLLECTION) as a GEOMETRY |
-| o    | ST_Extent(geom)                 | Returns the minimum bounding box of *geom* (which may be a GEOMETRYCOLLECTION) |
-| h    | ST_GeometryN(geomCollection, n) | Returns the *n*th GEOMETRY of *geomCollection*               |
-| h    | ST_InteriorRingN(geom)          | Returns the nth interior ring of *geom*, or null if *geom* is not a polygon |
-| h    | ST_IsClosed(geom)               | Returns whether *geom* is a closed LINESTRING or MULTILINESTRING |
-| o    | ST_IsEmpty(geom)                | Returns whether *geom* is empty                              |
-| o    | ST_IsRectangle(geom)            | Returns whether *geom* is a rectangle                        |
-| h    | ST_IsRing(geom)                 | Returns whether *geom* is a closed and simple line-string or MULTILINESTRING |
-| o    | ST_IsSimple(geom)               | Returns whether *geom* is simple                             |
-| o    | ST_IsValid(geom)                | Returns whether *geom* is valid                              |
-| h    | ST_NPoints(geom)                | Returns the number of points in *geom*                       |
-| h    | ST_NumGeometries(geom)          | Returns the number of geometries in *geom* (1 if it is not a GEOMETRYCOLLECTION) |
-| h    | ST_NumInteriorRing(geom)        | Synonym for `ST_NumInteriorRings`                            |
-| h    | ST_NumInteriorRings(geom)       | Returns the number of interior rings of *geom*               |
-| h    | ST_NumPoints(geom)              | Returns the number of points in *geom*                       |
-| p    | ST_PointN(geom, n)              | Returns the *n*th point of a *geom*                          |
-| p    | ST_PointOnSurface(geom)         | Returns an interior or boundary point of *geom*              |
-| o    | ST_SRID(geom)                   | Returns SRID value of *geom* or 0 if it does not have one    |
-| p    | ST_StartPoint(geom)             | Returns the first point of *geom*                            |
-| o    | ST_X(geom)                      | Returns the x-value of the first coordinate of *geom*        |
-| o    | ST_XMax(geom)                   | Returns the maximum x-value of *geom*                        |
-| o    | ST_XMin(geom)                   | Returns the minimum x-value of *geom*                        |
-| o    | ST_Y(geom)                      | Returns the y-value of the first coordinate of *geom*        |
-| o    | ST_YMax(geom)                   | Returns the maximum y-value of *geom*                        |
-| o    | ST_YMin(geom)                   | Returns the minimum y-value of *geom*                        |
+| C（兼容性） | 运算符语法                      | 描述                                                         |
+| :---------- | :------------------------------ | :----------------------------------------------------------- |
+| o           | ST_Boundary(geom [, srid ])     | 返回 *geom* 的边界                                           |
+| o           | ST_Centroid(geom)               | 返回 *geom* 的质心                                           |
+| o           | ST_CoordDim(geom)               | 返回 *geom* 坐标的维度                                       |
+| o           | ST_Dimension(geom)              | 返回 *geom* 的维度                                           |
+| o           | ST_Distance(geom1, geom2)       | 返回 *geom1* 和 *geom2* 之间的距离                           |
+| h           | ST_ExteriorRing(geom)           | 返回 *geom* 的外环，如果 *geom* 不是多边形，则返回 null      |
+| o           | ST_GeometryType(geom)           | 返回 *geom* 的类型                                           |
+| o           | ST_GeometryTypeCode(geom)       | 返回 *geom* 的 OGC SFS 类型代码                              |
+| p           | ST_EndPoint(lineString)         | 返回 *geom* 的最后一个坐标                                   |
+| o           | ST_Envelope(geom [, srid ])     | 返回 *geom* 的包络（可能是 GEOMETRYCOLLECTION）作为 GEOMETRY |
+| o           | ST_Extent(geom)                 | Returns the minimum bounding box of *geom* (which may be a GEOMETRYCOLLECTION) |
+| h           | ST_GeometryN(geomCollection, n) | 返回 *geomCollection* 的第 *n* 个 GEOMETRY                   |
+| h           | ST_InteriorRingN(geom)          | 返回 *geom* 的第 n 个内环，如果 *geom* 不是多边形，则返回 null |
+| h           | ST_IsClosed(geom)               | 返回 *geom* 是否为封闭的 LINESTRING 或 MULTILINESTRING       |
+| o           | ST_IsEmpty(geom)                | 返回 *geom* 是否为空                                         |
+| o           | ST_IsRectangle(geom)            | 返回 *geom* 是否为矩形                                       |
+| h           | ST_IsRing(geom)                 | 返回 *geom* 是否为封闭的简单线串或 MULTILINESTRING           |
+| o           | ST_IsSimple(geom)               | 返回 *geom* 是否简单                                         |
+| o           | ST_IsValid(geom)                | 返回 *geom* 是否有效                                         |
+| h           | ST_NPoints(geom)                | 返回 *geom* 中的点数                                         |
+| h           | ST_NumGeometries(geom)          | 返回 *geom* 中的几何图形数量（如果不是 GEOMETRYCOLLECTION，则返回 1） |
+| h           | ST_NumInteriorRing(geom)        | `ST_NumInteriorRings` 的同义词                               |
+| h           | ST_NumInteriorRings(geom)       | 返回 *geom* 的内部环的数量                                   |
+| h           | ST_NumPoints(geom)              | 返回 *geom* 中的点数                                         |
+| p           | ST_PointN(geom, n)              | 返回 *geom* 的第 *n* 个点                                    |
+| p           | ST_PointOnSurface(geom)         | 返回 *geom* 的内部或边界点                                   |
+| o           | ST_SRID(geom)                   | 返回 *geom* 的 SRID 值，如果没有则返回 0                     |
+| p           | ST_StartPoint(geom)             | 返回 *geom* 的第一个点                                       |
+| o           | ST_X(geom)                      | 返回 *geom* 第一个坐标的 x 值                                |
+| o           | ST_XMax(geom)                   | 返回 *geom* 的最大 x 值                                      |
+| o           | ST_XMin(geom)                   | 返回 *geom* 的最小 x 值                                      |
+| o           | ST_Y(geom)                      | 返回 *geom* 第一个坐标的 y 值                                |
+| o           | ST_YMax(geom)                   | 返回 *geom* 的最大 y 值                                      |
+| o           | ST_YMin(geom)                   | 返回 *geom* 的最小 y 值                                      |
 
-Not implemented:
+未实现：
 
-- ST_CompactnessRatio(polygon) Returns the square root of *polygon*’s area divided by the area of the circle with circumference equal to its perimeter
-- ST_Explode(query [, fieldName]) Explodes the GEOMETRYCOLLECTIONs in the *fieldName* column of a query into multiple geometries
-- ST_IsValidDetail(geom [, selfTouchValid ]) Returns a valid detail as an array of objects
-- ST_IsValidReason(geom [, selfTouchValid ]) Returns text stating whether *geom* is valid, and if not valid, a reason why
+- `ST_CompactnessRatio(polygon)` 返回 *polygon* 面积除以其周长等于其周长的圆的面积的平方根；
+- `ST_Explode(query [, field Name])` 将查询的 *field Name* 列中的`GEOMETRY COLLECTIONs`分解为多个几何图形；
+- `ST_IsValidDetail(geom [, selfTouchValid ])` 返回有效细节作为对象数组；
+- `ST_IsValidReason(geom [, selfTouchValid ])` 返回文本说明 *geom* 是否有效，如果无效，则说明原因。
 
-#### Geometry properties (3D)
+#### 几何属性（3D）
 
-| C    | OPERATOR SYNTAX | DESCRIPTION                                           |
-| :--- | :-------------- | :---------------------------------------------------- |
-| p    | ST_Is3D(s)      | Returns whether *geom* has at least one z-coordinate  |
-| o    | ST_Z(geom)      | Returns the z-value of the first coordinate of *geom* |
-| o    | ST_ZMax(geom)   | Returns the maximum z-value of *geom*                 |
-| o    | ST_ZMin(geom)   | Returns the minimum z-value of *geom*                 |
+| C（兼容性） | 运算符语法    | 描述                              |
+| :---------- | :------------ | :-------------------------------- |
+| p           | ST_Is3D(s)    | 返回 *geom* 是否至少有一个 z 坐标 |
+| o           | ST_Z(geom)    | 返回 *geom* 第一个坐标的 z 值     |
+| o           | ST_ZMax(geom) | 返回 *geom* 的最大 z 值           |
+| o           | ST_ZMin(geom) | 返回 *geom* 的最小 z 值           |
 
-### Geometry predicates
+### 几何谓词
 
-| C    | OPERATOR SYNTAX                     | DESCRIPTION                                                  |
-| :--- | :---------------------------------- | :----------------------------------------------------------- |
-| o    | ST_Contains(geom1, geom2)           | Returns whether *geom1* contains *geom2*                     |
-| p    | ST_ContainsProperly(geom1, geom2)   | Returns whether *geom1* contains *geom2* but does not intersect its boundary |
-| p    | ST_CoveredBy(geom1, geom2)          | Returns whether no point in *geom1* is outside *geom2*.      |
-| p    | ST_Covers(geom1, geom2)             | Returns whether no point in *geom2* is outside *geom1*       |
-| o    | ST_Crosses(geom1, geom2)            | Returns whether *geom1* crosses *geom2*                      |
-| o    | ST_Disjoint(geom1, geom2)           | Returns whether *geom1* and *geom2* are disjoint             |
-| p    | ST_DWithin(geom1, geom2, distance)  | Returns whether *geom1* and *geom* are within *distance* of one another |
-| o    | ST_EnvelopesIntersect(geom1, geom2) | Returns whether the envelope of *geom1* intersects the envelope of *geom2* |
-| o    | ST_Equals(geom1, geom2)             | Returns whether *geom1* equals *geom2*                       |
-| o    | ST_Intersects(geom1, geom2)         | 返回*geom1是否与**geom2*相交                                 |
-| 哦   | ST_Overlaps(geom1, geom2)           | 返回*geom1是否与**geom2*重叠                                 |
-| 哦   | ST_Relate(geom1, geom2)             | *返回geom1*和*geom2*的DE-9IM交集矩阵                         |
-| 哦   | ST_Relate(geom1, geom2, iMatrix)    | 返回*geom1*和*geom2是否通过给定的交集矩阵**iMatrix*相关      |
-| 哦   | ST_Touches(geom1, geom2)            | 返回*geom1*是否接触*geom2*                                   |
-| 哦   | ST_Within(geom1, geom2)             | 返回*geom1*是否在*geom2内*                                   |
+| C（兼容性） | 运算符语法                          | 描述                                                         |
+| :---------- | :---------------------------------- | :----------------------------------------------------------- |
+| o           | ST_Contains(geom1, geom2)           | 返回 *geom1* 是否包含 *geom2*                                |
+| p           | ST_ContainsProperly(geom1, geom2)   | 返回 *geom1* 是否包含 *geom2* 但与其边界不相交               |
+| p           | ST_CoveredBy(geom1, geom2)          | 返回 *geom1* 中是否没有点位于 *geom2* 之外。                 |
+| p           | ST_Covers(geom1, geom2)             | 返回 *geom2* 中是否没有点位于 *geom1* 之外                   |
+| o           | ST_Crosses(geom1, geom2)            | 返回 *geom1* 是否与 *geom2* 相交                             |
+| o           | ST_Disjoint(geom1, geom2)           | 返回 *geom1* 和 *geom2* 是否不相交                           |
+| p           | ST_DWithin(geom1, geom2, distance)  | 返回 *geom1* 和 *geom* 是否在彼此的 *距离* 范围内            |
+| o           | ST_EnvelopesIntersect(geom1, geom2) | 返回 *geom1* 的包络线是否与 *geom2* 的包络线相交             |
+| o           | ST_Equals(geom1, geom2)             | 返回 *geom1* 是否等于 *geom2*                                |
+| o           | ST_Intersects(geom1, geom2)         | 返回 *geom1* 是否与 *geom2* 相交                             |
+| o           | ST_Overlaps(geom1, geom2)           | 返回 *geom1* 是否与 *geom2* 重叠                             |
+| o           | ST_Relate(geom1, geom2)             | 返回 *geom1* 和 *geom2* 的 DE-9IM 交集矩阵                   |
+| o           | ST_Relate(geom1, geom2, iMatrix)    | 返回 *geom1* 和 *geom2* 是否通过给定的交集矩阵 *iMatrix* 相关 |
+| o           | ST_Touches(geom1, geom2)            | 返回 *geom1* 是否接触 *geom2*                                |
+| o           | ST_Within(geom1, geom2)             | 返回 *geom1* 是否在 *geom2* 内                               |
+
+TODO
 
 未实现：
 
