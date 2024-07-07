@@ -1322,223 +1322,221 @@ TODO
 | o           | ST_Touches(geom1, geom2)            | 返回 *geom1* 是否接触 *geom2*                                |
 | o           | ST_Within(geom1, geom2)             | 返回 *geom1* 是否在 *geom2* 内                               |
 
-TODO
-
 未实现：
 
-- ST_OrderingEquals(geom1, geom2) 返回*geom1*是否等于*geom2*以及它们的坐标和组件几何图形以相同的顺序列出
+- `ST_OrderingEquals(geom1, geom2)` 返回 *geom1* 是否等于 *geom2* 以及它们的坐标和组件几何图形以相同的顺序列出。
 
 #### 几何运算符（2D）
 
-以下函数结合了 2D 几何图形。
+以下函数组合了 2D 几何图形。
 
-| C    | 运算符语法                                       | 描述                                 |
-| :--- | :----------------------------------------------- | :----------------------------------- |
-| p    | ST_Buffer（几何，距离[，quadSegs，endCapStyle]） | *计算geom*周围的缓冲区               |
-| p    | ST_Buffer（几何，距离[，bufferStyle]）           | *计算geom*周围的缓冲区               |
-| 哦   | ST_ConvexHull(几何)                              | 计算包含*geom中所有点的最小凸多边形* |
-| 哦   | ST_Difference(geom1, geom2)                      | 计算两个几何图形之间的差异           |
-| 哦   | ST_SymDifference(geom1, geom2)                   | 计算两个几何图形之间的对称差         |
-| 哦   | ST_Intersection(geom1, geom2)                    | *计算geom1*和*geom2*的交集           |
-| p    | ST_OffsetCurve(几何、距离、bufferStyle)          | *计算线串*的偏移线                   |
-| 哦   | ST_Union(geom1, geom2)                           | *计算geom1*和*geom2*的并集           |
-| 哦   | ST_Union(geomCollection)                         | *计算geomCollection*中几何图形的并集 |
+| C（兼容性） | 运算符语法                                           | 描述                                   |
+| :---------- | :--------------------------------------------------- | :------------------------------------- |
+| p           | ST_Buffer(geom, distance [, quadSegs, endCapStyle ]) | 计算 *geom* 周围的缓冲区               |
+| p           | ST_Buffer(geom, distance [, bufferStyle ])           | 计算 *geom* 周围的缓冲区               |
+| o           | ST_ConvexHull(geom)                                  | 计算包含 *geom* 中所有点的最小凸多边形 |
+| o           | ST_Difference(geom1, geom2)                          | 计算两个几何图形之间的差异             |
+| o           | ST_SymDifference(geom1, geom2)                       | 计算两个几何体之间的对称差异           |
+| o           | ST_Intersection(geom1, geom2)                        | 计算 *geom1* 和 *geom2* 的交集         |
+| p           | ST_OffsetCurve(geom, distance, bufferStyle)          | 计算 *linestring* 的偏移线             |
+| o           | ST_Union(geom1, geom2)                               | 计算 *geom1* 和 *geom2* 的并集         |
+| o           | ST_Union(geomCollection)                             | 计算 *geomCollection* 中几何图形的并集 |
 
-另请参见：`ST_Union`聚合函数。
+另请参考：`ST_Union` 聚合函数。
 
 #### 仿射变换函数（3D 和 2D）
 
-以下函数转换 2D 几何图形。
+以下函数可变换 2D 几何图形。
 
-| C    | 运算符语法                             | 描述                                                         |
-| :--- | :------------------------------------- | :----------------------------------------------------------- |
-| 哦   | ST_Rotate（几何，角度[，原点\| x，y]） | 将*几何图形绕**原点*（或点 ( *x* , *y* )）逆时针旋转*角度*（以弧度为单位） |
-| 哦   | ST_Scale（几何、x 因子、y 因子）       | *通过将纵*坐标乘以指定的比例因子来缩放几何                   |
-| 哦   | ST_翻译（几何，x，y）                  | 通过向量 (x, y)平移*geom*                                    |
+| C（兼容性） | 运算符语法                                | 描述                                                         |
+| :---------- | :---------------------------------------- | :----------------------------------------------------------- |
+| o           | ST_Rotate(geom, angle [, origin \| x, y]) | 将 *geom* 绕 *origin* （或点 (*x*, *y*)）逆时针旋转 *angle* （以弧度为单位） |
+| o           | ST_Scale(geom, xFactor, yFactor)          | 通过将纵坐标乘以指定的比例因子来缩放 *geom*                  |
+| o           | ST_Translate(geom, x, y)                  | 将 *geom* 平移向量 (x, y)                                    |
 
 未实现：
 
-- ST_Scale(geom, xFactor, yFactor [, zFactor ])通过将纵坐标乘以指定的比例因子来缩放*geom*
-- ST_Translate(geom, x, y, [, z]) 翻译*geom*
+- `ST_Scale(geom, xFactor, yFactor [, zFactor ])` 通过将纵坐标乘以指定的比例因子来缩放 *geom*；
+- `ST_Translate(geom, x, y, [, z])` 平移 *geom*。
 
 #### 几何编辑功能（2D）
 
-以下函数修改 2D 几何图形。
+以下函数可修改 2D 几何图形。
 
-| C    | 运算符语法                             | 描述                                                         |
-| :--- | :------------------------------------- | :----------------------------------------------------------- |
-| p    | ST_AddPoint(线串, 点 [, 索引])         | 将*点*添加到给定*索引处的**线串*（如果未指定*索引*，则添加到末尾） |
-| H    | ST_Densify（几何，公差）               | 通过沿线段插入额外的顶点来加密*几何图形*                     |
-| H    | ST_Flip坐标（几何）                    | *翻转几何体*的 X 和 Y 坐标                                   |
-| H    | ST_孔（几何）                          | *返回几何体*中的孔（可能是 GEOMETRYCOLLECTION）              |
-| H    | ST_Normalize（几何）                   | *将geom*转换为正常形式                                       |
-| p    | ST_RemoveRepeatedPoints(geom [, 公差]) | *从几何*中删除重复的坐标                                     |
-| H    | ST_RemoveHoles(几何)                   | *去除几何体*的孔                                             |
-| p    | ST_RemovePoint（线串，索引）           | 删除*线串*中给定*索引处的**点*                               |
-| H    | ST_Reverse（几何）                     | *反转几何坐标*的顺序                                         |
+| C（兼容性） | 运算符语法                                  | 描述                                                         |
+| :---------- | :------------------------------------------ | :----------------------------------------------------------- |
+| p           | ST_AddPoint(linestring, point [, index])    | 将 *point* 添加到给定 *index* 处的 *linestring*（如果未指定 *index*，则添加到末尾） |
+| h           | ST_Densify(geom, tolerance)                 | 通过沿线段插入额外的顶点来加密 *geom*                        |
+| h           | ST_FlipCoordinates(geom)                    | 翻转 *geom* 的 X 和 Y 坐标                                   |
+| h           | ST_Holes(geom)                              | 返回 *geom* 中的孔（可能是 GEOMETRYCOLLECTION）              |
+| h           | ST_Normalize(geom)                          | 将 *geom* 转换为正常形式                                     |
+| p           | ST_RemoveRepeatedPoints(geom [, tolerance]) | 从 *geom* 中删除重复的坐标                                   |
+| h           | ST_RemoveHoles(geom)                        | 移除 *geom* 的孔                                             |
+| p           | ST_RemovePoint(linestring, index)           | 删除 *linestring* 中给定 *index* 处的 *point*                |
+| h           | ST_Reverse(geom)                            | 反转 *geom* 坐标的顺序                                       |
 
 未实现：
 
-- ST_CollectionExtract(geom,Dimension) 过滤*geom ，返回具有给定**维度*的那些成员的多几何图形（1 = 点，2 = 线串，3 = 多边形）
+- `ST_CollectionExtract(geom, dimension)` 过滤 *geom*，返回具有给定 `dimension (1 = point, 2 = line-string, 3 = polygon)` 的成员的多重几何图形。
 
 #### 几何编辑功能（3D）
 
-以下函数修改 3D 几何图形。
+以下函数可修改 3D 几何图形。
 
-| C    | 运算符语法            | 描述                            |
-| :--- | :-------------------- | :------------------------------ |
-| H    | ST_AddZ(geom, zToAdd) | *将zToAdd*添加到*geom*的 z 坐标 |
+| C（兼容性） | 运算符语法            | 描述                            |
+| :---------- | :-------------------- | :------------------------------ |
+| H           | ST_AddZ(geom, zToAdd) | 将 zToAdd 添加到 geom 的 z 坐标 |
 
 未实现：
 
-- ST_Interpolate3DLine(geom) 返回带有 z 值插值的*geom*，如果不是线串或多行字符串，则返回 null
-- ST_MultiplyZ(geom, zFactor) 返回z 值乘以*zFactor的**geom*
-- ST_Reverse3DLine(geom [, sortOrder ]) 可能根据其第一个和最后一个坐标的 z 值反转*geom*
-- *ST_UpdateZ(geom, newZ [, updateCondition ]) 更新geom*的 z 值
-- *ST_ZUpdateLineExtremities(geom, startZ, endZ [, interpolate ]) 更新geom*的开始和结束 z 值
+- `ST_Interpolate3DLine(geom)` 返回带有 z 值插值的 *geom*，如果它不是线串或 MULTILINESTRING，则返回 null；
+- `ST_MultiplyZ(geom, zFactor)` 返回 *geom* 的 z 值乘以 *zFactor*；
+- `ST_Reverse3DLine(geom [, sortOrder ])` 可能会根据其第一个和最后一个坐标的 z 值反转 *geom*；
+- `ST_UpdateZ(geom, newZ [, updateCondition ])` 更新 *geom* 的 z 值；
+- `ST_ZUpdateLineExtremities(geom, startZ, endZ [, interpolate ])` 更新 *geom* 的起始和终止 z 值。
 
 #### 几何测量功能（2D）
 
 以下函数测量几何形状。
 
-| C    | 运算符语法                                                   | 描述                                                         |
-| :--- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| 哦   | ST_Area（几何）                                              | *返回geom*的面积（可能是 GEOMETRYCOLLECTION）                |
-| H    | ST_ClosestCooperative(点，几何)                              | 返回最接近*点的**几何*坐标                                   |
-| H    | ST_ClosestPoint(geom1, geom2)                                | *返回geom1*最接近*geom2*的点                                 |
-| H    | ST_Furthest坐标（几何，点）                                  | *返回距离点*最远的*几何*坐标                                 |
-| H    | ST_长度（几何）                                              | *返回geom*的长度                                             |
-| H    | ST_LocateAlong（几何，segmentLengthFraction，offsetDistance） | *返回一个 MULTIPOINT，其中包含沿geom*线段的点，位于*segmentLengthFraction*和*offsetDistance* |
-| H    | ST_LongestLine(geom1, geom2)                                 | *返回geom1*和*geom2*点之间的二维最长线串                     |
-| H    | ST_MaxDistance(geom1, geom2)                                 | *计算geom1*和*geom2*之间的最大距离                           |
-| H    | ST_周长（多边形）                                            | *返回多边形*周长（可能是 MULTIPOLYGON）                      |
-| H    | ST_ProjectPoint(点, 线串)                                    | 项目*指向*线*串*（可能是多线串）                             |
+| C（兼容性） | 运算符语法                                                  | 描述                                                         |
+| :---------- | :---------------------------------------------------------- | :----------------------------------------------------------- |
+| o           | ST_Area(geom)                                               | 返回 *geom* 的面积（可能是 GEOMETRYCOLLECTION）              |
+| h           | ST_ClosestCoordinate(point, geom)                           | 返回最接近 *point* 的 *geom* 坐标                            |
+| h           | ST_ClosestPoint(geom1, geom2)                               | 返回 *geom1* 最接近 *geom2* 的点                             |
+| h           | ST_FurthestCoordinate(geom, point)                          | 返回距离*点*最远的*几何*的坐标                               |
+| h           | ST_Length(geom)                                             | 返回 *geom* 的长度                                           |
+| h           | ST_LocateAlong(geom, segmentLengthFraction, offsetDistance) | 返回一个 MULTIPOINT，其中包含位于 *geom* 线段 *segmentLengthFraction* 和 *offsetDistance* 处的点 |
+| h           | ST_LongestLine(geom1, geom2)                                | 返回 *geom1* 和 *geom2* 点之间的二维最长线串                 |
+| h           | ST_MaxDistance(geom1, geom2)                                | 计算 *geom1* 和 *geom2* 之间的最大距离                       |
+| h           | ST_Perimeter(polygon)                                       | 返回 *polygon* (可能是 MULTIPOLYGON) 的周长长度              |
+| h           | ST_ProjectPoint(point, lineString)                          | 将 *point* 投影到 *lineString* 上（可能是 MULTILINESTRING）  |
 
 #### 几何测量功能（3D）
 
 未实现：
 
-- ST_3DArea(geom) 返回多边形的 3D 面积
-- ST_3DLength(geom) 返回线串的 3D 长度
-- ST_3DPerimeter(geom) 返回多边形或 MULTIPOLYGON 的 3D 周长
-- *ST_SunPosition(point [, timestamp ]) 计算点*和*时间戳*处的太阳位置（现在默认）
+- `ST_3DArea(geom)` 返回多边形的三维面积；
+- `ST_3DLength(geom)` 返回线串的 3D 长度；
+- `ST_3DPerimeter(geom)` 返回多边形或MULTIPOLYGON的三维周长；
+- `ST_SunPosition(point [, timestamp ])` 计算 *point* 和 *timestamp* 处的太阳位置（现在默认）。
 
 #### 几何处理功能（2D）
 
-以下函数处理几何形状。
+以下函数处理几何图形。
 
-| C    | 运算符语法                                | 描述                                                         |
-| :--- | :---------------------------------------- | :----------------------------------------------------------- |
-| 哦   | ST_LineMerge(几何)                        | 合并线性分量的集合以形成最大长度的线串                       |
-| 哦   | ST_MakeValid(几何)                        | 将给定的无效几何图形变为有效几何图形                         |
-| 哦   | ST_Polygonize（几何）                     | 从*几何体的边缘创建一个多重多边形*                           |
-| 哦   | ST_PrecisionReducer(geom, n)              | *将geom*的精度降低到小数点后*n位*                            |
-| 哦   | ST_Simplify(几何，距离)                   | 使用具有*距离*容差的[Douglas-Peuker 算法](https://en.wikipedia.org/wiki/Ramer–Douglas–Peucker_algorithm)简化*几何* |
-| 哦   | ST_SimplifyPreserveTopology（几何，距离） | 简化*geom*，保留其拓扑                                       |
-| 哦   | ST_Snap(geom1, geom2, 公差)               | *将geom1*和*geom2*捕捉在一起                                 |
-| p    | ST_Split（几何，刀片）                    | 通过*刀片*分割*几何体*                                       |
+| C（兼容性） | 运算符语法                                  | 描述                                                         |
+| :---------- | :------------------------------------------ | :----------------------------------------------------------- |
+| o           | ST_LineMerge(geom)                          | 合并线性组件的集合以形成最大长度的线串                       |
+| o           | ST_MakeValid(geom)                          | 将给定的无效几何图形转换为有效几何图形                       |
+| o           | ST_Polygonize(geom)                         | 从 *geom* 的边缘创建一个 MULTIPOLYGON                        |
+| o           | ST_PrecisionReducer(geom, n)                | 将 *geom* 的精度降低至 *n* 位小数                            |
+| o           | ST_Simplify(geom, distance)                 | 使用 [Douglas-Peuker 算法](https://en.wikipedia.org/wiki/Ramer–Douglas–Peucker_algorithm) 和 *distance* 容差来简化 *geom* |
+| o           | ST_SimplifyPreserveTopology(geom, distance) | 简化 *geom*，保留其拓扑结构                                  |
+| o           | ST_Snap(geom1, geom2, tolerance)            | 将 *geom1* 和 *geom2* 对齐在一起                             |
+| p           | ST_Split(geom, blade)                       | 通过 *blade* 分割 *geom*                                     |
 
 未实现：
 
-- ST_LineIntersector(geom1, geom2) 将*geom1*（线串）与*geom2分割*
-- ST_LineMerge(geom) 合并线性分量的集合以形成最大长度的线串
-- ST_MakeValid(geom [,preserveGeomDim[,preserveDuplicateCoord[,preserveCoordDim]]]) 使*geom*有效
-- ST_RingSideBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]]) 计算一侧的环形缓冲区
-- ST_SideBuffer(geom, distance [, bufferStyle ]) 计算一侧的单个缓冲区
+- `ST_LineIntersector(geom1, geom2)` 将 *geom1* （线串）与 *geom2* 分割；
+- `ST_LineMerge(geom)` 合并线性组件的集合以形成最大长度的线串；
+- `ST_MakeValid(geom [, retainGeomDim [, retainDuplicateCoord [, retainCoordDim]]])` 使 *geom* 有效；
+- `ST_RingSideBuffer(geom, distance, bufferCount [, endCapStyle [, doDifference]])` 计算一侧的环形缓冲区；
+- `ST_SideBuffer(geom, distance [, bufferStyle ])` 计算一侧的单个缓冲区。
 
 #### 几何投影函数
 
-由于其[使用条款的](https://epsg.org/terms-of-use.html)限制，EPSG 数据集与 Proj4J 分开发布。为了使用 Apache Calcite 中的投影函数，用户必须在其依赖项中包含 EPSG 数据集。
+由于 EPSG 数据集的[使用条款](https://epsg.org/terms-of-use.html)有限制，因此它与 Proj4J 分开发布。为了使用 Apache Calcite 中的投影函数，用户必须在其依赖项中包含 EPSG 数据集。
 
-| C    | 运算符语法               | 描述                                                 |
-| :--- | :----------------------- | :--------------------------------------------------- |
-| 哦   | ST_SetSRID(geom, srid)   | 返回具有新 SRID 的*geom*副本                         |
-| 哦   | ST_Transform(geom, srid) | *将geom*从一个坐标参考系 (CRS)转换为*srid*指定的 CRS |
+| C（兼容性） | 运算符语法               | 描述                                                        |
+| :---------- | :----------------------- | :---------------------------------------------------------- |
+| o           | ST_SetSRID(geom, srid)   | 返回具有新 SRID 的 *geom* 副本                              |
+| o           | ST_Transform(geom, srid) | 将 *geom* 从一个坐标参考系统 (CRS) 转换为 *srid* 指定的 CRS |
 
 #### 三角函数
 
 未实现：
 
-- *ST_Azimuth(point1, point2) 返回从point1*到*point2*的线段的方位角
+- `ST_Azimuth(point1, point2)` 返回从 *point1* 到 *point2* 的线段的方位角。
 
 #### 地形函数
 
 未实现：
 
-- ST_TriangleAspect(geom) 返回三角形的长宽比
-- ST_TriangleContouring(query [, z1, z2, z3 ][, varArgs ]*) 根据类别将三角形分割成更小的三角形
-- ST_TriangleDirection(geom) 计算三角形最陡上升的方向并将其作为线串返回
-- ST_TriangleSlope(geom) 以百分比形式计算三角形的斜率
-- ST_Voronoi(geom [, outDimension [, EnvelopePolygon ]]) 创建 Voronoi 图
+- `ST_TriangleAspect(geom)` 返回三角形的纵横比；
+- `ST_TriangleContouring(query [, z1, z2, z3 ][, varArgs ]*)` 将三角形按类别分割成更小的三角形；
+- `ST_TriangleDirection(geom)` 计算三角形的最陡上升方向并将其以线串形式返回；
+- `ST_TriangleSlope(geom)` 以百分比形式计算三角形的斜率；
+- `ST_Voronoi(geom [, outDimension [, envelopePolygon ]])` 创建 Voronoi 图。
 
 #### 三角测量函数
 
-| C    | 运算符语法                            | 描述                                   |
-| :--- | :------------------------------------ | :------------------------------------- |
-| H    | ST_ConstrainedDelaunay(geom [, 标志]) | 基于*geom计算约束 Delaunay 三角剖分*   |
-| H    | ST_Delaunay(geom [, 标志])            | 基于*geom中的点计算 Delaunay 三角剖分* |
+| C（兼容性） | 运算符语法                            | 描述                                       |
+| :---------- | :------------------------------------ | :----------------------------------------- |
+| h           | ST_ConstrainedDelaunay(geom [, flag]) | 根据 *geom* 计算受约束的 Delaunay 三角剖分 |
+| h           | ST_Delaunay(geom [, flag])            | 根据 *geom* 中的点计算 Delaunay 三角剖分   |
 
 未实现：
 
-- ST_Tessellate(polygon)用自适应三角形对*多边形（可能是 MULTIPOLYGON）进行细分*
+- `ST_Tessellate(polygon)` 使用自适应三角形对*多边形* (可能是 MULTIPOLYGON) 进行镶嵌。
 
 #### 几何聚合函数
 
-| C    | 运算符语法         | 描述                                 |
-| :--- | :----------------- | :----------------------------------- |
-| H    | ST_Accum(几何)     | *将geom*累加到数组中                 |
-| H    | ST_Collect（几何） | *将geom*收集到 GeometryCollection 中 |
-| H    | ST_Union（几何）   | *计算geom*中几何图形的并集           |
+| C（兼容性） | 运算符语法       | 描述                                   |
+| :---------- | :--------------- | :------------------------------------- |
+| h           | ST_Accum(geom)   | 将 *geom* 累积到数组中                 |
+| h           | ST_Collect(geom) | 将 *geom* 收集到 GeometryCollection 中 |
+| h           | ST_Union(geom)   | 计算 *geom* 中几何的并集               |
 
 ### JSON 函数
 
-在下面的：
+在以下内容中：
 
-- *jsonValue*是包含 JSON 值的字符串；
-- *path*是包含 JSON 路径表达式的字符串；模式标志`strict`or`lax`应该在*路径*的开头指定。
+- *jsonValue* 是包含 JSON 值的字符串；
+- *path* 是包含 JSON 路径表达式的字符串；*path* 的开头应指定模式标志 `strict` 或 `lax`。
 
-#### 查询功能
+#### 查询函数
 
 | 运算符语法                                                   | 描述                                                         |
 | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| JSON_EXISTS(jsonValue, 路径 [ { TRUE \| FALSE \| UNKNOWN \| ERROR } ON ERROR ] ) | *jsonValue*是否满足使用JSON路径表达式*path*描述的搜索条件    |
-| JSON_VALUE(jsonValue, 路径 [ 返回类型 ] [ { ERROR \| NULL \| DEFAULT expr } ON EMPTY ] [ { ERROR \| NULL \| DEFAULT expr } ON ERROR ] ) | 使用 JSON 路径表达式*路径从**jsonValue*中提取 SQL 标量       |
-| JSON_QUERY(jsonValue, 路径 [ {WITHOUT [ ARRAY ] \| WITH [ CONDITIONAL \| UNCONDITIONAL ] [ ARRAY ] } WRAPPER ] [ { ERROR \| NULL \| EMPTY ARRAY \| EMPTY OBJECT } ON EMPTY ] [ { ERROR \| NULL \| EMPTY ARRAY \| EMPTY OBJECT } 错误]） | 使用*路径*JSON 路径表达式从*jsonValue*中提取 JSON 对象或 JSON 数组 |
+| JSON_EXISTS(jsonValue, path [ { TRUE \| FALSE \| UNKNOWN \| ERROR } ON ERROR ] ) | *jsonValue* 是否满足使用 JSON 路径表达式 *path* 描述的搜索条件 |
+| JSON_VALUE(jsonValue, path [ RETURNING type ] [ { ERROR \| NULL \| DEFAULT expr } ON EMPTY ] [ { ERROR \| NULL \| DEFAULT expr } ON ERROR ] ) | 使用 JSON 路径表达式 *path* 从 *jsonValue* 中提取 SQL 标量   |
+| JSON_QUERY(jsonValue, path [ { WITHOUT [ ARRAY ] \| WITH [ CONDITIONAL \| UNCONDITIONAL ] [ ARRAY ] } WRAPPER ] [ { ERROR \| NULL \| EMPTY ARRAY \| EMPTY OBJECT } ON EMPTY ] [ { ERROR \| NULL \| EMPTY ARRAY \| EMPTY OBJECT } ON ERROR ] ) | 使用 *path* JSON 路径表达式从 *jsonValue* 中提取 JSON 对象或 JSON 数组 |
 
-笔记：
+注意：
 
-- and`ON ERROR`子句`ON EMPTY`定义抛出错误或即将返回空值时函数的回退行为。
-- 该`ARRAY WRAPPER`子句定义了如何在`JSON_QUERY`函数中表示 JSON 数组结果。以下示例比较了包装器行为。
+- `ON ERROR` 和 `ON EMPTY` 子句定义当抛出错误或即将返回空值时函数的回退行为；
+- `ARRAY WRAPPER` 子句定义如何在 `JSON_QUERY` 函数中表示 JSON 数组结果。以下示例比较了包装器行为。
 
 示例数据：
 
-```
+```json
 {"a": "[1,2]", "b": [1,2], "c": "hi"}
 ```
 
 比较：
 
-| 操作员                           | $.A       | $.B       | $.C        |
-| :------------------------------- | :-------- | :-------- | :--------- |
-| JSON_VALUE                       | [1, 2]    | 错误      | 你好       |
-| 没有数组包装器的 JSON 查询       | 错误      | [1, 2]    | 错误       |
-| 使用无条件数组包装器的 JSON 查询 | [“[1,2]”] | [ [1,2] ] | [ “你好” ] |
-| 带条件数组包装器的 JSON 查询     | [“[1,2]”] | [1,2]     | [ “你好” ] |
+| 运算符语法                                  | $.A         | $.B       | $.C      |
+| :------------------------------------------ | :---------- | :-------- | :------- |
+| JSON_VALUE                                  | [1, 2]      | error     | hi       |
+| JSON QUERY WITHOUT ARRAY WRAPPER            | error       | [1, 2]    | error    |
+| JSON QUERY WITH UNCONDITIONAL ARRAY WRAPPER | [ “[1,2]” ] | [ [1,2] ] | [ “hi” ] |
+| JSON QUERY WITH CONDITIONAL ARRAY WRAPPER   | [ “[1,2]” ] | [1,2]     | [ “hi” ] |
 
 未实现：
 
 - JSON_TABLE
 
-#### Constructor Functions
+#### 构造函数
 
-| OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
-| :----------------------------------------------------------- | :----------------------------------------------------------- |
-| JSON_OBJECT( jsonKeyVal [, jsonKeyVal ]* [ nullBehavior ] )  | Construct JSON object using a series of key-value pairs      |
-| JSON_OBJECTAGG( jsonKeyVal [ nullBehavior ] )                | Aggregate function to construct a JSON object using a key-value pair |
-| JSON_ARRAY( [ jsonVal [, jsonVal ]* ] [ nullBehavior ] )     | Construct a JSON array using a series of values              |
-| JSON_ARRAYAGG( jsonVal [ ORDER BY orderItem [, orderItem ]* ] [ nullBehavior ] ) | Aggregate function to construct a JSON array using a value   |
+| 运算符语法                                                   | 描述                               |
+| :----------------------------------------------------------- | :--------------------------------- |
+| JSON_OBJECT( jsonKeyVal [, jsonKeyVal ]* [ nullBehavior ] )  | 使用一系列键值对构造 JSON 对象     |
+| JSON_OBJECTAGG( jsonKeyVal [ nullBehavior ] )                | 使用键值对构建 JSON 对象的聚合函数 |
+| JSON_ARRAY( [ jsonVal [, jsonVal ]* ] [ nullBehavior ] )     | 使用一系列值构造 JSON 数组         |
+| JSON_ARRAYAGG( jsonVal [ ORDER BY orderItem [, orderItem ]* ] [ nullBehavior ] ) | 使用值构建 JSON 数组的聚合函数     |
 
-```
+```json
 jsonKeyVal:
       [ KEY ] name VALUE value [ FORMAT JSON ]
   |   name : value [ FORMAT JSON ]
@@ -1551,326 +1549,324 @@ nullBehavior:
   |   ABSENT ON NULL
 ```
 
-Note:
+注意：
 
-- The flag `FORMAT JSON` indicates the value is formatted as JSON character string. When `FORMAT JSON` is used, the value should be de-parse from JSON character string to a SQL structured value.
-- `ON NULL` clause defines how the JSON output represents null values. The default null behavior of `JSON_OBJECT` and `JSON_OBJECTAGG` is `NULL ON NULL`, and for `JSON_ARRAY` and `JSON_ARRAYAGG` it is `ABSENT ON NULL`.
-- If `ORDER BY` clause is provided, `JSON_ARRAYAGG` sorts the input rows into the specified order before performing aggregation.
+- 标志 `FORMAT JSON` 表示值被格式化为 JSON 字符串。当使用 `FORMAT JSON` 时，该值应该从 JSON 字符串解析为 SQL 结构化值；
+- `ON NULL` 子句定义 JSON 输出如何表示空值。`JSON_OBJECT` 和 `JSON_OBJECTAGG` 的默认空行为是 `NULL ON NULL`，而对于 `JSON_ARRAY` 和 `JSON_ARRAYAGG`，则为 `ABSENT ON NULL`；
+- 如果提供了 `ORDER BY` 子句，`JSON_ARRAYAGG` 会在执行聚合之前将输入行按指定顺序排序。
 
-#### Comparison Operators
+#### 比较运算符
 
-| OPERATOR SYNTAX                 | DESCRIPTION                                    |
-| :------------------------------ | :--------------------------------------------- |
-| jsonValue IS JSON [ VALUE ]     | Whether *jsonValue* is a JSON value            |
-| jsonValue IS NOT JSON [ VALUE ] | Whether *jsonValue* is not a JSON value        |
-| jsonValue IS JSON SCALAR        | Whether *jsonValue* is a JSON scalar value     |
-| jsonValue IS NOT JSON SCALAR    | Whether *jsonValue* is not a JSON scalar value |
-| jsonValue IS JSON OBJECT        | Whether *jsonValue* is a JSON object           |
-| jsonValue IS NOT JSON OBJECT    | Whether *jsonValue* is not a JSON object       |
-| jsonValue IS JSON ARRAY         | Whether *jsonValue* is a JSON array            |
-| jsonValue IS NOT JSON ARRAY     | Whether *jsonValue* is not a JSON array        |
+| 运算符语法                      | 描述                             |
+| :------------------------------ | :------------------------------- |
+| jsonValue IS JSON [ VALUE ]     | *jsonValue* 是否为 JSON 值       |
+| jsonValue IS NOT JSON [ VALUE ] | *jsonValue* 是否不是 JSON 值     |
+| jsonValue IS JSON SCALAR        | *jsonValue* 是否是 JSON 标量值   |
+| jsonValue IS NOT JSON SCALAR    | *jsonValue* 是否不是 JSON 标量值 |
+| jsonValue IS JSON OBJECT        | *jsonValue* 是否为 JSON 对象     |
+| jsonValue IS NOT JSON OBJECT    | *jsonValue* 是否不是 JSON 对象   |
+| jsonValue IS JSON ARRAY         | *jsonValue* 是否为 JSON 数组     |
+| jsonValue IS NOT JSON ARRAY     | *jsonValue* 是否不是 JSON 数组   |
 
-### Dialect-specific Operators
+### 特定方言运算符
 
-The following operators are not in the SQL standard, and are not enabled in Calcite’s default operator table. They are only available for use in queries if your session has enabled an extra operator table.
+以下运算符不在 SQL 标准中，并且未在 Calcite 的默认运算符表中启用。仅当您的会话启用了额外的运算符表时，它们才可用于查询。
 
-To enable an operator table, set the [fun](https://calcite.apache.org/docs/adapter.html#jdbc-connect-string-parameters) connect string parameter.
+要启用操作员表，请设置 [fun](https://calcite.apache.org/docs/adapter.html#jdbc-connect-string-parameters) 连接字符串参数。
 
-The ‘C’ (compatibility) column contains value:
+“C”（兼容性）列包含值：
 
-- ‘*’ for all libraries,
-- ‘b’ for Google BigQuery (‘fun=bigquery’ in the connect string),
-- ‘c’ for Apache Calcite (‘fun=calcite’ in the connect string),
-- ‘h’ for Apache Hive (‘fun=hive’ in the connect string),
-- ‘m’ for MySQL (‘fun=mysql’ in the connect string),
-- ‘q’ for Microsoft SQL Server (‘fun=mssql’ in the connect string),
-- ‘o’ for Oracle (‘fun=oracle’ in the connect string),
-- ‘p’ for PostgreSQL (‘fun=postgresql’ in the connect string),
-- ’s’ for Apache Spark (‘fun=spark’ in the connect string).
+- ‘*’ 代表所有库，
+- ‘b’ 代表 Google BigQuery（连接字符串中为 ‘fun=bigquery’），
+- ‘c’ 代表 Apache Calcite（连接字符串中为 ‘fun=calcite’），
+- ‘h’ 代表 Apache Hive（连接字符串中为 ‘fun=hive’），
+- ‘m’ 代表 MySQL（连接字符串中为 ‘fun=mysql’），
+- ‘q’ 代表 Microsoft SQL Server（连接字符串中为 ‘fun=mssql’），
+- ‘o’ 代表 Oracle（连接字符串中为 ‘fun=oracle’），
+- ‘p’ 代表 PostgreSQL（连接字符串中为 ‘fun=postgresql’），
+- ‘s’ 代表 Apache Spark（连接字符串中为 ‘fun=spark’）。
 
-One operator name may correspond to multiple SQL dialects, but with different semantics.
+一个操作符名称可能对应多种SQL方言，但语义不同。
 
-BigQuery’s type system uses confusingly different names for types and functions:
+- BigQuery 的类型系统对类型和函数使用了容易混淆的不同名称：
 
-- BigQuery’s `DATETIME` type represents a local date time, and corresponds to Calcite’s `TIMESTAMP` type;
-- BigQuery’s `TIMESTAMP` type represents an instant, and corresponds to Calcite’s `TIMESTAMP WITH LOCAL TIME ZONE` type;
-- The *timestampLtz* parameter, for instance in `DATE(timestampLtz)`, has Calcite type `TIMESTAMP WITH LOCAL TIME ZONE`;
-- The `TIMESTAMP(string)` function, designed to be compatible the BigQuery function, return a Calcite `TIMESTAMP WITH LOCAL TIME ZONE`;
-- Similarly, `DATETIME(string)` returns a Calcite `TIMESTAMP`.
+- BigQuery 的 `DATETIME` 类型表示本地日期时间，与 Calcite 的 `TIMESTAMP` 类型相对应；
+- BigQuery 的 `TIMESTAMP` 类型表示瞬间，与 Calcite 的 `TIMESTAMP WITH LOCAL TIME ZONE` 类型相对应；
+- *timestampLtz* 参数（例如 `DATE(timestampLtz)` 中的参数）具有 Calcite 类型 `TIMESTAMP WITH LOCAL TIME ZONE`；
+- `TIMESTAMP(string)` 函数旨在与 BigQuery 函数兼容，返回 Calcite `TIMESTAMP WITH LOCAL TIME ZONE`；
+- 类似地，`DATETIME(string)` 返回 Calcite `TIMESTAMP`。
 
-| C            | OPERATOR SYNTAX                                              | DESCRIPTION                                                  |
-| :----------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| p            | expr :: type                                                 | Casts *expr* to *type*                                       |
-| m            | expr1 <=> expr2                                              | Whether two values are equal, treating null values as the same, and it’s similar to `IS NOT DISTINCT FROM` |
-| *            | ACOSH(numeric)                                               | Returns the inverse hyperbolic cosine of *numeric*           |
-| s            | ARRAY(expr [, expr ]*)                                       | Construct an array in Apache Spark                           |
-| s            | ARRAY_APPEND(array, element)                                 | Appends an *element* to the end of the *array* and returns the result. Type of *element* should be similar to type of the elements of the *array*. If the *array* is null, the function will return null. If an *element* that is null, the null *element* will be added to the end of the *array* |
-| s            | ARRAY_COMPACT(array)                                         | Removes null values from the *array*                         |
-| b            | ARRAY_CONCAT(array [, array ]*)                              | Concatenates one or more arrays. If any input argument is `NULL` the function returns `NULL` |
-| s            | ARRAY_CONTAINS(array, element)                               | Returns true if the *array* contains the *element*           |
-| s            | ARRAY_DISTINCT(array)                                        | Removes duplicate values from the *array* that keeps ordering of elements |
-| s            | ARRAY_EXCEPT(array1, array2)                                 | Returns an array of the elements in *array1* but not in *array2*, without duplicates |
-| s            | ARRAY_INSERT(array, pos, element)                            | Places *element* into index *pos* of *array*. Array index start at 1, or start from the end if index is negative. Index above array size appends the array, or prepends the array if index is negative, with `NULL` elements. |
-| s            | ARRAY_INTERSECT(array1, array2)                              | Returns an array of the elements in the intersection of *array1* and *array2*, without duplicates |
-| s            | ARRAY_JOIN(array, delimiter [, nullText ])                   | Synonym for `ARRAY_TO_STRING`                                |
-| b            | ARRAY_LENGTH(array)                                          | Synonym for `CARDINALITY`                                    |
-| s            | ARRAY_MAX(array)                                             | Returns the maximum value in the *array*                     |
-| s            | ARRAY_MIN(array)                                             | Returns the minimum value in the *array*                     |
-| s            | ARRAY_POSITION(array, element)                               | Returns the (1-based) index of the first *element* of the *array* as long |
-| s            | ARRAY_REMOVE(array, element)                                 | Remove all elements that equal to *element* from the *array* |
-| s            | ARRAY_PREPEND(array, element)                                | Appends an *element* to the beginning of the *array* and returns the result. Type of *element* should be similar to type of the elements of the *array*. If the *array* is null, the function will return null. If an *element* that is null, the null *element* will be added to the beginning of the *array* |
-| s            | ARRAY_REPEAT(element, count)                                 | Returns the array containing element count times.            |
-| b            | ARRAY_REVERSE(array)                                         | Reverses elements of *array*                                 |
-| s            | ARRAY_SIZE(array)                                            | Synonym for `CARDINALITY`                                    |
-| b            | ARRAY_TO_STRING(array, delimiter [, nullText ])              | Returns a concatenation of the elements in *array* as a STRING and take *delimiter* as the delimiter. If the *nullText* parameter is used, the function replaces any `NULL` values in the array with the value of *nullText*. If the *nullText* parameter is not used, the function omits the `NULL` value and its preceding delimiter. Returns `NULL` if any argument is `NULL` |
-| s            | ARRAY_UNION(array1, array2)                                  | Returns an array of the elements in the union of *array1* and *array2*, without duplicates |
-| s            | ARRAYS_OVERLAP(array1, array2)                               | Returns true if *array1 contains at least a non-null element present also in \*array2*. If the arrays have no common element and they are both non-empty and either of them contains a null element null is returned, false otherwise |
-| s            | ARRAYS_ZIP(array [, array ]*)                                | Returns a merged *array* of structs in which the N-th struct contains all N-th values of input arrays |
-| s            | SORT_ARRAY(array [, ascendingOrder])                         | Sorts the *array* in ascending or descending order according to the natural ordering of the array elements. The default order is ascending if *ascendingOrder* is not specified. Null elements will be placed at the beginning of the returned array in ascending order or at the end of the returned array in descending order |
-| *            | ASINH(numeric)                                               | Returns the inverse hyperbolic sine of *numeric*             |
-| *            | ATANH(numeric)                                               | Returns the inverse hyperbolic tangent of *numeric*          |
-| s            | BIT_LENGTH(binary)                                           | Returns the bit length of *binary*                           |
-| s            | BIT_LENGTH(string)                                           | Returns the bit length of *string*                           |
-| s            | BIT_GET(value, position)                                     | Returns the bit (0 or 1) value at the specified *position* of numeric *value*. The positions are numbered from right to left, starting at zero. The *position* argument cannot be negative |
-| b            | CEIL(value)                                                  | Similar to standard `CEIL(value)` except if *value* is an integer type, the return type is a double |
-| m s          | CHAR(integer)                                                | Returns the character whose ASCII code is *integer* % 256, or null if *integer* < 0 |
-| b o p        | CHR(integer)                                                 | Returns the character whose UTF-8 code is *integer*          |
-| b            | CODE_POINTS_TO_BYTES(integers)                               | Converts *integers*, an array of integers between 0 and 255 inclusive, into bytes; throws error if any element is out of range |
-| b            | CODE_POINTS_TO_STRING(integers)                              | Converts *integers*, an array of integers between 0 and 0xD7FF or between 0xE000 and 0x10FFFF inclusive, into string; throws error if any element is out of range |
-| o            | CONCAT(string, string)                                       | Concatenates two strings, returns null only when both string arguments are null, otherwise treats null as empty string |
-| b m          | CONCAT(string [, string ]*)                                  | Concatenates one or more strings, returns null if any of the arguments is null |
-| p q          | CONCAT(string [, string ]*)                                  | Concatenates one or more strings, null is treated as empty string |
-| m p          | CONCAT_WS(separator, str1 [, string ]*)                      | Concatenates one or more strings, returns null only when separator is null, otherwise treats null arguments as empty strings |
-| q            | CONCAT_WS(separator, str1, str2 [, string ]*)                | Concatenates two or more strings, requires at least 3 arguments (up to 254), treats null arguments as empty strings |
-| m            | COMPRESS(string)                                             | Compresses a string using zlib compression and returns the result as a binary string |
-| b            | CONTAINS_SUBSTR(expression, string [ , json_scope => json_scope_value ]) | Returns whether *string* exists as a substring in *expression*. Optional *json_scope* argument specifies what scope to search if *expression* is in JSON format. Returns NULL if a NULL exists in *expression* that does not result in a match |
-| q            | CONVERT(type, expression [ , style ])                        | Equivalent to `CAST(expression AS type)`; ignores the *style* operand |
-| p            | CONVERT_TIMEZONE(tz1, tz2, datetime)                         | Converts the timezone of *datetime* from *tz1* to *tz2*      |
-| *            | COSH(numeric)                                                | Returns the hyperbolic cosine of *numeric*                   |
-| *            | COTH(numeric)                                                | Returns the hyperbolic cotangent of *numeric*                |
-| *            | CSC(numeric)                                                 | Returns the cosecant of *numeric* in radians                 |
-| *            | CSCH(numeric)                                                | Returns the hyperbolic cosecant of *numeric*                 |
-| b            | CURRENT_DATETIME([ timeZone ])                               | Returns the current time as a TIMESTAMP from *timezone*      |
-| m            | DAYNAME(datetime)                                            | Returns the name, in the connection’s locale, of the weekday in *datetime*; for example, it returns ‘星期日’ for both DATE ‘2020-02-10’ and TIMESTAMP ‘2020-02-10 10:10:10’ |
-| b            | DATE(timestamp)                                              | Extracts the DATE from a *timestamp*                         |
-| b            | DATE(timestampLtz)                                           | Extracts the DATE from *timestampLtz* (an instant; BigQuery’s TIMESTAMP type), assuming UTC |
-| b            | DATE(timestampLtz, timeZone)                                 | Extracts the DATE from *timestampLtz* (an instant; BigQuery’s TIMESTAMP type) in *timeZone* |
-| b            | DATE(string)                                                 | Equivalent to `CAST(string AS DATE)`                         |
-| b            | DATE(year, month, day)                                       | Returns a DATE value for *year*, *month*, and *day* (all of type INTEGER) |
-| p q          | DATEADD(timeUnit, integer, datetime)                         | Equivalent to `TIMESTAMPADD(timeUnit, integer, datetime)`    |
-| p q          | DATEDIFF(timeUnit, datetime, datetime2)                      | Equivalent to `TIMESTAMPDIFF(timeUnit, datetime, datetime2)` |
-| q            | DATEPART(timeUnit, datetime)                                 | Equivalent to `EXTRACT(timeUnit FROM  datetime)`             |
-| b            | DATETIME(date, time)                                         | Converts *date* and *time* to a TIMESTAMP                    |
-| b            | DATETIME(date)                                               | Converts *date* to a TIMESTAMP value (at midnight)           |
-| b            | DATETIME(date, timeZone)                                     | Converts *date* to a TIMESTAMP value (at midnight), in *timeZone* |
-| b            | DATETIME(year, month, day, hour, minute, second)             | Creates a TIMESTAMP for *year*, *month*, *day*, *hour*, *minute*, *second* (all of type INTEGER) |
-| b            | DATETIME_ADD(timestamp, interval)                            | Returns the TIMESTAMP value that occurs *interval* after *timestamp* |
-| b            | DATETIME_DIFF(timestamp, timestamp2, timeUnit)               | Returns the whole number of *timeUnit* between *timestamp* and *timestamp2* |
-| b            | DATETIME_SUB(timestamp, interval)                            | Returns the TIMESTAMP that occurs *interval* before *timestamp* |
-| b            | DATETIME_TRUNC(timestamp, timeUnit)                          | Truncates *timestamp* to the granularity of *timeUnit*, rounding to the beginning of the unit |
-| b            | DATE_FROM_UNIX_DATE(integer)                                 | Returns the DATE that is *integer* days after 1970-01-01     |
-| p            | DATE_PART(timeUnit, datetime)                                | Equivalent to `EXTRACT(timeUnit FROM  datetime)`             |
-| b            | DATE_ADD(date, interval)                                     | Returns the DATE value that occurs *interval* after *date*   |
-| b            | DATE_DIFF(date, date2, timeUnit)                             | Returns the whole number of *timeUnit* between *date* and *date2* |
-| b            | DATE_SUB(date, interval)                                     | Returns the DATE value that occurs *interval* before *date*  |
-| b            | DATE_TRUNC(date, timeUnit)                                   | Truncates *date* to the granularity of *timeUnit*, rounding to the beginning of the unit |
-| o            | DECODE(value, value1, result1 [, valueN, resultN ]* [, default ]) | Compares *value* to each *valueN* value one by one; if *value* is equal to a *valueN*, returns the corresponding *resultN*, else returns *default*, or NULL if *default* is not specified |
-| p            | DIFFERENCE(string, string)                                   | 返回两个字符串相似度的度量，即它们的值具有共同的字符位置的数量`SOUNDEX`：如果值相同则为 4 ，如果值完全不同则为`SOUNDEX`0`SOUNDEX` |
-| 乙           | ENDS_WITH(字符串1, 字符串2)                                  | 返回*string2是否是**string1*的后缀                           |
-| 哦           | EXTRACT(xml, xpath, [, 命名空间])                            | 返回与 XPath 表达式匹配的一个或多个元素的 XML 片段。可选的命名空间值，指定前缀的默认映射或命名空间映射，在计算 XPath 表达式时使用 |
-| 哦           | EXISTSNODE(xml, xpath, [, 命名空间])                         | 确定使用指定的 xpath 遍历 XML 文档是否会产生任何节点。如果对 XPath 表达式匹配的一个或多个元素的文档片段应用 XPath 遍历后没有剩余节点，则返回 0。如果还有任何节点，则返回 1。可选的命名空间值，指定前缀的默认映射或命名空间映射，在计算 XPath 表达式时使用。 |
-| 米           | EXTRACTVALUE(xml, xpathExpr))                                | 返回第一个文本节点的文本，该文本节点是与 XPath 表达式匹配的一个或多个元素的子级。 |
-| HS           | 阶乘（整数）                                                 | *返回整数*的阶乘，*整数*范围为 [0, 20]。否则，返回 NULL      |
-| HS           | FIND_IN_SET(matchStr, textStr)                               | 返回逗号分隔的*textStr中给定**matchStr*的索引（从 1 开始）。如果未找到给定的*matchStr或**matchStr*包含逗号，则返回 0 。例如，FIND_IN_SET('bc', 'a,bc,def') 返回 2 |
-| 乙           | 楼层（值）                                                   | 与标准类似，`FLOOR(value)`但如果*value*是整数类型，则返回类型是 double |
-| 乙           | FORMAT_DATE（字符串，日期）                                  | 根据指定的格式*字符串*格式化*日期*                           |
-| 乙           | FORMAT_DATETIME（字符串，时间戳）                            | 根据指定的格式*字符串*格式化*时间戳*                         |
-| HS           | FORMAT_NUMBER（值，十进制值）                                | 将数字*值*格式化为“#,###,###.##”，四舍五入到小数位*DecimalVal*。如果*decimalVal*为0，则结果没有小数点或小数部分 |
-| HS           | FORMAT_NUMBER（值，格式）                                    | 将数字*值*格式化为 MySQL 的 FORMAT*格式*，例如 '#,###,###.##0.00' |
-| 乙           | FORMAT_TIME（字符串，时间）                                  | 根据指定的格式*字符串*格式化*时间*                           |
-| 乙           | FORMAT_TIMESTAMP（字符串时间戳）                             | 根据指定的格式*字符串*格式化*时间戳*                         |
-| s            | GETBIT（值，位置）                                           | 等价于`BIT_GET(value, position)`                             |
-| 博           | GREATEST(expr [, expr ]*)                                    | 返回最大的表达式                                             |
-| 黑社会       | IF(条件, 值1, 值2)                                           | 如果*条件*为 TRUE，则返回*value1* ，否则返回*value2*         |
-| 乙           | IFNULL(值1,值2)                                              | 等价于`NVL(value1, value2)`                                  |
-| p            | string1 ILIKE string2 [ ESCAPE string3 ]                     | *string1*是否匹配模式*string2*，忽略大小写（类似于`LIKE`）   |
-| p            | string1 不喜欢 string2 [ ESCAPE string3 ]                    | *string1*是否与模式*string2*不匹配，忽略大小写（类似于`NOT LIKE`） |
-| 博           | INSTR(字符串, 子字符串 [, 来自 [, 出现次数 ] ])              | *返回子字符串*在*string*中的位置，*从 from* （默认 1）开始搜索，直到找到*子字符串第 n 次**出现*（默认 1） |
-| 米           | INSTR（字符串，子字符串）                                    | 等价于`POSITION(substring IN string)`                        |
-| 乙           | IS_INF（值）                                                 | 返回*值*是否为无穷大                                         |
-| 乙           | IS_NAN（值）                                                 | 返回*值*是否为 NaN                                           |
-| 米           | JSON_TYPE(json值)                                            | *返回一个字符串值，表示jsonValue*的类型                      |
-| 米           | JSON_DEPTH(json值)                                           | *返回一个整数值，表示jsonValue*的深度                        |
-| 米           | JSON_PRETTY(jsonValue)                                       | *返回jsonValue*的漂亮打印                                    |
-| 米           | JSON_LENGTH(jsonValue [, 路径])                              | *返回一个整数，表示jsonValue*的长度                          |
-| 米           | JSON_INSERT(jsonValue, 路径, val [, 路径, val ]*)            | *返回一个 JSON 文档，插入jsonValue*、*path*、*val*的数据     |
-| 米           | JSON_KEYS(jsonValue [, 路径])                                | *返回一个字符串，指示 JSON jsonValue*的键                    |
-| 米           | JSON_REMOVE(jsonValue, 路径 [, 路径 ])                       | 使用一系列*路径表达式从**jsonValue*中删除数据并返回结果      |
-| 米           | JSON_REPLACE(jsonValue, 路径, val [, 路径, val ]*)           | *返回一个 JSON 文档，替换jsonValue*、*path*、*val*的数据     |
-| 米           | JSON_SET(jsonValue, 路径, val [, 路径, val ]*)               | *返回一个 JSON 文档，设置jsonValue*、*path*、*val*的数据     |
-| 米           | JSON_STORAGE_SIZE（json值）                                  | *返回用于存储jsonValue*的二进制表示形式的字节数              |
-| 博           | LEAST(expr [, expr ]* )                                      | 返回最少的表达式                                             |
-| 图像格式     | 左（字符串，长度）                                           | 返回*字符串*中最左边的*长度字符*                             |
-| 乙           | 长度（字符串）                                               | 等价于`CHAR_LENGTH(string)`                                  |
-| HS           | LEVENSHTEIN(字符串1, 字符串2)                                | *返回string1*和*string2*之间的编辑距离                       |
-| 乙           | LOG(数字1 [, 数字2 ])                                        | *返回numeric1以**numeric2*为底的对数，如果*numeric2*不存在，则返回以 e 为底的对数 |
-| 博           | LPAD(字符串, 长度[, 模式])                                   | 返回一个字符串或字节值，该值由前面带有*模式*的*长度**字符串*组成 |
-| 乙           | TO_BASE32（字符串）                                          | *将字符串*转换为 Base-32 编码形式并返回编码字符串            |
-| 乙           | FROM_BASE32（字符串）                                        | 以字符串形式返回 base-32*字符串的解码结果*                   |
-| 米           | TO_BASE64（字符串）                                          | *将字符串*转换为 base-64 编码形式并返回编码字符串            |
-| BM           | FROM_BASE64（字符串）                                        | 将 Base-64*字符串*的解码结果作为字符串返回                   |
-| 乙           | TO_HEX（二进制）                                             | *将二进制*转换为十六进制 varchar                             |
-| 乙           | FROM_HEX(varchar)                                            | 将十六进制编码的*varchar*转换为字节                          |
-| 博           | LTRIM（字符串）                                              | 返回从开头删除所有空格的*字符串*                             |
-| s            | 地图（）                                                     | 返回一个空地图                                               |
-| s            | MAP（键，值[，键，值]*）                                     | 返回具有给定*键*/*值*对的映射                                |
-| s            | MAP_CONCAT(地图[,地图]*)                                     | 连接一个或多个地图。如果任何输入参数是`NULL`该函数返回`NULL`。请注意，方解石使用的是 LAST_WIN 策略 |
-| s            | MAP_ENTRIES（地图）                                          | *以数组形式返回映射*的条目，条目的顺序未定义                 |
-| s            | MAP_KEYS（地图）                                             | *以数组形式返回映射*的键，条目的顺序未定义                   |
-| s            | MAP_VALUES（地图）                                           | *以数组形式返回映射*的值，条目的顺序未定义                   |
-| s            | MAP_FROM_ARRAYS（数组1，数组2）                              | *返回从array1*和*array2*创建的映射。请注意，两个数组的长度应该相同，方解石使用 LAST_WIN 策略 |
-| s            | MAP_FROM_ENTRIES（行数组）                                   | 返回从具有两个字段的行数组创建的映射。注意一行中的字段数必须为2。注意方解石使用的是LAST_WIN策略 |
-| s            | STR_TO_MAP(字符串[, stringDelimiter [, keyValueDelimiter]])  | *使用分隔符将字符串*拆分为键/值对后返回映射。stringDelimiter 的默认分隔符为“,” ， *keyValueDelimiter的默认**分隔*符为“:” 。请注意，方解石使用的是 LAST_WIN 策略 |
-| 图像格式     | MD5（字符串）                                                | *计算字符串*的 MD5 128 位校验和并将其作为十六进制字符串返回  |
-| 米           | 月份名称（日期）                                             | *返回datetime*中月份的名称（在连接的区域设置中）；例如，它对于 DATE '2020-02-10' 和 TIMESTAMP '2020-02-10 10:10:10' 都返回 '二月' |
-| 哦           | NVL(值1,值2)                                                 | 如果*value1*不为 null，则返回*value1 ，否则返回**value2*     |
-| 乙           | 偏移量(索引)                                                 | 对数组进行索引时，将*index*包裹起来会返回从 0 开始的*索引处*`OFFSET`的值；*如果索引*越界则抛出错误 |
-| 乙           | 序数（索引）                                                 | 类似于`OFFSET`除了*索引*从 1 开始                            |
-| 乙           | PARSE_DATE（格式，字符串）                                   | 使用 format 指定的*格式将日期的**字符串*表示形式转换为 DATE 值 |
-| 乙           | PARSE_DATETIME（格式，字符串）                               | 使用 format 指定的*格式将日期时间的**字符串*表示形式转换为 TIMESTAMP 值 |
-| 乙           | PARSE_TIME（格式，字符串）                                   | 使用 format 指定的*格式将时间的**字符串*表示形式转换为 TIME 值 |
-| 乙           | PARSE_TIMESTAMP（格式，字符串[，时区]）                      | 使用 format 指定的*格式将时间戳的**字符串*表示形式转换为*timeZone*中的 TIMESTAMP WITH LOCAL TIME ZONE 值 |
-| HS           | PARSE_URL（urlString，partToExtract [，keyToExtract]）       | 从*urlString*返回指定的*partToExtract*。*partToExtract*的有效值包括 HOST、PATH、QUERY、REF、PROTOCOL、AUTHORITY、FILE 和 USERINFO。*keyToExtract*指定要提取的查询 |
-| 乙           | POW(数字1,数字2)                                             | 返回*numeric1的**numeric2*次方                               |
-| 乙           | REGEXP_CONTAINS（字符串，正则表达式）                        | 返回*字符串是否与正则**表达式*部分匹配                       |
-| 乙           | REGEXP_EXTRACT(字符串, 正则表达式 [, 位置 [, 出现次数]])     | *返回string中与**regexp*匹配的子字符串，从*位置*（默认 1）开始搜索，直到找到第 n 个*匹配项*（默认 1）。如果没有匹配则返回NULL |
-| 乙           | REGEXP_EXTRACT_ALL（字符串，正则表达式）                     | *返回string中与**regexp*匹配的所有子字符串的数组。如果没有匹配则返回空数组 |
-| 乙           | REGEXP_INSTR(字符串, 正则表达式 [, 位置 [, 出现次数 [, 出现位置]]]) | *返回string中与**regexp*匹配的子字符串的从 1 开始的最低位置，从*位置*（默认 1）开始搜索，直到找到第 n 个*匹配项*（默认 1）。将occurrence_position（默认0）设置为1返回子字符串的结束位置+1。如果没有匹配则返回0 |
-| 蒙特利尔银行 | REGEXP_REPLACE（字符串，正则表达式，代表[，位置[，出现次数[，匹配类型]]]） | 将与*regexp*匹配的*字符串*的所有子字符串替换为 expr 中起始*位置处的**rep*（如果省略，默认为 1），*occurrence*指定要搜索的匹配项的出现次数（如果省略，默认为 1），*matchType*指定如何执行匹配 |
-| 乙           | REGEXP_SUBSTR(string, regexp [, position [, occurrence]])    | Synonym for REGEXP_EXTRACT                                   |
-| b m p        | REPEAT(string, integer)                                      | Returns a string consisting of *string* repeated of *integer* times; returns an empty string if *integer* is less than 1 |
-| b m          | REVERSE(string)                                              | Returns *string* with the order of the characters reversed   |
-| b m p        | RIGHT(string, length)                                        | Returns the rightmost *length* characters from the *string*  |
-| h s          | string1 RLIKE string2                                        | Whether *string1* matches regex pattern *string2* (similar to `LIKE`, but uses Java regex) |
-| h s          | string1 NOT RLIKE string2                                    | Whether *string1* does not match regex pattern *string2* (similar to `NOT LIKE`, but uses Java regex) |
-| b o          | RPAD(string, length[, pattern ])                             | Returns a string or bytes value that consists of *string* appended to *length* with *pattern* |
-| b o          | RTRIM(string)                                                | Returns *string* with all blanks removed from the end        |
-| b            | SAFE_ADD(numeric1, numeric2)                                 | Returns *numeric1* + *numeric2*, or NULL on overflow         |
-| b            | SAFE_CAST(value AS type)                                     | Converts *value* to *type*, returning NULL if conversion fails |
-| b            | SAFE_DIVIDE(numeric1, numeric2)                              | Returns *numeric1* / *numeric2*, or NULL on overflow or if *numeric2* is zero |
-| b            | SAFE_MULTIPLY(numeric1, numeric2)                            | Returns *numeric1* * *numeric2*, or NULL on overflow         |
-| b            | SAFE_NEGATE(numeric)                                         | Returns *numeric* * -1, or NULL on overflow                  |
-| b            | SAFE_OFFSET(index)                                           | Similar to `OFFSET` except null is returned if *index* is out of bounds |
-| b            | SAFE_ORDINAL(index)                                          | Similar to `OFFSET` except *index* begins at 1 and null is returned if *index* is out of bounds |
-| b            | SAFE_SUBTRACT(numeric1, numeric2)                            | Returns *numeric1* - *numeric2*, or NULL on overflow         |
-| *            | SEC(numeric)                                                 | Returns the secant of *numeric* in radians                   |
-| *            | SECH(numeric)                                                | Returns the hyperbolic secant of *numeric*                   |
-| b m p        | SHA1(string)                                                 | Calculates a SHA-1 hash value of *string* and returns it as a hex string |
-| b p          | SHA256(string)                                               | Calculates a SHA-256 hash value of *string* and returns it as a hex string |
-| b p          | SHA512(string)                                               | Calculates a SHA-512 hash value of *string* and returns it as a hex string |
-| *            | SINH(numeric)                                                | Returns the hyperbolic sine of *numeric*                     |
-| b m o p      | SOUNDEX(string)                                              | Returns the phonetic representation of *string*; throws if *string* is encoded with multi-byte encoding such as UTF-8 |
-| s            | SOUNDEX(string)                                              | Returns the phonetic representation of *string*; return original *string* if *string* is encoded with multi-byte encoding such as UTF-8 |
-| m            | SPACE(integer)                                               | Returns a string of *integer* spaces; returns an empty string if *integer* is less than 1 |
-| b            | SPLIT(string [, delimiter ])                                 | Returns the string array of *string* split at *delimiter* (if omitted, default is comma) |
-| b            | STARTS_WITH(string1, string2)                                | Returns whether *string2* is a prefix of *string1*           |
-| m            | STRCMP(string, string)                                       | Returns 0 if both of the strings are same and returns -1 when the first argument is smaller than the second and 1 when the second one is smaller than the first one |
-| b p          | STRPOS(string, substring)                                    | Equivalent to `POSITION(substring IN string)`                |
-| b m o p      | SUBSTR(string, position [, substringLength ])                | Returns a portion of *string*, beginning at character *position*, *substringLength* characters long. SUBSTR calculates lengths using characters as defined by the input character set |
-| *            | TANH(numeric)                                                | Returns the hyperbolic tangent of *numeric*                  |
-| b            | TIME(hour, minute, second)                                   | Returns a TIME value *hour*, *minute*, *second* (all of type INTEGER) |
-| b            | TIME(timestamp)                                              | Extracts the TIME from *timestamp* (a local time; BigQuery’s DATETIME type) |
-| b            | TIME(instant)                                                | Extracts the TIME from *timestampLtz* (an instant; BigQuery’s TIMESTAMP type), assuming UTC |
-| b            | TIME(instant, timeZone)                                      | Extracts the time from *timestampLtz* (an instant; BigQuery’s TIMESTAMP type), in *timeZone* |
-| b            | TIMESTAMP(string)                                            | Equivalent to `CAST(string AS TIMESTAMP WITH LOCAL TIME ZONE)` |
-| b            | TIMESTAMP(string, timeZone)                                  | Equivalent to `CAST(string AS TIMESTAMP WITH LOCAL TIME ZONE)`, converted to *timeZone* |
-| b            | TIMESTAMP(date)                                              | Converts *date* to a TIMESTAMP WITH LOCAL TIME ZONE value (at midnight) |
-| b            | TIMESTAMP(date, timeZone)                                    | Converts *date* to a TIMESTAMP WITH LOCAL TIME ZONE value (at midnight), in *timeZone* |
-| b            | TIMESTAMP(timestamp)                                         | Converts *timestamp* to a TIMESTAMP WITH LOCAL TIME ZONE, assuming a UTC |
-| b            | TIMESTAMP(timestamp, timeZone)                               | Converts *timestamp* to a TIMESTAMP WITH LOCAL TIME ZONE, in *timeZone* |
-| b            | TIMESTAMP_ADD(timestamp, interval)                           | Returns the TIMESTAMP value that occurs *interval* after *timestamp* |
-| b            | TIMESTAMP_DIFF(timestamp, timestamp2, timeUnit)              | Returns the whole number of *timeUnit* between *timestamp* and *timestamp2*. Equivalent to `TIMESTAMPDIFF(timeUnit, timestamp2, timestamp)` and `(timestamp - timestamp2) timeUnit` |
-| b            | TIMESTAMP_MICROS(integer)                                    | Returns the TIMESTAMP that is *integer* microseconds after 1970-01-01 00:00:00 |
-| b            | TIMESTAMP_MILLIS(integer)                                    | Returns the TIMESTAMP that is *integer* milliseconds after 1970-01-01 00:00:00 |
-| b            | TIMESTAMP_SECONDS(integer)                                   | Returns the TIMESTAMP that is *integer* seconds after 1970-01-01 00:00:00 |
-| b            | TIMESTAMP_SUB(timestamp, interval)                           | Returns the TIMESTAMP value that is *interval* before *timestamp* |
-| b            | TIMESTAMP_TRUNC(timestamp, timeUnit)                         | Truncates *timestamp* to the granularity of *timeUnit*, rounding to the beginning of the unit |
-| b            | TIME_ADD(time, interval)                                     | Adds *interval* to *time*, independent of any time zone      |
-| b            | TIME_DIFF(time, time2, timeUnit)                             | Returns the whole number of *timeUnit* between *time* and *time2* |
-| b            | TIME_SUB(time, interval)                                     | Returns the TIME value that is *interval* before *time*      |
-| b            | TIME_TRUNC(time, timeUnit)                                   | Truncates *time* to the granularity of *timeUnit*, rounding to the beginning of the unit |
-| m o p        | TO_CHAR(timestamp, format)                                   | Converts *timestamp* to a string using the format *format*   |
-| b            | TO_CODE_POINTS(string)                                       | Converts *string* to an array of integers that represent code points or extended ASCII character values |
-| o p          | TO_DATE(string, format)                                      | Converts *string* to a date using the format *format*        |
-| o p          | TO_TIMESTAMP(string, format)                                 | Converts *string* to a timestamp using the format *format*   |
-| b o p        | TRANSLATE(expr, fromString, toString)                        | Returns *expr* with all occurrences of each character in *fromString* replaced by its corresponding character in *toString*. Characters in *expr* that are not in *fromString* are not replaced |
-| b            | TRUNC(numeric1 [, numeric2 ])                                | Truncates *numeric1* to optionally *numeric2* (if not specified 0) places right to the decimal point |
-| q            | TRY_CAST(value AS type)                                      | Converts *value* to *type*, returning NULL if conversion fails |
-| b            | UNIX_MICROS(timestamp)                                       | Returns the number of microseconds since 1970-01-01 00:00:00 |
-| b            | UNIX_MILLIS(timestamp)                                       | Returns the number of milliseconds since 1970-01-01 00:00:00 |
-| b            | UNIX_SECONDS(timestamp)                                      | Returns the number of seconds since 1970-01-01 00:00:00      |
-| b            | UNIX_DATE(date)                                              | Returns the number of days since 1970-01-01                  |
-| s            | URL_DECODE(string)                                           | 使用特定的编码方案解码“application/x-www-form-urlencoded”格式的字符串*，*解码错误时返回原始*字符串* |
-| s            | URL_ENCODE（字符串）                                         | 使用特定的编码方案将*字符串*转换为“application/x-www-form-urlencoded”格式 |
-| 哦           | XMLTRANSFORM（xml，xslt）                                    | 将 XSLT 转换*xslt*转换为 XML 字符串*xml*并返回结果           |
+| C（兼容性） | 运算符语法                                                   | 描述                                                         |
+| :---------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| p           | expr :: type                                                 | 将 *expr* 转换为 *type*                                      |
+| m           | expr1 <=> expr2                                              | 两个值是否相等，将空值视为相同，类似于`IS NOT DISTINCT FROM` |
+| *           | ACOSH(numeric)                                               | 返回 *numeric* 的反双曲余弦值                                |
+| s           | ARRAY([expr [, expr ]*])                                     | 在 Apache Spark 中构造一个数组。该函数允许用户使用 `ARRAY()` 创建一个空数组 |
+| s           | ARRAY_APPEND(array, element)                                 | 将一个元素附加到数组末尾并返回结果。元素的类型应与数组元素的类型相似。如果数组为空，则函数将返回空值。如果元素为空，则将空元素添加到数组末尾 |
+| s           | ARRAY_COMPACT(array)                                         | 从*数组*中删除空值                                           |
+| b           | ARRAY_CONCAT(array [, array ]*)                              | 连接一个或多个数组。如果任何输入参数为“NULL”，则函数返回“NULL” |
+| s           | ARRAY_CONTAINS(array, element)                               | 如果 *数组* 包含 *元素*，则返回 true                         |
+| s           | ARRAY_DISTINCT(array)                                        | 从保持元素排序的数组中删除重复的值                           |
+| s           | ARRAY_EXCEPT(array1, array2)                                 | 返回 *array1* 中存在但不存在于 *array2* 中的元素数组，且无重复 |
+| s           | ARRAY_INSERT(array, pos, element)                            | 将 *元素* 放入 *数组* 的索引 *pos* 中。数组索引从 1 开始，如果索引为负数，则从末尾开始。数组大小之上的索引将使用 `NULL` 元素附加到数组中，如果索引为负数，则将 `NULL` 元素添加到数组前面。 |
+| s           | ARRAY_INTERSECT(array1, array2)                              | 返回 *array1* 和 *array2* 交集处的元素数组，不包含重复项     |
+| s           | ARRAY_JOIN(array, delimiter [, nullText ])                   | `ARRAY_TO_STRING` 的同义词                                   |
+| b           | ARRAY_LENGTH(array)                                          | `CARDINALITY` 的同义词                                       |
+| s           | ARRAY_MAX(array)                                             | 返回数组中的最大值                                           |
+| s           | ARRAY_MIN(array)                                             | 返回数组中的最小值                                           |
+| s           | ARRAY_POSITION(array, element)                               | 返回数组中第一个元素的（从 1 开始）索引                      |
+| s           | ARRAY_REMOVE(array, element)                                 | 从*数组*中删除所有等于*元素*的元素                           |
+| s           | ARRAY_PREPEND(array, element)                                | 将一个元素附加到数组的开头并返回结果。元素的类型应与数组元素的类型相似。如果数组为空，则函数将返回空。如果元素为空，则将空元素添加到数组的开头 |
+| s           | ARRAY_REPEAT(element, count)                                 | 返回包含元素 count 次的数组。                                |
+| b           | ARRAY_REVERSE(array)                                         | 反转*数组*的元素                                             |
+| s           | ARRAY_SIZE(array)                                            | `CARDINALITY` 的同义词                                       |
+| b           | ARRAY_TO_STRING(array, delimiter [, nullText ])              | 将 *array* 中元素的连接作为 STRING 返回，并以 *delimiter* 作为分隔符。如果使用 *nullText* 参数，则该函数会将数组中的任何 `NULL` 值替换为 *nullText* 的值。如果未使用 *nullText* 参数，则该函数会省略 `NULL` 值及其前面的分隔符。如果任何参数为 `NULL`，则返回 `NULL` |
+| s           | ARRAY_UNION(array1, array2)                                  | 返回 *array1* 和 *array2* 的并集元素数组，不包含重复元素     |
+| s           | ARRAYS_OVERLAP(array1, array2)                               | 如果 *array1 至少包含一个非空元素，并且该元素也存在于 \*array2* 中，则返回 true。如果两个数组没有共同元素，且两个数组都非空，并且其中一个数组包含一个空元素，则返回 null，否则返回 false |
+| s           | ARRAYS_ZIP(array [, array ]*)                                | 返回合并的结构体*数组*，其中第 N 个结构体包含输入数组的所有第 N 个值 |
+| s           | SORT_ARRAY(array [, ascendingOrder])                         | 根据数组元素的自然顺序，按升序或降序对 *数组* 进行排序。如果未指定 *ascendingOrder*，则默认顺序为升序。空元素将按升序放置在返回数组的开头，或按降序放置在返回数组的末尾 |
+| *           | ASINH(numeric)                                               | 返回 *numeric* 的反双曲正弦值                                |
+| *           | ATANH(numeric)                                               | 返回 *numeric* 的反双曲正切值                                |
+| f           | BITAND_AGG(value)                                            | 相当于 `BIT_AND(value)`                                      |
+| f           | BITOR_AGG(value)                                             | 相当于 `BIT_OR(value)`                                       |
+| s           | BIT_LENGTH(binary)                                           | 返回*二进制*的位长度                                         |
+| s           | BIT_LENGTH(string)                                           | 返回 *string* 的位长度                                       |
+| s           | BIT_GET(value, position)                                     | 返回数字*值*指定*位置*的位（0 或 1）值。位置从右到左编号，从零开始。*位置*参数不能为负数 |
+| b           | CEIL(value)                                                  | 与标准 `CEIL(value)` 类似，除非 *value* 是整数类型，否则返回类型为双精度 |
+| m s         | CHAR(integer)                                                | 返回 ASCII 码为 *integer* % 256 的字符，如果 *integer* < 0，则返回 null |
+| b o p       | CHR(integer)                                                 | 返回 UTF-8 代码为 *整数* 的字符                              |
+| b           | CODE_POINTS_TO_BYTES(integers)                               | 将*整数*（0 到 255 之间的整数数组，含 0 和 255）转换为字节；如果任何元素超出范围，则会引发错误 |
+| b           | CODE_POINTS_TO_STRING(integers)                              | 将 *整数*（0 到 0xD7FF 之间或 0xE000 到 0x10FFFF 之间的整数数组）转换为字符串；如果任何元素超出范围，则会引发错误 |
+| o           | CONCAT(string, string)                                       | 连接两个字符串，仅当两个字符串参数都为空时才返回空，否则将空视为空字符串 |
+| b m         | CONCAT(string [, string ]*)                                  | 连接一个或多个字符串，如果任何参数为空，则返回空             |
+| p q         | CONCAT(string [, string ]*)                                  | 连接一个或多个字符串，null 被视为空字符串                    |
+| m p         | CONCAT_WS(separator, str1 [, string ]*)                      | 连接一个或多个字符串，仅当分隔符为空时才返回空，否则将空参数视为空字符串 |
+| q           | CONCAT_WS(separator, str1, str2 [, string ]*)                | 连接两个或多个字符串，需要至少 3 个参数（最多 254 个），将空参数视为空字符串 |
+| m           | COMPRESS(string)                                             | 使用 zlib 压缩来压缩字符串并将结果作为二进制字符串返回       |
+| b           | CONTAINS_SUBSTR(expression, string [ , json_scope => json_scope_value ]) | 返回 *string* 是否作为子字符串存在于 *expression* 中。可选的 *json_scope* 参数指定如果 *expression* 为 JSON 格式，则搜索的范围。如果 *expression* 中存在 NULL 且不匹配，则返回 NULL |
+| q           | CONVERT(type, expression [ , style ])                        | 相当于 `CAST(expression AS type)`；忽略 *style* 操作数       |
+| p           | CONVERT_TIMEZONE(tz1, tz2, datetime)                         | 将 *datetime* 的时区从 *tz1* 转换为 *tz2*                    |
+| *           | COSH(numeric)                                                | 返回 *numeric* 的双曲余弦                                    |
+| *           | COTH(numeric)                                                | 返回 *numeric* 的双曲余切                                    |
+| *           | CSC(numeric)                                                 | 以弧度返回 *numeric* 的余割                                  |
+| *           | CSCH(numeric)                                                | 返回 *numeric* 的双曲余割                                    |
+| b           | CURRENT_DATETIME([ timeZone ])                               | 从 *timezone* 返回当前时间作为时间戳                         |
+| m           | DAYNAME(datetime)                                            | 返回连接语言环境中 *datetime* 中的星期几名称；例如，对于 DATE ‘2020-02-10’ 和 TIMESTAMP ‘2020-02-10 10:10:10’，它均返回‘星期日’ |
+| b           | DATE(timestamp)                                              | 从*时间戳*中提取日期                                         |
+| b           | DATE(timestampLtz)                                           | 从 *timestampLtz*（一个瞬间；BigQuery 的 TIMESTAMP 类型）中提取 DATE，假设为 UTC |
+| b           | DATE(timestampLtz, timeZone)                                 | 从 *timeZone* 中的 *timestampLtz*（瞬间；BigQuery 的 TIMESTAMP 类型）中提取 DATE |
+| b           | DATE(string)                                                 | 相当于 `CAST(string AS DATE)`                                |
+| b           | DATE(year, month, day)                                       | 返回 *year*、*month* 和 *day* 的 DATE 值（均为 INTEGER 类型） |
+| p q         | DATEADD(timeUnit, integer, datetime)                         | 相当于 `TIMESTAMPADD(timeUnit, integer, datetime)`           |
+| p q         | DATEDIFF(timeUnit, datetime, datetime2)                      | 相当于 `TIMESTAMPDIFF(timeUnit, datetime, datetime2)`        |
+| q           | DATEPART(timeUnit, datetime)                                 | 相当于 `EXTRACT(timeUnit FROM datetime)`                     |
+| b           | DATETIME(date, time)                                         | 将*日期*和*时间*转换为时间戳                                 |
+| b           | DATETIME(date)                                               | 将*日期*转换为时间戳值（午夜）                               |
+| b           | DATETIME(date, timeZone)                                     | 将 *date* 转换为 TIMESTAMP 值（午夜），以 *timeZone* 为单位  |
+| b           | DATETIME(year, month, day, hour, minute, second)             | 为*年*、*月*、*日*、*时*、*分*、*秒* 创建时间戳（所有类型均为 INTEGER） |
+| b           | DATETIME_ADD(timestamp, interval)                            | 返回在 *timestamp* 之后 *interval* 发生的 TIMESTAMP 值       |
+| b           | DATETIME_DIFF(timestamp, timestamp2, timeUnit)               | 返回 *timestamp* 和 *timestamp2* 之间的 *timeUnit* 的整数    |
+| b           | DATETIME_SUB(timestamp, interval)                            | 返回在 *timestamp* 之前 *interval* 发生的 TIMESTAMP          |
+| b           | DATETIME_TRUNC(timestamp, timeUnit)                          | 将 *timestamp* 截断为 *timeUnit* 的粒度，四舍五入到单位的开头 |
+| b s         | DATE_FROM_UNIX_DATE(integer)                                 | 返回 1970-01-01 之后 *整数* 天的 DATE                        |
+| p           | DATE_PART(timeUnit, datetime)                                | 相当于 `EXTRACT(timeUnit FROM datetime)`                     |
+| b           | DATE_ADD(date, interval)                                     | 返回在 *date* 之后 *interval* 发生的 DATE 值                 |
+| b           | DATE_DIFF(date, date2, timeUnit)                             | 返回 *date* 和 *date2* 之间的 *timeUnit* 的整数              |
+| b           | DATE_SUB(date, interval)                                     | 返回在 *date* 之前 *interval* 发生的 DATE 值                 |
+| b           | DATE_TRUNC(date, timeUnit)                                   | 将 *date* 截断为 *timeUnit* 的粒度，四舍五入到单位的开头     |
+| o s         | DECODE(value, value1, result1 [, valueN, resultN ]* [, default ]) | 将 *value* 与每个 *valueN* 值逐一进行比较；如果 *value* 等于 *valueN*，则返回相应的 *resultN*，否则返回 *default*，如果未指定 *default*，则返回 NULL |
+| p           | DIFFERENCE(string, string)                                   | 返回两个字符串的相似度度量，即它们的 `SOUNDEX` 值具有相同的字符位置数：如果 `SOUNDEX` 值相同，则返回 4；如果 `SOUNDEX` 值完全不同，则返回 0 |
+| f s         | ENDSWITH(string1, string2)                                   | 返回 *string2* 是否是 *string1* 的后缀                       |
+| b p         | ENDS_WITH(string1, string2)                                  | 相当于 `ENDSWITH(string1, string2)`                          |
+| s           | EXISTS(array, func)                                          | 返回谓词 *func* 是否对 *array* 中的一个或多个元素成立        |
+| o           | EXISTSNODE(xml, xpath, [, namespaces ])                      | 确定使用指定的 xpath 遍历 XML 文档是否会产生任何节点。如果在 XPath 表达式匹配的元素或元素的文档片段上应用 XPath 遍历后没有剩余节点，则返回 0。如果剩余任何节点，则返回 1。可选命名空间值，用于指定前缀的默认映射或命名空间映射，在评估 XPath 表达式时使用。 |
+| o           | EXTRACT(xml, xpath, [, namespaces ])                         | 返回与 XPath 表达式匹配的元素的 XML 片段。可选的命名空间值，用于指定前缀的默认映射或命名空间映射，在评估 XPath 表达式时使用 |
+| m           | EXTRACTVALUE(xml, xpathExpr))                                | 返回 XPath 表达式匹配的元素或元素的子元素的第一个文本节点的文本。 |
+| h s         | FACTORIAL(integer)                                           | 返回*integer*的阶乘，*integer*的范围是[0, 20]。否则返回NULL  |
+| h s         | FIND_IN_SET(matchStr, textStr)                               | 返回逗号分隔的 *textStr* 中给定 *matchStr* 的索引（从 1 开始）。如果未找到给定的 *matchStr* 或 *matchStr* 包含逗号，则返回 0。例如，FIND_IN_SET(‘bc’, ‘a,bc,def’) 返回 2 |
+| b           | FLOOR(value)                                                 | 与标准 `FLOOR(value)` 类似，除非 *value* 是整数类型，否则返回类型为双精度 |
+| b           | FORMAT_DATE(string, date)                                    | 根据指定的格式 *string* 格式化 *date*                        |
+| b           | FORMAT_DATETIME(string, timestamp)                           | 根据指定的格式 *string* 格式化 *timestamp*                   |
+| h s         | FORMAT_NUMBER(value, decimalVal)                             | 将数字 *value* 格式化为 ‘#,###,###.##’，四舍五入到小数位 *decimalVal*。如果 *decimalVal* 为 0，则结果没有小数点或小数部分 |
+| h s         | FORMAT_NUMBER(value, format)                                 | 将数字*值*格式化为 MySQL 的 FORMAT *格式*，如‘#,###,###.##0.00’ |
+| b           | FORMAT_TIME(string, time)                                    | 根据指定的格式 *string* 格式化 *time*                        |
+| b           | FORMAT_TIMESTAMP(string timestamp)                           | 根据指定的格式 *string* 格式化 *timestamp*                   |
+| s           | GETBIT(value, position)                                      | 相当于 `BIT_GET(value, position)`                            |
+| b o s       | GREATEST(expr [, expr ]*)                                    | 返回表达式中最大的一个                                       |
+| b h s       | IF(condition, value1, value2)                                | 如果 *condition* 为 TRUE，则返回 *value1*，否则返回 *value2* |
+| b s         | IFNULL(value1, value2)                                       | 相当于 `NVL(value1, value2)`                                 |
+| p           | string1 ILIKE string2 [ ESCAPE string3 ]                     | *string1* 是否与模式 *string2* 匹配，忽略大小写（类似于 `LIKE`） |
+| p           | string1 NOT ILIKE string2 [ ESCAPE string3 ]                 | *string1* 是否与模式 *string2* 不匹配，忽略大小写（类似于 `NOT LIKE`） |
+| b o         | INSTR(string, substring [, from [, occurrence ] ])           | 返回 *string* 中 *substring* 的位置，从 *from* （默认 1）开始搜索，直到找到 *substring* 的第 n 次 *occurrence* （默认 1） |
+| m           | INSTR(string, substring)                                     | 相当于 `POSITION(子字符串 IN 字符串)`                        |
+| b           | IS_INF(value)                                                | 返回*值*是否无限                                             |
+| b           | IS_NAN(value)                                                | 返回 *value* 是否为 NaN                                      |
+| m           | JSON_TYPE(jsonValue)                                         | 返回一个字符串值，表示 *jsonValue* 的类型                    |
+| m           | JSON_DEPTH(jsonValue)                                        | 返回一个整数值，表示 *jsonValue* 的深度                      |
+| m           | JSON_PRETTY(jsonValue)                                       | 返回 *jsonValue* 的格式化打印                                |
+| m           | JSON_LENGTH(jsonValue [, path ])                             | 返回一个整数，表示 *jsonValue* 的长度                        |
+| m           | JSON_INSERT(jsonValue, path, val [, path, val ]*)            | 返回一个 JSON 文档，插入 *jsonValue*、*path*、*val* 的数据。 |
+| m           | JSON_KEYS(jsonValue [, path ])                               | 返回表示 JSON *jsonValue* 的键的字符串                       |
+| m           | JSON_REMOVE(jsonValue, path [, path ])                       | 使用一系列 *path* 表达式从 *jsonValue* 中删除数据并返回结果  |
+| m           | JSON_REPLACE(jsonValue, path, val [, path, val ]*)           | 返回一个 JSON 文档，替换 *jsonValue*、*path*、*val* 的数据。 |
+| m           | JSON_SET(jsonValue, path, val [, path, val ]*)               | 返回一个 JSON 文档，其中包含 *jsonValue*、*path*、*val* 的数据。 |
+| m           | JSON_STORAGE_SIZE(jsonValue)                                 | 返回用于存储 *jsonValue* 二进制表示的字节数                  |
+| b o s       | LEAST(expr [, expr ]* )                                      | 返回表达式中的最小值                                         |
+| b m p s     | LEFT(string, length)                                         | 返回*字符串*最左边的*长度*个字符                             |
+| f s         | LEN(string)                                                  | 相当于 `CHAR_LENGTH(string)`                                 |
+| b f s       | LENGTH(string)                                               | 相当于 `CHAR_LENGTH(string)`                                 |
+| h s         | LEVENSHTEIN(string1, string2)                                | 返回 *string1* 和 *string2* 之间的编辑距离                   |
+| b           | LOG(numeric1 [, numeric2 ])                                  | 返回以 *numeric1* 为底数 *numeric2* 的对数，如果 *numeric2* 不存在，则返回以 e 为底数 |
+| m s         | LOG2(numeric)                                                | 返回 *numeric* 的以 2 为底的对数                             |
+| b o s       | LPAD(string, length [, pattern ])                            | 返回由 *string* 和 *length* 开头且带有 *pattern* 的字符串或字节值 |
+| b           | TO_BASE32(string)                                            | 将 *string* 转换为 base-32 编码形式并返回编码字符串          |
+| b           | FROM_BASE32(string)                                          | 以字符串形式返回 base-32 *string* 的解码结果                 |
+| m           | TO_BASE64(string)                                            | 将 *string* 转换为 base-64 编码形式并返回编码字符串          |
+| b m         | FROM_BASE64(string)                                          | 以字符串形式返回 base-64 *string* 的解码结果                 |
+| b           | TO_HEX(binary)                                               | 将 *binary* 转换为十六进制 varchar                           |
+| b           | FROM_HEX(varchar)                                            | 将十六进制编码的 *varchar* 转换为字节                        |
+| b o s       | LTRIM(string)                                                | 返回从开头删除所有空格的 *string*                            |
+| s           | MAP()                                                        | 返回空映射                                                   |
+| s           | MAP(key, value [, key, value]*)                              | 返回具有给定 *key*/*value* 对的映射                          |
+| s           | MAP_CONCAT(map [, map]*)                                     | 连接一个或多个地图。如果任何输入参数为“NULL”，则函数返回“NULL”。请注意，calcite 使用的是 LAST_WIN 策略 |
+| s           | MAP_CONTAINS_KEY(map, key)                                   | 返回 *map* 是否包含 *key*                                    |
+| s           | MAP_ENTRIES(map)                                             | 以数组形式返回 *map* 的条目，条目的顺序未定义                |
+| s           | MAP_KEYS(map)                                                | 以数组形式返回 *map* 的键，条目的顺序未定义。                |
+| s           | MAP_VALUES(map)                                              | 将 *map* 的值作为数组返回，条目的顺序未定义                  |
+| s           | MAP_FROM_ARRAYS(array1, array2)                              | 返回由 *array1* 和 *array2* 创建的映射。请注意，两个数组的长度应该相同，并且 calcite 使用 LAST_WIN 策略 |
+| s           | MAP_FROM_ENTRIES(arrayOfRows)                                | 返回由具有两个字段的行数组创建的映射。请注意，一行中的字段数必须为 2。请注意，calcite 使用 LAST_WIN 策略 |
+| s           | STR_TO_MAP(string [, stringDelimiter [, keyValueDelimiter]]) | 使用分隔符将 *string* 拆分为键/值对后返回映射。*stringDelimiter* 的默认分隔符为‘,’，*keyValueDelimiter* 的默认分隔符为‘:’。请注意，calcite 使用的是 LAST_WIN 策略 |
+| b m p s     | MD5(string)                                                  | 计算 *string* 的 MD5 128 位校验和并将其作为十六进制字符串返回 |
+| m           | MONTHNAME(date)                                              | 返回连接的区域设置中 *datetime* 月份的名称；例如，对于 DATE ‘2020-02-10’ 和 TIMESTAMP ‘2020-02-10 10:10:10’，它均返回‘二月’ |
+| o s         | NVL(value1, value2)                                          | 如果 *value1* 不为空，则返回 *value1*，否则返回 *value2*     |
+| b           | OFFSET(index)                                                | 当索引一个数组时，将 *index* 包装在 `OFFSET` 中将返回基于 0 的 *index* 处的值；如果 *index* 超出范围，则会引发错误 |
+| b           | ORDINAL(index)                                               | 与 `OFFSET` 类似，但 *index* 从 1 开始                       |
+| b           | PARSE_DATE(format, string)                                   | 使用 *format* 指定的格式将日期的 *string* 表示形式转换为 DATE 值 |
+| b           | PARSE_DATETIME(format, string)                               | 使用 *format* 指定的格式将日期时间的 *string* 表示形式转换为 TIMESTAMP 值 |
+| b           | PARSE_TIME(format, string)                                   | 使用 *format* 指定的格式将时间的 *string* 表示形式转换为 TIME 值 |
+| b           | PARSE_TIMESTAMP(format, string[, timeZone])                  | 使用 *format* 指定的格式将时间戳的 *string* 表示形式转换为 *timeZone* 中的 TIMESTAMP WITH LOCAL TIME ZONE 值 |
+| h s         | PARSE_URL(urlString, partToExtract [, keyToExtract] )        | 从 *urlString* 返回指定的 *partToExtract*。*partToExtract* 的有效值包括 HOST、PATH、QUERY、REF、PROTOCOL、AUTHORITY、FILE 和 USERINFO。*keyToExtract* 指定要提取哪个查询 |
+| b s         | POW(numeric1, numeric2)                                      | 返回 *numeric1* 的 *numeric2* 次方                           |
+| p           | RANDOM()                                                     | 生成 0 到 1 之间的随机双精度数（含 0 和 1）                  |
+| s           | REGEXP(string, regexp)                                       | 相当于 `string1 RLIKE string2`                               |
+| b           | REGEXP_CONTAINS(string, regexp)                              | 返回 *string* 是否与 *regexp* 部分匹配                       |
+| b           | REGEXP_EXTRACT(string, regexp [, position [, occurrence]])   | 返回 *string* 中与 *regexp* 匹配的子字符串，从 *position*（默认 1）开始搜索，直到找到第 n 次 *occurrence*（默认 1）。如果没有匹配，则返回 NULL |
+| b           | REGEXP_EXTRACT_ALL(string, regexp)                           | 返回 *string* 中与 *regexp* 匹配的所有子字符串的数组。如果没有匹配，则返回一个空数组 |
+| b           | REGEXP_INSTR(string, regexp [, position [, occurrence [, occurrence_position]]]) | 返回与 *regexp* 匹配的 *string* 中子字符串的最低 1 位置，从 *position*（默认 1）开始搜索，直到找到第 n 个 *occurrence*（默认 1）。将 indication_position（默认 0）设置为 1 将返回子字符串的结束位置 + 1。如果没有匹配，则返回 0 |
+| m o p s     | REGEXP_LIKE(string, regexp [, flags])                        | 相当于 `string1 RLIKE string2`，但带有一个可选的搜索标志参数。支持的标志包括：<ul><li>i：不区分大小写匹配</li><li>c：区分大小写匹配</li><li>n：区分换行符匹配</li><li>s：不区分换行符匹配</li><li>m：多行</li></ul> |
+| b m o       | REGEXP_REPLACE(string, regexp, rep [, pos [, occurrence [, matchType]]]) | 将 *string* 中与 *regexp* 匹配的所有子字符串替换为 expr 中起始 *pos* 处的 *rep*（如果省略，则默认为 1），*occurrence* 指定要搜索匹配的哪一次出现（如果省略，则默认为 1），*matchType* 指定如何执行匹配 |
+| b           | REGEXP_SUBSTR(string, regexp [, position [, occurrence]])    | REGEXP_EXTRACT 的同义词                                      |
+| b m p s     | REPEAT(string, integer)                                      | 返回由重复 *integer* 次的 *string* 组成的字符串；如果 *integer* 小于 1，则返回空字符串 |
+| b m         | REVERSE(string)                                              | 返回字符顺序颠倒的*字符串*                                   |
+| b m p s     | RIGHT(string, length)                                        | 返回*字符串*最右边的*长度*个字符                             |
+| h s         | string1 RLIKE string2                                        | *string1* 是否与正则表达式模式 *string2* 匹配（类似于 `LIKE`，但使用 Java 正则表达式） |
+| h s         | string1 NOT RLIKE string2                                    | *string1* 是否与正则表达式模式 *string2* 不匹配（类似于“NOT LIKE”，但使用 Java 正则表达式） |
+| b o s       | RPAD(string, length[, pattern ])                             | 返回由 *string* 附加到 *length* 并使用 *pattern* 组成的字符串或字节值 |
+| b o s       | RTRIM(string)                                                | 返回删除末尾所有空格的 *string*                              |
+| b           | SAFE_ADD(numeric1, numeric2)                                 | 返回 *numeric1* + *numeric2*，溢出时返回 NULL。参数隐式转换为 BIGINT、DOUBLE 或 DECIMAL 类型之一 |
+| b           | SAFE_CAST(value AS type)                                     | 将 *value* 转换为 *type*，如果转换失败则返回 NULL            |
+| b           | SAFE_DIVIDE(numeric1, numeric2)                              | 返回 *numeric1* / *numeric2*，如果溢出或 *numeric2* 为零，则返回 NULL。参数隐式转换为 BIGINT、DOUBLE 或 DECIMAL 类型之一 |
+| b           | SAFE_MULTIPLY(numeric1, numeric2)                            | 返回 *numeric1* * *numeric2*，或溢出时返回 NULL。参数隐式转换为 BIGINT、DOUBLE 或 DECIMAL 类型之一 |
+| b           | SAFE_NEGATE(numeric)                                         | 返回 *numeric* * -1，或溢出时返回 NULL。参数隐式转换为 BIGINT、DOUBLE 或 DECIMAL 类型之一 |
+| b           | SAFE_OFFSET(index)                                           | 与 `OFFSET` 类似，但如果 *index* 超出范围，则返回 null       |
+| b           | SAFE_ORDINAL(index)                                          | 与 `OFFSET` 类似，但 *index* 从 1 开始，并且如果 *index* 超出范围则返回 null |
+| b           | SAFE_SUBTRACT(numeric1, numeric2)                            | 返回 *numeric1* - *numeric2*，或溢出时返回 NULL。参数隐式转换为 BIGINT、DOUBLE 或 DECIMAL 类型之一 |
+| *           | SEC(numeric)                                                 | 以弧度返回 *numeric* 的正割                                  |
+| *           | SECH(numeric)                                                | 返回 *numeric* 的双曲正割                                    |
+| b m p s     | SHA1(string)                                                 | 计算 *string* 的 SHA-1 哈希值并将其作为十六进制字符串返回    |
+| b p         | SHA256(string)                                               | 计算 *string* 的 SHA-256 哈希值并将其作为十六进制字符串返回  |
+| b p         | SHA512(string)                                               | 计算 *string* 的 SHA-512 哈希值并将其作为十六进制字符串返回  |
+| *           | SINH(numeric)                                                | 返回 *numeric* 的双曲正弦值                                  |
+| b m o p     | SOUNDEX(string)                                              | 返回 *string* 的语音表示；如果 *string* 使用多字节编码（如 UTF-8）进行编码，则抛出 |
+| s           | SOUNDEX(string)                                              | 返回 *string* 的语音表示；如果 *string* 使用多字节编码（如 UTF-8）编码，则返回原始 *string* |
+| m s         | SPACE(integer)                                               | 返回一个由 *整数* 空格组成的字符串；如果 *整数* 小于 1，则返回一个空字符串 |
+| b           | SPLIT(string [, delimiter ])                                 | 返回以 *delimiter* 分隔的 *string* 字符串数组（如果省略，则默认为逗号）。如果 *string* 为空，则返回一个空数组，否则，如果 *delimiter* 为空，则返回一个包含原始 *string* 的数组。 |
+| f s         | STARTSWITH(string1, string2)                                 | 返回 *string2* 是否是 *string1* 的前缀                       |
+| b p         | STARTS_WITH(string1, string2)                                | 相当于 `STARTSWITH(string1, string2)`                        |
+| m           | STRCMP(string, string)                                       | 如果两个字符串相同则返回 0，如果第一个参数小于第二个参数则返回 -1，如果第二个参数小于第一个参数则返回 1 |
+| b p         | STRPOS(string, substring)                                    | 相当于 `POSITION(子字符串 IN 字符串)`                        |
+| b m o p     | SUBSTR(string, position [, substringLength ])                | 返回 *string* 的一部分，从字符 *position* 开始，长度为 *substringLength* 个字符。SUBSTR 使用输入字符集定义的字符计算长度 |
+| *           | TANH(numeric)                                                | 返回 *numeric* 的双曲正切                                    |
+| b           | TIME(hour, minute, second)                                   | 返回 TIME 值 *小时*、*分钟*、*秒*（所有类型为 INTEGER）      |
+| b           | TIME(timestamp)                                              | 从 *timestamp*（本地时间；BigQuery 的 DATETIME 类型）中提取时间 |
+| b           | TIME(instant)                                                | 从 *timestampLtz*（一个瞬间；BigQuery 的 TIMESTAMP 类型）中提取时间，假设为 UTC |
+| b           | TIME(instant, timeZone)                                      | 从 *timeZone* 中的 *timestampLtz*（瞬间；BigQuery 的 TIMESTAMP 类型）中提取时间 |
+| b           | TIMESTAMP(string)                                            | 相当于 `CAST(string AS TIMESTAMP WITH LOCAL TIME ZONE)`      |
+| b           | TIMESTAMP(string, timeZone)                                  | 相当于 `CAST(string AS TIMESTAMP WITH LOCAL TIME ZONE)`，转换为 *timeZone* |
+| b           | TIMESTAMP(date)                                              | 将*日期*转换为带有本地时区的时间戳值（午夜）                 |
+| b           | TIMESTAMP(date, timeZone)                                    | 将 *date* 转换为带有本地时区的时间戳值（午夜），以 *timeZone* 为单位 |
+| b           | TIMESTAMP(timestamp)                                         | 将 *timestamp* 转换为带有本地时区的时间戳，假设为 UTC        |
+| b           | TIMESTAMP(timestamp, timeZone)                               | 将 *timestamp* 转换为 *timeZone* 中的带有本地时区的时间戳    |
+| b           | TIMESTAMP_ADD(timestamp, interval)                           | 返回在 *timestamp* 之后 *interval* 发生的 TIMESTAMP 值       |
+| b           | TIMESTAMP_DIFF(timestamp, timestamp2, timeUnit)              | 返回 *timestamp* 和 *timestamp2* 之间的 *timeUnit* 的整数。相当于 `TIMESTAMPDIFF(timeUnit, timestamp2, timestamp)` 和 `(timestamp - timestamp2) timeUnit` |
+| b s         | TIMESTAMP_MICROS(integer)                                    | 返回 1970-01-01 00:00:00 之后 *整数* 微秒的 TIMESTAMP        |
+| b s         | TIMESTAMP_MILLIS(integer)                                    | 返回 1970-01-01 00:00:00 之后 *整数* 毫秒的 TIMESTAMP        |
+| b s         | TIMESTAMP_SECONDS(integer)                                   | 返回 1970-01-01 00:00:00 之后 *整数* 秒的 TIMESTAMP          |
+| b           | TIMESTAMP_SUB(timestamp, interval)                           | 返回 *timestamp* 之前 *interval* 的 TIMESTAMP 值             |
+| b           | TIMESTAMP_TRUNC(timestamp, timeUnit)                         | 将 *timestamp* 截断为 *timeUnit* 的粒度，四舍五入到单位的开头 |
+| b           | TIME_ADD(time, interval)                                     | 将*间隔*添加到*时间*，与任何时区无关                         |
+| b           | TIME_DIFF(time, time2, timeUnit)                             | 返回 *time* 和 *time2* 之间的 *timeUnit* 的整数              |
+| b           | TIME_SUB(time, interval)                                     | 返回 *time* 之前 *interval* 的 TIME 值                       |
+| b           | TIME_TRUNC(time, timeUnit)                                   | 将 *time* 截断为 *timeUnit* 的粒度，四舍五入到单位的开头     |
+| m o p       | TO_CHAR(timestamp, format)                                   | 使用格式 *format* 将 *timestamp* 转换为字符串                |
+| b           | TO_CODE_POINTS(string)                                       | 将 *string* 转换为表示代码点或扩展 ASCII 字符值的整数数组    |
+| o p         | TO_DATE(string, format)                                      | 使用格式 *format* 将 *string* 转换为日期                     |
 
-笔记：
+注意：
 
-- Calcite 没有 Redshift 库，因此使用 Postgres 库。这些函数`DATEADD`是`DATEDIFF`在 Redshift 而不是 Postgres 中实现的，但仍然出现在 Calcite 的 Postgres 库中
+- Calcite 没有 Redshift 库，因此改用 Postgres 库。函数 `DATEADD`、`DATEDIFF` 在 Redshift 中实现，而不是 Postgres，但它们仍然出现在 Calcite 的 Postgres 库中；
 
-- 函数`DATEADD`, `DATEDIFF`,`DATE_PART`需要 Babel 解析器
-
-- `JSON_TYPE`///如果参数为null则`JSON_DEPTH`返回`JSON_PRETTY`null`JSON_STORAGE_SIZE`
-
-- `JSON_LENGTH`//如果第一个参数为null则返回`JSON_KEYS`null`JSON_REMOVE`
-
+- 函数 `DATEADD`、`DATEDIFF`、`DATE_PART` 需要 Babel 解析器；
+- 如果参数为 null，则 `JSON_TYPE` / `JSON_DEPTH` / `JSON_PRETTY` / `JSON_STORAGE_SIZE` 返回 null；
+- 如果第一个参数为 null，则 `JSON_LENGTH` / `JSON_KEYS` / `JSON_REMOVE` 返回 null；
 - `JSON_TYPE` 通常返回一个大写字符串标志，指示 JSON 输入的类型。目前支持的类型标志有：
-  - 整数
-  - 细绳
-  - 漂浮
-  - 双倍的
-  - 长的
-  - 布尔值
-  - 日期
-  - 目的
-  - 大批
-  - 无效的
-  
+  - INTEGER
+  - STRING
+  - FLOAT
+  - DOUBLE
+  - LONG
+  - BOOLEAN
+  - DATE
+  - OBJECT
+  - ARRAY
+  - NULL
+
 - `JSON_DEPTH` 定义 JSON 值的深度如下：
   - 空数组、空对象或标量值的深度为 1；
-  - 仅包含深度为 1 的元素的非空数组或仅包含深度为 1 的成员值的非空对象的深度为 2；
+  - 仅包含深度为 1 的元素的非空数组或仅包含深度为 1 的成员值的非空对象深度为 2；
   - 否则，JSON 文档的深度大于 2。
-  
+
 - `JSON_LENGTH` 定义 JSON 值的长度如下：
   - 标量值的长度为 1；
-  - 数组或对象的长度是包含的元素数量。
+  - 数组或对象的长度是其包含的元素数。
 
-方言特定的聚合函数。
 
-| C    | 运算符语法                                                   | 描述                                                         |
-| :--- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| C    | 骨料(m)                                                      | 在当前 GROUP BY 键的上下文中计算度量*m*                      |
-| BP   | ARRAY_AGG( [ ALL \| DISTINCT ] 值 [ 尊重 NULLS \| 忽略 NULLS ] [ ORDER BY orderItem [, orderItem ]* ] ) | 将值收集到数组中                                             |
-| BP   | ARRAY_CONCAT_AGG([ ALL \| DISTINCT ] 值 [ ORDER BY orderItem [, orderItem ]* ] ) | 将数组连接成数组                                             |
-| p    | BOOL_AND（条件）                                             | 同义词`EVERY`                                                |
-| p    | BOOL_OR（条件）                                              | 同义词`SOME`                                                 |
-| 乙   | COUNTIF(条件)                                                | *返回条件*为 TRUE 的行数；等价于`COUNT(*) FILTER (WHERE condition)` |
-| 米   | GROUP_CONCAT( [ ALL \| DISTINCT ] value [, value ]* [ ORDER BY orderItem [, orderItem ]* ] [ SEPARATOR 分隔符 ] ) | MySQL 特定的变体`LISTAGG`                                    |
-| 乙   | 逻辑与（条件）                                               | 同义词`EVERY`                                                |
-| 乙   | LOGICAL_OR（条件）                                           | 同义词`SOME`                                                 |
-| s    | MAX_BY（值，补偿）                                           | 同义词`ARG_MAX`                                              |
-| s    | MIN_BY（值，补偿）                                           | 同义词`ARG_MIN`                                              |
-| 乙   | PERCENTILE_CONT(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_CONT`，`PERCENTILE_CONT(value, fraction) OVER (ORDER BY value)`等价于标准`PERCENTILE_CONT(fraction) WITHIN GROUP (ORDER BY value)` |
-| 乙   | PERCENTILE_DISC(值, 分数 [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准的同义词`PERCENTILE_DISC`，`PERCENTILE_DISC(value, fraction) OVER (ORDER BY value)`等价于标准`PERCENTILE_DISC(fraction) WITHIN GROUP (ORDER BY value)` |
-| BP   | STRING_AGG( [ ALL \| DISTINCT ] 值 [, 分隔符] [ ORDER BY orderItem [, orderItem ]* ] ) | 同义词`LISTAGG`                                              |
+特定方言的聚合函数。
+
+| C（兼容性） | 运算符语法                                                   | 描述                                                         |
+| :---------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
+| c           | AGGREGATE(m)                                                 | 在当前 GROUP BY 键的上下文中计算度量 *m*                     |
+| b p         | ARRAY_AGG( [ ALL \| DISTINCT ] value [ RESPECT NULLS \| IGNORE NULLS ] [ ORDER BY orderItem [, orderItem ]* ] ) | 将值收集到数组中                                             |
+| b p         | ARRAY_CONCAT_AGG( [ ALL \| DISTINCT ] value [ ORDER BY orderItem [, orderItem ]* ] ) | 将数组连接成数组                                             |
+| p s         | BOOL_AND(condition)                                          | `EVERY` 的同义词                                             |
+| p s         | BOOL_OR(condition)                                           | `SOME` 的同义词                                              |
+| b           | COUNTIF(condition)                                           | 返回*条件*为 TRUE 的行数；相当于 `COUNT(*) FILTER (WHERE 条件)` |
+| m           | GROUP_CONCAT( [ ALL \| DISTINCT ] value [, value ]* [ ORDER BY orderItem [, orderItem ]* ] [ SEPARATOR separator ] ) | MySQL 特定的 `LISTAGG` 变体                                  |
+| b           | LOGICAL_AND(condition)                                       | `EVERY` 的同义词                                             |
+| b           | LOGICAL_OR(condition)                                        | `SOME` 的同义词                                              |
+| s           | MAX_BY(value, comp)                                          | `ARG_MAX` 的同义词                                           |
+| s           | MIN_BY(value, comp)                                          | `ARG_MIN` 的同义词                                           |
+| b           | PERCENTILE_CONT(value, fraction [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准 `PERCENTILE_CONT` 的同义词，其中 `PERCENTILE_CONT(value,fraction)OVER(ORDER BY value)` 相当于标准 `PERCENTILE_CONT(fraction)WITHIN GROUP(ORDER BY value)` |
+| b           | PERCENTILE_DISC(value, fraction [ RESPECT NULLS \| IGNORE NULLS ] ) OVER windowSpec | 标准 `PERCENTILE_DISC` 的同义词，其中 `PERCENTILE_DISC(value,fraction)OVER(ORDER BY value)` 相当于标准 `PERCENTILE_DISC(fraction)WITHIN GROUP(ORDER BY value)` |
+| b p         | STRING_AGG( [ ALL \| DISTINCT ] value [, separator] [ ORDER BY orderItem [, orderItem ]* ] ) | `LISTAGG` 的同义词                                           |
 
 用法示例：
 
-##### JSON_TYPE 示例
+#### JSON_TYPE 示例
 
 SQL
 
-```
+```sql
 SELECT JSON_TYPE(v) AS c1,
   JSON_TYPE(JSON_VALUE(v, 'lax $.b' ERROR ON ERROR)) AS c2,
   JSON_TYPE(JSON_VALUE(v, 'strict $.a[0]' ERROR ON ERROR)) AS c3,
@@ -1881,15 +1877,15 @@ LIMIT 10;
 
 结果
 
-|  C1  |  C2  |  C3  |   C4   |
-| :--: | :--: | :--: | :----: |
-| 目的 | 大批 | 整数 | 布尔值 |
+|   C1   |  C2   |   C3    |   C4    |
+| :----: | :---: | :-----: | :-----: |
+| OBJECT | ARRAY | INTEGER | BOOLEAN |
 
-##### JSON_DEPTH 示例
+#### JSON_DEPTH 示例
 
 SQL
 
-```
+```sql
 SELECT JSON_DEPTH(v) AS c1,
   JSON_DEPTH(JSON_VALUE(v, 'lax $.b' ERROR ON ERROR)) AS c2,
   JSON_DEPTH(JSON_VALUE(v, 'strict $.a[0]' ERROR ON ERROR)) AS c3,
@@ -1904,11 +1900,11 @@ LIMIT 10;
 | :--: | :--: | :--: | :--: |
 |  3   |  2   |  1   |  1   |
 
-##### JSON_LENGTH 示例
+#### JSON_LENGTH 示例
 
 SQL
 
-```
+```sql
 SELECT JSON_LENGTH(v) AS c1,
   JSON_LENGTH(v, 'lax $.a') AS c2,
   JSON_LENGTH(v, 'strict $.a[0]') AS c3,
@@ -1923,18 +1919,16 @@ LIMIT 10;
 | :--: | :--: | :--: | :--: |
 |  1   |  2   |  1   |  1   |
 
-##### JSON_INSERT 示例
+#### JSON_INSERT 示例
 
 SQL
 
-```SQL
+```sql
 SELECT JSON_INSERT(v, '$.a', 10, '$.c', '[1]') AS c1,
   JSON_INSERT(v, '$', 10, '$.c', '[1]') AS c2
 FROM (VALUES ('{"a": [10, true]}')) AS t(v)
 LIMIT 10;
 ```
-
-
 
 结果
 
@@ -1942,11 +1936,11 @@ LIMIT 10;
 | ------------------------------ | ------------------------------ |
 | {“a”：1，“b”：[2]，“c”：“[1]”} | {“a”：1，“b”：[2]，“c”：“[1]”} |
 
-##### JSON_KEYS 示例
+#### JSON_KEYS 示例
 
 SQL
 
-```
+```sql
 SELECT JSON_KEYS(v) AS c1,
   JSON_KEYS(v, 'lax $.a') AS c2,
   JSON_KEYS(v, 'lax $.b') AS c2,
@@ -1958,15 +1952,15 @@ LIMIT 10;
 
 结果
 
-|     C1     |   C2   |  C3   |   C4   |   C5   |
-| :--------: | :----: | :---: | :----: | :----: |
-| [“a”，“b”] | 无效的 | [“C”] | 无效的 | 无效的 |
+|     C1     |  C2  |  C3   |  C4  |  C5  |
+| :--------: | :--: | :---: | :--: | :--: |
+| [“a”, “b”] | NULL | [“c”] | NULL | NULL |
 
-##### JSON_REMOVE 示例
+#### JSON_REMOVE 示例
 
 SQL
 
-```
+```sql
 SELECT JSON_REMOVE(v, '$[1]') AS c1
 FROM (VALUES ('["a", ["b", "c"], "d"]')) AS t(v)
 LIMIT 10;
@@ -1974,15 +1968,15 @@ LIMIT 10;
 
 结果
 
-|    C1    |
-| :------: |
-| [“广告”] |
+|     C1     |
+| :--------: |
+| [“a”, “d”] |
 
-##### JSON_REPLACE 示例
+#### JSON_REPLACE 示例
 
 SQL
 
-```SQL
+```sql
 SELECT
 JSON_REPLACE(v, '$.a', 10, '$.c', '[1]') AS c1,
 JSON_REPLACE(v, '$', 10, '$.c', '[1]') AS c2
@@ -1990,19 +1984,17 @@ FROM (VALUES ('{\"a\": 1,\"b\":[2]}')) AS t(v)
 limit 10;
 ```
 
-
-
 结果
 
 | C1                             | C2                              |
 | ------------------------------ | ------------------------------- |
 | {“a”：1，“b”：[2]，“c”：“[1]”} | {“a”:1 , “b”:[2] , “c”:“[1]”}”) |
 
-##### JSON_SET 示例
+#### JSON_SET 示例
 
 SQL
 
-```SQL
+```sql
 SELECT
 JSON_SET(v, '$.a', 10, '$.c', '[1]') AS c1,
 JSON_SET(v, '$', 10, '$.c', '[1]') AS c2
@@ -2010,19 +2002,17 @@ FROM (VALUES ('{\"a\": 1,\"b\":[2]}')) AS t(v)
 limit 10;
 ```
 
-
-
 结果
 
 | C1                  | C2   |
 | ------------------- | ---- |
 | {“a”：10，“b”：[2]} | 10   |
 
-##### JSON_STORAGE_SIZE 示例
+#### JSON_STORAGE_SIZE 示例
 
 SQL
 
-```
+```sql
 SELECT
 JSON_STORAGE_SIZE('[100, \"sakila\", [1, 3, 5], 425.05]') AS c1,
 JSON_STORAGE_SIZE('{\"a\": 10, \"b\": \"a\", \"c\": \"[1, 3, 5, 7]\"}') AS c2,
@@ -2041,7 +2031,7 @@ limit 10;
 
 SQL
 
-```
+```sql
 SELECT DECODE(f1, 1, 'aa', 2, 'bb', 3, 'cc', 4, 'dd', 'ee') as c1,
   DECODE(f2, 1, 'aa', 2, 'bb', 3, 'cc', 4, 'dd', 'ee') as c2,
   DECODE(f3, 1, 'aa', 2, 'bb', 3, 'cc', 4, 'dd', 'ee') as c3,
@@ -2054,13 +2044,13 @@ FROM (VALUES (1, 2, 3, 4, 5)) AS t(f1, f2, f3, f4, f5);
 
 |  C1  |  C2  |  C3  |  C4  |  C5  |
 | :--: | :--: | :--: | :--: | :--: |
-|  啊  |  BB  | 抄送 |  DD  |  伊  |
+|  aa  |  bb  |  cc  |  dd  |  ee  |
 
 #### 翻译示例
 
 SQL
 
-```
+```sql
 SELECT TRANSLATE('Aa*Bb*Cc''D*d', ' */''%', '_') as c1,
   TRANSLATE('Aa/Bb/Cc''D/d', ' */''%', '_') as c2,
   TRANSLATE('Aa Bb Cc''D d', ' */''%', '_') as c3,
@@ -2074,48 +2064,65 @@ FROM (VALUES (true)) AS t(f0);
 | :---------: | :---------: | :---------: | :---------: |
 | Aa_Bb_CcD_d | Aa_Bb_CcD_d | Aa_Bb_CcD_d | Aa_Bb_CcD_d |
 
+### 高阶函数
+
+
+
+```sql
+lambdaExpression:
+      parameters '->' expression
+
+parameters:
+      '(' [ identifier [, identifier ] ] ')'
+  |   identifier
+```
+
+高阶函数未包含在 SQL 标准中，因此所有函数也将在[方言特定运算符](https://calcite.apache.org/docs/reference.html#dialect-specific-operators)中列出。
+
+带有 lambda 参数的函数示例为 *EXISTS*。
+
 ### 用户定义函数
 
-方解石是可延伸的。你可以使用用户代码定义每种函数。对于每种函数，通常有多种定义函数的方法，从方便到高效。
+Calcite 是可扩展的。您可以使用用户代码定义每种函数。对于每种函数，通常有几种定义函数的方法，从方便到高效不等。
 
 要实现*标量函数*，有 3 个选项：
 
-- 创建一个具有公共静态方法的类`eval`，并注册该类；
-- 创建一个具有公共非静态`eval`方法和不带参数的公共构造函数的类，并注册该类；
+- 创建一个具有公共静态 `eval` 方法的类，并注册该类；
+- 创建一个具有公共非静态 `eval` 方法和无参数公共构造函数的类，并注册该类；
 - 创建一个具有一个或多个公共静态方法的类，并注册每个类/方法组合。
 
-要实现*聚合函数*，有两种选择：
+要实现*聚合函数*，有 2 个选项：
 
-- 创建一个具有 public static 和方法的类`init`，`add`并`result`注册该类；
-- 创建一个具有公共非静态 和 方法的类`init`，以及一个不带参数的公共构造函数，并注册该类。
+- 创建一个具有公共静态 `init`、`add` 和 `result` 方法的类，并注册该类；
+- 创建一个具有公共非静态 `init`、`add` 和 `result` 方法以及无参数的公共构造函数的类，并注册该类。
 
-`merge`（可选）向类添加公共方法；这允许 Calcite 生成合并小计的代码。
+可选地，向类添加一个公共 `merge` 方法；这允许 Calcite 生成合并小计的代码。
 
-（可选）让你的类实现 [SqlSplittableAggFunction](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlSplittableAggFunction.html) 接口；这使得 Calcite 可以跨多个聚合阶段分解函数，从汇总表中汇总，并通过连接推送它。
+可选地，让您的类实现 [SqlSplittableAggFunction](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlSplittableAggFunction.html) 接口；这允许 Calcite 跨多个聚合阶段分解函数，从汇总表中汇总，并通过连接推送它。
 
-要实现*表函数*，有 3 个选项：
+要实现 *table 函数*，有 3 个选项：
 
-- `eval`创建一个具有返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)的静态方法的类，并注册该类；
-- `eval`创建一个具有返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)的非静态方法的类，并注册该类；
-- 创建一个具有一个或多个返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)的公共静态方法的类，并注册每个类/方法组合。
+- 创建一个具有静态 `eval` 方法的类，该方法返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)，并注册该类；
+- 创建一个具有非静态 `eval` 方法的类，该方法返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)，并注册该类；
+- 创建一个具有一个或多个公共静态方法的类，这些方法返回 [ScannableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ScannableTable.html) 或 [QueryableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/QueryableTable.html)，并注册每个类/方法组合。
 
-要实现*表宏*，有 3 个选项：
+要实现 *table 宏*，有 3 个选项：
 
-- `eval`创建一个具有返回 [TranslatableTable 的](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)静态方法的类，并注册该类；
-- `eval`创建一个具有返回 [TranslatableTable 的](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)非静态方法的类，并注册该类；
-- 创建一个具有一个或多个返回 [TranslatableTable 的](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)公共静态方法的类，并注册每个类/方法组合。
+- 创建一个具有静态 `eval` 方法的类，该方法返回 [TranslatableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)，并注册该类；
+- 创建一个具有非静态 `eval` 方法的类，该方法返回 [TranslatableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)，并注册该类；
+- 创建一个具有一个或多个公共静态方法的类，该方法返回 [TranslatableTable](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/TranslatableTable.html)，并注册每个类/方法组合。
 
-Calcite 从实现函数的 Java 方法的参数和返回类型推导出函数的参数类型和结果类型。[此外，你可以使用参数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/linq4j/function/Parameter.html)注释指定每个参数的名称和可选性 。
+Calcite 从实现函数的 Java 方法的参数和返回类型推断出函数的参数类型和结果类型。此外，您可以使用 [Parameter](https://calcite.apache.org/javadocAggregate/org/apache/calcite/linq4j/function/Parameter.html) 注释指定每个参数的名称和可选性。
 
 #### 使用命名参数和可选参数调用函数
 
-通常，当你调用函数时，需要按顺序指定其所有参数。但如果函数有很多参数，特别是如果你想随着时间的推移添加更多参数，这可能会成为问题。
+通常，调用函数时，需要按顺序指定其所有参数。但如果函数有很多参数，尤其是当您想随着时间的推移添加更多参数时，这可能会成为一个问题。
 
-为了解决这个问题，SQL 标准允许你按名称传递参数，并定义可选参数（即，具有默认值，如果未指定则使用默认值）。
+为了解决这个问题，SQL 标准允许您按名称传递参数，并定义可选参数（即，如果未指定参数，则使用默认值）。
 
-假设你有一个 function `f`，声明如下伪语法：
+假设您有一个函数 `f`，声明如下伪语法：
 
-```
+```sql
 FUNCTION f(
   INTEGER a,
   INTEGER b DEFAULT NULL,
@@ -2124,40 +2131,41 @@ FUNCTION f(
   INTEGER e DEFAULT NULL) RETURNS INTEGER
 ```
 
-该函数的所有参数都有名称和parameters，并且 有默认值`b`，因此都是可选的。（在方解石中，是可选参数唯一允许的默认值； [将来](https://issues.apache.org/jira/browse/CALCITE-947)可能会改变。）
+该函数的所有参数都有名称，并且参数 `b`、`d` 和 `e` 的默认值为 `NULL`，因此是可选的（在 Calcite 中，`NULL` 是可选参数唯一允许的默认值；这可能会在[未来](https://issues.apache.org/jira/browse/CALCITE-947)发生变化）。
 
-当调用带有可选参数的函数时，可以省略列表末尾的可选参数，或者`DEFAULT` 对任何可选参数使用关键字。这里有些例子：
+调用带有可选参数的函数时，您可以省略列表末尾的可选参数，或者对任何可选参数使用 `DEFAULT` 关键字。以下是一些示例：
 
-- `f(1, 2, 3, 4, 5)`按顺序为每个参数提供一个值；
-- `f(1, 2, 3, 4)`省略`e`，获取其默认值`NULL`;
-- `f(1, DEFAULT, 3)`省略`d`和`e`，并指定使用默认值`b`;
-- `f(1, DEFAULT, 3, DEFAULT, DEFAULT)`和前面的例子效果一样；
-- `f(1, 2)`不合法，因为`c`不是可选的；
-- `f(1, 2, DEFAULT, 4)`不合法，因为`c`不是可选的。
+- `f(1, 2, 3, 4, 5)` 按顺序为每个参数提供一个值；
+- `f(1, 2, 3, 4)` 省略 `e`，获取其默认值 `NULL`；
+- `f(1, DEFAULT, 3)` 省略 `d` 和 `e`，并指定使用默认值 `b`；
+- `f(1, DEFAULT, 3, DEFAULT, DEFAULT)` 与上一个示例具有相同的效果；
+- `f(1, 2)` 不合法，因为 `c` 不是可选的；
+- `f(1, 2, DEFAULT, 4)` 不合法，因为 `c` 不是可选的。
 
-你可以使用语法按名称指定参数`=>`。如果一个参数被命名，那么它们都必须被命名。参数可以是任何其他参数，但不得多次指定任何参数，并且你需要为每个参数提供一个不可选的值。这里有些例子：
+您可以使用 `=>` 语法按名称指定参数。如果一个参数被命名，则所有参数都必须被命名。参数可以位于任何其他参数中，但不得多次指定任何参数，并且您需要为每个非可选参数提供一个值。以下是一些示例：
 
-- `f(c => 3, d => 1, a => 0)`等价于`f(0, NULL, 3, 1, NULL)`；
-- `f(c => 3, d => 1)`不合法，因为你尚未指定 的值 `a`并且`a`不是可选的。
+- `f(c => 3, d => 1, a => 0)` 等同于 `f(0, NULL, 3, 1, NULL)`;
+- `f(c => 3, d => 1)` 不合法，因为您没有为 `a` 指定值，并且 `a` 不是可选的。
 
 #### SQL Hint
 
-提示是给优化器的指令。在编写SQL时，你可能会知道优化器未知的数据信息。提示使你能够做出通常由优化器做出的决策。
+提示是给优化器的指令。编写 SQL 时，您可能知道优化器不知道的数据信息。提示使您能够做出通常由优化器做出的决策。
 
-- 规划器执行者：没有完美的规划器，因此实现提示以允许用户更好地控制执行是有意义的。例如：“永远不要将此子查询与其他子查询合并”( `/*+ no_merge */`)；“将这些表视为前导表”( `/*+ leading */`) 以影响连接顺序等；
-- 附加元数据/统计信息：一些统计信息，例如“扫描的表索引”或“某些洗牌键的倾斜信息”对于查询来说是动态的，用提示配置它们会非常方便，因为我们来自规划器的规划元数据非常方便通常不太准确；
-- 算子资源限制：在很多情况下，我们会给执行算子一个默认的资源配置，即最小并行度、内存（资源消耗 UDF）、特殊资源要求（GPU 或 SSD 磁盘）……对资源进行分析会非常灵活每个查询都有提示（不是作业）。
+- 规划器执行器：没有完美的规划器，因此实施提示以允许用户更好地控制执行是有意义的。例如：“永远不要将此子查询与其他子查询合并”（`/*+ no_merge */`）；“将这些表视为前导表”（`/*+ leading */`）以影响连接顺序等；
+- 附加元数据/统计信息：某些统计信息（如“用于扫描的表索引”或“某些 shuffle 键的倾斜信息”）对于查询而言是动态的，使用提示配置它们会非常方便，因为我们从规划器获得的规划元数据通常不太准确；
+- 运算符资源约束：在许多情况下，我们会为执行运算符提供默认的资源配置，即最小并行度、内存（消耗资源的 UDF）、特殊资源需求（GPU 或 SSD 磁盘）……使用每个查询（而不是作业）的提示来分析资源会非常灵活。
 
-##### 句法
+##### 语法
 
-方解石支持两个位置的提示：
+Calcite 支持两个位置的提示：
 
-- 查询提示：关键字后`SELECT`；
-- 表提示：位于引用的表名称之后。
+* 查询提示：紧跟在 `SELECT` 关键字之后；
+
+* 表提示：紧跟在引用的表名之后。
 
 例如：
 
-```
+```sql
 SELECT /*+ hint1, hint2(a=1, b=2) */
 ...
 FROM
@@ -2169,7 +2177,7 @@ JOIN
 
 语法如下：
 
-```
+```sql
 hintComment:
       '/*+' hint [, hint ]* '*/'
 
@@ -2191,23 +2199,23 @@ hintOption:
    |  stringLiteral
 ```
 
-它在方解石中处于实验阶段，尚未完全实施，我们已实施的是：
+它在 Calcite 中处于实验阶段，尚未完全实现，我们已实现的内容包括：
 
 - 解析器支持上述语法；
-- `RelHint`代表一个提示项；
+- `RelHint` 表示提示项；
 - 在 sql-to-rel 转换和规划器规划期间传播提示的机制。
 
-我们还没有添加任何内置提示项，如果我们认为提示足够稳定，我们会引入更多。
+我们尚未添加任何内置提示项，如果我们认为提示足够稳定，我们会引入更多。
 
-#### MATCH_识别
+#### MATCH_RECOGNIZE
 
-`MATCH_RECOGNIZE`是一个 SQL 扩展，用于识别复杂事件处理 (CEP) 中的事件序列。
+`MATCH_RECOGNIZE` 是一个 SQL 扩展，用于识别复杂事件处理 (CEP) 中的事件序列。
 
-它在方解石中处于实验阶段，但尚未完全实施。
+它在 Calcite 中处于实验阶段，尚未完全实现。
 
-##### 句法
+##### 语法
 
-```
+```sql
 matchRecognize:
       MATCH_RECOGNIZE '('
       [ PARTITION BY expression [, expression ]* ]
@@ -2265,13 +2273,13 @@ intervalLiteral:
       INTERVAL 'string' timeUnit [ TO timeUnit ]
 ```
 
-在*patternQuantifier*中，*repeat*是正整数，*minRepeat*和*maxRepeat*是非负整数。
+在 patternQuantifier 中，repeat 是正整数，minRepeat 和 maxRepeat 是非负整数。
 
-### DDL 扩展
+## DDL 扩展
 
-DDL 扩展仅在 calcite-server 模块中可用。要启用，请包含`calcite-server.jar`在类路径中，并添加 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。
+DDL 扩展仅在 calcite-server 模块中可用。要启用，请在类路径中包含 `calcite-server.jar`，并将 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 添加到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。
 
-```
+```sql
 ddlStatement:
       createSchemaStatement
   |   createForeignSchemaStatement
@@ -2390,19 +2398,19 @@ dropFunctionStatement:
       DROP FUNCTION [ IF EXISTS ] name
 ```
 
-在*createTableStatement*中，如果指定*AS query ，则可以省略**tableElement*列表 ，或者可以省略任何*tableElement*的数据类型，在这种情况下，它只是重命名基础列。
+在 *createTableStatement* 中，如果指定 *AS query*，则可以省略 *tableElement* 列表，也可以省略任何 *tableElement* 的数据类型，在这种情况下，它只会重命名基础列。
 
-在*columnGenerator*中，如果未指定`VIRTUAL`或`STORED`对于生成的列，`VIRTUAL`则为默认值。
+在 *columnGenerator* 中，如果没有为生成的列指定 `VIRTUAL` 或 `STORED`，则 `VIRTUAL` 为默认值。
 
-在*createFunctionStatement*和*usingFile*中，*classNameLiteral* 和*filePathLiteral*是字符文字。
+在 *createFunctionStatement* 和 *usingFile* 中，*classNameLiteral* 和 *filePathLiteral* 是字符文字。
 
-#### 声明用户定义类型的对象
+### 为用户定义类型声明对象
 
-在架构中定义并安装对象类型后，你可以使用它在任何 SQL 块中声明对象。例如，你可以使用对象类型来指定属性、列、变量、绑定变量、记录字段、表元素、形式参数或函数结果的数据类型。在运行时，创建对象类型的实例；也就是说，该类型的对象被实例化。每个对象可以保存不同的值。
+在架构中定义并安装对象类型后，您可以使用它在任何 SQL 块中声明对象。例如，您可以使用对象类型指定属性、列、变量、绑定变量、记录字段、表元素、形式参数或函数结果的数据类型。在运行时，将创建对象类型的实例；也就是说，实例化该类型的对象。每个对象可以保存不同的值。
 
-例如，我们可以声明类型`address_typ`和`employee_typ`：
+例如，我们可以声明类型 `address_typ` 和 `employee_typ`：
 
-```
+```sql
 CREATE TYPE address_typ AS (
    street          VARCHAR(30),
    city            VARCHAR(20),
@@ -2424,9 +2432,9 @@ CREATE TYPE employee_typ AS (
   address           address_typ);
 ```
 
-使用这些类型，你可以实例化对象，如下所示：
+使用这些类型，您可以按如下方式实例化对象：
 
-```
+```sql
 employee_typ(315, 'Francis', 'Logan', 'FLOGAN',
     '555.777.2222', DATE '2004-05-01', 'SA_MAN', 11000, .15, 101, 110,
      address_typ('376 Mission', 'San Francisco', 'CA', '94222'))
