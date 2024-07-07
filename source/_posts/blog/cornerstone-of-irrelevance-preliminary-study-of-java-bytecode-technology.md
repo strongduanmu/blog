@@ -6,6 +6,7 @@ date: 2024-07-02 08:31:00
 updated: 2024-07-05 08:31:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
+topic: jvm
 references:
   - '[Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'

@@ -2,10 +2,12 @@
 title: JVM 学习资料整理
 tags: [JVM]
 categories: [JVM]
+sticky: 900
 date: 2024-05-11 08:31:00
 updated: 2024-06-21 08:31:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_7.jpg
+topic: jvm
 ---
 
 ## 前言

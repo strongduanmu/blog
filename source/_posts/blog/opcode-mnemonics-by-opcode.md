@@ -6,6 +6,7 @@ date: 2024-06-25 18:50:22
 updated: 2024-06-26 8:00:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_9.jpg
+topic: jvm
 references:
   - '[Chapter 7. Opcode Mnemonics by Opcode](https://docs.oracle.com/javase/specs/jvms/se21/html/jvms-7.html)'
 ---
