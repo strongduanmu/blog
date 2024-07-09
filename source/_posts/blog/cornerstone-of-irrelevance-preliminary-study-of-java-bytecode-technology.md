@@ -3,12 +3,13 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-05 08:31:00
+updated: 2024-07-09 08:31:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
 references:
   - '[Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)'
+  - '[JVM 虚拟机规范（SE7）中文版](https://strongduanmu.com/share/jvm/JVM%20%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%A7%84%E8%8C%83%EF%BC%88SE7%EF%BC%89%E4%B8%AD%E6%96%87%E7%89%88.pdf)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
 ---
 
@@ -25,7 +26,7 @@ references:
 3. **对象操作指令**，包括方法调用指令；
 4. **算术运算以及类型转换指令**。
 
-除此之外，还有一些用于执行专门任务的指令，例如同步指令、异常指令等，完整的 JVM 指令可以参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)。
+除此之外，还有一些用于执行专门任务的指令，例如**同步指令、异常指令**等，完整的 JVM 指令可以参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)。
 
 ## 如何查看字节码
 
@@ -60,7 +61,7 @@ where possible options include:
   -bootclasspath <path>            Override location of bootstrap class files
 ```
 
-我们编写一个如下的简单 `HelloByteCode` 程序作为示例，程序 `main` 方法创建了一个 `HelloByteCode` 对象，并调用了 `sayHello` 方法，输出 `Hello, ByteCode!` 字符串。
+我们编写一个如下的简单 `HelloByteCode` 程序作为示例，程序 `main` 方法创建了一个 `HelloByteCode` 对象（源码请参考 [HelloByteCode](https://github.com/strongduanmu/jvm-lecture/blob/b6d9fdb4ed79fc3c77de5e70e75c4f1630a04475/src/main/java/com/strongduanmu/jvm/bytecode/HelloByteCode.java#L3)），并调用了 `sayHello` 方法，输出 `Hello, ByteCode!` 字符串。
 
 ```java
 public final class HelloByteCode {
@@ -82,7 +83,7 @@ public final class HelloByteCode {
 javac -g HelloByteCode.java
 ```
 
-获取到字节码文件后，我们再通过 `javap` 命令查看字节码信息，`-c` 参数用于对代码进行反编译，`-v` 参数则用于打印附加信息。
+获取到字节码文件后，我们再通过 `javap` 命令查看字节码信息，`-c` 参数用于对代码进行反编译，`-v` 参数则用于打印附加信息。如下展示了完整的字节码信息，大家可以先尝试理解下字节码的含义，在下个小节我们将对字节码进行深入探究。
 
 ```bash
 ❯ javap -c -v HelloByteCode
@@ -182,9 +183,38 @@ SourceFile: "HelloByteCode.java"
 
 ![通过 jclasslib 查看字节码](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/show-bytecode-with-jclasslib.png)
 
-选择完成后，可以在右侧的 Tab 中查看字节码，`General Information` 记录的是通用信息，主要包括：版本号、
+选择完成后，可以在右侧的 Tab 中查看字节码。此外，`jclasslib` 插件在查看字节码时，可以点击 `Show JVM Spec` 查看 JVM 虚拟机规范，查看相关字节码指令的作用。
 
 ![jclasslib 展示的字节码](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/jclasslib-bytecode-view.png)
+
+## 深入理解字节码
+
+前文介绍了两种查看字节码的方法，想必大家对于字节码中的内容有诸多疑问。本节我将带领大家逐行分析，一起深入探究字节码内容，尝试理解字节码内部的含义。首先，我们来看下字节码中的 `Classfile`，具体内容如下：
+
+```text
+Classfile /Users/duanzhengqiang/IdeaProjects/jvm-lecture/src/main/java/com/strongduanmu/jvm/bytecode/HelloByteCode.class
+  Last modified 2024年7月5日; size 736 bytes
+  MD5 checksum 591e8e496f42a858607d95d6db85bdd8
+  Compiled from "HelloByteCode.java"
+```
+
+TODO
+
+`Classfile` 声明了当前字节码来源的 `class` 文件路径，并展示了 `class` 文件最近修改时间，MD5 校验值以及编译的来源文件。
+
+`public final class com.strongduanmu.jvm.bytecode.HelloByteCode` 部分显式了当前字节码的版本号（`major version: 55` 对应了 JDK 11）、访问标识符（`ACC_PUBLIC` 表示当前是一个 public 类，`ACC_FINAL` 表示当前是一个 final 类，`ACC_SUPER` 是 JDK 早期用于标记当前类显式声明的父类，从 JDK 1.1 开始，所有类都必须显式声明它们的父类（即使是 `Object`），因此 `ACC_SUPER` 访问标志实际上总是被设置）以及接口、字段、方法和属性等信息。
+
+`Constant pool` 表示常量池，其中声明了字节码中需要使用的常量，`#1`、`#2` 等表示常量的编号，`Methodref`、`Class`、`Fieldref` 是常量的类型，分别表示方法引用，Class 类以及字段引用，更多常量类型可参考 [JVM 虚拟机规范（SE7）中文版 - 4.4 常量池](https://strongduanmu.com/share/jvm/JVM%20%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%A7%84%E8%8C%83%EF%BC%88SE7%EF%BC%89%E4%B8%AD%E6%96%87%E7%89%88.pdf)。常量中可以通过编号引用其他常量，例如：`#8.#24`，代表了对 `Object` 对象 `init` 方法的引用，字节码注释 `java/lang/Object."<init>":()V` 已经很好地向我们展示了方法引用。
+
+`{...}` 之间则是字节码相关的信息，这部分我们会在下个小节，结合字节码指令为大家详细介绍。
+
+TODO
+
+## 字节码执行过程
+
+TODO
+
+## 常用字节码指令
 
 TODO
 
