@@ -10,6 +10,7 @@ topic: jvm
 references:
   - '[Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)'
   - '[JVM 虚拟机规范（SE7）中文版](https://strongduanmu.com/share/jvm/JVM%20%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%A7%84%E8%8C%83%EF%BC%88SE7%EF%BC%89%E4%B8%AD%E6%96%87%E7%89%88.pdf)'
+  - '[Java 代码优化之解读 JVM 字节码)](https://blog.csdn.net/weixin_44950987/article/details/100570710)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
 ---
 
@@ -277,24 +278,22 @@ Constant pool:
 
 `Constant pool` 表示常量池，其中声明了字节码中需要使用的常量，`#1`、`#2` 等表示常量的编号，字节码中使用常量时，只需要引用相关的编号即可。`Methodref`、`Class`、`Fieldref` 是常量的类型，分别表示方法引用，Class 类以及字段引用，更多常量类型可参考如下常量类型表格。常量中可以通过编号引用其他常量，例如：`#8.#24`，代表了对 `Object` 对象 `init` 方法的引用，字节码注释 `java/lang/Object."<init>":()V` 已经很好地向我们展示了方法引用。
 
-| 常量类型                    | 值   | 含义         |
-| --------------------------- | ---- | ------------ |
-| CONSTANT_Class              | 7    | 表示类或接口 |
-| CONSTANT_Fieldref           | 9    |              |
-| CONSTANT_Methodref          | 10   |              |
-| CONSTANT_InterfaceMethodref | 11   |              |
-| CONSTANT_String             | 8    |              |
-| CONSTANT_Integer            | 3    |              |
-| CONSTANT_Float              | 4    |              |
-| CONSTANT_Long               | 5    |              |
-| CONSTANT_Double             | 6    |              |
-| CONSTANT_NameAndType        | 12   |              |
-| CONSTANT_Utf8               | 1    |              |
-| CONSTANT_MethodHandle       | 15   |              |
-| CONSTANT_MethodType         | 16   |              |
-| CONSTANT_InvokeDynamic      | 18   |              |
-
-
+| 常量类型                    | 值   | 含义                                                         |
+| --------------------------- | ---- | ------------------------------------------------------------ |
+| CONSTANT_Class              | 7    | 类或接口                                                     |
+| CONSTANT_Fieldref           | 9    | 字段                                                         |
+| CONSTANT_Methodref          | 10   | 类方法                                                       |
+| CONSTANT_InterfaceMethodref | 11   | 接口方法                                                     |
+| CONSTANT_String             | 8    | `java.lang.String` 类型的常量                                |
+| CONSTANT_Integer            | 3    | 4 字节整型常量                                               |
+| CONSTANT_Float              | 4    | 4 字节浮点型常量                                             |
+| CONSTANT_Long               | 5    | 8 字节长整型常量                                             |
+| CONSTANT_Double             | 6    | 8 字节双精度浮点型常量                                       |
+| CONSTANT_NameAndType        | 12   | 字段或方法的名称和类型，类型通过字段描述符（例如：`[Ljava/lang/String;`）或方法描述符（例如：`(Ljava/lang/String;)V`）进行表示 |
+| CONSTANT_Utf8               | 1    | `UTF-8` 编码表示的字符串常量值                               |
+| CONSTANT_MethodHandle       | 15   | 方法句柄                                                     |
+| CONSTANT_MethodType         | 16   | 方法类型                                                     |
+| CONSTANT_InvokeDynamic      | 18   | `invohecynamic` 动态方法调用                                 |
 
 ### 字节码
 
