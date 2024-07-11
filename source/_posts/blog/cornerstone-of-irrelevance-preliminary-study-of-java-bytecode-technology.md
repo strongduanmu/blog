@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-10 07:30:00
+updated: 2024-07-11 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -281,9 +281,9 @@ Constant pool:
 | 常量类型                    | 值   | 含义                                                         |
 | --------------------------- | ---- | ------------------------------------------------------------ |
 | CONSTANT_Class              | 7    | 类或接口                                                     |
-| CONSTANT_Fieldref           | 9    | 字段                                                         |
-| CONSTANT_Methodref          | 10   | 类方法                                                       |
-| CONSTANT_InterfaceMethodref | 11   | 接口方法                                                     |
+| CONSTANT_Fieldref           | 9    | 字段引用                                                     |
+| CONSTANT_Methodref          | 10   | 类方法引用                                                   |
+| CONSTANT_InterfaceMethodref | 11   | 接口方法引用                                                 |
 | CONSTANT_String             | 8    | `java.lang.String` 类型的常量                                |
 | CONSTANT_Integer            | 3    | 4 字节整型常量                                               |
 | CONSTANT_Float              | 4    | 4 字节浮点型常量                                             |
@@ -297,9 +297,147 @@ Constant pool:
 
 ### 字节码
 
-`{...}` 之间则是字节码相关的信息，这部分我们会在下个小节，结合字节码指令为大家详细介绍。
+介绍完常量池后，我们再来关注下最核心的字节码指令，由于本文示例程序中包含了私有方法，因此需要使用 `javap -c -v -p HelloByteCode` 查看包含私有方法在内的所有成员变量和方法。如下展示了字节码信息，可以看到总共包含了 3 个方法——`HelloByteCode` 构造方法、`main` 方法、`sayHello` 方法，下面我们将分别进行探究学习。
+
+```java
+{
+  public com.strongduanmu.jvm.bytecode.HelloByteCode();
+    descriptor: ()V
+    flags: (0x0001) ACC_PUBLIC
+    Code:
+      stack=1, locals=1, args_size=1
+         0: aload_0
+         1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+         4: return
+      LineNumberTable:
+        line 3: 0
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       5     0  this   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+
+  public static void main(java.lang.String[]);
+    descriptor: ([Ljava/lang/String;)V
+    flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+    Code:
+      stack=2, locals=2, args_size=1
+         0: new           #7                  // class com/strongduanmu/jvm/bytecode/HelloByteCode
+         3: dup
+         4: invokespecial #9                  // Method "<init>":()V
+         7: astore_1
+         8: aload_1
+         9: invokevirtual #10                 // Method sayHello:()V
+        12: return
+      LineNumberTable:
+        line 6: 0
+        line 7: 8
+        line 8: 12
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0      13     0  args   [Ljava/lang/String;
+            8       5     1 helloByteCode   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+
+  private void sayHello();
+    descriptor: ()V
+    flags: (0x0002) ACC_PRIVATE
+    Code:
+      stack=2, locals=1, args_size=1
+         0: getstatic     #13                 // Field java/lang/System.out:Ljava/io/PrintStream;
+         3: ldc           #19                 // String Hello, ByteCode!
+         5: invokevirtual #21                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+         8: return
+      LineNumberTable:
+        line 11: 0
+        line 12: 8
+      LocalVariableTable:
+        Start  Length  Slot  Name   Signature
+            0       9     0  this   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+}
+```
+
+#### HelloByteCode 构造方法
+
+```java
+public com.strongduanmu.jvm.bytecode.HelloByteCode();
+  descriptor: ()V
+  flags: (0x0001) ACC_PUBLIC
+  Code:
+    stack=1, locals=1, args_size=1
+       0: aload_0
+       1: invokespecial #1                  // Method java/lang/Object."<init>":()V
+       4: return
+    LineNumberTable:
+      line 3: 0
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0       5     0  this   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+```
+
+HelloByteCode 构造方法是 Java 编译器默认生成的，了解 Java 的朋友都知道，当我们在程序中没有定义任何构造方法时，Java 编译器会默认生成无参的构造方法。`public com.strongduanmu.jvm.bytecode.HelloByteCode();` 是构造方法的方法声明，HelloByteCode 前面会带上完整的包路径。
+
+`descriptor` 则是方法描述符，`()V` 中 `()` 表示入参，默认构造方法的入参为空，`()` 之后是返回值，由于构造方法没有任何返回值，因此返回值为 `void`，缩写为 `V`。
+
+`flags` 表示访问标识符，`ACC_PUBLIC` 表示该构造方法为 `public` 构造方法，更多访问标识符类型可参考 [Class 基础信息](#class-基础信息)。
+
+`Code` 则对应了具体的代码逻辑，
 
 TODO
+
+#### main 方法
+
+```java
+public static void main(java.lang.String[]);
+  descriptor: ([Ljava/lang/String;)V
+  flags: (0x0009) ACC_PUBLIC, ACC_STATIC
+  Code:
+    stack=2, locals=2, args_size=1
+       0: new           #7                  // class com/strongduanmu/jvm/bytecode/HelloByteCode
+       3: dup
+       4: invokespecial #9                  // Method "<init>":()V
+       7: astore_1
+       8: aload_1
+       9: invokevirtual #10                 // Method sayHello:()V
+      12: return
+    LineNumberTable:
+      line 6: 0
+      line 7: 8
+      line 8: 12
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      13     0  args   [Ljava/lang/String;
+          8       5     1 helloByteCode   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+```
+
+
+
+
+
+#### sayHello 方法
+
+```java
+private void sayHello();
+  descriptor: ()V
+  flags: (0x0002) ACC_PRIVATE
+  Code:
+    stack=2, locals=1, args_size=1
+       0: getstatic     #13                 // Field java/lang/System.out:Ljava/io/PrintStream;
+       3: ldc           #19                 // String Hello, ByteCode!
+       5: invokevirtual #21                 // Method java/io/PrintStream.println:(Ljava/lang/String;)V
+       8: return
+    LineNumberTable:
+      line 11: 0
+      line 12: 8
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0       9     0  this   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
+```
+
+
+
+
+
+### SourceFile
+
+`SourceFile` 内容比较简单，用于声明当前 class 文件的源文件，此处为 `HelloByteCode.java`。
 
 ## 字节码执行过程
 
