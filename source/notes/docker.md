@@ -115,3 +115,17 @@ show pdbs;
 # password：123456
 # sid：ORCLSID
 ```
+
+### ShardingSphere
+
+```bash
+# 安装 socat
+brew install socat
+socat TCP-LISTEN:2375,reuseaddr,fork UNIX-CLIENT:/var/run/docker.sock
+
+# 在创建镜像的窗口中执行
+export DOCKER_HOST=tcp://127.0.0.1:2375
+# 然后执行 ShardingSphere Proxy 镜像打包命令
+./mvnw -B clean install -am -pl test/e2e/sql -Pit.env.docker -DskipTests -Dspotless.apply.skip=true -T 1C 
+```
+
