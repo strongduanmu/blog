@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-11 07:30:00
+updated: 2024-07-14 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -378,7 +378,9 @@ HelloByteCode 构造方法是 Java 编译器默认生成的，了解 Java 的朋
 
 `flags` 表示访问标识符，`ACC_PUBLIC` 表示该构造方法为 `public` 构造方法，更多访问标识符类型可参考 [Class 基础信息](#class-基础信息)。
 
-`Code` 则对应了具体的代码逻辑，
+`Code` 则对应了具体的代码逻辑，`stack=1, locals=1, args_size=1` 中的 `stack` 表示当前方法执行时最大的栈使用深度，`HelloByteCode` 构造方法栈深度为 1，`locals` 表示本地变量表中槽位的个数，`args_size` 表示方法的参数个数。好奇的同学可能会问——**默认无参构造方法的参数个数为 1？**TODO
+
+![Local Variable 和 Stack 转换关系](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/local-variable-and-stack-relationship.png)
 
 TODO
 
