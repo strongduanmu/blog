@@ -129,3 +129,4 @@ export DOCKER_HOST=tcp://127.0.0.1:2375
 ./mvnw -B clean install -am -pl test/e2e/sql -Pit.env.docker -DskipTests -Dspotless.apply.skip=true -T 1C 
 ```
 
+​	
