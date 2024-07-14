@@ -378,9 +378,17 @@ HelloByteCode 构造方法是 Java 编译器默认生成的，了解 Java 的朋
 
 `flags` 表示访问标识符，`ACC_PUBLIC` 表示该构造方法为 `public` 构造方法，更多访问标识符类型可参考 [Class 基础信息](#class-基础信息)。
 
-`Code` 则对应了具体的代码逻辑，`stack=1, locals=1, args_size=1` 中的 `stack` 表示当前方法执行时最大的栈使用深度，`HelloByteCode` 构造方法栈深度为 1，`locals` 表示本地变量表中槽位的个数，`args_size` 表示方法的参数个数。好奇的同学可能会问——**默认无参构造方法的参数个数为 1？**TODO
+`Code` 则对应了具体的代码逻辑，`stack=1, locals=1, args_size=1` 中的 `stack` 表示当前方法执行时最大的栈使用深度，`HelloByteCode` 构造方法栈深度为 1，`locals` 表示本地变量表中槽位的个数，`args_size` 表示方法的参数个数。
 
-![Local Variable 和 Stack 转换关系](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/local-variable-and-stack-relationship.png)
+> 好奇的同学可能会问：默认无参构造方法的参数个数为什么是 1？因为在 Java 中，非静态方法（包括构造方法）会有一个 `this` 引用，并且 `this` 会作为方法的隐藏参数，`this` 会存储在本地变量表的第 1 个槽位，所以字节码里 `args_size` 为 1。
+
+`0: aload_0` 中的 `0` 表示当前指令位于该方法指令的 0 位置，`aload_0` 表示将第一个引用类型本地变量推至栈顶。下图展示了 `Local Variable` 和 `Stack` 关系，由于 JVM 是一个基于栈的计算机器，因此在计算的过程中会执行很多压入和弹出操作，即 Load 和 Store 指令。
+
+![Local Variable 和 Stack 关系](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/local-variable-and-stack-relationship.png)
+
+`1: invokespecial #1` 中的 `1` 表示当前指令位于该方法指令的 1 位置，`invokespecial` 表示调用超类构造方法、实例初始化方法或私有方法，`#1` 引用了常量池中的第一个常量，即 `#1 = Methodref #8.#24 // java/lang/Object."<init>":()V`。从整个指令来看，调用的是超类构造方法：`Object` 类的 `init` 方法。
+
+`4: return` 中的 `4` 表示当前指令位于该方法指令的 4 位置，`return` 表示从当前方法返回 void。
 
 TODO
 
