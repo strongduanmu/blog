@@ -116,6 +116,25 @@ show pdbs;
 # sid：ORCLSID
 ```
 
+### StarRocks
+
+```bash
+# 拉取镜像
+docker pull starrocks/allin1-ubuntu:2.5.8
+
+docker run --name starrocks -p 9030:9030 -p 8030:8030 -p 8040:8040 -itd starrocks/allin1-ubuntu:2.5.8
+
+mysql -P9030 -h127.0.0.1 -uroot --prompt="StarRocks > "
+```
+
+### Zookeeper
+
+```bash
+docker pull zookeeper
+
+docker run -d --name zookeeper --privileged=true -p 2181:2181  zookeeper
+```
+
 ### ShardingSphere
 
 ```bash
