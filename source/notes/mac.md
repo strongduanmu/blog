@@ -7,6 +7,19 @@ order: 40
 banner: /assets/banner/banner_10.jpg
 ---
 
+## Mac 安装提示：已损坏，无法打开
+
+解决步骤：
+
+```bash
+# 1. 在命令行执行以下命令
+sudo spctl --master-disable
+
+# 2. 打开系统设置，点击安全与隐私，在软件来源处选择任意来源
+# 3. 执行以下命令
+xattr -rc /Applications/prettyZoo.app
+```
+
 ## Hackintosh 更新驱动
 
 Hackintosh 安装完成后，出现有线耳机无法输入声音的情况，咨询黑苹果大佬后建议更新 AppleALC 驱动 1.8.7。首先，执行如下命令，下载 `Kext Updater` 软件获取最新驱动。
