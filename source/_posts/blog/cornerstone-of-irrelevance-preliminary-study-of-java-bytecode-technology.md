@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-14 07:30:00
+updated: 2024-07-16 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -382,7 +382,7 @@ HelloByteCode 构造方法是 Java 编译器默认生成的，了解 Java 的朋
 
 > 好奇的同学可能会问：默认无参构造方法的参数个数为什么是 1？因为在 Java 中，非静态方法（包括构造方法）会有一个 `this` 引用，并且 `this` 会作为方法的隐藏参数，`this` 会存储在本地变量表的第 1 个槽位，所以字节码里 `args_size` 为 1。
 
-`0: aload_0` 中的 `0` 表示当前指令位于该方法指令的 0 位置，`aload_0` 表示将第一个引用类型本地变量推至栈顶。下图展示了 `Local Variable` 和 `Stack` 关系，由于 JVM 是一个基于栈的计算机器，因此在计算的过程中会执行很多压入和弹出操作，即 Load 和 Store 指令。
+`0: aload_0` 中的 `0` 表示当前指令位于该方法指令的 0 位置，`aload_0` 表示将第一个引用类型本地变量压入栈顶。下图展示了 `Local Variable` 和 `Stack` 关系，由于 JVM 是一个基于栈的计算机器，因此在计算的过程中会执行很多压入和弹出操作，即 Load 和 Store 指令。
 
 ![Local Variable 和 Stack 关系](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/local-variable-and-stack-relationship.png)
 
@@ -390,7 +390,28 @@ HelloByteCode 构造方法是 Java 编译器默认生成的，了解 Java 的朋
 
 `4: return` 中的 `4` 表示当前指令位于该方法指令的 4 位置，`return` 表示从当前方法返回 void。
 
-TODO
+`LineNumberTable` 行号表记录了源码中行号和方法指令的位置，`line 3: 0` 中的 `3` 表示源码中的第 3 行，`0` 表示方法指令的第 0 个位置，即 `0: aload_0`。
+
+`LocalVariableTable` 本地变量表记录了当前方法中的本地变量，`Start` 表示起始位置，标识了该变量在字节码中的哪行开始起作用，`Length` 表示指令作用范围，对应的是字节码中的位置。可以看到，默认构造方法有一个 `this` 变量，`Slot` 表示槽位，`Signature` 表示变量的签名信息，其中 `L<ClassName>` 是引用类型的字段描述符。下表展示了常用类型的字段描述符，在字节码中我们会经常看到这些字段描述符信息，大家可以随时查阅表格加强理解。
+
+| 字符         | 类型      | 含义                      |
+| ------------ | --------- | ------------------------- |
+| B            | byte      | 有符号字节型数            |
+| C            | char      | Unicode 字符，UTF-16 编码 |
+| D            | double    | 双精度浮点数              |
+| F            | float     | 单精度浮点数              |
+| I            | int       | 整型数                    |
+| J            | long      | 长整数                    |
+| S            | short     | 有符号短整数              |
+| Z            | boolean   | 布尔值 true/false         |
+| L Classname; | reference | 一个名为 Classname 的实例 |
+| [            | reference | 一个一维数组              |
+
+字段描述符示例：
+
+* `int` 实例变量的描述符是 `I`；
+* `java.lang.Object` 描述符是 `Ljava/lang/Object;`；
+* `double` 的三维数组 `double d[][][]` 描述符是 `[[[D`。
 
 #### main 方法
 
@@ -417,7 +438,7 @@ public static void main(java.lang.String[]);
           8       5     1 helloByteCode   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
 ```
 
-
+有了 HelloByteCode 构造方法的基础，我们阅读 `main` 方法的字节码会很轻松，`descriptor` 表示了方法描述符，`([Ljava/lang/String;)V` 表示入参为 `String` 数组，返回值为 `void`，这和我们记忆中的 `main` 方法声明是完全一致的。`flags` 声明了 `main` 方法为 `public` 公有方法，并且是 `static` 静态方法。
 
 
 
