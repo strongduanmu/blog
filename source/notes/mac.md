@@ -20,6 +20,24 @@ sudo spctl --master-disable
 xattr -rc /Applications/prettyZoo.app
 ```
 
+## Mac 快速开启 HTTP 服务
+
+```bash
+# 启动 Apache 服务
+sudo apachectl start
+# 重启 Apache 服务
+sudo apachectl restart
+# 关闭 Apache 服务
+sudo apachectl stop
+
+# 修改端口：打开 /etc/apache2/httpd.conf
+# 将默认 80 端口改为 8080
+open /etc/apache2
+# 打开 HTTP 服务根目录
+open /Library/WebServer/Documents
+# 访问 localhost:8080 会出现 It works! 提示
+```
+
 ## Hackintosh 更新驱动
 
 Hackintosh 安装完成后，出现有线耳机无法输入声音的情况，咨询黑苹果大佬后建议更新 AppleALC 驱动 1.8.7。首先，执行如下命令，下载 `Kext Updater` 软件获取最新驱动。
