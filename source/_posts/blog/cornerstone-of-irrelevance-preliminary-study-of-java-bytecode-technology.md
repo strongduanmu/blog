@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-16 07:30:00
+updated: 2024-07-22 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -439,6 +439,10 @@ public static void main(java.lang.String[]);
 ```
 
 有了 HelloByteCode 构造方法的基础，我们阅读 `main` 方法的字节码会很轻松，`descriptor` 表示了方法描述符，`([Ljava/lang/String;)V` 表示入参为 `String` 数组，返回值为 `void`，这和我们记忆中的 `main` 方法声明是完全一致的。`flags` 声明了 `main` 方法为 `public` 公有方法，并且是 `static` 静态方法。
+
+`Code` 部分 `stack=2, locals=2, args_size=1` 中的 `stack=2`表示当前方法执行时使用的最大栈深度为 2，我们将在后文**字节码执行过程**小节中，为大家详细介绍栈在执行过程中的作用。`locals=2` 表示该方法的本地变量数为 2，即：`args` 和 `helloByteCode`，那么为什么 `main` 方法的本地变量没有 `this`？我们前文介绍过，只有非静态方法会有当前对象的 `this` 引用，而 `main` 方法是一个静态方法。`args_size=1` 表示了 `main` 方法有一个参数 `args`。
+
+`0: new #7` 表示方法字节码的第 0 个位置，`new` 是一个操作码，表示创建一个对象，并将其引用值压入栈顶，后面紧跟着的 `#7` 是操作数，引用的是常量池中的第 7 个常量。
 
 
 

@@ -135,6 +135,20 @@ docker pull zookeeper
 docker run -d --name zookeeper --privileged=true -p 2181:2181  zookeeper
 ```
 
+## Jenkins
+
+```bash
+docker pull jenkinsci/blueocean
+
+docker run --name jenkins -u root -d -p 8080:8080 -p 50000:50000 -v /Users/duanzhengqiang/.m2:/root/.m2 -v /var/run/docker.sock:/var/run/docker.sock jenkinsci/blueocean
+
+# 浏览器访问管理界面
+localhost:8080
+
+# 日志中查看密码
+docker logs jenkins
+```
+
 ### ShardingSphere
 
 ```bash
