@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-02 08:31:00
-updated: 2024-07-22 07:30:00
+updated: 2024-07-23 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -442,9 +442,23 @@ public static void main(java.lang.String[]);
 
 `Code` 部分 `stack=2, locals=2, args_size=1` 中的 `stack=2`表示当前方法执行时使用的最大栈深度为 2，我们将在后文**字节码执行过程**小节中，为大家详细介绍栈在执行过程中的作用。`locals=2` 表示该方法的本地变量数为 2，即：`args` 和 `helloByteCode`，那么为什么 `main` 方法的本地变量没有 `this`？我们前文介绍过，只有非静态方法会有当前对象的 `this` 引用，而 `main` 方法是一个静态方法。`args_size=1` 表示了 `main` 方法有一个参数 `args`。
 
-`0: new #7` 表示方法字节码的第 0 个位置，`new` 是一个操作码，表示创建一个对象，并将其引用值压入栈顶，后面紧跟着的 `#7` 是操作数，引用的是常量池中的第 7 个常量。
+字节码部分，为了方便大家理解，可以参考下面的字节码指令图。`0: new #7` 表示方法字节码的第 0 个位置，`new` 是一个操作码，表示创建一个对象，并将其引用值压入栈顶，后面紧跟着的 `#7` 是操作数，引用的是常量池中的第 7 个常量，由于 JVM 操作数栈是基于槽（`Slot`），每个槽默认为 32 位宽，即 4 位 16 进制数，因此 07 之前需要用 00 补位。参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)，我们可以快速查阅到 `new` 操作码对应的 16 进制为 bb，因此 `0: new #7` 使用 16 进制的表现形式为 `bb0007`。
 
+`3: dup` 表示字节码的第 3 个位置，`dup`（全称 `duplicate`） 表示复制栈顶数值，并将复制值压入栈顶，后面没有操作数，因此它的 16 进制表示为 `59`。
 
+`4: invokespecial #9` 前文已经介绍，该操作码表示调用超类构造方法，实例初始化方法或私有方法，此处表示对 HelloByteCode 初始化时 `init` 方法的调用，`invokespecial` 操作码对应的 16 进制为 b7，同样操作数需要用 00 补位，最终 `4: invokespecial #9` 16 进制表示为 `b70009`。
+
+`astore_1` 表示将栈顶引用型数值存入第二个本地变量，`aload_1` 表示将第二个引用类型本地变量推至栈顶，这两个操作码后面都没有操作数，它们 16 进制的表示分别为 `4c` 和 `2b`。
+
+`9: invokevirtual #10` 表示调用实例方法，此处为调用 `sayHello` 实例方法，`invokevirtual` 操作码对应的 16 进制为 b6，经过补位后的 16 进制表示为 `b6000a`。最后 `return` 操作码表示了方法返回 void，对应的 16 进制表示为 `b1`。
+
+![字节码指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/class-bytecode.png)
+
+那么，根据字节码助记符转换出来的 16 进制存储在哪里呢？答案是 class 文件。我们可以使用 `Sublime Text` 文本编辑器查看 class 文件中的内容，具体内容如下，通过比对能够找到 `main` 方法对应的 16 进制内容——`bb00 0759 b700 094c 2bb6 000a b1`。
+
+![HelloByteCode Class 内容](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/hello-byte-code-class.png)
+
+`main` 方法中其他的 `LineNumberTable` 和 `LocalVariableTable`，和前文介绍的内容基本一致，感兴趣的读者可以自行尝试理解，本小节就不再一一介绍。
 
 #### sayHello 方法
 
@@ -466,9 +480,9 @@ private void sayHello();
           0       9     0  this   Lcom/strongduanmu/jvm/bytecode/HelloByteCode;
 ```
 
+最后，我们再来看下 `sayHello` 方法，和构造方法及 `main` 方法不同的是，`sayHello` 方法是一个私有方法，因此 `flags` 对应的是 `ACC_PRIVATE`。
 
-
-
+`Code` 部分，`sayHello` 方法使用到了 `getstatic` 和 `ldc` 两个操作码，`getstatic` 操作码表示获取指定类的静态域，并将其压入栈顶，此处表示对 `System` 类中的静态成员变量 `PrintStream out` 的调用。`ldc` 操作码表示将 int，float 或 String 型常量值从常量池中推至栈顶，此处指将字符串常量 `Hello, ByteCode!` 推至栈顶。`invokevirtual` 操作码前文已经介绍，表示调用实例方法，此处表示调用 PrintStream 对象的 `println` 方法。
 
 ### SourceFile
 
