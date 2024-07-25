@@ -10,7 +10,7 @@ topic: jvm
 references:
   - '[Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)'
   - '[JVM 虚拟机规范（SE7）中文版](https://strongduanmu.com/share/jvm/JVM%20%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%A7%84%E8%8C%83%EF%BC%88SE7%EF%BC%89%E4%B8%AD%E6%96%87%E7%89%88.pdf)'
-  - '[Java 代码优化之解读 JVM 字节码)](https://blog.csdn.net/weixin_44950987/article/details/100570710)'
+  - '[Java JVM 之程序计数器](https://www.cnblogs.com/ruoli-0/p/13781170.html)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
 ---
 
@@ -489,6 +489,8 @@ private void sayHello();
 `SourceFile` 内容比较简单，用于声明当前 class 文件的源文件，此处为 `HelloByteCode.java`。
 
 ## 字节码执行过程
+
+前文我们详细介绍了 `javap` 命令展示字节码信息的具体含义，本节我们再来了解下字节码的执行过程。
 
 TODO
 
