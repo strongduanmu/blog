@@ -2,8 +2,8 @@
 title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
-date: 2024-07-02 08:31:00
-updated: 2024-07-23 07:30:00
+date: 2024-07-26 07:30:00
+updated: 2024-07-26 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -490,7 +490,59 @@ private void sayHello();
 
 ## 字节码执行过程
 
-前文我们详细介绍了 `javap` 命令展示字节码信息的具体含义，本节我们再来了解下字节码的执行过程。
+前文我们详细介绍了 `javap` 命令展示字节码信息的具体含义，本节我们再来了解下字节码的执行过程。如果不考虑 JVM 中的异常处理逻辑，我们可以用下面的伪代码来表示字节码的执行过程。首先，JVM 会自动计算 PC 程序计数器的值进行加 1，然后根据 PC 程序计数器指示的位置，读取字节码流中的操作码，由于字节码中一些操作码后面存在操作数，因此会判断当前操作码是否存在操作数，存在则继续读取操作数，不存在或者读取完则执行**指令（操作码 + 操作数）**，执行完成后继续读取剩余的字节码内容。
+
+```java
+do {
+    自动计算 PC 程序计数器的值加 1;
+  	根据 PC 程序计数器指示的位置，从字节码流中取出操作码; 
+  	if (字节码存在操作数) 
+      	从字节码流中取出操作数;
+    执行操作码所定义的操作;
+} while (字节码流长度 > 0);
+```
+
+了解了字节码基础执行流程，我们再结合下面的 `BasicCalculator` 示例，来观察下具体每个字节码执行时，局部变量表和操作栈之间的交互变化。
+
+```java
+public final class BasicCalculator {
+    
+    public static void main(String[] args) {
+        System.out.println(new BasicCalculator().calculate());
+    }
+    
+    private int calculate() {
+        int a = 100;
+        int b = 200;
+        int c = 300;
+        return (a + b) * c;
+    }
+}
+```
+
+我们分别使用 `javac -g BasicCalculator.java` 和 `javap -c -v -p BasicCalculator` 编译和查看字节码信息，可以得到如下的核心逻辑：
+
+```java
+private int calculate();
+    descriptor: ()I
+    flags: (0x0002) ACC_PRIVATE
+    Code:
+      stack=2, locals=4, args_size=1
+         0: bipush        100
+         2: istore_1
+         3: sipush        200
+         6: istore_2
+         7: sipush        300
+        10: istore_3
+        11: iload_1
+        12: iload_2
+        13: iadd
+        14: iload_3
+        15: imul
+        16: ireturn
+```
+
+
 
 TODO
 
