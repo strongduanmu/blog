@@ -557,7 +557,7 @@ private int calculate();
          11       6     3     c   I
 ```
 
-从上面的字节码可以看到，这段计算逻辑总共包含了 4 个本地变量，分别是：`this`、`a`、`b` 和 `c`，执行计算逻辑时，多次调用了 `push` 和 `store` 指令。
+从字节码中可以看到，这段计算逻辑总共包含了 4 个本地变量，分别是：`this`、`a`、`b` 和 `c`，执行计算逻辑时，多次调用了 `push` 和 `store` 指令，下面我们将针对字节码中的每个指令进行逐个分析。
 
 #### 执行 bipush 100 指令
 
@@ -581,7 +581,7 @@ private int calculate();
 
 ![执行 istore_2 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_2.png)
 
-然后继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入第三个本地变量，即上图所示的 b 变量。
+JVM 继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入第三个本地变量，即上图所示的 b 变量。
 
 #### 执行 sipush 300 指令
 
@@ -593,7 +593,7 @@ private int calculate();
 
 ![执行 istore_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_3.png)
 
-根据程序计数器指示的位置 10，JVM 会执行 istore_3 指令，该指令会将栈顶 int 型数值存入第四个本地变量，即存入变量 c 的槽位。
+根据程序计数器指示的位置 10，JVM 会执行 `istore_3` 指令，该指令会将栈顶 int 型数值存入第四个本地变量，即存入变量 c 的位置。
 
 #### 执行 iload_1 指令
 
@@ -609,31 +609,27 @@ private int calculate();
 
 #### 执行 iadd 指令
 
-TODO
+![执行 iadd 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iadd.png)
 
-![执行 iadd 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/image-20240727181105545.png)
-
-
+程序计数器 13 位置指向了 `iadd` 指令，该指令表示将栈顶两 int 型数值相加并将结果压入栈顶，上图展示了将栈顶的 100 和 200 相加，并将结果 300 压入栈顶的过程。
 
 #### 执行 iload_3 指令
 
-![执行 iload_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/image-20240727181406574.png)
+![执行 iload_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_3.png)
 
-
+程序计数器 14 位置指向了 `iload_3` 指令，该指令表示将第四个 int 型本地变量推至栈顶，上图展示了将栈顶的 100 和 200 相加，并将结果 300 压入栈顶的过程。
 
 #### 执行 imul 指令
 
 ![执行 imul 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-imul.png)
 
-
+程序计数器 15 位置指向了 `imul` 指令，该指令表示将栈顶两 int 型数值相乘并将结果压入栈顶，上图展示了将栈顶的 300 和 300 相乘，并将结果 90000 压入栈顶的过程。
 
 #### 执行 ireturn 指令
 
 ![执行 ireturn 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-ireturn.png)
 
-
-
-TODO
+程序计数器 16 位置指向了 `ireturn` 指令，该指令表示从当前方法返回 int，上图展示了将栈顶的 90000 返回给调用逻辑的过程。到这里，我们就详细介绍了示例程序计算逻辑执行时，程序计数器、局部变量表以及操作栈之间的变化，虽然这个示例较为简单，但是它已经很好地展示了字节码执行的过程。如果大家感兴趣，可以尝试采用上面的方式来理解更复杂的业务逻辑。
 
 ## 常用字节码指令
 
