@@ -35,8 +35,8 @@ references:
 | 13               | 0x0d               | fconst_2    | 将 float 型 2 推至栈顶                                       |
 | 14               | 0x0e               | dconst_0    | 将 double 型 0 推至栈顶                                      |
 | 15               | 0x0f               | dconst_1    | 将 double 型 1 推至栈顶                                      |
-| 16               | 0x10               | bipush      | 将单字节的常量值（-128~127）推至栈顶                         |
-| 17               | 0x11               | sipush      | 将一个短整型常量（-32768~32767）推至栈顶                     |
+| 16               | 0x10               | bipush      | 将单字节的常量值（-128 ~ 127）推至栈顶                       |
+| 17               | 0x11               | sipush      | 将一个短整型常量（-32768 ~ 32767）推至栈顶                   |
 | 18               | 0x12               | ldc         | 将 int，float 或 String 型常量值从常量池中推至栈顶           |
 | 19               | 0x13               | ldc_w       | 将 int，float 或 String 型常量值从常量池中推至栈顶（宽索引） |
 | 20               | 0x14               | ldc2_w      | 将 long 或 double 型常量值从常量池中推至栈顶（宽索引）       |

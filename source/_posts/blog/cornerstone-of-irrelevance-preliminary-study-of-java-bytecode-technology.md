@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-26 07:30:00
-updated: 2024-07-26 07:30:00
+updated: 2024-07-27 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -490,6 +490,8 @@ private void sayHello();
 
 ## 字节码执行过程
 
+### 抽象执行流程
+
 前文我们详细介绍了 `javap` 命令展示字节码信息的具体含义，本节我们再来了解下字节码的执行过程。如果不考虑 JVM 中的异常处理逻辑，我们可以用下面的伪代码来表示字节码的执行过程。首先，JVM 会自动计算 PC 程序计数器的值进行加 1，然后根据 PC 程序计数器指示的位置，读取字节码流中的操作码，由于字节码中一些操作码后面存在操作数，因此会判断当前操作码是否存在操作数，存在则继续读取操作数，不存在或者读取完则执行**指令（操作码 + 操作数）**，执行完成后继续读取剩余的字节码内容。
 
 ```java
@@ -502,7 +504,9 @@ do {
 } while (字节码流长度 > 0);
 ```
 
-了解了字节码基础执行流程，我们再结合下面的 `BasicCalculator` 示例，来观察下具体每个字节码执行时，局部变量表和操作栈之间的交互变化。
+### 执行流程说明
+
+了解了字节码抽象执行流程，我们再结合下面的 `BasicCalculator` 示例，来观察下具体每个字节码执行时，局部变量表和操作栈之间的交互变化。
 
 ```java
 public final class BasicCalculator {
@@ -524,23 +528,108 @@ public final class BasicCalculator {
 
 ```java
 private int calculate();
-    descriptor: ()I
-    flags: (0x0002) ACC_PRIVATE
-    Code:
-      stack=2, locals=4, args_size=1
-         0: bipush        100
-         2: istore_1
-         3: sipush        200
-         6: istore_2
-         7: sipush        300
-        10: istore_3
-        11: iload_1
-        12: iload_2
-        13: iadd
-        14: iload_3
-        15: imul
-        16: ireturn
+  descriptor: ()I
+  flags: (0x0002) ACC_PRIVATE
+  Code:
+    stack=2, locals=4, args_size=1
+       0: bipush        100
+       2: istore_1
+       3: sipush        200
+       6: istore_2
+       7: sipush        300
+      10: istore_3
+      11: iload_1
+      12: iload_2
+      13: iadd
+      14: iload_3
+      15: imul
+      16: ireturn
+    LineNumberTable:
+      line 10: 0
+      line 11: 3
+      line 12: 7
+      line 13: 11
+    LocalVariableTable:
+      Start  Length  Slot  Name   Signature
+          0      17     0  this   Lcom/strongduanmu/jvm/bytecode/BasicCalculator;
+          3      14     1     a   I
+          7      10     2     b   I
+         11       6     3     c   I
 ```
+
+从上面的字节码可以看到，这段计算逻辑总共包含了 4 个本地变量，分别是：`this`、`a`、`b` 和 `c`，执行计算逻辑时，多次调用了 `push` 和 `store` 指令。
+
+#### 执行 bipush 100 指令
+
+![执行 bipush 100 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-bipush-100.png)
+
+首先，我们来看下第 1 个指令 `bipush`，它表示将单字节的常量值（`-128 ~ 127`）推至栈顶，此案例是将 100 推至栈顶。上图展示了程序计数器、局部变量表和操作栈的状态，程序计数器指向了当前需要执行字节码的位置 0，JVM 首先会读取 bipush 操作码，由于该操作码包含了 1 个字节的操作数，因此会继续读取对应的值 100，读取完成后执行指令，会将 100 推至操作栈的栈顶。
+
+#### 执行 istore_1 指令
+
+![执行 istore_1 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_1.png)
+
+然后 JVM 会继续执行 `istore_1` 指令，该指令表示将栈顶 int 型数值存入第二个本地变量，即上图所示的 a 变量中。
+
+#### 执行 sipush 200 指令
+
+![执行 sipush 200 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-sipush-200.png)
+
+根据程序计数器指示的位置 3，JVM 会继续执行对应的 `sipush` 指令，该指令会将短整型常量（`-32768 ~ 32767`）推至栈顶，此处会将 200 推至操作栈的栈顶。执行完成后程序计数器会变更为 6，因为操作码 `sipush` 占用 1 个字节，操作数 `200` 占用 2 个字节。
+
+#### 执行 istore_2 指令
+
+![执行 istore_2 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_2.png)
+
+然后继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入第三个本地变量，即上图所示的 b 变量。
+
+#### 执行 sipush 300 指令
+
+![执行 sipush 300 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-sipush-300.png)
+
+`sipush` 指令前文已经介绍其作用，此处只有操作数不同，该指令会将 300 压入到栈顶。
+
+#### 执行 istore_3 指令
+
+![执行 istore_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_3.png)
+
+根据程序计数器指示的位置 10，JVM 会执行 istore_3 指令，该指令会将栈顶 int 型数值存入第四个本地变量，即存入变量 c 的槽位。
+
+#### 执行 iload_1 指令
+
+![执行 iload_1 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_1.png)
+
+程序计数器 11 位置指向了 `iload_1` 指令，该指令表示将第二个 int 型本地变量推至栈顶，上图展示了将变量 a 的值 100 推至栈顶的过程。
+
+#### 执行 iload_2 指令
+
+![执行 iload_2 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_2.png)
+
+程序计数器 12 位置指向了 `iload_2` 指令，该指令表示将第三个 int 型本地变量推至栈顶，上图展示了将变量 b 的值 200 推至栈顶的过程。
+
+#### 执行 iadd 指令
+
+TODO
+
+![执行 iadd 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/image-20240727181105545.png)
+
+
+
+#### 执行 iload_3 指令
+
+![执行 iload_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/image-20240727181406574.png)
+
+
+
+#### 执行 imul 指令
+
+![执行 imul 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-imul.png)
+
+
+
+#### 执行 ireturn 指令
+
+![执行 ireturn 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-ireturn.png)
 
 
 
