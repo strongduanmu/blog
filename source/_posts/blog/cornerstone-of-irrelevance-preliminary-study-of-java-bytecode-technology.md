@@ -16,7 +16,7 @@ references:
 
 ## 前言
 
-熟悉 Java 语言的朋友应该都听过 `Write Once, Run Anywhere.` 这样的口号，它主要阐述地是 Java 语言的跨平台特性。工程师只需要编写一次 Java 源码，再通过 Java 编译器将源码编译为字节码文件，就可以很方便地在不同操作系统的 JVM 上进行分发运行。**Java 字节码技术是 Java 语言实现平台无关性的基石，也是学习 JVM 虚拟机实现的基础**，了解 Java 字节码技术，可以帮助大家理解后续的类加载机制，以及 JVM 编译优化相关的内容。因此，本系列首先从 Java 字节码技术开始，和大家一起初步探究字节码的设计和实现。
+熟悉 Java 语言的朋友应该都听过 `Write Once, Run Anywhere.` 这样的口号，它主要阐述地是 Java 语言的跨平台特性。工程师只需要编写一次 Java 源码，再通过 Java 编译器将源码编译为字节码文件，就可以很方便地在不同操作系统的 JVM 上进行分发运行。**Java 字节码技术是 Java 语言实现平台无关性的基石，也是学习 JVM 虚拟机实现的基础**，了解 Java 字节码技术，可以帮助大家理解后续的类加载机制，以及 JVM 编译优化相关的内容。因此，本系列首先从 Java 字节码技术开始，和大家一起初步探究字节码的设计和执行逻辑。
 
 ## 什么是字节码
 
@@ -559,77 +559,79 @@ private int calculate();
 
 从字节码中可以看到，这段计算逻辑总共包含了 4 个本地变量，分别是：`this`、`a`、`b` 和 `c`，执行计算逻辑时，多次调用了 `push` 和 `store` 指令，下面我们将针对字节码中的每个指令进行逐个分析。
 
-#### 执行 bipush 100 指令
+* **执行 bipush 100 指令：**
 
 ![执行 bipush 100 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-bipush-100.png)
 
 首先，我们来看下第 1 个指令 `bipush`，它表示将单字节的常量值（`-128 ~ 127`）推至栈顶，此案例是将 100 推至栈顶。上图展示了程序计数器、局部变量表和操作栈的状态，程序计数器指向了当前需要执行字节码的位置 0，JVM 首先会读取 bipush 操作码，由于该操作码包含了 1 个字节的操作数，因此会继续读取对应的值 100，读取完成后执行指令，会将 100 推至操作栈的栈顶。
 
-#### 执行 istore_1 指令
+* **执行 istore_1 指令：**
 
 ![执行 istore_1 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_1.png)
 
 然后 JVM 会继续执行 `istore_1` 指令，该指令表示将栈顶 int 型数值存入第二个本地变量，即上图所示的 a 变量中。
 
-#### 执行 sipush 200 指令
+* **执行 sipush 200 指令：**
 
 ![执行 sipush 200 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-sipush-200.png)
 
 根据程序计数器指示的位置 3，JVM 会继续执行对应的 `sipush` 指令，该指令会将短整型常量（`-32768 ~ 32767`）推至栈顶，此处会将 200 推至操作栈的栈顶。执行完成后程序计数器会变更为 6，因为操作码 `sipush` 占用 1 个字节，操作数 `200` 占用 2 个字节。
 
-#### 执行 istore_2 指令
+* **执行 istore_2 指令：**
 
 ![执行 istore_2 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_2.png)
 
 JVM 继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入第三个本地变量，即上图所示的 b 变量。
 
-#### 执行 sipush 300 指令
+* **执行 sipush 300 指令：**
 
 ![执行 sipush 300 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-sipush-300.png)
 
 `sipush` 指令前文已经介绍其作用，此处只有操作数不同，该指令会将 300 压入到栈顶。
 
-#### 执行 istore_3 指令
+* **执行 istore_3 指令：**
 
 ![执行 istore_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-istore_3.png)
 
 根据程序计数器指示的位置 10，JVM 会执行 `istore_3` 指令，该指令会将栈顶 int 型数值存入第四个本地变量，即存入变量 c 的位置。
 
-#### 执行 iload_1 指令
+* **执行 iload_1 指令：**
 
 ![执行 iload_1 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_1.png)
 
 程序计数器 11 位置指向了 `iload_1` 指令，该指令表示将第二个 int 型本地变量推至栈顶，上图展示了将变量 a 的值 100 推至栈顶的过程。
 
-#### 执行 iload_2 指令
+* **执行 iload_2 指令：**
 
 ![执行 iload_2 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_2.png)
 
 程序计数器 12 位置指向了 `iload_2` 指令，该指令表示将第三个 int 型本地变量推至栈顶，上图展示了将变量 b 的值 200 推至栈顶的过程。
 
-#### 执行 iadd 指令
+* **执行 iadd 指令：**
 
 ![执行 iadd 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iadd.png)
 
 程序计数器 13 位置指向了 `iadd` 指令，该指令表示将栈顶两 int 型数值相加并将结果压入栈顶，上图展示了将栈顶的 100 和 200 相加，并将结果 300 压入栈顶的过程。
 
-#### 执行 iload_3 指令
+* **执行 iload_3 指令：**
 
 ![执行 iload_3 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-iload_3.png)
 
-程序计数器 14 位置指向了 `iload_3` 指令，该指令表示将第四个 int 型本地变量推至栈顶，上图展示了将栈顶的 100 和 200 相加，并将结果 300 压入栈顶的过程。
+程序计数器 14 位置指向了 `iload_3` 指令，该指令表示将第四个 int 型本地变量推至栈顶，上图展示了将变量 c 的值 300 推至栈顶的过程。
 
-#### 执行 imul 指令
+* **执行 imul 指令：**
 
 ![执行 imul 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-imul.png)
 
 程序计数器 15 位置指向了 `imul` 指令，该指令表示将栈顶两 int 型数值相乘并将结果压入栈顶，上图展示了将栈顶的 300 和 300 相乘，并将结果 90000 压入栈顶的过程。
 
-#### 执行 ireturn 指令
+* **执行 ireturn 指令：**
 
 ![执行 ireturn 指令](cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology/bytecode-execute-progress-ireturn.png)
 
-程序计数器 16 位置指向了 `ireturn` 指令，该指令表示从当前方法返回 int，上图展示了将栈顶的 90000 返回给调用逻辑的过程。到这里，我们就详细介绍了示例程序计算逻辑执行时，程序计数器、局部变量表以及操作栈之间的变化，虽然这个示例较为简单，但是它已经很好地展示了字节码执行的过程。如果大家感兴趣，可以尝试采用上面的方式来理解更复杂的业务逻辑。
+程序计数器 16 位置指向了 `ireturn` 指令，该指令表示从当前方法返回 int，上图展示了将栈顶的 90000 返回给调用逻辑的过程。
+
+到这里，我们就详细介绍了示例计算逻辑执行时，程序计数器、局部变量表以及操作栈之间的变化，虽然这个示例较为简单，但是它已经很好地展示了字节码执行的过程。如果大家感兴趣，可以**尝试采用上面的方式来理解更复杂的业务逻辑**。
 
 ## 常用字节码指令
 
@@ -637,4 +639,10 @@ TODO
 
 ## 结语
 
-TODO
+本文从字节码的基础概念开始，为大家介绍了 `javap` 和 `jclasslib` 两种查看字节码的方式，通过工具我们能跟观察到字节码中的关键信息，包括：**Classfile、Class 基础信息、常量池、字节码和 SourceFile**，其中**最重要的常量池和字节码**本文也进行了深入探究。
+
+然后我们又结合一个示例计算逻辑，逐个字节码为大家介绍字节码的执行过程，相信大家一定对程序计数器、局部变量表以及操作栈之间的关系有了深刻的理解。
+
+在最后一个部分，我们对常用的字节码指令进行了介绍，期望能够帮助大家了解常用字节码的作用，并能跟在实际的项目中理解这些字节码，进而帮助我们排查问题。
+
+由于 JVM 虚拟机规范中总共定义了 200 多个字节码，考虑到文章的篇幅，我们无法一一进行介绍，感兴趣的读者可以参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)，探究学习其他字节码指令。
