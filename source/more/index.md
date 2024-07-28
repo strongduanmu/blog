@@ -52,18 +52,14 @@ breadcrumb: false
 
 {% grid %}
 <!-- cell -->
-{% link mailto:parasol@waddledee.com Email icon:/assets/placeholder/email.svg %}
+{% link mailto:duanzhengqiang@apache.org Email icon:/assets/placeholder/email.svg %}
 <!-- cell -->
 {% link https://github.com/strongduanmu Github icon:/assets/placeholder/github.svg %}
 {% endgrid %}
 
 <style>
-  .tag-plugin.gallery.grid-box .grid-cell {
-    background: none;
-    padding: 4px;
-  }
-
-  .md-text .link-card .img {
-    filter: invert(85%) sepia(0%) saturate(1%) hue-rotate(87deg) brightness(95%) contrast(98%);
-  }
+.tag-plugin.gallery.grid-box .grid-cell {
+  background: none;
+  padding: 4px;
+}
 </style>
