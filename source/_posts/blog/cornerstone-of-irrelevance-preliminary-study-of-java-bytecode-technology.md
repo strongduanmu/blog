@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-26 07:30:00
-updated: 2024-07-27 07:30:00
+updated: 2024-07-30 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -12,6 +12,7 @@ references:
   - '[JVM 虚拟机规范（SE7）中文版](https://strongduanmu.com/share/jvm/JVM%20%E8%99%9A%E6%8B%9F%E6%9C%BA%E8%A7%84%E8%8C%83%EF%BC%88SE7%EF%BC%89%E4%B8%AD%E6%96%87%E7%89%88.pdf)'
   - '[Java JVM 之程序计数器](https://www.cnblogs.com/ruoli-0/p/13781170.html)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
+  - '[我所知道 JVM 虚拟机之字节码指令集与解析六（操作数栈管理指令）](https://segmentfault.com/a/1190000039911004)'
 ---
 
 ## 前言
@@ -23,9 +24,9 @@ references:
 字节码即 `Java ByteCode`，它由单个字节（`byte`）的指令组成，理论上最多可以支持 256 个操作码（`opcode`），而实际上 Java 只使用了 200 左右的操作码，还有一些操作码则保留下来，用于调试等操作。操作码通常也称为指令，后面会跟随零至多个参数，即操作数（`operand`）。根据指令的特性，可以将字节码分为如下的 4 大类：
 
 1. **栈操作指令**，包括与局部变量交互的指令；
-2. **程序流程控制指令**；
-3. **对象操作指令**，包括方法调用指令；
-4. **算术运算以及类型转换指令**。
+2. **流程控制指令**；
+3. **方法调用指令**；
+4. **算术运算及类型转换指令**。
 
 除此之外，还有一些用于执行专门任务的指令，例如**同步指令、异常指令**等，完整的 JVM 指令可以参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)。
 
@@ -635,7 +636,74 @@ JVM 继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入�
 
 ## 常用字节码指令
 
-TODO
+最后一个部分，我们再来介绍下常用的字节码指令，帮助大家能够在实际项目中看懂更加复杂的字节码指令含义。文章一开始，我们就介绍了字节码指令包括了：`栈操作指令`、`流程控制指令`、`流程控制指令` 和 `算术运算及类型转换指令` 4 大类，除了这 4 大类，`对象初始化指令` 也同样重要，下面我们将按照这几大类，为大家介绍常用的字节码指令。
+
+### 对象初始化指令
+
+通过 `new HelloByteCode()` 进行对象初始化，是大家日常开发的常用操作，通过前文的示例我们可以发现，对象初始化操作通常可以对应如下的 3 个 JVM 指令，分别是 `new`、`dup` 和 `invokespecial`：
+
+```java
+ 0: new           #7                  // class com/strongduanmu/jvm/bytecode/HelloByteCode
+ 3: dup
+ 4: invokespecial #9                  // Method "<init>":()V
+```
+
+那为什么需要 3 条指令才能完成对象初始化呢？是因为：
+
+* 字节码中的 `new` 指令只负责创建对象，并将对象引用压入栈顶，`new` 指令不会调用对象的构造方法；
+* `dup` 指令用于复制栈顶的值，此时操作栈上会出现连续相同的两个对象引用，`dup` 复制的对象引用会用于下一步 `invokespecial` 指令执行，而 `new` 指令创建的对象引用则会用于正常代码逻辑调用；
+* 调用构造方法是由 `invokespecial` 指令来完成，此处会调用 `HelloByteCode#init` 实例方法，因此需要从操作栈上弹出 `this` 对象。
+
+在完成对象初始化后，通常会将对象实例赋给局部变量或全局变量，因此，紧随其后的指令可能有如下几种：
+
+* `astore_{n}` 或 `astore {n}`，`{n}` 表示本地变量表中的位置，该命令会将对象存储到本地变量表的指定位置；
+* `putfield` 将对象赋值给实例变量；
+* `putstatic` 将对象赋值给静态变量。
+
+### 栈操作指令
+
+前文我们介绍对象初始化时提到了 `dup` 指令，它就是一个栈操作指令，除了 `dup` 指令外，栈操作指令还包括：`pop`、`pop2`、`dup_x1`、`dup_x2`、`dup2`、`dup2_x1`、`dup2_x2` 和 `swap` 指令。
+
+`dup`、`dup2`、`pop` 和 `pop2` 是最基础的栈操作指令，它们的作用如下：
+
+* `dup` 用于复制栈顶数值，并将复制值压入栈顶，dup 指令只能适用于下表分类 1 的类型，这些类型只占用一个槽位 Slot；
+* `dup2` 用于复制栈顶一个 long、double 类型，或者两个非 long、非 double 的其他类型数值，并将复制值压入栈顶（long、double 类型占用两个槽位 Slot）；
+* `pop` 将栈顶数值弹出，pop 指令只能适用于下表分类 1 的类型，这些类型只占用一个槽位 Slot；
+* `pop2` 将栈顶的一个 long、double 类型，或者两个非 long、非 double 的其他类型数值弹出（long、double 类型占用两个槽位 Slot）。
+
+| 实际类型        | JVM 计算类型    | 分类 |
+| --------------- | --------------- | ---- |
+| `boolean`       | `int`           | 1    |
+| `byte`          | `int`           | 1    |
+| `char`          | `int`           | 1    |
+| `short`         | `int`           | 1    |
+| `int`           | `int`           | 1    |
+| `float`         | `float`         | 1    |
+| `reference`     | `reference`     | 1    |
+| `returnAddress` | `returnAddress` | 1    |
+| `long`          | `long`          | 2    |
+| `double`        | `double`        | 2    |
+
+`dup_x1`、`dup_x2`、`dup2_x1`、`dup2_x2` 这几个指令会稍微复杂一些，前缀部分的 `dup` 和 `dup2` 和前面介绍的指令含义相同，表示复制 1 个和 2 个槽位 Slot 数值，后缀 `_x{n}` 代表将栈顶复制的值插入到栈的指定位置，我们只需将指令的 `dup` 和 `_x{n}` 中的系数相加，结果即为需要插入的位置，例如：
+
+* `dup_x1` 插入位置为 `1 + 1 = 2`，即栈顶 2 个 Slot 下的位置；
+* `dup_x2` 插入位置为 `1 + 2 = 3`，即栈顶 3 个 Slot 下的位置；
+* `dup2_x1` 插入位置为 `2 + 1 = 3`，即栈顶 3 个 Slot下的位置；
+* `dup2_x2` 插入位置为 `2 + 2 = 4`，即栈顶 4 个 Slot 下的位置。
+
+`swap` 指令表示将栈顶最顶端的两个数值互换，这个数值不能是占用 2 个槽位的 long 或 double 类型，TODO 对于 long double 如何处理
+
+### 流程控制指令
+
+
+
+### 方法调用指令
+
+
+
+### 算术运算及类型转换指令
+
+
 
 ## 结语
 
