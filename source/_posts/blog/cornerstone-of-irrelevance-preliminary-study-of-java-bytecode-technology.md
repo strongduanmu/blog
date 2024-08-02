@@ -695,13 +695,96 @@ JVM 继续执行 `istore_2` 指令，该指令会将栈顶 int 型数值存入�
 
 ### 流程控制指令
 
-流程控制指令主要包括分支和循环等操作，这些指令会通过检查条件来控制程序的执行流程，一般包括了：`if... then... else...`、`for...`、`try {...} catch (...)` 等常用语句。
+流程控制指令主要包括分支和循环等操作，这些指令会通过检查条件来控制程序的执行流程，一般包括了：`if... then... else...`、`for...`、`try {...} catch (...)` 等常用语句。为了方便介绍流程控制指令，我们编写了如下的简单示例：
 
+```java
+public final class FlowControl {
+    
+    public static void main(String[] args) {
+        Collection<Integer> numbers = Arrays.asList(1, 2, 3, 4, 5);
+        for (int each : numbers) {
+            if (each % 2 == 0) {
+                continue;
+            }
+            System.out.println(each);
+        }
+    }
+}
+```
 
+编译后查看字节码，可以得到的字节码信息，`0: iconst_5` 表示初始化一个 `int` 型常量 5，它用于表示数组的长度。紧接着 `1: anewarray` 就创建了一个 Integer 类型的数组。然后依次初始化常量 1 ~ 5，并使用 `Integer.valueOf` 将基础类型转换为包装类型，然后存储到数组的 0 ~ 4 位置中。数组初始化完成后，会调用 `Arrays.asList` 方法转换为 `List` 对象，再使用 `astore_1` 将集合对象存储到本地变量表的第二个位置中。
+
+```java
+Code:
+  stack=4, locals=4, args_size=1
+     0: iconst_5
+     1: anewarray     #2                  // class java/lang/Integer
+     4: dup
+     5: iconst_0
+     6: iconst_1
+     7: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+    10: aastore
+    11: dup
+    12: iconst_1
+    13: iconst_2
+    14: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+    17: aastore
+    18: dup
+    19: iconst_2
+    20: iconst_3
+    21: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+    24: aastore
+    25: dup
+    26: iconst_3
+    27: iconst_4
+    28: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+    31: aastore
+    32: dup
+    33: iconst_4
+    34: iconst_5
+    35: invokestatic  #3                  // Method java/lang/Integer.valueOf:(I)Ljava/lang/Integer;
+    38: aastore
+    39: invokestatic  #4                  // Method java/util/Arrays.asList:([Ljava/lang/Object;)Ljava/util/List;
+    42: astore_1
+		...
+```
+
+下面这部分字节码才是流程控制的关键，可以看到 `for ... each` 语句编译之后使用了迭代器（似乎并不总是使用 `for index++` 执行），循环过程中先调用 `hasNext` 方法判断迭代器是否需要继续执行，该返回会返回 `true`，`false`，JVM 虚拟机会将其转换为 1 和 0 压入栈顶。`56: ifeq 91` 则会判断栈顶 int 数值是否等于 0，相等则跳转到程序计数器 91 的位置执行。
+
+如果不等于 0 则代表当前集合仍然有值，会通过 `60: invokeinterface #7,  1` 调用迭代器的 `next` 方法，然后通过 `irem` 指令从栈顶取出 `iconst_2` 定义的常量 2，并进行取模运算。`75: ifne 81` 会判断栈顶 int 类型值是否不等于 0，不等于则跳转到程序计数器 81 的位置，执行 `println` 操作，否则执行 `78: goto 50` 指令跳转到程序计数器 50 位置，继续执行下一次循环操作。
+
+```java
+Code:
+  stack=4, locals=4, args_size=1
+    ...
+		43: aload_1
+    44: invokeinterface #5,  1            // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
+    49: astore_2
+    50: aload_2
+    51: invokeinterface #6,  1            // InterfaceMethod java/util/Iterator.hasNext:()Z
+    56: ifeq          91
+    59: aload_2
+    60: invokeinterface #7,  1            // InterfaceMethod java/util/Iterator.next:()Ljava/lang/Object;
+    65: checkcast     #2                  // class java/lang/Integer
+    68: invokevirtual #8                  // Method java/lang/Integer.intValue:()I
+    71: istore_3
+    72: iload_3
+    73: iconst_2
+    74: irem
+    75: ifne          81
+    78: goto          50
+    81: getstatic     #9                  // Field java/lang/System.out:Ljava/io/PrintStream;
+    84: iload_3
+    85: invokevirtual #10                 // Method java/io/PrintStream.println:(I)V
+    88: goto          50
+    91: return
+```
+
+关于更多的流程控制指令，大家可以自行尝试编写代码分析，字节码指令含义可参考[比较 Comparisons](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html#%E6%AF%94%E8%BE%83-comparisons) 和[控制 Control](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html#%E6%8E%A7%E5%88%B6-control)。
 
 ### 方法调用指令
 
-
+TODO
 
 ### 算术运算及类型转换指令
 
