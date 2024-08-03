@@ -13,6 +13,7 @@ references:
   - '[Java JVM 之程序计数器](https://www.cnblogs.com/ruoli-0/p/13781170.html)'
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
   - '[我所知道 JVM 虚拟机之字节码指令集与解析六（操作数栈管理指令）](https://segmentfault.com/a/1190000039911004)'
+  - '[Advanced Java Bytecode Tutorial](https://www.jrebel.com/blog/java-bytecode-tutorial)'
 ---
 
 ## 前言
@@ -784,7 +785,42 @@ Code:
 
 ### 方法调用指令
 
-TODO
+前文我们已经介绍了部分方法调用指令，例如：在构造方法初始化时，会调用 `invokespecial` 进行初始化。下面列举了常用方法调用指令的含义：
+
+* `invokevirtual`：调用实例方法；
+* `invokespecial`：调用超类构造方法，实例初始化方法，私有方法；
+* `invokestatic`：调用静态方法；
+* `invokeinterface`：调用接口方法；
+* `invokedynamic`：调用动态方法。
+
+细心的朋友可能会发现，`invokevirtual` 和 `invokeinterface` 可能存在重叠，如果一个类继承了另一个类，此时调用 `invokevirtual` 和 `invokeinterface` 都可以实现逻辑。那么他们之间有什么差异呢？我们通过一个小例子来说明下，下面的示例中有 A 和 B 两个类，A 类中定义了 `method1` 和 `method2`，B 类继承了 A 类，并重写了 `method2`，然后增加了 `method3`。此外，B 类还实现了接口 X，重写了 `methodX`，C 类也同样实现了 X 接口，并重写了 `methodX`。
+
+在 JVM 中执行方法时，需要先解析该方法。在类的定义中有一个方法表，所有方法都对应了一个编号，JVM 解析过程中会从方法表中查找方法对应的编号位置。这个案例中，如果我们调用 `method2` 方法，由于该方法在 A 和 B 类中的位置相同，因此使用 `invokeinterface` 指令即可完成，如果我们调用 `methodX` 方法，由于该方法在 B 和 C 类中的位置不同，如果仍然使用 `invokeinterface` 指令，那么就需要在运行时动态地查找不同类中的位置，效率会大大下降，而使用 `invokevirtual` 则可以提升效率，因为每个类的方法表在编译后已经确定，无需动态查找。
+
+```java
+class A
+	method1
+	method2
+  
+class B extends A implement X
+  @Super
+	method1
+  @Override
+	method2
+	method3
+  @Override
+  methodX
+  
+class C implements X
+	methodC
+  @Override
+	methodX
+```
+
+因此我们可以总结下 `invokevirtual` 和 `invokeinterface` 之间的差异：
+
+* `invokevirtual` 用于在编译期无法确定方法编号位置，需要在运行期，根据不同对象动态查找方法表确定位置的场景，此时使用 `invokevirtual` 效率更高；
+* `invokespecial` 用在编译期已经确定方法编号位置，而不需要等到运行期，再根据实际对象查找方法位置的场景。
 
 ### 算术运算及类型转换指令
 
