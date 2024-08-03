@@ -822,6 +822,8 @@ class C implements X
 * `invokevirtual` 用于在编译期无法确定方法编号位置，需要在运行期，根据不同对象动态查找方法表确定位置的场景，此时使用 `invokevirtual` 效率更高；
 * `invokespecial` 用在编译期已经确定方法编号位置，而不需要等到运行期，再根据实际对象查找方法位置的场景。
 
+TODO
+
 ### 算术运算及类型转换指令
 
 JVM 指令中还包含了很多算术运算指令，对于所有的数值类型 `int`（`boolean`、`byte`、`char` 和 `short` 都会被当做 `int` 运算）、`long`、`float` 和 `double` 都有加、减、乘、除、取模和取反指令，下表展示了不同数值类型对应的运算指令。
