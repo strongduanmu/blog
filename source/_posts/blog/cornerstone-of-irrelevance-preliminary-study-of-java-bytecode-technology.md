@@ -749,7 +749,7 @@ Code:
     38: aastore
     39: invokestatic  #4                  // Method java/util/Arrays.asList:([Ljava/lang/Object;)Ljava/util/List;
     42: astore_1
-		...
+    ...
 ```
 
 下面这部分字节码才是流程控制的关键，可以看到 `for ... each` 语句编译之后使用了迭代器（似乎并不总是使用 `for index++` 执行），循环过程中先调用 `hasNext` 方法判断迭代器是否需要继续执行，该返回会返回 `true`，`false`，JVM 虚拟机会将其转换为 1 和 0 压入栈顶。`56: ifeq 91` 则会判断栈顶 int 数值是否等于 0，相等则跳转到程序计数器 91 的位置执行。
@@ -760,7 +760,7 @@ Code:
 Code:
   stack=4, locals=4, args_size=1
     ...
-		43: aload_1
+    43: aload_1
     44: invokeinterface #5,  1            // InterfaceMethod java/util/Collection.iterator:()Ljava/util/Iterator;
     49: astore_2
     50: aload_2
@@ -805,17 +805,17 @@ Code:
 class A
 	method1
 	method2
-  
+
 class B extends A implement X
-  @Override
+	@Override
 	method2
 	method3
-  @Override
-  methodX
-  
+	@Override
+	methodX
+
 class C implements X
 	methodC
-  @Override
+	@Override
 	methodX
 ```
 
