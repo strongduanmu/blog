@@ -3,7 +3,7 @@ title: 无关性的基石之 Java 字节码技术初探
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-26 07:30:00
-updated: 2024-08-01 07:30:00
+updated: 2024-08-04 07:30:00
 cover: /assets/cover/jvm.png
 banner: /assets/banner/banner_3.jpg
 topic: jvm
@@ -14,6 +14,8 @@ references:
   - '[JVM Bytecode for Dummies (and the Rest of Us Too)](https://www.youtube.com/watch?v=rPyqB1l4gko)'
   - '[我所知道 JVM 虚拟机之字节码指令集与解析六（操作数栈管理指令）](https://segmentfault.com/a/1190000039911004)'
   - '[Advanced Java Bytecode Tutorial](https://www.jrebel.com/blog/java-bytecode-tutorial)'
+  - '[JVM 中方法调用的实现机制](https://it.deepinmind.com/jvm/2019/07/19/jvm-method-invocation.html)'
+  - '[JVM 之动态方法调用：invokedynamic](https://it.deepinmind.com/jvm/2019/07/19/jvm-method-invocation-invokedynamic.html)'
 ---
 
 ## 前言
@@ -793,9 +795,11 @@ Code:
 * `invokeinterface`：调用接口方法；
 * `invokedynamic`：调用动态方法。
 
-细心的朋友可能会发现，`invokevirtual` 和 `invokeinterface` 可能存在重叠，如果一个类继承了另一个类，此时调用 `invokevirtual` 和 `invokeinterface` 都可以实现逻辑。那么他们之间有什么差异呢？我们通过一个小例子来说明下，下面的示例中有 A 和 B 两个类，A 类中定义了 `method1` 和 `method2`，B 类继承了 A 类，并重写了 `method2`，然后增加了 `method3`。此外，B 类还实现了接口 X，重写了 `methodX`，C 类也同样实现了 X 接口，并重写了 `methodX`。
+细心的朋友可能会发现，`invokevirtual` 和 `invokeinterface` 有些类似，一个是调用实例方法，一个是调用接口方法。那么他们之间有什么差异呢？我们通过一个小例子来说明下，下面的示例中有 A 和 B 两个类，A 类中定义了 `method1` 和 `method2`，B 类继承了 A 类，并重写了 `method2`，然后增加了 `method3`。此外，B 类还实现了接口 X，重写了 `methodX`，C 类也同样实现了 X 接口，并重写了 `methodX`。
 
-在 JVM 中执行方法时，需要先解析该方法。在类的定义中有一个方法表，所有方法都对应了一个编号，JVM 解析过程中会从方法表中查找方法对应的编号位置。这个案例中，如果我们调用 `method2` 方法，由于该方法在 A 和 B 类中的位置相同，因此使用 `invokeinterface` 指令即可完成，如果我们调用 `methodX` 方法，由于该方法在 B 和 C 类中的位置不同，如果仍然使用 `invokeinterface` 指令，那么就需要在运行时动态地查找不同类中的位置，效率会大大下降，而使用 `invokevirtual` 则可以提升效率，因为每个类的方法表在编译后已经确定，无需动态查找。
+在 JVM 中执行方法时，需要先解析该方法。在类的定义中有一个方法表，所有方法都对应了一个编号，JVM 解析过程中会从方法表中查找方法对应的编号位置。这个案例中，如果我们调用 B 类的 `method2` 方法，由于该方法在 B 类中进行了重写，因此可以直接在 B 类的方法表中快速查找到，因此使用 `invokevirtual B#method2` 指令即可。如果我们调用 B 类的 `method1` 方法，由于该方法 B 类没有重写，继承的是父类的方法，因此使用 `invokevirtual B#method1` 指令时，会通过指针找到 `A#method1` 方法。
+
+此外，我们还可以使用 X 接口调用 `methodX` 方法，此时会生成 `invokeinterface` 指令进行调用，由于不同对象 `methodX` 方法的编号位置不同，在执行 `invokeinterface` 指令时，就需要在运行时动态地查找不同类中的位置，效率会有些影响。当然，尽管接口调用会有一些额外开销，但也无需为了这点小的优化而不去使用接口，因为 JVM 中的 JIT 编译器会帮我们优化这部分的性能损耗。
 
 ```java
 class A
@@ -803,8 +807,6 @@ class A
 	method2
   
 class B extends A implement X
-  @Super
-	method1
   @Override
 	method2
 	method3
@@ -817,12 +819,16 @@ class C implements X
 	methodX
 ```
 
-因此我们可以总结下 `invokevirtual` 和 `invokeinterface` 之间的差异：
+除了 `invokevirtual` 和 `invokeinterface` 外，`invokedynamic` 指令也值得拿出来说一说。从 JDK 7 开始，JVM 新增了 `invokedynamic` 指令，这条指令是为了实现`动态类型语言（Dynamically Typed Language）` 而进行地改进之一，也是 JDK 8 支持 Lambda 表达式的基础。
 
-* `invokevirtual` 用于在编译期无法确定方法编号位置，需要在运行期，根据不同对象动态查找方法表确定位置的场景，此时使用 `invokevirtual` 效率更高；
-* `invokespecial` 用在编译期已经确定方法编号位置，而不需要等到运行期，再根据实际对象查找方法位置的场景。
+我们知道在不改变字节码的情况下，想要实现调用 Demo 类的 test 方法，只有两种办法：
 
-TODO
+1. 使用 `new Demo().test();`，先创建 Demo 类，然后通过对象调用 test 方法；
+2. 使用反射 API，通过 `Demo.class.getMethod` 获取到 Method 对象，然后调用 `Method.invoke` 反射调用 test 方法。
+
+这两个方法都需要显式地把方法 test 和类型 Demo 关联起来，假设我们还有一个类型 Demo2，它也有一个一模一样的方法 test，这时候我们又要如何调用 test 方法呢？在 JDK 8 之前，我们通常会定义一个公共接口，然后将 test 方法声明在接口中，并让 Demo 和 Demo2 实现这个接口，这样我们就可以面向接口进行调用。
+
+虽然面向接口可以实现，但是总体上体验很差，增加了很多额外的工作，为了解决这个问题，JDK 8 实现了全新的 Lambda 表达式。Lambda 表达式的本质是对象引用，它基于 `invokedynamic` 指令，配合新增的方法句柄 `Method Hanlders`（它可以用来描述一个跟类型 Demo 无关的 test 方法签名，甚至不包括方法名称，这样就可以做到不同的对象调用同一个签名的方法），可以在运行时再决定由哪个类来接收被调用的方法。关于 invokedynamic 指令的更多细节，可以参考 [JVM 之动态方法调用：invokedynamic](https://it.deepinmind.com/jvm/2019/07/19/jvm-method-invocation-invokedynamic.html) 进行学习了解。
 
 ### 算术运算及类型转换指令
 
