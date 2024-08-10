@@ -14,9 +14,10 @@ leftbar:
 base_dir: /wiki/c/
 tree:
   '基础入门':
+    - index
     - introduction
   '基本语法':
-    - introduction
+    - introduction2
   '高级应用':
-    - introduction
+    - introduction3
   
