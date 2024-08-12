@@ -19,15 +19,15 @@ banner: /assets/banner/banner_2.jpg
 
 2. C **语言在许多领域应用广泛**；
 
-   - `操作系统`：C 广泛用于开发操作系统，如 Unix、Linux 和 Windows；
+   - `操作系统`：C 广泛用于开发操作系统，如 `Unix`、`Linux` 和 `Windows`；
 
    - `嵌入式系统`：C 是一种用于开发嵌入式系统（如微控制器、微处理器和其他电子设备）的流行语言；
 
    - `系统软件`：C 用于开发设备驱动程序、编译器和汇编器等系统软件；
 
-   - `网络`：C 语言广泛用于开发网络应用程序，例如 Web 服务器、 网络协议和网络驱动程序；
+   - `网络`：C 语言广泛用于开发网络应用程序，例如 `Web` 服务器、 网络协议和网络驱动程序；
 
-   - `数据库系统`：C 用于开发数据库系统，例如 Oracle、MySQL 和 PostgreSQL；
+   - `数据库系统`：C 用于开发数据库系统，例如 `Oracle`、`MySQL` 和 `PostgreSQL`；
 
    - `游戏`：由于 C 能够处理低级硬件交互，因此经常用于开发计算机游戏；
 
@@ -73,4 +73,89 @@ C 语言标准的第一次大型修订，发生在 1999 年，增加了许多语
 
 2023 年预计发布，计划进一步增强安全性，消除实现定义的行为，引入模块化语言概念等新特性，使 C 语言在安全和可靠性方面有重大 提高。
 
-TODO
+## 第一个 C 语言程序——Hello World
+
+C 语言的源代码文件，以**后缀名** `.c` **结尾**，下面是我们学习的第一个 C 语言程序——Hello World。
+
+```c
+// 引入 C 语言标准输入输出头文件
+#include <stdio.h>
+
+// C 语言入口 main 函数
+int main() {
+  	// 通过 printf 输出字符串
+    printf("Hello, World!\n");
+    return 0;
+}
+```
+
+我们将它保存在 `HelloWorld.c` 文件中，并使用 `gcc` 编译器进行编译，`-o` 参数指定了输出二进制文件的名称，此外，还可以指定 `-std` 参数指定编译的 C 语言标准：
+
+```bash
+gcc -o HelloWorld HelloWorld.c
+gcc -std=c99 -o HelloWorld HelloWorld.c
+```
+
+编译完成后，我们就得到了一个可执行程序，使用如下的命令执行，可以看到输出了 `Hello, World!`：
+
+```bash
+./HelloWorld
+Hello, World!
+```
+
+## 使用 CLion IDE 开发 C 程序
+
+IDE（`Integrated Development Environment`，集成开发环境）相较于文本开发工具，它可以把代码编写、编译、执行、调试等多种功能综合到一起，有效地提升开发效率。`CLion` 是一款由 JetBrains 推出的跨平台 C/C++ 集成开发环境，它具有智能编辑器、`CMake` 构建支持、调试器、单元测试、代码分析等功能，可以极大提高 C/C++ 开发效率。
+
+下图展示了使用 CLion 创建项目，用户可以选择创建 C 可执行文件，还是 C 库文件，并可以选择对应的 C 语言标准。
+
+![使用 CLion 创建项目](/wiki/c/introduction/create-projection-wtih-clion.png)
+
+创建完成后，项目中自带了一个 `main.c` 文件，直接选择右上角的 Run 或 Debug 按钮，可以执行 C 程序，下方的 Debug 窗口展示了执行结果。
+
+![创建完成的 Clion 项目](/wiki/c/introduction/created_project.png)
+
+为了方便后续 C 语言的学习，我们需要在 `c_lecture` 项目中创建多个子目录，如下图所示，我们创建了 `hello_world` 目录，并将前文练习的 HelloWorld 源码复制过来，可以发现执行出现了报错，这是因为一个 C 程序中只允许存在一个 main 函数。
+
+![项目中包含多个 main 函数](/wiki/c/introduction/multi-main-in-same-project.png)
+
+为了解决这个问题，我们需要安装 `C/C++ Single File Execution` 插件，然后在需要执行的代码中右键选择 `Add executable for single c/cpp file`，此时 `CMakeLists.txt` 文件中多处了一行 `add_executable(HelloWorld hello_world/HelloWorld.c)`，然后我们再右击项目文件夹，选择 `Reload CMake Project` 进行刷新，此时再次执行 HelloWorld 程序，发现可以正常执行。
+
+```cmake
+cmake_minimum_required(VERSION 3.28)
+project(c_lecture C)
+
+set(CMAKE_C_STANDARD 99)
+
+add_executable(main main.c)
+add_executable(HelloWorld hello_world/HelloWorld.c)
+```
+
+## C 程序的运行流程
+
+C 程序从编写到执行总共需要 4 个步骤：`编辑`、`编译`、`链接`和`执行`，编辑指的是编写 C 源码，并将源码存储为 `.c` 源文件的过程。编译则是使用编译器，将源码转换为目标程序的过程，如果程序没有任何报错，则会生成一个扩展名为 `.obj` 的二进制文件。由于 C 程序中需要引入其他依赖库，因此链接会将编译好的目标程序，以及其他依赖的程序库链接到一起，形成统一的可执行二进制程序。有了可执行程序，最终我们可以直接在命令行中执行程序。
+
+![C 程序的运行流程](/wiki/c/introduction/c-program-execute-sequence.png)
+
+## C 语言的注释
+
+C 语言中支持两种注释类型：
+
+1. **单行注释**：
+
+```c
+// 单行注释
+```
+
+2. **多行注释**（**或块注释**）：
+
+```c
+/*
+这是第一行注释 
+这是第二行注释 
+这是第三行注释
+*/
+```
+
+
+
