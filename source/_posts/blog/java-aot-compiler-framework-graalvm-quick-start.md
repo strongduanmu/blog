@@ -3,7 +3,7 @@ title: Java AOT 编译框架 GraalVM 快速入门
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00
-updated: 2024-08-14 08:00:00
+updated: 2024-08-15 08:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_11.jpg
 topic: jvm
@@ -40,23 +40,21 @@ GraalVM 是一个**高性能、支持多种编程语言的执行环境**。它�
 
 **那么什么是 AOT 技术呢**？熟悉 C、C++ 语言的同学对这个概念一定不陌生，所谓 AOT 编译，是指**在程序运行之前**，便将程序源码或字节码转换为机器码的过程，编译完成后的输出的是可执行文件或者动态链接库文件。和 AOT 编译相对的是 JIT 编译，JIT 编译是指**在程序运行过程中**，将字节码编译为可在硬件上直接执行的机器码，在 Java 语言中，HotSpot 虚拟机会将热点代码通过 JIT 编译器编译为机器码，从而提升程序的执行性能。
 
+下图展示了 AOT 和 JIT 编译的运行流程，他们都需要通过 `javac` 编译器将 Java 源码编译为 Java 字节码。AOT 和 JIT 编译的差异主要体现在获得字节码后如何执行，传统的 Java 程序会运行在 JVM 之上，JVM 会通过解释执行的方式执行字节码逻辑，如果执行的代码是热点代码，则会通过 JIT 即时编译器，将字节码编译为二进制代码。AOT 编译则脱离了 JVM 运行时环境，直接通过 GraalVM 编译器将 Java 字节码编译为二进制文件，然后直接在操作系统上运行。
+
+![AOT 和 JIT 运行流程](java-aot-compiler-framework-graalvm-quick-start/aot-and-jit-run-process.png)
+
+AOT 编译最突出的特点是脱离了 JVM 运行时环境，直接编译生成二进制可执行文件，**无需在程序运行过程中耗费 CPU 资源来进行即时编译，程序能够在启动后立刻达到期望的最佳性能**。下图展示了 [Quarkus 框架](https://cn.quarkus.io/)使用 GraalVM AOT 性能对比，可以看到使用 AOT 编译后的程序消耗内存更少，并且启动后首次执行的耗时大幅度缩短。
+
 ![Quarkus 框架使用 GraalVM AOT 性能对比](java-aot-compiler-framework-graalvm-quick-start/quarkus-graalvm-performance.png)
-
-AOT 编译的优势很明显，即**无需在程序运行过程中耗费 CPU 资源来进行即时编译，程序能够在启动后立刻达到期望的最佳性能**。上图展示了 [Quarkus 框架](https://cn.quarkus.io/)使用 GraalVM AOT 性能对比，可以看到使用 AOT 编译后的程序消耗内存更少，并且启动后首次执行的耗时大幅度缩短。
-
-
-
-
-
-
 
 ### AOT 编译的优势和劣势
 
-
-
-
+混迹于技术圈的朋友，可能都听过这句话——**没有银弹**（欧美传说中，使用银子弹可以杀死吸血鬼、狼人或怪兽，银弹引申为解决问题的有效方法）。对于 AOT 编译技术也是同样，它在带来低内存消耗、快速启动等优势的同时，同样也会带来一些问题，下面我们就来探讨下 AOT 编译的优势和劣势。
 
 ![GraalVM AOT 编译和 JVM JIT 编译对比](java-aot-compiler-framework-graalvm-quick-start/graalvm-aot-vs-jit.png)
+
+
 
 
 

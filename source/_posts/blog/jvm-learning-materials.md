@@ -38,7 +38,6 @@ JVM 虚拟机原理及其相关的调优技术是每一位 Java 工程师必备�
 * [深入理解Java虚拟机：JVM高级特性与最佳实践（第3版）](https://strongduanmu.com/share/jvm/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Java%E8%99%9A%E6%8B%9F%E6%9C%BA%EF%BC%9AJVM%E9%AB%98%E7%BA%A7%E7%89%B9%E6%80%A7%E4%B8%8E%E6%9C%80%E4%BD%B3%E5%AE%9E%E8%B7%B5%EF%BC%88%E7%AC%AC3%E7%89%88%EF%BC%89.pdf)
 * [深入理解 JAVA 内存模型](https://strongduanmu.com/share/jvm/%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3%20JAVA%20%E5%86%85%E5%AD%98%E6%A8%A1%E5%9E%8B.pdf)
 * [自己动手写 Java 虚拟机](https://strongduanmu.com/share/jvm/%E8%87%AA%E5%B7%B1%E5%8A%A8%E6%89%8B%E5%86%99%20Java%20%E8%99%9A%E6%8B%9F%E6%9C%BA.pdf)
-* [GraalVM 与 Java 静态编译：原理与应用](https://weread.qq.com/web/bookDetail/05e320207280c16e05e5bc3)
 
 ### 综合介绍
 
@@ -48,3 +47,11 @@ JVM 虚拟机原理及其相关的调优技术是每一位 Java 工程师必备�
 
 * [大咖微讲堂之《JVM 字节码的探索与实践应用》](https://heapdump.cn/course/2608464/list)
 
+### GraalVM
+
+* [GraalVM 与 Java 静态编译：原理与应用](https://weread.qq.com/web/bookDetail/05e320207280c16e05e5bc3)
+* [Java Developer's Introduction to GraalVM](https://www.youtube.com/watch?v=llmdMhED0Qc)
+
+* [Optimizing Performance with GraalVM](https://archive.qconsf.com/system/files/presentation-slides/qconsf2019-alina-yurenko-jit-vs-aot-performance-with-graalvm.pdf)
+
+* [Run Code in Any Language Anywhere with GraalVM](https://www.youtube.com/watch?v=JoDOo4FyYMU)
