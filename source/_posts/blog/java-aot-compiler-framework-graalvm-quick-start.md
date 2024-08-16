@@ -50,13 +50,70 @@ AOT 编译最突出的特点是脱离了 JVM 运行时环境，直接编译生�
 
 ### AOT 编译的优势和劣势
 
-混迹于技术圈的朋友，可能都听过这句话——**没有银弹**（欧美传说中，使用银子弹可以杀死吸血鬼、狼人或怪兽，银弹引申为解决问题的有效方法）。对于 AOT 编译技术也是同样，它在带来低内存消耗、快速启动等优势的同时，同样也会带来一些问题，下面我们就来探讨下 AOT 编译的优势和劣势。
+混迹于技术圈的朋友，可能都听过这句话——**没有银弹**（西方传说中，使用银子弹可以杀死吸血鬼、狼人或怪兽，银弹引申为解决问题的有效方法）。对于 AOT 编译技术也是同样，它在带来低内存消耗、快速启动等优势的同时，同样也会带来一些问题，下面我们就来探讨下 AOT 编译的优势和劣势。
 
 ![GraalVM AOT 编译和 JVM JIT 编译对比](java-aot-compiler-framework-graalvm-quick-start/graalvm-aot-vs-jit.png)
 
+上图展示了 AOT 编译和传统的 JIT 编译的对比，相比 JIT 编译，AOT 编译具有如下的一些优势：
 
+* **启动速度更快**：AOT 编译直接生成了平台相关的机器码，无需再使用解释执行和 JIT 编译的方式，避免了解释执行低效，也避免了 JIT 编译带来的 CPU 开销。AOT 编译还解决了传统 Java 执行模型中无法充分预热，始终存在解释执行的问题，因此可以大幅度提升启动速度，并稳定保持较好的性能；
+* **占用内存更少**：由于 JVM 虚拟机运行需要占用内存，Java 语言实现动态特性也需要额外消耗内存，AOT 编译后程序无需运行在 JVM 虚拟机上，同时也去除了 Java 语言的动态特性，因此程序内存消耗会更少；
+* **更小的应用包**：AOT 编译后的程序无需依赖 JVM 虚拟机，因此打包的应用会更小，可以很方便地进行分发。
 
+虽然 AOT 编译有如上众多的优点，但是鱼和熊掌不可兼得，由于 AOT 编译采用了静态执行的方式，不可避免地会带来如下的问题：
 
+* **峰值吞吐量降低**：由于 AOT 编译在编译器需要将全部的代码转换为机器码，因此 AOT 编译无法像 JVM 一样，在程序运行时动态地获取指标，来指导编译器编译出性能更优的机器码，因此峰值吞吐量相比于 JVM 会有所下降（GraalVM EE 版本提供了 `Profile-Guided Optimizations` 用来指导 AOT 编译，取得了不错的效果，未来需要关注该特性是否会开源到 GraalVM CE 版本，更多信息可以参考 [Optimizing Performance with GraalVM](https://archive.qconsf.com/system/files/presentation-slides/qconsf2019-alina-yurenko-jit-vs-aot-performance-with-graalvm.pdf)）；
+* **最大延迟增大**：AOT 编译目前仅支持常规的 `STOP&COPY` 垃圾收集器，因此最大延迟相比 JVM 会增加（GraalVM EE 版本提供了 G1 垃圾回收器，最大延迟相比 GraalVM CE 会更小）；
+* **封闭性**：AOT 编译的基本原则是**封闭性假设**，即程序在编译期必须掌握运行时所需的所有信息，在运行时不能出现任何编译器未知的内容。这会导致 Java 程序中的很多动态特性无法继续使用，例如：**反射、动态类加载、动态代理、JCA 加密机制（内部依赖了反射）、JNI、序列化等**，如果程序中包含了这些动态特性，则需要通过额外的适配工作进行处理；
+* **平台相关性**：AOT 静态编译后程序由原来的平台无关性，变为平台相关性，用户需要考虑部署的平台架构，然后编译出不同的二进制程序；
+* **生态变化**：传统面向 Java 程序的调试、监控、Agent 等技术不再适用，因为运行的程序由 Java 程序变成了本地程序，用户需要使用 GDB 才能调试本地程序。可以说，AOT 编译除了源码仍然是 Java 外，其他的生态完全不同了，这些会成为 AOT 编译推广的阻力。
+
+## GraalVM AOT 实战
+
+### 安装 GraalVM SDK
+
+GraalVM 官方文档 [Getting Started](https://www.graalvm.org/latest/docs/getting-started/) 页面提供了主流 Linux、Mac 和 Windows 平台安装 GraalVM 的教程，大家可以按照教程进行安装。由于笔者更喜欢 SDKMAN 这个工具，因此本小节会介绍下 SDKMAN 安装 GraalVM SDK 的步骤，大家可以按照自己熟悉的方式进行安装。
+
+首先，我们需要安装 SDKMAN，参考官方文档 [Installation](https://sdkman.io/install)，执行以下脚本即可完成安装，安装完成后使用 `sdk version` 查看版本信息。
+
+```bash
+curl -s "https://get.sdkman.io" | bash
+source "$HOME/.sdkman/bin/sdkman-init.sh"
+sdk version
+```
+
+然后我们执行 `sdk list java` 查看 Java SDK 可用版本：
+
+```bash
+================================================================================
+Available Java Versions for macOS ARM 64bit
+================================================================================
+ Vendor        | Use | Version      | Dist    | Status     | Identifier
+--------------------------------------------------------------------------------
+ GraalVM Oracle|     | 24.ea.8      | graal   |            | 24.ea.8-graal
+               |     | 24.ea.7      | graal   | installed  | 24.ea.7-graal
+               |     | 23.ea.22     | graal   |            | 23.ea.22-graal
+               |     | 23.ea.21     | graal   |            | 23.ea.21-graal
+               |     | 22.0.2       | graal   | installed  | 22.0.2-graal
+               |     | 21.0.4       | graal   |            | 21.0.4-graal
+================================================================================
+Omit Identifier to install default version 21.0.4-tem:
+    $ sdk install java
+Use TAB completion to discover available versions
+    $ sdk install java [TAB]
+Or install a specific version by Identifier:
+    $ sdk install java 21.0.4-tem
+Hit Q to exit this list view
+================================================================================
+```
+
+可以选择最新稳定版 `22.0.2-graal` 进行安装，执行 `sdk install java 22.0.2-graal`，安装完成后可以通过 `sdk default java 22.0.2-graal` 设置当前默认 JDK 版本，然后执行 `java -version` 查看 JDK 版本号。
+
+```bash
+java version "22.0.2" 2024-07-16
+Java(TM) SE Runtime Environment Oracle GraalVM 22.0.2+9.1 (build 22.0.2+9-jvmci-b01)
+Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 22.0.2+9.1 (build 22.0.2+9-jvmci-b01, mixed mode, sharing)
+```
 
 
 
