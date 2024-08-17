@@ -3,7 +3,7 @@ title: Java AOT 编译框架 GraalVM 快速入门
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00
-updated: 2024-08-15 08:00:00
+updated: 2024-08-17 08:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_11.jpg
 topic: jvm
@@ -14,6 +14,7 @@ references:
   - '[云原生时代，Java 的危与机](https://www.infoq.cn/article/rqfww2r2zpyqiolc1wbe)'
   - '[Java Developer&#x27;s Introduction to GraalVM](https://www.youtube.com/watch?v=llmdMhED0Qc)'
   - '[Run Code in Any Language Anywhere with GraalVM](https://www.youtube.com/watch?v=JoDOo4FyYMU)'
+  - '[A New GraalVM Release and New Free License](https://medium.com/graalvm/a-new-graalvm-release-and-new-free-license-4aab483692f5)'
 ---
 
 ## GraalVM 诞生的背景
@@ -62,8 +63,8 @@ AOT 编译最突出的特点是脱离了 JVM 运行时环境，直接编译生�
 
 虽然 AOT 编译有如上众多的优点，但是鱼和熊掌不可兼得，由于 AOT 编译采用了静态执行的方式，不可避免地会带来如下的问题：
 
-* **峰值吞吐量降低**：由于 AOT 编译在编译器需要将全部的代码转换为机器码，因此 AOT 编译无法像 JVM 一样，在程序运行时动态地获取指标，来指导编译器编译出性能更优的机器码，因此峰值吞吐量相比于 JVM 会有所下降（GraalVM EE 版本提供了 `Profile-Guided Optimizations` 用来指导 AOT 编译，取得了不错的效果，未来需要关注该特性是否会开源到 GraalVM CE 版本，更多信息可以参考 [Optimizing Performance with GraalVM](https://archive.qconsf.com/system/files/presentation-slides/qconsf2019-alina-yurenko-jit-vs-aot-performance-with-graalvm.pdf)）；
-* **最大延迟增大**：AOT 编译目前仅支持常规的 `STOP&COPY` 垃圾收集器，因此最大延迟相比 JVM 会增加（GraalVM EE 版本提供了 G1 垃圾回收器，最大延迟相比 GraalVM CE 会更小）；
+* **峰值吞吐量降低**：由于 AOT 编译在编译器需要将全部的代码转换为机器码，因此 AOT 编译无法像 JVM 一样，在程序运行时动态地获取指标，来指导编译器编译出性能更优的机器码，因此峰值吞吐量相比于 JVM 会有所下降（最新的 Oracle GraalVM 版本提供了 `Profile-Guided Optimizations` 用来指导 AOT 编译，取得了不错的效果，更多信息可以参考 [Optimizing Performance with GraalVM](https://archive.qconsf.com/system/files/presentation-slides/qconsf2019-alina-yurenko-jit-vs-aot-performance-with-graalvm.pdf) 及 [A New GraalVM Release and New Free License](https://medium.com/graalvm/a-new-graalvm-release-and-new-free-license-4aab483692f5)）；
+* **最大延迟增大**：AOT 编译目前仅支持常规的 `STOP&COPY` 垃圾收集器，因此最大延迟相比 JVM 会增加（最新的 Oracle GraalVM 版本提供了 G1 垃圾回收器，最大延迟相比 GraalVM CE 会更小）；
 * **封闭性**：AOT 编译的基本原则是**封闭性假设**，即程序在编译期必须掌握运行时所需的所有信息，在运行时不能出现任何编译器未知的内容。这会导致 Java 程序中的很多动态特性无法继续使用，例如：**反射、动态类加载、动态代理、JCA 加密机制（内部依赖了反射）、JNI、序列化等**，如果程序中包含了这些动态特性，则需要通过额外的适配工作进行处理；
 * **平台相关性**：AOT 静态编译后程序由原来的平台无关性，变为平台相关性，用户需要考虑部署的平台架构，然后编译出不同的二进制程序；
 * **生态变化**：传统面向 Java 程序的调试、监控、Agent 等技术不再适用，因为运行的程序由 Java 程序变成了本地程序，用户需要使用 GDB 才能调试本地程序。可以说，AOT 编译除了源码仍然是 Java 外，其他的生态完全不同了，这些会成为 AOT 编译推广的阻力。
@@ -114,6 +115,44 @@ java version "22.0.2" 2024-07-16
 Java(TM) SE Runtime Environment Oracle GraalVM 22.0.2+9.1 (build 22.0.2+9-jvmci-b01)
 Java HotSpot(TM) 64-Bit Server VM Oracle GraalVM 22.0.2+9.1 (build 22.0.2+9-jvmci-b01, mixed mode, sharing)
 ```
+
+安装完 GraalVM SDK 后，我们还需要安装 AOT 静态编译所需的本地工具链，例如：C 库的头文件、`glibc-devel`、`zlib`、`gcc` 和 `libstdc++-static`。本地工具链安装脚本如下：
+
+```bash
+# MacOS
+xcode-select --install
+# CentOS
+sudo yum install gcc glibc-devel zlib-devel
+# Ubuntu
+sudo apt-get install build-essential zlib1g-dev
+```
+
+更多关于本地工具链的安装步骤，请大家参考 [GraalVM 官方文档先决条件](https://www.graalvm.org/latest/reference-manual/native-image/#prerequisites)。
+
+### GraalVM HelloWorld
+
+学习一门新语言，通常都是从 `HelloWorld` 开始，我们也尝试使用 GraalVM 编译一个 Java 的 HelloWorld 程序，输出 `Hello World! GraalVM!`。
+
+```java
+public final class HelloWorld {
+    
+    public static void main(String[] args) {
+        System.out.println("Hello World! GraalVM!");
+    }
+}
+```
+
+我们按照前文介绍的步骤，先使用 `javac HelloWorld.java` 命令将源码编译为字节码，再使用 `GraalVM` 编译器将字节码编译为本地代码，GraalVM 编译器的命令为 `native-image`，执行如下的命令可以编译出本地代码。
+
+```bash
+# 编译生成 HelloWorld
+native-image HelloWorld
+# 执行 Native Image
+./helloworld                                                                                                                   ✔
+Hello World! GraalVM!
+```
+
+
 
 
 
