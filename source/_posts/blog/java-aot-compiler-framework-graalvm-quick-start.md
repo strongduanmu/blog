@@ -3,7 +3,7 @@ title: Java AOT 编译框架 GraalVM 快速入门
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00
-updated: 2024-08-17 08:00:00
+updated: 2024-08-18 08:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_11.jpg
 topic: jvm
@@ -142,22 +142,127 @@ public final class HelloWorld {
 }
 ```
 
-我们按照前文介绍的步骤，先使用 `javac HelloWorld.java` 命令将源码编译为字节码，再使用 `GraalVM` 编译器将字节码编译为本地代码，GraalVM 编译器的命令为 `native-image`，执行如下的命令可以编译出本地代码。
+我们按照前文介绍的步骤，先使用 `javac HelloWorld.java` 命令将源码编译为字节码，再使用 `GraalVM` 编译器将字节码编译为本地代码，GraalVM 编译器的命令为 `native-image`，执行如下的命令可以编译出本地代码。`native-image` 命令参数较多，大家可以使用 `native-image --help` 查看完整列表进行探究。
 
 ```bash
 # 编译生成 HelloWorld
 native-image HelloWorld
+```
+
+![GraalVM 编译 Native Image](java-aot-compiler-framework-graalvm-quick-start/graalvm-build-native-image.png)
+
+上图展示了 GraalVM 编译过程，编译后会默认会生成 class 文件名对应的小写二进制文件，我们也可以使用 `-o` 参数指定二进制文件名，执行 `./helloworld` 可以输出字符串。
+
+```bash
 # 执行 Native Image
-./helloworld                                                                                                                   ✔
+./helloworld
 Hello World! GraalVM!
 ```
 
+### 使用 Maven 构建 Native Image
 
+在实际工作中，我们通常会使用 Maven 或 Gradle 工具，来构建 Native Image。本文将以 Maven 工具为例，为大家介绍下实际项目中如何构建一个 Native Image 可执行文件，Gradle 工具的使用大家可以参考官方文档 [Native-Image#Gradle](https://www.graalvm.org/latest/reference-manual/native-image/#gradle)。
 
+我们使用 IDEA 工具创建 Maven 项目，Archetype 使用 `quickstart`，它可以创建出一个包含 `Hello World!` Demo 的 Maven 项目。
 
+![使用 IDEA 创建 Maven 项目](java-aot-compiler-framework-graalvm-quick-start/new-maven-project-with-idea.png)
+
+然后在 `pom.xml` 文件中添加 `maven-compiler-plugin` 和 `maven-jar-plugin` 插件，用于编译 Java 源码，并将源码打包为可执行 jar 文件。
+
+```xml
+<build>
+     <plugins>
+         <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-compiler-plugin</artifactId>
+             <version>3.12.1</version>
+             <configuration>
+                 <fork>true</fork>
+             </configuration>
+         </plugin>
+         <plugin>
+             <groupId>org.apache.maven.plugins</groupId>
+             <artifactId>maven-jar-plugin</artifactId>
+             <version>3.3.0</version>
+             <configuration>
+                 <archive>
+                     <manifest>
+                         <mainClass>com.example.App</mainClass>
+                         <addClasspath>true</addClasspath>
+                     </manifest>
+                 </archive>
+             </configuration>
+         </plugin>
+     </plugins>
+ </build>
+```
+
+再添加一个新的 `profile`，id 可以设置为 `native`，并在改 profile 下添加 `native-maven-plugin` 插件，用于将字节码文件编译为二进制的 Native Image，`configuration` 下可以配置本地镜像名称 `imageName`，以及构建时的参数 `buildArg`，此处 `--no-fallback` 代表的是不进入 `fallback` 模式。当 GraalVM 发现使用了未被配置的动态特性时会默认回退到 JVM 模式。本选项会关闭回退行为，总是执行静态编译。
+
+```xml
+<properties>
+    <native.image.name>HelloWorld</native.image.name>
+    <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
+</properties>
+
+<profiles>
+    <profile>
+        <id>native</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native.maven.plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <imageName>${native.image.name}</imageName>
+                        <buildArgs>
+                            <buildArg>--no-fallback</buildArg>
+                        </buildArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-native</id>
+                            <goals>
+                                <goal>compile-no-fork</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                        <execution>
+                            <id>test-native</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+```
+
+配置完成后，我们再执行 ` mvn -Pnative package` 编译二进制文件，如下图所示会在 `target` 目录下编译生成 `HelloWorld` 可执行文件。
+
+![Maven 构建结果](java-aot-compiler-framework-graalvm-quick-start/maven-build-target.png)
+
+执行 `./target/HelloWorld` 会输出 `Hello World!`。
+
+```bash
+./target/HelloWorld
+Hello World!
+```
 
 TODO
 
 ## 结语
+
+本文首先介绍了 GraalVM 诞生的背景，随着云原生时代的发展，应用体积、内存消耗以及启动速度越来越成为人们关注的问题，为了解决云原生环境下 Java 程序存在的问题，以及应对来自 Go、Rust 等原生语言的挑战，Java 社区提出了 `GraalVM` 方案，通过 GraalVM 中的 `AOT` 提前编译技术，将 Java 生成的字节码文件，提前编译生成二进制的机器码，从而**规避冷启动以及依赖 JVM 运行带来的诸多问题**。
+
+然后我们对比了 GraalVM AOT 编译和传统的 JIT 编译之间的优势和劣势，GraalVM AOT 目前更适用于对启动速度、内存消耗有较高要求的场景，而对于吞吐量、延迟有较高要求的场景，则更推荐采用传统的 JIT 编译方式。此外，GraalVM AOT 编译带来的生态变化，会导致传统 Java 程序的监控、调试、Agent 技术不再适用，这些需要在选型 GraalVM AOT 技术时进行充分考虑。
+
+最后一个部分，我们介绍了 GraalVM AOT 实战，从基础的 SDK 安装，到第一个 HelloWorld 程序，带大家一起体验了下 GraalVM 的基础使用。然后我们又参考了项目实际情况，使用 Maven 工具构建了一个简单的二进制程序。
 
 TODO
