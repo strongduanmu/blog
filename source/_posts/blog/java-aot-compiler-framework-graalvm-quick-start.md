@@ -3,12 +3,13 @@ title: Java AOT 编译框架 GraalVM 快速入门
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00
-updated: 2024-08-18 08:00:00
+updated: 2024-08-21 08:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_11.jpg
 topic: jvm
 references:
-  - '[GraalVM Documentation](https://www.graalvm.org/jdk21/docs/)'
+  - '[GraalVM Documentation](https://www.graalvm.org/latest/docs/)'
+  - '[Collect Metadata with the Tracing Agent](https://www.graalvm.org/latest/reference-manual/native-image/metadata/AutomaticMetadataCollection/)'
   - '[GraalVM 与 Java 静态编译：原理与应用](https://yd.qq.com/web/reader/05e320207280c16e05e5bc3)'
   - '[SubstrateVM：AOT 编译框架](https://time.geekbang.org/column/article/41582)'
   - '[云原生时代，Java 的危与机](https://www.infoq.cn/article/rqfww2r2zpyqiolc1wbe)'
@@ -69,7 +70,7 @@ AOT 编译最突出的特点是脱离了 JVM 运行时环境，直接编译生�
 * **平台相关性**：AOT 静态编译后程序由原来的平台无关性，变为平台相关性，用户需要考虑部署的平台架构，然后编译出不同的二进制程序；
 * **生态变化**：传统面向 Java 程序的调试、监控、Agent 等技术不再适用，因为运行的程序由 Java 程序变成了本地程序，用户需要使用 GDB 才能调试本地程序。可以说，AOT 编译除了源码仍然是 Java 外，其他的生态完全不同了，这些会成为 AOT 编译推广的阻力。
 
-## GraalVM AOT 实战
+## GraalVM AOT 编译实战
 
 ### 安装 GraalVM SDK
 
@@ -157,6 +158,18 @@ native-image HelloWorld
 # 执行 Native Image
 ./helloworld
 Hello World! GraalVM!
+```
+
+我们使用 `time` 命令对比 Java 执行方式和 Native 执行方式，可以明显看到不论是执行时间，还是 CPU 使用率，Native 执行方式都更有优势。
+
+```bash
+time java HelloWorld
+Hello World! GraalVM!
+java HelloWorld  0.04s user 0.04s system 60% cpu 0.136 total
+
+time ./helloworld
+Hello World! GraalVM!
+./helloworld  0.00s user 0.01s system 46% cpu 0.032 total
 ```
 
 ### 使用 Maven 构建 Native Image
@@ -254,6 +267,12 @@ Hello World! GraalVM!
 ./target/HelloWorld
 Hello World!
 ```
+
+### 使用 Tracing Agent 收集元数据
+
+根据前文的介绍，我们知道 GraalVM AOT 基于**封闭性假设**，即程序在编译期必须掌握运行时所需的所有信息，在运行时不能出现任何编译器未知的内容。Java 程序中包含了很多动态特性，例如：**反射、动态类加载、动态代理、JCA 加密机制（内部依赖了反射）、JNI、序列化等**，这些都违反了封闭性假设。
+
+GraalVM 允许通过配置将缺失的信息补充给编译器以满足封闭性，为此 GraalVM 设计了 `jni-config.json`、`reflect-config.json`、`proxy-config.json`、`resource-config.json`、`predefined-classes-config.json` 和 `serialization-config.json` 配置文件，分别用于JNI 回调目标信息、反射目标信息、动态代理目标接口信息、资源文件信息、提前定义动态类信息、序列化信息。
 
 TODO
 
