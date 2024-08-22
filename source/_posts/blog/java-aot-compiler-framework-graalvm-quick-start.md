@@ -176,7 +176,7 @@ Hello World! GraalVM!
 
 在实际工作中，我们通常会使用 Maven 或 Gradle 工具，来构建 Native Image。本文将以 Maven 工具为例，为大家介绍下实际项目中如何构建一个 Native Image 可执行文件，Gradle 工具的使用大家可以参考官方文档 [Native-Image#Gradle](https://www.graalvm.org/latest/reference-manual/native-image/#gradle)。
 
-我们使用 IDEA 工具创建 Maven 项目，首先创建一个名为 `graalvm-lecture` 的 `Empty Project`，然后再其下创建子模块 `hello-world`， Archetype 使用 `quickstart`，它可以创建出一个包含 `Hello World!` Demo 的 Maven 项目。
+我们使用 IDEA 工具创建 Maven 项目，首先创建一个名为 `graalvm-lecture` 的 `Empty Project`，然后再其下创建子模块 [hello-world](https://github.com/strongduanmu/graalvm-lecture/tree/main/hello-world)， Archetype 使用 `quickstart`，它可以创建出一个包含 `Hello World!` Demo 的 Maven 项目。
 
 ![使用 IDEA 创建 Maven 项目](java-aot-compiler-framework-graalvm-quick-start/new-maven-project-with-idea.png)
 
@@ -284,7 +284,7 @@ java -agentlib:native-image-agent=config-output-dir=/path/to/config-dir/,config-
 
 通常，建议将元数据文件写入到类路径 `META-INF/native-image/` 下，这样 `native-image` 工具就能自动地查找该目录下定义的 JSON 文件，满足 GraalVM AOT 封闭性。在 Java 程序中，最常见的动态特性是反射，下面我们以一个简单的反射程序为例，介绍下如何使用 Tracing Agent 收集元数据，以及如何使用元数据来执行包含反射的 Native 程序。
 
-我们在上一个案例的 Maven 项目中创建一个 `reflection` 子模块，并添加如下的 `Reflection` 和 `StringReverser` 类，Reflection 类根据参数传递的类名、方法名和方法参数，进行反射调用。
+我们在上一个案例的 Maven 项目中创建一个 [reflection](https://github.com/strongduanmu/graalvm-lecture/tree/main/reflection) 子模块，并添加如下的 `Reflection` 和 `StringReverser` 类，Reflection 类根据参数传递的类名、方法名和方法参数，进行反射调用。
 
 ```java
 public final class Reflection {
@@ -419,7 +419,7 @@ mkdir -p ./reflection/src/main/resources/META-INF/native-image
 然后，在 JVM 反射程序中开启 Agent 代理，添加如下参数并执行字符串反转程序（**注意，Tracing Agent 是 GraalVM 提供的功能，需要注意 JDK 的选择**）：
 
 ```shell
--agentlib:native-image-agent=config-output-dir=META-INF/native-image
+-agentlib:native-image-agent=config-output-dir=reflection/src/main/resources/META-INF/native-image
 ```
 
 ![配置 Agent 运行反射程序](java-aot-compiler-framework-graalvm-quick-start/run-reflection-with-agent.png)
