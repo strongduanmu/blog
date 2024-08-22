@@ -3,7 +3,7 @@ title: Java AOT 编译框架 GraalVM 快速入门
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00
-updated: 2024-08-21 08:00:00
+updated: 2024-08-22 08:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_11.jpg
 topic: jvm
@@ -176,7 +176,7 @@ Hello World! GraalVM!
 
 在实际工作中，我们通常会使用 Maven 或 Gradle 工具，来构建 Native Image。本文将以 Maven 工具为例，为大家介绍下实际项目中如何构建一个 Native Image 可执行文件，Gradle 工具的使用大家可以参考官方文档 [Native-Image#Gradle](https://www.graalvm.org/latest/reference-manual/native-image/#gradle)。
 
-我们使用 IDEA 工具创建 Maven 项目，Archetype 使用 `quickstart`，它可以创建出一个包含 `Hello World!` Demo 的 Maven 项目。
+我们使用 IDEA 工具创建 Maven 项目，首先创建一个名为 `graalvm-lecture` 的 `Empty Project`，然后再其下创建子模块 `hello-world`， Archetype 使用 `quickstart`，它可以创建出一个包含 `Hello World!` Demo 的 Maven 项目。
 
 ![使用 IDEA 创建 Maven 项目](java-aot-compiler-framework-graalvm-quick-start/new-maven-project-with-idea.png)
 
@@ -272,9 +272,175 @@ Hello World!
 
 根据前文的介绍，我们知道 GraalVM AOT 基于**封闭性假设**，即程序在编译期必须掌握运行时所需的所有信息，在运行时不能出现任何编译器未知的内容。Java 程序中包含了很多动态特性，例如：**反射、动态类加载、动态代理、JCA 加密机制（内部依赖了反射）、JNI、序列化等**，这些都违反了封闭性假设。
 
-GraalVM 允许通过配置将缺失的信息补充给编译器以满足封闭性，为此 GraalVM 设计了 `jni-config.json`、`reflect-config.json`、`proxy-config.json`、`resource-config.json`、`predefined-classes-config.json` 和 `serialization-config.json` 配置文件，分别用于JNI 回调目标信息、反射目标信息、动态代理目标接口信息、资源文件信息、提前定义动态类信息、序列化信息。
+GraalVM 允许通过配置将缺失的信息补充给编译器以满足封闭性，为此 GraalVM 设计了 `jni-config.json`、`reflect-config.json`、`proxy-config.json`、`resource-config.json`、`predefined-classes-config.json` 和 `serialization-config.json` 配置文件，分别用于JNI 回调目标信息、反射目标信息、动态代理目标接口信息、资源文件信息、提前定义动态类信息、序列化信息。虽然 JSON 格式便于阅读和编写，但是通过人工方式编写 JSON 配置工作量比较大，也容易出现遗漏，因此 GraalVM 提供了基于 `JVMTI（JVM Tool Interface）` 的 `native-image-agent`，用于挂载在应用程序上，在运行时监控并记录和动态特性相关的函数调用信息。
 
-TODO
+使用 GraalVM SDK，执行 `java -agentlib:native-image-agent=config-output-dir=/path/to/config-dir/ ...`（注意：`-agentlib` 参数声明在 `-jar`、类名或者参数命令之前指定） 命令启动代理，在程序运行时，Agent 工具会查找 `native-image` 需要的类、字段、方法和资源等信息，当程序运行结束时，会将可达性元数据 [Reachability Metadata](https://www.graalvm.org/latest/reference-manual/native-image/metadata/) 写入到指定目录的 JSON 文件中。
+
+此外，Agent 工具还支持使用 `config-write-period-secs=n` 指定写入元数据的间隔，以及使用 `config-write-initial-delay-secs=n` 指定首次写入元数据的延迟时间。
+
+```bash
+java -agentlib:native-image-agent=config-output-dir=/path/to/config-dir/,config-write-period-secs=300,config-write-initial-delay-secs=5 ...
+```
+
+通常，建议将元数据文件写入到类路径 `META-INF/native-image/` 下，这样 `native-image` 工具就能自动地查找该目录下定义的 JSON 文件，满足 GraalVM AOT 封闭性。在 Java 程序中，最常见的动态特性是反射，下面我们以一个简单的反射程序为例，介绍下如何使用 Tracing Agent 收集元数据，以及如何使用元数据来执行包含反射的 Native 程序。
+
+我们在上一个案例的 Maven 项目中创建一个 `reflection` 子模块，并添加如下的 `Reflection` 和 `StringReverser` 类，Reflection 类根据参数传递的类名、方法名和方法参数，进行反射调用。
+
+```java
+public final class Reflection {
+    
+    @SneakyThrows
+    public static void main(final String[] args) {
+        if (3 != args.length) {
+            throw new IllegalArgumentException("You must provide class name, method name and arguments.");
+        }
+        String className = args[0];
+        String methodName = args[1];
+        String arguments = args[2];
+        Class<?> clazz = Class.forName(className);
+        Method method = clazz.getDeclaredMethod(methodName, String.class);
+        Object result = method.invoke(null, arguments);
+        System.out.println(result);
+    }
+}
+```
+
+StringReverser 类逻辑也比较简单，根据输入的字符串，实现反转并输出。
+
+```java
+@SuppressWarnings("unused")
+public final class StringReverser {
+    
+    public static String reverse(final String input) {
+        return new StringBuilder(input).reverse().toString();
+    }
+}
+```
+
+然后我们通过 IDEA 运行反射程序，并传入参数 `com.strongduanmu.StringReverser reverse "Hello World!"`，执行后输出 `!dlroW olleH`。
+
+![使用 IDEA 运行反射程序](java-aot-compiler-framework-graalvm-quick-start/run-reflection-with-idea.png)
+
+JVM 运行反射很容易，下面我们再来使用 GraalVM AOT 编译，尝试下运行反射程序，首先在 pom 中添加 `native-maven-plugin` 插件，然后执行 `./mvnw -Pnative clean package -f reflection` 进行编译。
+
+```xml
+<properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <native.image.name>Reflection</native.image.name>
+    <native.maven.plugin.version>0.10.2</native.maven.plugin.version>
+</properties>
+
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.12.1</version>
+            <configuration>
+                <fork>true</fork>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-jar-plugin</artifactId>
+            <version>3.3.0</version>
+            <configuration>
+                <archive>
+                    <manifest>
+                        <mainClass>com.strongduanmu.Reflection</mainClass>
+                        <addClasspath>true</addClasspath>
+                    </manifest>
+                </archive>
+            </configuration>
+        </plugin>
+    </plugins>
+</build>
+
+<profiles>
+    <profile>
+        <id>native</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.graalvm.buildtools</groupId>
+                    <artifactId>native-maven-plugin</artifactId>
+                    <version>${native.maven.plugin.version}</version>
+                    <extensions>true</extensions>
+                    <configuration>
+                        <imageName>${native.image.name}</imageName>
+                        <buildArgs>
+                            <buildArg>--no-fallback</buildArg>
+                        </buildArgs>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>build-native</id>
+                            <goals>
+                                <goal>compile-no-fork</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                        <execution>
+                            <id>test-native</id>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+</profiles>
+```
+
+编译完成后，我们执行 `./reflection/target/Reflection com.strongduanmu.StringReverser reverse "Hello World\!"`，出现了如下报错：
+
+```
+Exception in thread "main" java.lang.ClassNotFoundException: com.strongduanmu.StringReverser
+        at org.graalvm.nativeimage.builder/com.oracle.svm.core.hub.ClassForNameSupport.forName(ClassForNameSupport.java:143)
+        at org.graalvm.nativeimage.builder/com.oracle.svm.core.hub.ClassForNameSupport.forName(ClassForNameSupport.java:106)
+        at java.base@22.0.2/java.lang.Class.forName(DynamicHub.java:1387)
+        at java.base@22.0.2/java.lang.Class.forName(DynamicHub.java:1352)
+        at java.base@22.0.2/java.lang.Class.forName(DynamicHub.java:1346)
+        at com.strongduanmu.Reflection.main(Reflection.java:17)
+        at java.base@22.0.2/java.lang.invoke.LambdaForm$DMH/sa346b79c.invokeStaticInit(LambdaForm$DMH)
+```
+
+提示无法找到 `com.strongduanmu.StringReverser` 类，我们的源码中不是已经定义了这个类吗？这个异常是因为 GraalVM AOT 编译时，会进行静态分析，由于 StringReverser 类程序中没有明确的调用，因此静态分析不会将其包含在本地执行文件中。为了支持反射功能，我们需要借助 GraalVM Tracing Agent 进行元数据收集，并将其以 JSON 格式配置在项目的 `META-INF/native-image` 目录中。
+
+首先，我们在项目中创建 `META-INF/native-image` 目录：
+
+```bash
+mkdir -p ./reflection/src/main/resources/META-INF/native-image
+```
+
+然后，在 JVM 反射程序中开启 Agent 代理，添加如下参数并执行字符串反转程序（**注意，Tracing Agent 是 GraalVM 提供的功能，需要注意 JDK 的选择**）：
+
+```shell
+-agentlib:native-image-agent=config-output-dir=META-INF/native-image
+```
+
+![配置 Agent 运行反射程序](java-aot-compiler-framework-graalvm-quick-start/run-reflection-with-agent.png)
+
+执行完成后会生成前面介绍的 6 个 JSON 文件，我们以 `reflect-config.json` 为例，文件里面声明了程序运行过程中使用到的类、方法和参数。
+
+```json
+[
+{
+  "name":"com.strongduanmu.StringReverser",
+  "methods":[{"name":"reverse","parameterTypes":["java.lang.String"] }]
+}
+]
+```
+
+我们使用 `./mvnw -Pnative clean package -f reflection` 再次进行编译，然后执行 `./reflection/target/Reflection com.strongduanmu.StringReverser reverse "Hello World\!"`，此时程序可以正常运行。
+
+```bash
+./reflection/target/Reflection com.strongduanmu.StringReverser reverse "Hello World\!"
+!dlroW olleH
+```
 
 ## 结语
 
@@ -282,6 +448,6 @@ TODO
 
 然后我们对比了 GraalVM AOT 编译和传统的 JIT 编译之间的优势和劣势，GraalVM AOT 目前更适用于对启动速度、内存消耗有较高要求的场景，而对于吞吐量、延迟有较高要求的场景，则更推荐采用传统的 JIT 编译方式。此外，GraalVM AOT 编译带来的生态变化，会导致传统 Java 程序的监控、调试、Agent 技术不再适用，这些需要在选型 GraalVM AOT 技术时进行充分考虑。
 
-最后一个部分，我们介绍了 GraalVM AOT 实战，从基础的 SDK 安装，到第一个 HelloWorld 程序，带大家一起体验了下 GraalVM 的基础使用。然后我们又参考了项目实际情况，使用 Maven 工具构建了一个简单的二进制程序。
+最后一个部分，我们介绍了 GraalVM AOT 实战，从基础的 SDK 安装，到第一个 HelloWorld 程序，带大家一起体验了下 GraalVM 的基础使用。然后我们参考了项目实际情况，使用 Maven 工具构建了一个简单的二进制程序。此外，由于现实中的 Java 程序具有很多动态特性，我们展示了反射程序如何通过 Agent 收集元数据，并将元数据维护在 `META-INF/native-image` 目录下，最终成功执行了带有反射的本地程序。
 
-TODO
+GraalVM 为 Java 领域带来新的发展机遇，相信随着 GraalVM 的成熟，越来越多应用程序将以 Native 的方式运行在不同环境中。作为 Java 工程师，也需要紧跟时代发展，不断探索新的技术，完善自己的技能栈。本系列后续还会探究更多关于 GraalVM 的新技术，欢迎感兴趣的朋友持续关注，本文如有不足之处，也欢迎留言探讨。
