@@ -4,7 +4,7 @@ tags: [Calcite]
 categories: [Calcite]
 date: 2024-08-26 08:00:00
 updated: 2024-08-26 08:00:00
-cover: /assets/blog/2022/04/05/1649126780.jpg
+cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
 banner: /assets/banner/banner_9.jpg
