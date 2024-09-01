@@ -26,3 +26,6 @@ MySQL 是当前最流行的开源数据库，国内外众多公司基本都使�
 * 事务处理概念与技术
 * [高性能MySQL（第4版）](https://weread.qq.com/web/bookDetail/00a32b70813ab746fg018ec7)
 
+## 网络资料
+
+* [数据库内核月报](http://mysql.taobao.org/monthly/)
