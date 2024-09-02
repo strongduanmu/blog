@@ -185,6 +185,159 @@ metaDbPasswd=DqQUThAumQ1QSUqiR+HhdaxMKwezoWmXAvyxBgJZxHz9s/ClvIFLoPCeh+zCYDO9
 然后我们启动 TddlLauncher，观察启动日志，可以发现如下的错误信息：
 
 ```
+2024-09-02 08:12:44.168 [main] ERROR com.alibaba.polardbx.CobarConfig - [] Failed to init cobar server.
+com.alibaba.polardbx.common.exception.TddlRuntimeException: ERR-CODE: [PXC-10001][ERR_X_PROTOCOL_CLIENT] XDataSource to my_polarx#1c31783e@127.0.0.1:32886 Failed to init new TCP. XClientPool to my_polarx#1c31783e@127.0.0.1:32886 now 0 TCP(0 aging), 0 sessions(0 running, 0 idle), 0 waiting connection. 
+	at com.alibaba.polardbx.rpc.compatible.XDataSource.getConnection(XDataSource.java:210)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initTsoServicesX(MetaDbDataSource.java:139)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initXDataSourceByJdbcProps(MetaDbDataSource.java:202)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initMetaDbDataSource(MetaDbDataSource.java:213)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.doInit(MetaDbDataSource.java:135)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.getInstance(MetaDbDataSource.java:530)
+	at com.alibaba.polardbx.gms.util.MetaDbUtil.getConnection(MetaDbUtil.java:53)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeAccessor.create(SchemaChangeAccessor.java:79)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeAccessor.doInit(SchemaChangeAccessor.java:75)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeManager.doInit(SchemaChangeManager.java:62)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeManager.getInstance(SchemaChangeManager.java:55)
+	at com.alibaba.polardbx.config.loader.ServerLoader.initPolarDbXComponents(ServerLoader.java:222)
+	at com.alibaba.polardbx.config.loader.ServerLoader.load(ServerLoader.java:191)
+	at com.alibaba.polardbx.config.loader.ServerLoader.doInit(ServerLoader.java:96)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.CobarConfig.initCobarConfig(CobarConfig.java:80)
+	at com.alibaba.polardbx.CobarConfig.<init>(CobarConfig.java:61)
+	at com.alibaba.polardbx.CobarServer.<init>(CobarServer.java:154)
+	at com.alibaba.polardbx.CobarServer.<clinit>(CobarServer.java:108)
+	at com.alibaba.polardbx.server.TddlLauncher.main(TddlLauncher.java:126)
+Caused by: com.alibaba.polardbx.common.exception.TddlNestableRuntimeException: Failed to init new TCP. XClientPool to my_polarx#1c31783e@127.0.0.1:32886 now 0 TCP(0 aging), 0 sessions(0 running, 0 idle), 0 waiting connection.
+	at com.alibaba.polardbx.rpc.pool.XConnectionManager.getConnection(XConnectionManager.java:514)
+	at com.alibaba.polardbx.rpc.compatible.XDataSource.getConnection(XDataSource.java:193)
+	... 22 common frames omitted
+Caused by: com.alibaba.polardbx.common.exception.TddlNestableRuntimeException: Failed to init new TCP.
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:491)
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:287)
+	at com.alibaba.polardbx.rpc.pool.XConnectionManager.getConnection(XConnectionManager.java:502)
+	... 23 common frames omitted
+Caused by: com.alibaba.polardbx.common.exception.TddlRuntimeException: ERR-CODE: [PXC-10001][ERR_X_PROTOCOL_CLIENT] XClientPool to my_polarx#1c31783e@127.0.0.1:32886 connect fail. 
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:474)
+	... 25 common frames omitted
+2024-09-02 08:12:44.171 [main] ERROR com.alibaba.polardbx.server.TddlLauncher - [] ## Something goes wrong when starting up the tddl server:
+ java.lang.ExceptionInInitializerError
+	at com.alibaba.polardbx.server.TddlLauncher.main(TddlLauncher.java:126)
+Caused by: ERR-CODE: [PXC-10001][ERR_X_PROTOCOL_CLIENT] XDataSource to my_polarx#1c31783e@127.0.0.1:32886 Failed to init new TCP. XClientPool to my_polarx#1c31783e@127.0.0.1:32886 now 0 TCP(0 aging), 0 sessions(0 running, 0 idle), 0 waiting connection. 
+	at com.alibaba.polardbx.rpc.compatible.XDataSource.getConnection(XDataSource.java:210)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initTsoServicesX(MetaDbDataSource.java:139)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initXDataSourceByJdbcProps(MetaDbDataSource.java:202)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.initMetaDbDataSource(MetaDbDataSource.java:213)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.doInit(MetaDbDataSource.java:135)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.MetaDbDataSource.getInstance(MetaDbDataSource.java:530)
+	at com.alibaba.polardbx.gms.util.MetaDbUtil.getConnection(MetaDbUtil.java:53)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeAccessor.create(SchemaChangeAccessor.java:79)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeAccessor.doInit(SchemaChangeAccessor.java:75)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeManager.doInit(SchemaChangeManager.java:62)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.gms.metadb.schema.SchemaChangeManager.getInstance(SchemaChangeManager.java:55)
+	at com.alibaba.polardbx.config.loader.ServerLoader.initPolarDbXComponents(ServerLoader.java:222)
+	at com.alibaba.polardbx.config.loader.ServerLoader.load(ServerLoader.java:191)
+	at com.alibaba.polardbx.config.loader.ServerLoader.doInit(ServerLoader.java:96)
+	at com.alibaba.polardbx.common.model.lifecycle.AbstractLifecycle.init(AbstractLifecycle.java:43)
+	at com.alibaba.polardbx.CobarConfig.initCobarConfig(CobarConfig.java:80)
+	at com.alibaba.polardbx.CobarConfig.<init>(CobarConfig.java:61)
+	at com.alibaba.polardbx.CobarServer.<init>(CobarServer.java:154)
+	at com.alibaba.polardbx.CobarServer.<clinit>(CobarServer.java:108)
+	... 1 more
+Caused by: Failed to init new TCP. XClientPool to my_polarx#1c31783e@127.0.0.1:32886 now 0 TCP(0 aging), 0 sessions(0 running, 0 idle), 0 waiting connection.
+	at com.alibaba.polardbx.rpc.pool.XConnectionManager.getConnection(XConnectionManager.java:514)
+	at com.alibaba.polardbx.rpc.compatible.XDataSource.getConnection(XDataSource.java:193)
+	... 22 more
+Caused by: Failed to init new TCP.
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:491)
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:287)
+	at com.alibaba.polardbx.rpc.pool.XConnectionManager.getConnection(XConnectionManager.java:502)
+	... 23 more
+Caused by: ERR-CODE: [PXC-10001][ERR_X_PROTOCOL_CLIENT] XClientPool to my_polarx#1c31783e@127.0.0.1:32886 connect fail. 
+	at com.alibaba.polardbx.rpc.pool.XClientPool.getConnection(XClientPool.java:474)
+	... 25 more
+```
+
+从日志信息可以大致看出，是 CN 节点无法连接到 Docker 容器中的 DN 和 GMS 服务，搜索官方 Issue 列表，发现该问题反馈较多，官方同学之前回复的答案是将 `server.properties` 中的 `galaxyXProtocol` 设置为 1，具体参考 [issues-34](https://github.com/polardb/polardbx-sql/issues/34)，笔者检查了该配置，目前使用的分支已经使用了相同的设置。
+
+最近反馈的 [issues-214](https://github.com/polardb/polardbx-sql/issues/214) 同样记录了该问题，目前还没有解决。笔者查看源码，发现 `galaxyXProtocol` 配置主要用于控制 CN 和 DN/GMS 节点通信的协议，可以配置为 1 和 2，分别对应了 `GALAXY_X_PROTOCOL` 和 `OPEN_XRPC_PROTOCOL` 协议。
+
+```java
+String galaxyXProtocol = serverProps.getProperty("galaxyXProtocol");
+if (!StringUtil.isEmpty(galaxyXProtocol)) {
+    final int i = Integer.parseInt(galaxyXProtocol);
+    if (1 == i) {
+        XConfig.GALAXY_X_PROTOCOL = true;
+        XConfig.OPEN_XRPC_PROTOCOL = false;
+    } else if (2 == i) {
+        XConfig.GALAXY_X_PROTOCOL = false;
+        XConfig.OPEN_XRPC_PROTOCOL = true;
+    } else {
+        XConfig.GALAXY_X_PROTOCOL = false;
+        XConfig.OPEN_XRPC_PROTOCOL = false;
+    }
+} else {
+    XConfig.GALAXY_X_PROTOCOL = false;
+    XConfig.OPEN_XRPC_PROTOCOL = false;
+}
+```
+
+进入容器查看 `server.properties` 配置，可以发现 `galaxyXProtocol` 配置为 `2`，并且私有协议的端口 `metaDbXprotoPort` 配置为 `34886`，正常情况下 CN 和 DN/GMS 通信需要保证协议类型以及端口一致，才能正常通信。
+
+![DN/GMS server.properties 配置](polardb-x-dev-environment-setup-note/some-dn-and-gms-config.png)
+
+为了保证协议类型和协议端口一致，我们需要重启启动一个容器，并将 `34886` 端口映射到宿主机，执行以下脚本重新启动容器：
+
+```bash
+docker stop some-dn-and-gms
+docker rm some-dn-and-gms
+# 映射 34886 端口
+docker run -d --name some-dn-and-gms --env mode=dev -p 4886:4886 -p 34886:34886 polardbx/polardb-x
+```
+
+然后修改项目 `resources/server.properties` 配置，将 `galaxyXProtocol` 设置为 2，`metaDbXprotoPort` 设置为 `34886`。
+
+```properties
+# PolarDB-X 服务端口
+serverPort=8527
+managerPort=3406
+# PolarDB-X RPC 端口
+rpcPort=9090
+charset=utf-8
+processors=4
+processorHandler=16
+processorKillExecutor=128
+timerExecutor=8
+managerExecutor=256
+serverExecutor=1024
+idleTimeout=
+trustedIps=127.0.0.1
+slowSqlTime=1000
+maxConnection=20000
+allowManagerLogin=1
+allowCrossDbQuery=true
+galaxyXProtocol=2
+# MetaDB 地址
+metaDbAddr=127.0.0.1:4886
+# MetaDB 私有协议端口
+metaDbXprotoPort=34886
+# MetaDB 用户
+metaDbUser=my_polarx
+metaDbName=polardbx_meta_db_polardbx
+# PolarDB-X 实例名
+instanceId=polardbx-polardbx
+# metaDb 密码，通过查询获得
+metaDbPasswd=DqQUThAumQ1QSUqiR+HhdaxMKwezoWmXAvyxBgJZxHz9s/ClvIFLoPCeh+zCYDO9
+```
+
+再次启动 TddlLauncher，并观察启动日志，可以发现原有错误已经解决，本次出现了新的错误，具体异常信息如下：
+
+```
 0 [main] DEBUG Sigar  - no libsigar-universal64-macosx.dylib in java.library.path
 org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.library.path
 	at org.hyperic.sigar.Sigar.loadLibrary(Sigar.java:172)
@@ -218,7 +371,7 @@ org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.l
 	at com.alibaba.polardbx.server.TddlLauncher.main(TddlLauncher.java:128)
 ```
 
-参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库，然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`，
+参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`，下载链接中不支持的平台可以参考[官方文档](https://github.com/hyperic/sigar/wiki/source)自行编译。
 
 
 
