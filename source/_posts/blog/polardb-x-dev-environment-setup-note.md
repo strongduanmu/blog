@@ -3,7 +3,7 @@ title: PolarDB-X 开发环境搭建笔记
 tags: [PolarDB-X]
 categories: [PolarDB-X]
 date: 2024-08-28 08:00:00
-updated: 2024-08-30 08:00:00
+updated: 2024-09-04 08:00:00
 cover: /assets/cover/polardb-x.png
 banner: /assets/banner/banner_1.jpg
 references:
@@ -131,6 +131,8 @@ mysql> SHOW DATABASES;
 
 ### IDEA 启动 TddlLauncher
 
+#### IDEA 配置调整
+
 配置完成 DN 和 GMS 后，我们需要修改 `resources/server.properties` 配置，将 `serverPort` 改为 `8527`，`metaDbAddr` 改为 `127.0.0.1:4886`，`metaDbXprotoPort` 改为 `32886`，并增加 `metaDbPasswd=DqQUThAumQ1QSUqiR+HhdaxMKwezoWmXAvyxBgJZxHz9s/ClvIFLoPCeh+zCYDO9`，修改后的完整配置如下：
 
 ```properties
@@ -182,7 +184,9 @@ metaDbPasswd=DqQUThAumQ1QSUqiR+HhdaxMKwezoWmXAvyxBgJZxHz9s/ClvIFLoPCeh+zCYDO9
 </root>
 ```
 
-然后我们启动 TddlLauncher，观察启动日志，可以发现如下的错误信息：
+#### ERR_X_PROTOCOL_CLIENT 异常排查
+
+完成 IDEA 配置调整后，我们尝试启动 TddlLauncher，观察启动日志，可以发现如下的错误信息：
 
 ```
 2024-09-02 08:12:44.168 [main] ERROR com.alibaba.polardbx.CobarConfig - [] Failed to init cobar server.
@@ -335,7 +339,11 @@ instanceId=polardbx-polardbx
 metaDbPasswd=DqQUThAumQ1QSUqiR+HhdaxMKwezoWmXAvyxBgJZxHz9s/ClvIFLoPCeh+zCYDO9
 ```
 
-再次启动 TddlLauncher，并观察启动日志，可以发现原有错误已经解决，本次出现了新的错误，具体异常信息如下：
+再次启动 TddlLauncher，并观察启动日志，可以发现 `ERR_X_PROTOCOL_CLIENT` 异常已经解决。
+
+#### SigarException 异常排查
+
+根据日志显示，TddlLauncher 启动过程中又出现了新的错误，具体异常信息如下：
 
 ```
 0 [main] DEBUG Sigar  - no libsigar-universal64-macosx.dylib in java.library.path
@@ -371,7 +379,7 @@ org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.l
 	at com.alibaba.polardbx.server.TddlLauncher.main(TddlLauncher.java:128)
 ```
 
-参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`，下载链接中不支持的平台可以参考[官方文档](https://github.com/hyperic/sigar/wiki/source)自行编译。
+参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`，下载链接中不支持的平台可以参考[官方文档](https://github.com/hyperic/sigar/wiki/source)自行编译，Mac 平台编译找不到头文件可参考[在 MacOS 中找不到 C 程序的标准头文件](https://adoyle.me/Today-I-Learned/c/std-library-not-found-in-macos.html)。
 
 
 
