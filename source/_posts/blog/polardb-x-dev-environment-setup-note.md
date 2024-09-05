@@ -3,7 +3,7 @@ title: PolarDB-X 开发环境搭建笔记
 tags: [PolarDB-X]
 categories: [PolarDB-X]
 date: 2024-08-28 08:00:00
-updated: 2024-09-04 08:00:00
+updated: 2024-09-05 08:00:00
 cover: /assets/cover/polardb-x.png
 banner: /assets/banner/banner_1.jpg
 references:
@@ -381,7 +381,86 @@ org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.l
 
 参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`。由于笔者使用的是最新的 Mac M3 版本，目前官方并未提供 ARM 架构的 sigar 动态链接库，因此只好参考 [CentOS 开发环境搭建笔记](https://strongduanmu.com/blog/centos-dev-environment-setup-note.html)，在虚拟机中安装 CentOS 7，然后通过 IDEA 远程执行功能进行启动。
 
+使用虚拟机启动时，同样会出现 `SigarException`，会提示在 `java.library.path` 中没有 `libsigar-aarch64-linux.so`，我们可以从 [libsigar-aarch64-linux.so](https://strongduanmu.com/share/polardb-x/libsigar-aarch64-linux.so) 下载 Linux 平台下的动态链接库，并将该文件复制到 `java.library.path` 对应的路径中。可以通过 TddlLauncher 启动日志查看 `java.library.path`，
 
+```bash
+# java.library.path=/usr/java/packages/lib/aarch64:/lib:/usr/lib
+# 创建 java.library.path 目录
+mkdir -p /usr/java/packages/lib/aarch64/
+# 复制 libsigar-aarch64-linux.so
+cp ~/libsigar-aarch64-linux.so /usr/java/packages/lib/aarch64/
+```
+
+然后重启 TddlLauncher，可以发现 SigarException 已经解决，我们使用 `mysql -h172.16.16.128 -P8527 -upolardbx_root -p123456 -A` 访问虚拟机上的 PolarDB-X 服务，可以正常使用执行 SQL 语句。
+
+![登录 PolarDB-X 服务](polardb-x-dev-environment-setup-note/login-polardb-x-server.png)
+
+#### AssertionError: bad type null 异常
+
+执行 `SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.TABLES` 语句查询系统表时，出现了如下的 `AssertionError: bad type null` 异常，从堆栈信息看是在优化器部分出现了报错。
+
+```
+Caused by: java.lang.AssertionError: bad type null
+	at org.apache.calcite.plan.volcano.Dumpers.provenanceRecurse(Dumpers.java:116)
+	at org.apache.calcite.plan.volcano.Dumpers.provenance(Dumpers.java:79)
+	at org.apache.calcite.plan.volcano.VolcanoPlanner.findBestExp(VolcanoPlanner.java:537)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.getCheapestFractionalPlan(Planner.java:1412)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.optimizeByCBO(Planner.java:1324)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.optimizeByPlanEnumerator(Planner.java:1239)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.sqlRewriteAndPlanEnumerate(Planner.java:1186)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.optimize(Planner.java:1160)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.getPlan(Planner.java:945)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.doBuildPlan(Planner.java:474)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.doBuildPlan(Planner.java:510)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.doPlan(Planner.java:2699)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.plan(Planner.java:375)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.plan(Planner.java:347)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.planAfterProcessing(Planner.java:342)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.plan(Planner.java:311)
+	at com.alibaba.polardbx.optimizer.core.planner.Planner.plan(Planner.java:278)
+	at com.alibaba.polardbx.repo.mysql.handler.LogicalShowTablesMyHandler.handle(LogicalShowTablesMyHandler.java:95)
+	at com.alibaba.polardbx.executor.handler.HandlerCommon.handlePlan(HandlerCommon.java:153)
+	at com.alibaba.polardbx.executor.AbstractGroupExecutor.executeInner(AbstractGroupExecutor.java:74)
+	at com.alibaba.polardbx.executor.AbstractGroupExecutor.execByExecPlanNode(AbstractGroupExecutor.java:52)
+	at com.alibaba.polardbx.executor.TopologyExecutor.execByExecPlanNode(TopologyExecutor.java:50)
+	at com.alibaba.polardbx.transaction.TransactionExecutor.execByExecPlanNode(TransactionExecutor.java:141)
+	at com.alibaba.polardbx.executor.ExecutorHelper.executeByCursor(ExecutorHelper.java:170)
+	at com.alibaba.polardbx.executor.ExecutorHelper.execute(ExecutorHelper.java:92)
+	at com.alibaba.polardbx.executor.ExecutorHelper.execute(ExecutorHelper.java:84)
+	at com.alibaba.polardbx.executor.PlanExecutor.execByExecPlanNodeByOne(PlanExecutor.java:223)
+	at com.alibaba.polardbx.executor.PlanExecutor.execute(PlanExecutor.java:91)
+	at com.alibaba.polardbx.matrix.jdbc.TConnection.executeQuery(TConnection.java:737)
+	at com.alibaba.polardbx.matrix.jdbc.TConnection.executeSQL(TConnection.java:510)
+	... 19 common frames omitted
+```
+
+尝试咨询了下 PolarDB-X 社区大佬，反馈日志级别 Debug 会进入优化器更为严格的类型检查，会出现类型一致性的情况，可以通过调整日志级别来解决这个问题。
+
+![咨询 PolarDB-X 开发者](polardb-x-dev-environment-setup-note/chat-about-planner-bad-type-null.jpg)
+
+我们修改 `polardbx-server` 模块下的 `logback.xml` 文件，将 DEBUG 级别为 INFO 级别，然后重启 TddlLauncher 并再次执行系统表查询 SQL。
+
+```xml
+<root level="INFO">
+    <appender-ref ref="STDOUT"/>
+</root>
+```
+
+此时 `SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.TABLES LIMIT 5;` 语句可以正常查询出结果。
+
+```sql
+mysql> SELECT TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE FROM information_schema.TABLES LIMIT 5;
++--------------------+----------------------------+-------------+
+| TABLE_SCHEMA       | TABLE_NAME                 | TABLE_TYPE  |
++--------------------+----------------------------+-------------+
+| __cdc__            | __cdc_ddl_record__         | BASE TABLE  |
+| __cdc__            | __cdc_instruction__        | BASE TABLE  |
+| information_schema | INFORMATION_SCHEMA_TABLES  | SYSTEM VIEW |
+| information_schema | INFORMATION_SCHEMA_COLUMNS | SYSTEM VIEW |
+| information_schema | SCHEDULE_JOBS              | SYSTEM VIEW |
++--------------------+----------------------------+-------------+
+5 rows in set (0.35 sec)
+```
 
 ## PolarDB-X 入门使用 & Debug
 
