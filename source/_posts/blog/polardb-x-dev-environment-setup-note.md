@@ -379,7 +379,7 @@ org.hyperic.sigar.SigarException: no libsigar-universal64-macosx.dylib in java.l
 	at com.alibaba.polardbx.server.TddlLauncher.main(TddlLauncher.java:128)
 ```
 
-参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`，下载链接中不支持的平台可以参考[官方文档](https://github.com/hyperic/sigar/wiki/source)自行编译，Mac 平台编译找不到头文件可参考[在 MacOS 中找不到 C 程序的标准头文件](https://adoyle.me/Today-I-Learned/c/std-library-not-found-in-macos.html)。
+参考 stackoverflow 上 [Hyperic Sigar Mac Osx Error - No Library](https://stackoverflow.com/questions/11266895/hyperic-sigar-mac-osx-error-no-library) 讨论，需要下载 Mac 平台对应的动态链接库（[hyperic-sigar-1.6.4.tar.gz 下载地址](https://strongduanmu.com/share/polardb-x/hyperic-sigar-1.6.4.tar.gz)），然后将 `libsigar-universal64-macosx.dylib` 拷贝至 `/Library/Java/Extensions/`。由于笔者使用的是最新的 Mac M3 版本，目前官方并未提供 ARM 架构的 sigar 动态链接库，因此只好参考 [CentOS 开发环境搭建笔记](https://strongduanmu.com/blog/centos-dev-environment-setup-note.html)，在虚拟机中安装 CentOS 7，然后通过 IDEA 远程执行功能进行启动。
 
 
 
