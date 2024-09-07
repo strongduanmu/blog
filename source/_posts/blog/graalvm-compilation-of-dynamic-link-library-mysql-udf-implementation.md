@@ -1,5 +1,5 @@
 ---
-title: GraalVM 编译动态链接库实战之 MySQL UDF 实现
+title: GraalVM 编译动态链接库之 MySQL UDF 实现
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-09-07 20:00:00
