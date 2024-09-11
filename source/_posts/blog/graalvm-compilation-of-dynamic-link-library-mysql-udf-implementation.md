@@ -3,15 +3,15 @@ title: GraalVM 编译动态链接库之 MySQL UDF 实现
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-09-07 20:00:00
-updated: 2024-09-07 20:00:00
+updated: 2024-09-11 8:00:00
 cover: /assets/cover/graalvm.png
 banner: /assets/banner/banner_7.jpg
 topic: jvm
 references:
-  - '[MySQL 最佳实践——如何使用 C++ 实现 MySQL 用户定义函数](http://mysql.taobao.org/monthly/2019/02/08/)'
   - '[Build a Native Shared Library](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)'
-  - '[Golang 编写 MySQL UDF](https://mritd.com/2023/05/23/write-mysql-udf-in-golang/)'
   - '[Adding a Loadable Function](https://dev.mysql.com/doc/extending-mysql/8.0/en/adding-loadable-function.html)'
+  - '[MySQL 最佳实践——如何使用 C++ 实现 MySQL 用户定义函数](http://mysql.taobao.org/monthly/2019/02/08/)'
+  - '[Golang 编写 MySQL UDF](https://mritd.com/2023/05/23/write-mysql-udf-in-golang/)'
 ---
 
 ## 前言
@@ -20,7 +20,7 @@ references:
 
 ## GraalVM 动态链接库规范
 
-参考官方文档 [Build a Native Shared Library](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)，GraalVM 编译动态链接库，需要将 `--shared` 参数传递给 `native-image` 工具，默认会将 `main` 方法作为动态链接库的入口点方法，具体的编译命令如下：
+首先，我们来了解如何使用 GraalVM 编译动态链接库，参考官方文档 [Build a Native Shared Library](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)，GraalVM 编译动态链接库，需要将 `--shared` 参数传递给 `native-image` 工具，默认会将 `main` 方法作为动态链接库的入口点方法，具体的编译命令如下：
 
 ```bash
 # 指定 class name
@@ -61,11 +61,134 @@ int add(graal_isolatethread_t* thread, int a, int b);
 
 ## MySQL UDF 规范
 
+介绍完 GraalVM 编译动态链接库，我们再来了解下 MySQL UDF 的使用规范。MySQL 8.0 官方文档 [Adding a Loadable Function](https://dev.mysql.com/doc/extending-mysql/8.0/en/adding-loadable-function.html) 详细介绍了如何使用 `C/C++` 编写 MySQL UDF，并将其编译为动态链接库部署到 MySQL `plugin` 目录中，然后通过 `CREATE FUNCTION ... RETURNS ... SONAME 'xxx.so'` 语句创建 UDF 函数。
 
+编写 MySQL UDF 需要实现 3 个函数，分别是：初始化函数 `xxx_init()`、主函数 `xxx()` 和析构函数 `xxx_deinit()`。MySQL 会先调用 `xxx_init()` 进行初始化，如果 `xxx_init()` 返回异常，则主函数 `xxx()` 和析构函数 `xxx_deinit()` 都不会被调用，整个语句会抛出异常信息。如果 `xxx_init()` 执行成功，MySQL 会调用主函数 `xxx()` 执行函数逻辑，通常情况下每行数据都会调用一次。当所有数据行调用完主函数后，最后会调用 `xxx_deinit()` 对资源进行清理。
+
+### xxx_init 函数
+
+`xxx_init()` 函数是 MySQL UDF 的初始化函数，可以用来完成如下的初始化工作：
+
+* 检查传入函数的参数个数；
+* 检验传入函数的参数数据类型，是否可为空，以及对参数类型进行类型转换；
+* 分配函数所需的内存；
+* 指定返回值的最大长度；
+* 指定返回值的精度（针对返回值是 `REAL` 类型的函数）；
+* 指定返回值是否可以为 `NULL`。
+
+初始化函数的声明如下：
+
+```c
+bool xxx_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
+```
+
+`initid` 参数中存储了初始化信息，它会传递给 UDF 涉及的 3 个函数，`UDF_INIT` 结构包含如下成员：
+
+* `bool maybe_null`：用于标识当前 UDF 函数是否可以返回 `NULL`，如果可以返回 `NULL`，则需要在初始化时设置成 `true`。如果函数中的任意参数设置了 `maybe_null` 为 `true`，则函数 `maybe_null` 的默认值也为 `true`；
+* `unsigned int decimals`：指定小数点右侧的小数位数。默认值是传递给函数参数中最大的小数位数，例如，函数参数 `1.34`、`1.345` 和 `1.3`，则默认值为 3，因为 `1.345` 有 3 个小数数字。对于没有固定小数位数的参数，`decimals` 值设置为 31，这比 [`DECIMAL`](https://dev.mysql.com/doc/refman/8.0/en/fixed-point-types.html)、[`FLOAT`](https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html) 和 [`DOUBLE`](https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html) 数据类型允许的最大小数位数多 1；
+* `unsigned int max_length`：指定返回值的最大长度。对于不同的返回值类型，`max_length` 的默认值不同，对于 `STRING` 类型，默认值和和最长的函数参数相等。对于 `INTEGER` 类型， 默认值为 21。而对于 BLOB 类型的，可以将它设置成 65KB 或 16MB；
+* `char *ptr`：可实现 UDF 特定需求的指针，一般在 `xxx_init()` 中申请内存，在 `xxx_deinit()` 中释放内存，例如：用来存储 UDF 函数过长（长度超过 255 个字符）的字符串结果，默认情况下 UDF 主函数中的 `result` 只能存储 255 个字符，超过 255 个字符需要自行通过 `ptr` 指针申请内存，用于存储字符串结果；
+
+```c
+initid -> ptr = allocated_memory;
+```
+
+* `bool const_item`：如果 `xxx()` 函数总是返回相同值，`xxx_init()` 中可以把该值设置成 true。
+
+`args` 参数用于存储 UDF 函数的参数信息，`UDF_ARGS` 结构包含如下成员：
+
+* `unsigned int arg_count`：UDF 函数参数个数，可以在 `xxx_init()` 函数中检查参数个数是否符合预期，例如：
+
+```c
+if (args -> arg_count != 2) {
+    strcpy(message,"XXX() requires two arguments");
+    return 1;
+}
+```
+
+* `enum Item_result *arg_type`：用于定义参数类型的数组，可选值包括：`STRING_RESULT`、`INT_RESULT`、`REAL_RESULT` 和 `DECIMAL_RESULT`，可以在 `xxx_init` 函数中检查参数类型，也可以将 `arg_type` 元素设置为所需的类型，MySQL 在每次调用 `xxx` 函数时都会进行强制类型转换；
+
+```c
+// 类型检查
+if (args -> arg_type[0] != STRING_RESULT || args -> arg_type[1] != INT_RESULT) {
+    strcpy(message,"XXX() requires a string and an integer");
+    return 1;
+}
+
+// 强制类型转换
+args -> arg_type[0] = STRING_RESULT;
+args -> arg_type[1] = INT_RESULT;
+args -> arg_type[2] = REAL_RESULT;
+```
+
+* `char **args`：对于初始化函数 `xxx_init()`，当参数是常量时，例如：`3`、`4 * 7 - 2`  或 `SIN(3.14)`，`args -> args[i]` 指向参数值，当参数是非常量时 `args -> args[i]` 为 `NULL`。对于主函数 `xxx()`，`args -> args[i]` 总是指向参数的值，如果参数 `i` 为 `NULL`，则 `args -> args[i]` 为 `NULL`。对于 `STRING_RESULT` 类型，`args -> args[i]` 指向对应的字符串，`args -> lengths[i]` 代表字符串长度。对于 `INT_RESULT` 类型，需要强制转型为 `long long`，对于 `REAL_RESULT` 类型，需要转型为 `double`；
+
+```c
+// INT_RESULT 类型参数强转为 long long
+long long int_val = *(long long *) args -> args[i];
+// REAL_RESULT 类型参数强转为 double
+double real_val = *(double *) args -> args[i];
+```
+
+* `unsigned long *lengths`：对于初始化函数 `xxx_init()`，`lengths` 数组表示每个参数的最大长度，对于主函数 `xxx()`，`lengths` 数组表示每个参数的实际长度；
+* `char *maybe_null`：对于初始化函数 `xxx_init()`，`maybe_null` 表示对应的参数是否可以为 `NULL`；
+* `char **attributes`：表示传入参数的参数名，参数名对应的长度存储在 `args -> attribute_lengths[i]` 中，以 `SELECT my_udf(expr1, expr2 AS alias1, expr3 alias2);` 为例，对应的参数名和参数名长度如下；
+
+```c
+args -> attributes[0] = "expr1"
+args -> attribute_lengths[0] = 5
+
+args -> attributes[1] = "alias1"
+args -> attribute_lengths[1] = 6
+
+args -> attributes[2] = "alias2"
+args -> attribute_lengths[2] = 6
+```
+
+* `unsigned long *attribute_lengths`：表示传入参数名称的长度。
+
+### xxx 函数
+
+`xxx` 函数是 MySQL UDF 的主函数，在 SQL 中调用对应的 UDF 函数时，每行记录都会调用 `xxx` 函数，SQL 的数据类型和 `C/C++` 的数据类型对应关系如下，这些数据类型可以用于函数参数和返回值。
+
+| SQL 类型                                                     | C/C++ 类型  |
+| :----------------------------------------------------------- | :---------- |
+| `STRING`                                                     | `char *`    |
+| [`INTEGER`](https://dev.mysql.com/doc/refman/8.0/en/integer-types.html) | `long long` |
+| [`REAL`](https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html) | `double`    |
+
+> 注意：也可以声明 [`DECIMAL`](https://dev.mysql.com/doc/refman/8.0/en/fixed-point-types.html) 函数，但该值只能以字符串形式返回，因此你应该将函数编写为 `STRING` 函数。
+
+对于不同的返回值类型，`xxx` 函数的定义不同，下面分别列举了返回值 `STRING`、`INTEGER` 和 `REAL` 类型的 UDF 函数定义：
+
+```c
+// 返回值是 STRING 或 DECIMAL
+char *xxx(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error);
+// 返回值是 INTEGER
+long long xxx(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error);
+// 返回值是 REAL
+double xxx(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error);
+```
+
+主函数 `xxx` 如果出现了异常，需要将 `*error` 设置为 `1`：
+
+```c
+*error = 1;
+```
+
+此时，MySQL 执行到主函数时，会直接返回 NULL 结果，并忽略后续的数据行。和 `xxx_init()` 初始化函数不同的是，`xxx` 函数无法通过 `message` 返回错误，只能返回 NULL 值，并通过 `fprintf` 函数将错误日志输出到 MySQL `ERROR` 日志中（**如果笔者理解错误，欢迎 MySQL 大佬指正**）。
+
+### xxx_deinit 函数
+
+`xxx_deinit()` 函数是 UDF 的析构函数，用于释放初始化函数分配的内存，以及进行其他的清理工作。`xxx_deinit()` 函数是可选的，如果 UDF 函数无需释放资源，则可以不实现该函数。 `xxx_deinit()` 函数的定义如下：
+
+```c
+void xxx_deinit(UDF_INIT *initid);
+```
 
 ## GraalVM 实现 MySQL UDF 实战
 
-
+前文我们已经介绍了如何使用 GraalVM 编译动态链接库，并了解了实现 MySQL UDF 的规范，下面我们通过一个实战案例，具体介绍下如何使用 GraalVM 实现基于 SM4 的加解密 UDF 函数。
 
 ## 结语
 
