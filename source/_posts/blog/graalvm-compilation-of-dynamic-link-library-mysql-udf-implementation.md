@@ -190,5 +190,17 @@ void xxx_deinit(UDF_INIT *initid);
 
 前文我们已经介绍了如何使用 GraalVM 编译动态链接库，并了解了实现 MySQL UDF 的规范，下面我们通过一个实战案例，具体介绍下如何使用 GraalVM 实现基于 SM4 的加解密 UDF 函数。
 
+### 基于 SM4 实现加解密
+
+https://www.bouncycastle.org/
+
+### 编译 SM4 加解密动态链接库
+
+
+
+### 使用 C 实现 MySQL UDF
+
+
+
 ## 结语
 
