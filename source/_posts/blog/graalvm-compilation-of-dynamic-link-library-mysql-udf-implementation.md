@@ -192,15 +192,163 @@ void xxx_deinit(UDF_INIT *initid);
 
 ### 基于 SM4 实现加解密
 
-https://www.bouncycastle.org/
+[SM4](https://zh.wikipedia.org/wiki/SM4) 加密算法是国家密码管理局于 2012 年发布的，它是一种分组加密算法，目前 SM4 系列算法已经广泛应用于国内的安全加密领域。由于 SM4 系列算法主要应用于国内，JDK 的标准库中并未提供支持，因此我们需要通过第三方库 [BouncyCastle](https://www.bouncycastle.org/) 来实现 SM4 加解密。
+
+使用 BouncyCastle 比较简单，首先需要在项目中依赖 BouncyCastle 库的 jar 包，我们可以通过如下的 Maven 坐标进行依赖：
+
+```xml
+<dependency>
+    <groupId>org.bouncycastle</groupId>
+    <artifactId>bcprov-jdk18on</artifactId>
+    <version>1.78.1</version>
+</dependency>
+```
+
+然后借助 `java.security` 提供的扩展机制，使用 `Security.addProvider(new BouncyCastleProvider());` 注册 `BouncyCastle` 提供器。下面展示了一个简单的 SM4 算法加解密示例，通过 `Cipher.getInstance("SM4/ECB/PKCS5Padding"` 可以获取一个采用 `ECB` 模式的 `SM4` 算法，然后调用 `init` 方法分别对加密和解密模式进行初始化，最后调用 `doFinal` 方法执行加密和解密的逻辑。
+
+```java
+public final class SM4CryptographicDemo {
+    
+    @SneakyThrows
+    public static void main(String[] args) {
+        // 注册 BouncyCastle
+        Security.addProvider(new BouncyCastleProvider());
+        byte[] securityKey = Hex.decodeHex("4D744E003D713D054E7E407C350E447E");
+        String originalValue = "GraalVM SM4 Test.";
+        System.out.println("Original Value: " + originalValue);
+        // 加密处理
+        Cipher encryptCipher = Cipher.getInstance("SM4/ECB/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
+        encryptCipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(securityKey, "SM4"));
+        String encryptValue = Hex.encodeHexString((encryptCipher.doFinal(originalValue.getBytes())));
+        System.out.println("Encrypt Value: " + encryptValue);
+        // 解密处理
+        Cipher decryptCipher = Cipher.getInstance("SM4/ECB/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
+        decryptCipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(securityKey, "SM4"));
+        String decryptValue = new String((decryptCipher.doFinal(Hex.decodeHex(encryptValue))));
+        System.out.println("Decrypt Value: " + decryptValue);
+    }
+}
+```
+
+SM4 算法加密和解密的执行结果如下图：
+
+![SM4 算法加密和解密结果](graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation/sm4-encrypt-decrypt-result.png)
 
 ### 编译 SM4 加解密动态链接库
 
+使用 BouncyCastle 库实现基础的 SM4 加密和解密后，我们尝试使用 GraalVM 来编译一个动态链接库。根据前文的介绍，GraalVM 编译动态链接库需要通过 `@CEntryPoint` 注解，由于我们需要实现加密和解密两个函数，因此需要分别定义加密和解密方法，并使用 `@CEntryPoint` 进行标记。如下的 `SM4CryptographicNativeLibrary` 类，展示了 SM4 加密和解密动态链接库的逻辑：
 
+```java
+@SuppressWarnings("unused")
+public final class SM4CryptographicNativeLibrary {
+    
+    static {
+        // 注册 BouncyCastle
+        Security.addProvider(new BouncyCastleProvider());
+    }
+    
+    @SneakyThrows
+    @CEntryPoint(name = "sm4_encrypt")
+    private static CCharPointer sm4Encrypt(final IsolateThread thread, final CCharPointer plainValue, final CCharPointer cipherValue) {
+        String encryptValue = Hex.encodeHexString(getCipher(Cipher.ENCRYPT_MODE).doFinal(CTypeConversion.toJavaString(plainValue).getBytes()));
+        // C 语言中会在字符串结尾自动添加 \0 转义符，所以这里需要 +1
+        int encryptValueLength = encryptValue.getBytes().length + 1;
+        CTypeConversion.toCString(encryptValue, cipherValue, WordFactory.unsigned(encryptValueLength));
+        return cipherValue;
+    }
+    
+    @SneakyThrows
+    @CEntryPoint(name = "sm4_decrypt")
+    private static CCharPointer sm4Decrypt(final IsolateThread thread, final CCharPointer cipherValue, final CCharPointer plainValue) {
+        String decryptValue = new String(getCipher(Cipher.DECRYPT_MODE).doFinal(Hex.decodeHex(CTypeConversion.toJavaString(cipherValue))));
+        // C 语言中会在字符串结尾自动添加 \0 转义符，所以这里需要 +1
+        int decryptValueLength = decryptValue.getBytes().length + 1;
+        CTypeConversion.toCString(decryptValue, plainValue, WordFactory.unsigned(decryptValueLength));
+        return plainValue;
+    }
+    
+    @SneakyThrows
+    private static Cipher getCipher(final int cipherMode) {
+        Cipher result = Cipher.getInstance("SM4/ECB/PKCS5Padding", BouncyCastleProvider.PROVIDER_NAME);
+        result.init(cipherMode, new SecretKeySpec(Hex.decodeHex("4D744E003D713D054E7E407C350E447E"), "SM4"));
+        return result;
+    }
+}
+```
+
+首先，`SM4CryptographicNativeLibrary` 类 `static` 静态代码块中注册 `BouncyCastle`，从而保证 `java.security` 扩展机制能够识别到 BouncyCastle。然后在类中我们定义了 `sm4Encrypt` 和 `sm4Decrypt` 两个方法，并使用 `@CEntryPoint` 进行了方法导出，分别命名为 `sm4_encrypt` 和 `sm4_decrypt`。方法内部会调用 `getCipher` 获取 `SM4` 加解密方法，并通过 GraalVM 提供的 `CTypeConversion.toCString()` 方法，将加密、解密后的结果存储到 `CCharPointer` 类型的缓冲区对象中，存储到缓冲区过程中需要指定 `bufferSize`，由于 C 语言中会在字符串结尾自动添加 `\0` 转义符，所以这里需要 `+1` 处理。
+
+我们执行如下的命令进行编译：
+
+```bash
+./mvnw -Pnative clean package -f mysql-udf
+```
+
+编译成功后，`target` 目录下会生成动态链接库 `libsm4_udf.dylib`，以及头文件 `libsm4_udf.h`，后续我们可以使用 C 语言编写 MySQL UDF，并调用 GraalVM 生成的动态链接库。
+
+![SM4 UDF 动态链接库编译结果](graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation/libsm4_udf_shared_library.png)
 
 ### 使用 C 实现 MySQL UDF
 
+根据前文介绍我们知道，使用 C/C++ 编写 MySQL UDF，需要实现 `xxx_init`、`xxx` 和 `xxx_deinit` 3 个函数，其中 `xxx_init` 和 `init` 函数是必须实现的，而 `xxx_deinit` 则是可选的，如果没有资源需要释放，则可以不实现。笔者由于水平有限，简单使用 C 语言实现了 `sm4_encrypt_udf` 和 `sm4_decrypt_udf` 两个函数，分别用于 SM4 加密和解密操作。`thread` 对象的创建参考了 [GraalVM 动态链接库文档](https://www.graalvm.org/latest/reference-manual/native-image/guides/build-native-shared-library/)，需要在调用动态链接库函数时传入 thread 参数，并且在最后通过 `graal_tear_down_isolate` 函数清理 thread 对象。
 
+```c
+#include <stdio.h>
+#include <string.h>
+
+#include "mysql.h"
+#include "libsm4_udf.h"
+
+bool sm4_encrypt_udf_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+    return false;
+}
+
+char * sm4_encrypt_udf(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error) {
+    graal_isolate_t *isolate = NULL;
+    graal_isolatethread_t *thread = NULL;
+    if (0 != graal_create_isolate(NULL, &isolate, &thread)) {
+        fprintf(stderr, "initialization error\n" );
+        return "";
+    }
+    sm4_encrypt(thread, args -> args[0], result);
+    *length = strlen(result);
+    graal_tear_down_isolate(thread);
+    return result;
+}
+
+bool sm4_decrypt_udf_init(UDF_INIT *initid, UDF_ARGS *args, char *message) {
+    return false;
+}
+
+char * sm4_decrypt_udf(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error) {
+    graal_isolate_t *isolate = NULL;
+    graal_isolatethread_t *thread = NULL;
+    if (0 != graal_create_isolate(NULL, &isolate, &thread)) {
+        fprintf(stderr, "initialization error\n" );
+        return "";
+    }
+    sm4_decrypt(thread, args -> args[0], result);
+    *length = strlen(result);
+    graal_tear_down_isolate(thread);
+    return result;
+}
+```
+
+我们尝试使用 `GCC` 工具将 C 源码编译为动态链接库，通过 `-I` 指定编译时头文件位置，`-L/path/to` 用于指定编译时库文件的位置，`-l` 则用于指定库的名称，通常库名称不包含前面的 lib 前缀。`-Wl,-rpath=/path/to` 指定了运行时的库搜索路径，经笔者测试 MacOS 指定该参数会编译报错，Linux 下不指定该参数，运行时会找不到依赖库报错（具体原因有待进一步探索）。`-shared` 表示当前编译结果是动态链接库，`-o` 指定的输出的位置及动态链接库名称，最后则指定了 C 源码的位置。
+
+```bash
+# -I 指定编译时头文件位置
+# -L/path/to 指定编译时库文件的位置
+# -Wl,-rpath=/path/to 指定了运行时的库搜索路径（MacOS 指定会编译报错，Linux 下需要指定）
+gcc -I/opt/homebrew/opt/mysql/include/mysql -I./mysql-udf/target -L./mysql-udf/target -lsm4_udf -fPIC -g -shared -o ./mysql-udf/target/sm4_encrypt_udf.so ./mysql-udf/src/main/native/sm4_encrypt_udf.c
+```
+
+编译完成后，我们在 `target` 目录中可以看到 `sm4_encrypt_udf.so` 文件，这个就是我们需要的 MySQL UDF 动态链接库。
+
+![SM4 Encrypt UDF 函数](graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation/sm4-encrypt_udf.png)
+
+TODO
 
 ## 结语
 
+TODO
