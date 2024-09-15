@@ -29,6 +29,7 @@ JVM 虚拟机原理及其相关的调优技术是每一位 Java 工程师必备�
 * 重学 JVM 第 8 弹：TODO
 * 重学 JVM 第 9 弹：TODO
 * 重学 JVM 第 10 弹：[Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)
+* 重学 JVM 第 11 弹：[GraalVM 编译动态链接库之 MySQL UDF 实现](https://strongduanmu.com/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html)
 
 ## 网络资料
 

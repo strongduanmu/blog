@@ -12,11 +12,12 @@ references:
   - '[Adding a Loadable Function](https://dev.mysql.com/doc/extending-mysql/8.0/en/adding-loadable-function.html)'
   - '[MySQL 最佳实践——如何使用 C++ 实现 MySQL 用户定义函数](http://mysql.taobao.org/monthly/2019/02/08/)'
   - '[Golang 编写 MySQL UDF](https://mritd.com/2023/05/23/write-mysql-udf-in-golang/)'
+  - '[从零放弃学习 Spring - 在 Native Image 中使用 Bouncy Castle](https://vizee.org/2023/08/02/bouncy-castle-on-native-image/)'
 ---
 
 ## 前言
 
-在之前发布的 [Java AOT 编译框架 GraalVM 快速入门](http://localhost:4000/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html)一文中，我们介绍了 `GraalVM` 编译器的基础知识，对比了 GraalVM 和传统 JVM 之间的优势和劣势，并通过 Demo 示例展示了如何将 JVM 程序编译为原生可执行程序。GraalVM 除了编译出原生可执行程序外，还可以用于编译动态链接库，提供给 `C`、`C++` 等原生语言调用，GraalVM 编译动态链接库的能力大大提升了 Java 和原生语言之间的互操作性。本文将为大家介绍如何使用 GraalVM 编译动态链接库，并使用 C 语言调用动态链接库，从而实现基于 `SM4` 加解密的 `MySQL UDF`。
+在之前发布的 [Java AOT 编译框架 GraalVM 快速入门](http://localhost:4000/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html)一文中，我们介绍了 `GraalVM` 编译器的基础知识，对比了 GraalVM 和传统 JVM 之间的优势和劣势，并通过 Demo 示例展示了如何将 JVM 程序编译为原生可执行程序。GraalVM 除了编译原生可执行程序外，还可以用于编译动态链接库，提供给 `C`、`C++` 等原生语言调用，GraalVM 编译动态链接库的能力大大提升了 Java 和原生语言之间的互操作性。本文将为大家介绍如何使用 GraalVM 编译动态链接库，并使用 C 语言调用动态链接库，从而实现基于 `SM4` 加解密的 `MySQL UDF`。
 
 ## GraalVM 动态链接库规范
 
@@ -86,7 +87,7 @@ bool xxx_init(UDF_INIT *initid, UDF_ARGS *args, char *message);
 
 * `bool maybe_null`：用于标识当前 UDF 函数是否可以返回 `NULL`，如果可以返回 `NULL`，则需要在初始化时设置成 `true`。如果函数中的任意参数设置了 `maybe_null` 为 `true`，则函数 `maybe_null` 的默认值也为 `true`；
 * `unsigned int decimals`：指定小数点右侧的小数位数。默认值是传递给函数参数中最大的小数位数，例如，函数参数 `1.34`、`1.345` 和 `1.3`，则默认值为 3，因为 `1.345` 有 3 个小数数字。对于没有固定小数位数的参数，`decimals` 值设置为 31，这比 [`DECIMAL`](https://dev.mysql.com/doc/refman/8.0/en/fixed-point-types.html)、[`FLOAT`](https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html) 和 [`DOUBLE`](https://dev.mysql.com/doc/refman/8.0/en/floating-point-types.html) 数据类型允许的最大小数位数多 1；
-* `unsigned int max_length`：指定返回值的最大长度。对于不同的返回值类型，`max_length` 的默认值不同，对于 `STRING` 类型，默认值和和最长的函数参数相等。对于 `INTEGER` 类型， 默认值为 21。而对于 BLOB 类型的，可以将它设置成 65KB 或 16MB；
+* `unsigned int max_length`：指定返回值的最大长度。对于不同的返回值类型，`max_length` 的默认值不同，对于 `STRING` 类型，默认值和最长的函数参数相等。对于 `INTEGER` 类型， 默认值为 21。而对于 BLOB 类型的，可以将它设置成 65KB 或 16MB；
 * `char *ptr`：可实现 UDF 特定需求的指针，一般在 `xxx_init()` 中申请内存，在 `xxx_deinit()` 中释放内存，例如：用来存储 UDF 函数过长（长度超过 255 个字符）的字符串结果，默认情况下 UDF 主函数中的 `result` 只能存储 255 个字符，超过 255 个字符需要自行通过 `ptr` 指针申请内存，用于存储字符串结果；
 
 ```c
@@ -126,6 +127,7 @@ args -> arg_type[2] = REAL_RESULT;
 ```c
 // INT_RESULT 类型参数强转为 long long
 long long int_val = *(long long *) args -> args[i];
+
 // REAL_RESULT 类型参数强转为 double
 double real_val = *(double *) args -> args[i];
 ```
@@ -164,8 +166,10 @@ args -> attribute_lengths[2] = 6
 ```c
 // 返回值是 STRING 或 DECIMAL
 char *xxx(UDF_INIT *initid, UDF_ARGS *args, char *result, unsigned long *length, char *is_null, char *error);
+
 // 返回值是 INTEGER
 long long xxx(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error);
+
 // 返回值是 REAL
 double xxx(UDF_INIT *initid, UDF_ARGS *args, char *is_null, char *error);
 ```
@@ -347,8 +351,134 @@ gcc -I/opt/homebrew/opt/mysql/include/mysql -I./mysql-udf/target -L./mysql-udf/t
 
 ![SM4 Encrypt UDF 函数](graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation/sm4-encrypt_udf.png)
 
-TODO
+使用如下的命令将 `libsm4_udf.dylib` 和 `sm4_encrypt_udf.so` 库复制到 MySQL `/lib/plugin` 目录下：
+
+```bash
+cp mysql-udf/target/libsm4_udf.dylib /opt/homebrew/opt/mysql/lib/plugin/
+cp mysql-udf/target/sm4_encrypt_udf.so /opt/homebrew/opt/mysql/lib/plugin/
+```
+
+然后执行 `CREATE FUNCTION` 语句，创建 `sm4_encrypt_udf` 和 `sm4_decrypt_udf`  函数。
+
+```sql
+CREATE FUNCTION sm4_encrypt_udf RETURNS STRING SONAME 'sm4_encrypt_udf.so';
+CREATE FUNCTION sm4_decrypt_udf RETURNS STRING SONAME 'sm4_encrypt_udf.so';
+```
+
+我们使用 `SELECT sm4_encrypt_udf('123');` 测试 UDF 查询语句，但是出现了如下的异常信息，MySQL 服务由于 UDF 函数异常出现了重启。
+
+```
+mysql>  SELECT sm4_encrypt_udf('123');
+No connection. Trying to reconnect...
+Connection id:    8
+Current database: test
+
+ERROR 2013 (HY000): Lost connection to MySQL server during query
+No connection. Trying to reconnect...
+ERROR 2003 (HY000): Can't connect to MySQL server on '127.0.0.1:3306' (61)
+ERROR:
+Can't connect to the server
+```
+
+为了搞清楚异常的原因，我们使用 `tail -400f /opt/homebrew/var/mysql/duanzhengqiangdeMacBook-Pro.local.err` 命令查看 `MySQL Error` 日志。如下展示了完整的异常信息，可以看出 GraalVM 生成的动态链接库没有找到 `SM4/ECB/PKCS5Padding` 算法，异常的根本原因是 GraalVM 只能在编译期注册 `Security Provider`，无法在运行期注册，因此我们需要手动注册 `Security Provider`。
+
+![MySQL UDF 异常日志](graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation/mysql-udf-error-log.png)
+
+参考[从零放弃学习 Spring - 在 Native Image 中使用 Bouncy Castle](https://vizee.org/2023/08/02/bouncy-castle-on-native-image/)，可以使用 GraalVM 的 Feature 机制注册 `BouncyCastleProvider`，我们编写如下的 `SM4BouncyCastleFeature` 类，实现 `org.graalvm.nativeimage.hosted.Feature` 接口，并通过 `RuntimeClassInitialization` 初始化 `org.bouncycastle` 相关的动态类。
+
+```java
+@SuppressWarnings("unused")
+public final class SM4BouncyCastleFeature implements Feature {
+    
+    @Override
+    public void afterRegistration(final AfterRegistrationAccess access) {
+        RuntimeClassInitialization.initializeAtBuildTime("org.bouncycastle");
+        RuntimeClassInitialization.initializeAtRunTime("org.bouncycastle.jcajce.provider.drbg.DRBG$Default");
+        RuntimeClassInitialization.initializeAtRunTime("org.bouncycastle.jcajce.provider.drbg.DRBG$NonceAndIV");
+        Security.addProvider(new BouncyCastleProvider());
+    }
+}
+```
+
+然后将 `SM4BouncyCastleFeature` 类路径配置到 `native-maven-plugin` 插件的 `buildArgs` 中，完整配置为 `--features=com.strongduanmu.SM4BouncyCastleFeature`。
+
+```xml
+<build>
+    <plugins>
+        <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <version>${native.maven.plugin.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+                <imageName>${native.image.name}</imageName>
+                <buildArgs>
+                    <buildArg>--no-fallback</buildArg>
+                    <buildArg>--features=com.strongduanmu.SM4BouncyCastleFeature</buildArg>
+                </buildArgs>
+                <sharedLibrary>true</sharedLibrary>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>build-native</id>
+                    <goals>
+                        <goal>compile-no-fork</goal>
+                    </goals>
+                    <phase>package</phase>
+                </execution>
+                <execution>
+                    <id>test-native</id>
+                    <goals>
+                        <goal>test</goal>
+                    </goals>
+                    <phase>test</phase>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+</build>
+```
+
+然后执行 `./mvnw -Pnative clean package -f mysql-udf` 以及 `gcc -I/opt/homebrew/opt/mysql/include/mysql -I./mysql-udf/target -L./mysql-udf/target -lsm4_udf -fPIC -g -shared -o ./mysql-udf/target/sm4_encrypt_udf.so ./mysql-udf/src/main/native/sm4_encrypt_udf.c` 重新编译生成动态链接库，打包完成后将动态链接库复制到 `/opt/homebrew/opt/mysql/lib/plugin/` 目录下，并使用 `brew services restart mysql` 重启 MySQL 服务。
+
+重启完成后，执行以下的 SQL 脚本，删除之前创建的 UDF 函数，并重新创建新的 UDF：
+
+```sql
+# 删除已创建 UDF
+DROP FUNCTION sm4_encrypt_udf;
+DROP FUNCTION sm4_decrypt_udf;
+
+# 重新创建 UDF
+CREATE FUNCTION sm4_encrypt_udf RETURNS STRING SONAME 'sm4_encrypt_udf.so';
+CREATE FUNCTION sm4_decrypt_udf RETURNS STRING SONAME 'sm4_encrypt_udf.so';
+```
+
+然后我们再次测试 SM4 UDF 加解密功能，可以看到现在加密和解密都能够完美支持，完整的示例程序请参考 [mysql-udf](https://github.com/strongduanmu/graalvm-lecture/tree/main/mysql-udf)。
+
+```sql
+mysql> SELECT sm4_encrypt_udf('123');
++----------------------------------+
+| sm4_encrypt_udf('123')           |
++----------------------------------+
+| 2e5d924b4e9f26831c5cbcb087bd3439 |
++----------------------------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT sm4_decrypt_udf('2e5d924b4e9f26831c5cbcb087bd3439');
++-----------------------------------------------------+
+| sm4_decrypt_udf('2e5d924b4e9f26831c5cbcb087bd3439') |
++-----------------------------------------------------+
+| 123                                                 |
++-----------------------------------------------------+
+1 row in set (0.01 sec)
+```
 
 ## 结语
 
-TODO
+本文首先介绍了如何使用 GraalVM 编译动态链接库，需要在 GraalVM 编译时增加 `--shared` 参数，并将需要导出的动态链接库方法，使用 `@CEntryPoint` 注解进行标记，方法参数中需要增加额外的 `IsolateThread` 或 `Isolate` 参数，用于提供当前线程的执行上下文。
+
+然后又结合 MySQL 官方文档，为大家介绍了 MySQL UDF 函数的实现规范，UDF 函数中通常包含了 `xxx_init()`、`xxx()` 和 `xxx_deinit()` 3 个主要函数，大家可以结合 UDF 函数的逻辑需要，在不同的函数中进行参数校验、UDF 逻辑实现等处理。
+
+最后一个部分，我们使用 GraalVM 实现了一个基于 SM4 国密算法的加解密 UDF，核心的算法逻辑部分使用 GraalVM 编译，MySQL UDF 部分使用 C 语言实现，并调用 GraalVM 编译的动态链接库，最终我们完美地实现了加密和解密功能。
+
+**GraalVM 为 Java 生态带来了全新的应用场景，如何使用 GraalVM 将 Java 生态连接到原生应用中，这些都需要大家不断地思考和探索，欢迎大家积极留言交流 GraalVM 应用场景**。另外，由于笔者水平有限，本文如有问题，也欢迎留言指正。
