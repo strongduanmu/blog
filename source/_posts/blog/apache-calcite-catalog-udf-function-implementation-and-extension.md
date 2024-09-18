@@ -2,8 +2,8 @@
 title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
-date: 2024-08-26 08:00:00
-updated: 2024-08-26 08:00:00
+date: 2024-09-18 08:00:00
+updated: 2024-09-18 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
