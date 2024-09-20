@@ -17,7 +17,7 @@ references:
 
 ## 前言
 
-在之前发布的 [Java AOT 编译框架 GraalVM 快速入门](http://localhost:4000/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html)一文中，我们介绍了 `GraalVM` 编译器的基础知识，对比了 GraalVM 和传统 JVM 之间的优势和劣势，并通过 Demo 示例展示了如何将 JVM 程序编译为原生可执行程序。GraalVM 除了编译原生可执行程序外，还可以用于编译动态链接库，提供给 `C`、`C++` 等原生语言调用，GraalVM 编译动态链接库的能力大大提升了 Java 和原生语言之间的互操作性。本文将为大家介绍如何使用 GraalVM 编译动态链接库，并使用 C 语言调用动态链接库，从而实现基于 `SM4` 加解密的 `MySQL UDF`。
+在之前发布的 [Java AOT 编译框架 GraalVM 快速入门](https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html)一文中，我们介绍了 `GraalVM` 编译器的基础知识，对比了 GraalVM 和传统 JVM 之间的优势和劣势，并通过 Demo 示例展示了如何将 JVM 程序编译为原生可执行程序。GraalVM 除了编译原生可执行程序外，还可以用于编译动态链接库，提供给 `C`、`C++` 等原生语言调用，GraalVM 编译动态链接库的能力大大提升了 Java 和原生语言之间的互操作性。本文将为大家介绍如何使用 GraalVM 编译动态链接库，并使用 C 语言调用动态链接库，从而实现基于 `SM4` 加解密的 `MySQL UDF`。
 
 ## GraalVM 动态链接库规范
 
