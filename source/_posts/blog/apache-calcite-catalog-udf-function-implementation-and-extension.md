@@ -3,11 +3,12 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-09-23 08:00:00
+updated: 2024-09-24 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
   - '[Calcite 官方文档中文版-适配器-可扩展性](https://strongduanmu.com/wiki/calcite/adapters.html#%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7)'
+  - '[如何在 Calcite 注册函数](https://zhuanlan.zhihu.com/p/65472726)'
 banner: /assets/banner/banner_9.jpg
 topic: calcite
 ---
@@ -42,6 +43,64 @@ TableFunction 和 TableMacro 都对应了表函数，会返回一个表，他们
 
 ### 标量函数
 
+标量函数是指**将输入数据转换为输出数据的函数，通常用于对单个字段值进行计算和转换**。例如：`ABS(num)` 函数，它负责将每行输入的 `num` 字段值转换为绝对值再输出。
+
+![标量函数继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/scalar-function-inherit-class.png)
+
+上图展示了标量函数的继承体系，`ScalarFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getReturnType` 方法，用于表示标量函数返回值的类型。
+
+```java
+/**
+ * Function that returns a scalar result.
+ */
+public interface ScalarFunction extends Function {
+    /**
+     * Returns the return type of this function, constructed using the given
+     * type factory.
+     *
+     * @param typeFactory Type factory
+     */
+    RelDataType getReturnType(RelDataTypeFactory typeFactory);
+}
+```
+
+`ImplementableFunction` 接口用于声明该函数可以转换为 Java 代码进行执行，接口中提供了 `getImplementor` 方法，可以返回一个函数实现器 `CallImplementor`。
+
+```java
+/**
+ * Function that can be translated to java code.
+ *
+ * @see ScalarFunction
+ * @see TableFunction
+ */
+public interface ImplementableFunction extends Function {
+    /**
+     * Returns implementor that translates the function to linq4j expression.
+     *
+     * @return implementor that translates the function to linq4j expression.
+     */
+    CallImplementor getImplementor();
+}
+```
+
+`CallImplementor` 接口中声明了 `implement` 方法，可以将函数转换为 `linq4j` 表达式，用于函数逻辑的调用（`linq4j` 参考了 `.NET` 中的 `LINQ（Language-Integrated Query）` 功能，可以实现类似于 SQL 的声明式语法，后续我们专门写一篇文章介绍 `linq4j`）。
+
+```java
+public interface CallImplementor {
+    /**
+     * Implements a call.
+     *
+     * @param translator Translator for the call
+     * @param call Call that should be implemented
+     * @param nullAs The desired mode of {@code null} translation
+     * @return Translated call
+     */
+    Expression implement(RexToLixTranslator translator, RexCall call, RexImpTable.NullAs nullAs);
+}
+```
+
+
+
 TODO
 
 ### 聚合函数
@@ -49,10 +108,6 @@ TODO
 TODO
 
 ### 表函数 & 表宏
-
-TODO
-
-### 内置函数执行流程
 
 TODO
 
