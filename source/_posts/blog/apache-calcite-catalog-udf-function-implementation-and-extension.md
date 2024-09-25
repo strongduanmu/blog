@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-09-24 08:00:00
+updated: 2024-09-25 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -43,11 +43,17 @@ TableFunction 和 TableMacro 都对应了表函数，会返回一个表，他们
 
 ### 标量函数
 
+#### ScalarFunction 继承体系
+
 标量函数是指**将输入数据转换为输出数据的函数，通常用于对单个字段值进行计算和转换**。例如：`ABS(num)` 函数，它负责将每行输入的 `num` 字段值转换为绝对值再输出。
+
+下图展示了标量函数在 Schema 对象中的继承体系，核心的实现逻辑在 `ScalarFunctionImpl` 类中，它实现了 `ScalarFunction` 和 `ImplementableFunction` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，下面我们分别来介绍下这些接口和类的作用。
 
 ![标量函数继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/scalar-function-inherit-class.png)
 
-上图展示了标量函数的继承体系，`ScalarFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getReturnType` 方法，用于表示标量函数返回值的类型。
+##### ScalarFunction 接口
+
+`ScalarFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getReturnType` 方法，用于表示标量函数返回值的类型。
 
 ```java
 /**
@@ -63,6 +69,8 @@ public interface ScalarFunction extends Function {
     RelDataType getReturnType(RelDataTypeFactory typeFactory);
 }
 ```
+
+##### ImplementableFunction 接口
 
 `ImplementableFunction` 接口用于声明该函数可以转换为 Java 代码进行执行，接口中提供了 `getImplementor` 方法，可以返回一个函数实现器 `CallImplementor`。
 
@@ -99,7 +107,76 @@ public interface CallImplementor {
 }
 ```
 
+##### ReflectiveFunctionBase 抽象类
 
+`ReflectiveFunctionBase` 抽象类用于处理基于方法实现的函数，负责将方法参数映射为 `List<FunctionParameter>`。在初始化 ReflectiveFunctionBase 时，会传入函数逻辑对应的 `Method` 对象，`ParameterListBuilder` 类会根据 method 对象构造 `List<FunctionParameter>`。
+
+```java
+/**
+ * Creates a ReflectiveFunctionBase.
+ *
+ * @param method Method that is used to get type information from
+ */
+protected ReflectiveFunctionBase(Method method) {
+    this.method = method;
+    this.parameters = builder().addMethodParameters(method).build();
+}
+```
+
+`ParameterListBuilder` 类的核心逻辑为 `addMethodParameters` 方法，内部会遍历方法参数，通过 ReflectUtil 工具类获取参数名称（优先从 Parameter 注解中获取名称，无注解则使用参数名）和参数是否可选（优先从 Parameter 注解中获取是否可选，无注解则为 false），然后将 `type`、`name` 和 `optional` 参数传入 `add` 方法，用于创建 FunctionParameter 对象。
+
+```java
+public ParameterListBuilder addMethodParameters(Method method) {
+    final Class<?>[] types = method.getParameterTypes();
+    for (int i = 0; i < types.length; i++) {
+        add(types[i], ReflectUtil.getParameterName(method, i), ReflectUtil.isParameterOptional(method, i));
+    }
+    return this;
+}
+```
+
+`add` 方法实现逻辑如下，主要将传入的 `type` 参数通过 `typeFactory` 构建为 `RelDataType` 类型，将 `name` 和 `optional` 封装到对应的 `FunctionParameter` 接口方法中。此外，还根据参数的个数生成了 `ordinal` 序号，并封装到 `getOrdinal` 方法中。
+
+```java
+public ParameterListBuilder add(final Class<?> type, final String name, final boolean optional) {
+    final int ordinal = builder.size();
+    builder.add(new FunctionParameter() {
+        @Override
+        public String toString() {
+            return ordinal + ": " + name + " " + type.getSimpleName() + (optional ? "?" : "");
+        }
+        
+        // 基于 0 的参数序号
+        @Override
+        public int getOrdinal() {
+            return ordinal;
+        }
+        
+        // 参数名称
+        @Override
+        public String getName() {
+            return name;
+        }
+        
+        // 参数类型
+        @Override
+        public RelDataType getType(RelDataTypeFactory typeFactory) {
+            return typeFactory.createJavaType(type);
+        }
+        
+        // 参数是否可选，可选参数可以在函数调用时省略
+        @Override
+        public boolean isOptional() {
+            return optional;
+        }
+    });
+    return this;
+}
+```
+
+除了 FunctionParameter 构建逻辑外，ReflectiveFunctionBase 还提供了 `classHasPublicZeroArgsConstructor` 和 `classHasPublicFunctionContextConstructor` 方法，用于判断函数逻辑类是否提供了无关构造方法，以及包含 `FunctionContext`（提供函数调用的相关信息，可以使函数在构造期间提前执行，无需每次调用执行，具体可以参考 [FunctionContext](https://github.com/apache/calcite/blob/b2e9e6cba1e2ce28368d1281f527a9e53f4628ca/core/src/main/java/org/apache/calcite/schema/FunctionContext.java#L24-L85)） 的构造方法，这些构造方法会在函数初始化时进行调用，不包含可能会抛出异常。
+
+##### ScalarFunctionImpl 类
 
 TODO
 
