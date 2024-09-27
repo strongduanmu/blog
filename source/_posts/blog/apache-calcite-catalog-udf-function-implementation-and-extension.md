@@ -3,12 +3,13 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-09-26 08:00:00
+updated: 2024-09-27 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
   - '[Calcite 官方文档中文版-适配器-可扩展性](https://strongduanmu.com/wiki/calcite/adapters.html#%E5%8F%AF%E6%89%A9%E5%B1%95%E6%80%A7)'
   - '[如何在 Calcite 注册函数](https://zhuanlan.zhihu.com/p/65472726)'
+  - '[Calcite 的初步使用——Calcite 添加自定义函数](https://articles.zsxq.com/id_sl3habfw53xv.html)'
 banner: /assets/banner/banner_9.jpg
 topic: calcite
 ---
@@ -250,6 +251,8 @@ public enum NullPolicy {
 
 #### ScalarFunction 执行流程
 
+我们以 CoreQuidemTest（https://github.com/julianhyde/quidem） 为例，看看 `functions.iq` 中的函数是如何执行的。
+
 TODO
 
 ### 聚合函数
@@ -301,6 +304,8 @@ UDF Test：calcite/core/src/test/java/org/apache/calcite/test/UdfTest.java at ma
 PI 函数带不带括号的讨论：https://issues.apache.org/jira/browse/CALCITE-6566?page=com.atlassian.jira.plugin.system.issuetabpanels%3Aall-tabpanel
 
 关于函数参数的讨论：https://mail.google.com/mail/u/0/#inbox/FMfcgzQXJGsbkVFdDsKlrjSHbGTVxflZ
+
+CoreQuidemTest（各种测试语句）：https://github.com/apache/calcite/tree/99a0df108a9f72805afb6d87ec5b2c0ed258f1ec/core/src/test/resources/sql
 
 
 
