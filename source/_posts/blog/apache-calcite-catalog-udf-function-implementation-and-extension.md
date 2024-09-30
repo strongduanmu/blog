@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-09-27 08:00:00
+updated: 2024-09-30 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -44,15 +44,13 @@ TableFunction 和 TableMacro 都对应了表函数，会返回一个表，他们
 
 ### 标量函数
 
-#### ScalarFunction 继承体系
-
-标量函数是指**将输入数据转换为输出数据的函数，通常用于对单个字段值进行计算和转换**。例如：`ABS(num)` 函数，它负责将每行输入的 `num` 字段值转换为绝对值再输出。
+标量函数（`ScalarFunction`）是指**将输入数据转换为输出数据的函数，通常用于对单个字段值进行计算和转换**。例如：`ABS(num)` 函数，它负责将每行输入的 `num` 字段值转换为绝对值再输出。
 
 下图展示了标量函数在 Schema 对象中的继承体系，核心的实现逻辑在 `ScalarFunctionImpl` 类中，它实现了 `ScalarFunction` 和 `ImplementableFunction` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，下面我们分别来介绍下这些接口和类的作用。
 
 ![标量函数继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/scalar-function-inherit-class.png)
 
-##### ScalarFunction 接口
+* ScalarFunction 接口：
 
 `ScalarFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getReturnType` 方法，用于表示标量函数返回值的类型。
 
@@ -71,7 +69,7 @@ public interface ScalarFunction extends Function {
 }
 ```
 
-##### ImplementableFunction 接口
+* ImplementableFunction 接口：
 
 `ImplementableFunction` 接口用于声明该函数可以转换为 Java 代码进行执行，接口中提供了 `getImplementor` 方法，可以返回一个函数实现器 `CallImplementor`。
 
@@ -108,7 +106,7 @@ public interface CallImplementor {
 }
 ```
 
-##### ReflectiveFunctionBase 抽象类
+* ReflectiveFunctionBase 抽象类：
 
 `ReflectiveFunctionBase` 抽象类用于处理基于方法实现的函数，负责将方法参数映射为 `List<FunctionParameter>`。在初始化 ReflectiveFunctionBase 时，会传入函数逻辑对应的 `Method` 对象，`ParameterListBuilder` 类会根据 method 对象构造 `List<FunctionParameter>`。
 
@@ -177,7 +175,7 @@ public ParameterListBuilder add(final Class<?> type, final String name, final bo
 
 除了 FunctionParameter 构建逻辑外，ReflectiveFunctionBase 还提供了 `classHasPublicZeroArgsConstructor` 和 `classHasPublicFunctionContextConstructor` 方法，用于判断函数逻辑类是否提供了无关构造方法，以及包含 `FunctionContext`（提供函数调用的相关信息，可以使函数在构造期间提前执行，无需每次调用执行，具体可以参考 [FunctionContext](https://github.com/apache/calcite/blob/b2e9e6cba1e2ce28368d1281f527a9e53f4628ca/core/src/main/java/org/apache/calcite/schema/FunctionContext.java#L24-L85)）的构造方法，这些构造方法会在函数初始化时进行调用，不包含可能会抛出异常。
 
-##### ScalarFunctionImpl 类
+* ScalarFunctionImpl 类：
 
 `ScalarFunctionImpl` 类实现了 ScalarFunction 和 ImplementableFunction 接口中的相关方法，内部方法通过调用如下的私有构造方法进行初始化。如下展示了 ScalarFunctionImpl 了的构造方法，首先会调用 `super(method)` 初始化函数参数 `List<FunctionParameter>`，然后将函数实现器 CallImplementor 存储在成员变量中。 
 
@@ -249,17 +247,35 @@ public enum NullPolicy {
 
 获取到 NullPolicy 后，调用 `RexImpTable.createImplementor()` 方法创建函数实现器，由于函数实现器中的 `implement` 方法在执行阶段才会调用，我们将在后面的 ScalarFunction 案例中进行详细介绍。
 
-#### ScalarFunction 执行流程
-
-我们以 CoreQuidemTest（https://github.com/julianhyde/quidem） 为例，看看 `functions.iq` 中的函数是如何执行的。
-
-TODO
-
 ### 聚合函数
+
+聚合函数（`AggregateFunction`）是指**将多个值组合转换为标量值输出的函数**。例如：`SUM(num)` 函数，它负责将每行输入的 `num` 字段值进行累加，最终输出累加总和。
+
+下图展示了聚合函数在 Schema 对象中的继承体系，核心的实现逻辑在 `AggregateFunctionImpl` 类中，它实现了 `AggregateFunction` 和 `ImplementableAggFunction` 接口，下面我们分别来介绍下这些接口和类的作用。
+
+![聚合函数继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/aggregate-function-inherit-class.png)
+
+
 
 TODO
 
 ### 表函数 & 表宏
+
+表函数（`TableFunction`）是指**在执行阶段将某些数据转换为表的函数**，表宏（`TableMacro`）是指**在编译阶段将某些数据转换为表的函数**。表函数或者表宏，通常会使用在 FROM 子句中，作为一张表进行使用，例如：`SELECT * FROM XML_EXTRACT("/opt/csv/test.csv")`，`XML_EXTRACT` 就是一个表函数，它负责从 `test.csv` 文件中获取数据，并返回一张表。
+
+下图展示了表函数和表宏在 Schema 对象中的继承体系，表函数的核心实现逻辑在 `TableFunctionImpl` 类中，它实现了 `ImplementableFunction` 和 `TableFunction` 接口，并继承了 `ReflectiveFunctionBase` 抽象类。表宏的核心实现逻辑在 `TableMarcoImpl` 类中，它实现了 `TableMarco` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，下面我们分别来介绍下这些接口和类的作用。
+
+![表函数 & 表宏继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/table-function-marco-inherit-class.png)
+
+
+
+
+
+TODO
+
+### 函数执行流程
+
+我们以 CoreQuidemTest（https://github.com/julianhyde/quidem） 为例，看看 `functions.iq` 中的函数是如何执行的。
 
 TODO
 
