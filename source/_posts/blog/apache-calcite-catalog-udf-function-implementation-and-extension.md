@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-09-30 08:00:00
+updated: 2024-10-02 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -249,11 +249,122 @@ public enum NullPolicy {
 
 ### 聚合函数
 
-聚合函数（`AggregateFunction`）是指**将多个值组合转换为标量值输出的函数**。例如：`SUM(num)` 函数，它负责将每行输入的 `num` 字段值进行累加，最终输出累加总和。
+聚合函数（`AggregateFunction`）是指**将多个值组合转换为标量值输出的函数**。例如：`SUM(num)` 函数，它负责将每行输入的 `num` 字段值进行累加，最终输出累加总和。Calcite 聚合函数内部包含了一个累加的过程，通过聚合函数内部的 `init` 方法进行初始化，并创建一个累加器，然后通过 `add` 方法将当前行的值添加到累加器中进行计算，使用 `merge` 方法可以将两个累加器合二为一，最后计算完成通过 `result` 方法返回结果。
 
 下图展示了聚合函数在 Schema 对象中的继承体系，核心的实现逻辑在 `AggregateFunctionImpl` 类中，它实现了 `AggregateFunction` 和 `ImplementableAggFunction` 接口，下面我们分别来介绍下这些接口和类的作用。
 
 ![聚合函数继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/aggregate-function-inherit-class.png)
+
+* AggregateFunction 接口：
+
+`AggregateFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getReturnType` 方法，用于表示聚合函数返回值的类型。
+
+```java
+/**
+ * Function that combines several values into a scalar result.
+ */
+public interface AggregateFunction extends Function {
+    /**
+     * Returns the return type of this function, constructed using the given
+     * type factory.
+     *
+     * @param typeFactory Type factory
+     */
+    RelDataType getReturnType(RelDataTypeFactory typeFactory);
+}
+```
+
+* ImplementableAggFunction 接口：
+
+`ImplementableAggFunction` 接口用于声明该函数可以转换为 Java 代码进行执行，接口中提供了 `getImplementor` 方法，可以返回一个聚合函数实现器 `AggImplementor`，`windowContext` 用于标记当前聚合函数是否包含在窗口运算中。
+
+```java
+public interface ImplementableAggFunction extends AggregateFunction {
+    /**
+     * Returns implementor that translates the function to linq4j expression.
+     *
+     * @param windowContext true when aggregate is used in window context
+     * @return implementor that translates the function to linq4j expression.
+     */
+    AggImplementor getImplementor(boolean windowContext);
+}
+```
+
+`AggImplementor` 接口可以实现聚合函数所需的初始化、累加以及获取结果方法，如下展示了 `AggImplementor` 接口中的方法，`getStateType` 方法可以返回聚合函数实现时，中间变量的类型，例如：字符串连接函数，它的中间变量类型可以是 StringBuilder。`implementReset`、`implementAdd` 和 `implementResult` 分别对应了聚合函数的初始化、累加和获取结果方法，AggImplementor 接口的实现类，会根据不同的聚合函数类型实现其逻辑。
+
+```java
+public interface AggImplementor {
+    
+    // 返回聚合函数实现时，中间变量的类型
+    // 例如：字符串连接函数，它的中间变量类型可以是 StringBuilder
+    List<Type> getStateType(AggContext info);
+    
+    // 将中间变量重置为初识状态
+    // 应使用 AggResetContext.accumulator() 来引用状态变量
+    void implementReset(AggContext info, AggResetContext reset);
+    
+    // 将新增加的当前值，累加到中间变量
+    void implementAdd(AggContext info, AggAddContext add);
+    
+    // 根据中间变量计算结果值
+    Expression implementResult(AggContext info, AggResultContext result);
+}
+```
+
+* AggregateFunctionImpl 类：
+
+`AggregateFunctionImpl` 类实现了 `AggregateFunction` 和 `ImplementableAggFunction` 接口，通过私有的构造方法进行初始化，构造方法如下，`declaringClass` 表示聚合函数对应的实现类，`params` 表示聚合函数的参数，`valueTypes` 表示聚合函数参数的类型，`accumulatorType` 表示聚合器的类型，`resultType` 表示函数结果类型。
+
+`initMethod`、`addMethod`、`mergeMethod` 和 `resultMethod` 分别表示聚合函数初始化方法、累加方法、合并方法和结果方法，`isStatic` 表示 `initMethod` 是否为静态方法。
+
+```java
+private AggregateFunctionImpl(Class<?> declaringClass, List<FunctionParameter> params, List<Class<?>> valueTypes, Class<?> accumulatorType, Class<?> resultType, Method initMethod, Method addMethod, @Nullable Method mergeMethod, @Nullable Method resultMethod) {
+    this.declaringClass = declaringClass;
+    this.valueTypes = ImmutableList.copyOf(valueTypes);
+    this.parameters = params;
+    this.accumulatorType = accumulatorType;
+    this.resultType = resultType;
+    this.initMethod = requireNonNull(initMethod, "initMethod");
+    this.addMethod = requireNonNull(addMethod, "addMethod");
+    this.mergeMethod = mergeMethod;
+    this.resultMethod = resultMethod;
+    this.isStatic = isStatic(initMethod);
+    assert resultMethod != null || accumulatorType == resultType;
+}
+```
+
+由于 AggregateFunctionImpl 构造方法是私有的，通常 Calcite 内部都是通过 `create` 方法来创建 AggregateFunctionImpl 对象。
+
+TODO
+
+```java
+// 聚合函数累加器
+struct Accumulator {
+    final int sum;
+}
+
+// 聚合函数初始化方法
+Accumulator init() {
+    return new Accumulator(0);
+}
+
+// 聚合函数累加方法
+Accumulator add(Accumulator a, int x) {
+    return new Accumulator(a.sum + x);
+}
+
+// 聚合函数合并方法
+Accumulator merge(Accumulator a, Accumulator a2) {
+    return new Accumulator(a.sum + a2.sum);
+}
+
+// 聚合函数获取结果方法
+int result(Accumulator a) {
+    return a.sum;
+}
+```
+
+
 
 
 
