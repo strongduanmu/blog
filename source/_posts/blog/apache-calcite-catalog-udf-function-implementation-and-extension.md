@@ -249,7 +249,36 @@ public enum NullPolicy {
 
 ### 聚合函数
 
-聚合函数（`AggregateFunction`）是指**将多个值组合转换为标量值输出的函数**。例如：`SUM(num)` 函数，它负责将每行输入的 `num` 字段值进行累加，最终输出累加总和。Calcite 聚合函数内部包含了一个累加的过程，通过聚合函数内部的 `init` 方法进行初始化，并创建一个累加器，然后通过 `add` 方法将当前行的值添加到累加器中进行计算，使用 `merge` 方法可以将两个累加器合二为一，最后计算完成通过 `result` 方法返回结果。
+聚合函数（`AggregateFunction`）是指**将多个值组合转换为标量值输出的函数**。例如：`SUM(num)` 函数，它负责将每行输入的 `num` 字段值进行累加，最终输出累加总和。
+
+Calcite 聚合函数内部包含了一个累加过程，如下面的伪代码所示，`Accumulator` 累加器内部维护了一个 `sum` 变量，用于存储 `SUM` 函数计算的累加值。聚合函数调用 `init` 方法进行初始化，此时会创建一个累加器对象，并将 `sum` 初始化为 0，然后通过 `add` 方法将当前行的值添加到累加器中进行计算。如果有多个累加器，则可以使用 `merge` 方法将两个累加器中的值合二为一，最后计算完成可以通过 `result` 方法返回结果。
+
+```java
+// 聚合函数累加器
+struct Accumulator {
+    final int sum;
+}
+
+// 聚合函数初始化方法
+Accumulator init() {
+    return new Accumulator(0);
+}
+
+// 聚合函数累加方法
+Accumulator add(Accumulator a, int x) {
+    return new Accumulator(a.sum + x);
+}
+
+// 聚合函数合并方法
+Accumulator merge(Accumulator a, Accumulator a2) {
+    return new Accumulator(a.sum + a2.sum);
+}
+
+// 聚合函数获取结果方法
+int result(Accumulator a) {
+    return a.sum;
+}
+```
 
 下图展示了聚合函数在 Schema 对象中的继承体系，核心的实现逻辑在 `AggregateFunctionImpl` 类中，它实现了 `AggregateFunction` 和 `ImplementableAggFunction` 接口，下面我们分别来介绍下这些接口和类的作用。
 
@@ -333,34 +362,50 @@ private AggregateFunctionImpl(Class<?> declaringClass, List<FunctionParameter> p
 }
 ```
 
-由于 AggregateFunctionImpl 构造方法是私有的，通常 Calcite 内部都是通过 `create` 方法来创建 AggregateFunctionImpl 对象。
-
-TODO
+由于 AggregateFunctionImpl 构造方法是私有的，通常 Calcite 内部都是通过 `create` 方法来创建 AggregateFunctionImpl 对象，`create` 方法实现逻辑如下：
 
 ```java
-// 聚合函数累加器
-struct Accumulator {
-    final int sum;
-}
-
-// 聚合函数初始化方法
-Accumulator init() {
-    return new Accumulator(0);
-}
-
-// 聚合函数累加方法
-Accumulator add(Accumulator a, int x) {
-    return new Accumulator(a.sum + x);
-}
-
-// 聚合函数合并方法
-Accumulator merge(Accumulator a, Accumulator a2) {
-    return new Accumulator(a.sum + a2.sum);
-}
-
-// 聚合函数获取结果方法
-int result(Accumulator a) {
-    return a.sum;
+/**
+ * Creates an aggregate function, or returns null.
+ */
+public static @Nullable AggregateFunctionImpl create(Class<?> clazz) {
+    // 获取函数类中的 init 方法
+    final Method initMethod = ReflectiveFunctionBase.findMethod(clazz, "init");
+    // 获取函数类中的 add 方法
+    final Method addMethod = ReflectiveFunctionBase.findMethod(clazz, "add");
+    // merge 方法暂未实现
+    final Method mergeMethod = null; // TODO:
+    // 获取函数类中的 result 方法
+    final Method resultMethod = ReflectiveFunctionBase.findMethod(clazz, "result");
+    if (initMethod != null && addMethod != null) {
+        // A is return type of init by definition
+        final Class<?> accumulatorType = initMethod.getReturnType();
+        
+        // R is return type of result by definition
+        final Class<?> resultType = resultMethod != null ? resultMethod.getReturnType() : accumulatorType;
+        
+        // V is remaining args of add by definition
+        final List<Class> addParamTypes = ImmutableList.copyOf(addMethod.getParameterTypes());
+        if (addParamTypes.isEmpty() || addParamTypes.get(0) != accumulatorType) {
+            throw RESOURCE.firstParameterOfAdd(clazz.getName()).ex();
+        }
+        final ReflectiveFunctionBase.ParameterListBuilder params = ReflectiveFunctionBase.builder();
+        final ImmutableList.Builder<Class<?>> valueTypes = ImmutableList.builder();
+        for (int i = 1; i < addParamTypes.size(); i++) {
+            final Class type = addParamTypes.get(i);
+            final String name = ReflectUtil.getParameterName(addMethod, i);
+            final boolean optional = ReflectUtil.isParameterOptional(addMethod, i);
+            params.add(type, name, optional);
+            valueTypes.add(type);
+        }
+        
+        // A init()
+        // A add(A, V)
+        // A merge(A, A)
+        // R result(A)        
+        return new AggregateFunctionImpl(clazz, params.build(), valueTypes.build(), accumulatorType, resultType, initMethod, addMethod, mergeMethod, resultMethod);
+    }
+    return null;
 }
 ```
 
