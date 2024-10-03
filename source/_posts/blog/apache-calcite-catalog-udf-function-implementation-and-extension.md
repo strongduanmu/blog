@@ -379,26 +379,30 @@ public static @Nullable AggregateFunctionImpl create(Class<?> clazz) {
     final Method resultMethod = ReflectiveFunctionBase.findMethod(clazz, "result");
     if (initMethod != null && addMethod != null) {
         // A is return type of init by definition
+        // A 表示 init 方法的返回类型
         final Class<?> accumulatorType = initMethod.getReturnType();
-        
         // R is return type of result by definition
+        // R 表示 result 方法的返回类型
         final Class<?> resultType = resultMethod != null ? resultMethod.getReturnType() : accumulatorType;
-        
         // V is remaining args of add by definition
+        // V 表示 add 方法第一个参数之外的类型
         final List<Class> addParamTypes = ImmutableList.copyOf(addMethod.getParameterTypes());
+        // 检查 add 方法第一个参数和累加器类型是否一致
         if (addParamTypes.isEmpty() || addParamTypes.get(0) != accumulatorType) {
             throw RESOURCE.firstParameterOfAdd(clazz.getName()).ex();
         }
         final ReflectiveFunctionBase.ParameterListBuilder params = ReflectiveFunctionBase.builder();
         final ImmutableList.Builder<Class<?>> valueTypes = ImmutableList.builder();
+        // 跳过第一个构造器参数，从第二个参数开始遍历
         for (int i = 1; i < addParamTypes.size(); i++) {
             final Class type = addParamTypes.get(i);
+            // 调用 ReflectUtil 获取参数名称和参数是否可选标记，优先选择 Parameter 注解声明的信息
             final String name = ReflectUtil.getParameterName(addMethod, i);
             final boolean optional = ReflectUtil.isParameterOptional(addMethod, i);
             params.add(type, name, optional);
             valueTypes.add(type);
         }
-        
+        // 如下展示了聚合函数中的方法和类型
         // A init()
         // A add(A, V)
         // A merge(A, A)
@@ -409,11 +413,20 @@ public static @Nullable AggregateFunctionImpl create(Class<?> clazz) {
 }
 ```
 
+`create` 方法首先会从 `clazz` 类中获取 `init`、`add`、`merge` 和 `result` 对应的 Method 对象，目前 `merge` 方法仍然没有实现，`init` 和 `add` 方法是必须的，否则 `create` 方法会直接返回 null，外部调用的地方会判断是否允许函数为 null。
 
+如果 `init` 和 `add` 方法不为 null，则会从 Method 对象中获取聚合函数相关的类型及参数信息，代码中使用 A 表示 init 方法的返回类型，使用 R 表示 result 方法的返回类型，使用 V 表示 add 方法第一个参数之外的类型，并检查 add 方法中的第一个参数是否和累加器类型一致，不一致则抛出异常。
 
+然后循环 `add` 方法的参数，循环时会跳过第一个累加器参数，从第二个参数开始遍历，然后使用 `ReflectUtil` 优先从 `Parameter` 注解中获取参数名称和参数是否可选标记，循环过程中会把参数和参数类型存储在 params 和 valueTypes 中，最终所有的参数会传递给 `AggregateFunctionImpl` 私有构造方法，用于创建 AggregateFunctionImpl 对象。
 
+```java
+@Override
+public AggImplementor getImplementor(boolean windowContext) {
+    return new RexImpTable.UserDefinedAggReflectiveImplementor(this);
+}
+```
 
-TODO
+`AggregateFunctionImpl#getImplementor` 方法用于获取聚合函数实现器，参数 `windowContext` 表示当前是否是位于窗口运算中，聚合函数实现器直接调用了 `RexImpTable.UserDefinedAggReflectiveImplementor` 构造方法，并将当前的聚合函数实现类对象传递进去，实现器内部具体的逻辑，我们后文再详细分析，此处暂时跳过。
 
 ### 表函数 & 表宏
 
@@ -422,6 +435,20 @@ TODO
 下图展示了表函数和表宏在 Schema 对象中的继承体系，表函数的核心实现逻辑在 `TableFunctionImpl` 类中，它实现了 `ImplementableFunction` 和 `TableFunction` 接口，并继承了 `ReflectiveFunctionBase` 抽象类。表宏的核心实现逻辑在 `TableMarcoImpl` 类中，它实现了 `TableMarco` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，下面我们分别来介绍下这些接口和类的作用。
 
 ![表函数 & 表宏继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/table-function-marco-inherit-class.png)
+
+* TableFunction 接口：
+
+`TableFunction` 接口继承了 `Function` 接口，并在接口中声明了 `getRowType` 方法，用于表示表函数返回表的数据行类型。
+
+```java
+public interface TableFunction extends Function {
+    // 使用指定参数产生的表，表的数据行类型
+    RelDataType getRowType(RelDataTypeFactory typeFactory, List<? extends @Nullable Object> arguments);
+    
+    // 
+    Type getElementType(List<? extends @Nullable Object> arguments);
+}
+```
 
 
 
