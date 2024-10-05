@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-02 08:00:00
+updated: 2024-10-05 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -442,11 +442,65 @@ public AggImplementor getImplementor(boolean windowContext) {
 
 ```java
 public interface TableFunction extends Function {
-    // 使用指定参数产生的表，表的数据行类型
+    // 使用指定参数产生的表对应的数据行类型
     RelDataType getRowType(RelDataTypeFactory typeFactory, List<? extends @Nullable Object> arguments);
     
-    // 
+    // 获取表对应的数据行类型（Java 类型）
     Type getElementType(List<? extends @Nullable Object> arguments);
+}
+```
+
+* TableFunctionImpl 类：
+
+`TableFunctionImpl` 类实现了 `TableFunction` 和 `ImplementableFunction` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，私有构造方法允许传入函数实现的 Method 对象，以及调用实现逻辑 CallImplementor，`super(method)` 会调用 ReflectiveFunctionBase 抽象类的方法，对函数参数进行处理。
+
+```java
+private TableFunctionImpl(Method method, CallImplementor implementor) {
+    super(method);
+    this.implementor = implementor;
+}
+```
+
+私有构造方法会被 `create` 方法调用，`create` 方法会传入一个 `Class` 对象，以及函数方法名 `methodName`，根据方法名会查找 `Method` 对象，如果对象为 null，则返回 TableFunction 为 null。
+
+```java
+/**
+ * Creates a {@link TableFunctionImpl} from a class, looking for a method
+ * with a given name. Returns null if there is no such method.
+ */
+public static @Nullable TableFunction create(Class<?> clazz, String methodName) {
+    final Method method = findMethod(clazz, methodName);
+    if (method == null) {
+        return null;
+    }
+    return create(method);
+}
+```
+
+如果 `Method` 对象存在，TODO
+
+```java
+/**
+ * Creates a {@link TableFunctionImpl} from a method.
+ */
+public static @Nullable TableFunction create(final Method method) {
+    // 判断是否为非静态方法
+    if (!isStatic(method)) {
+        Class clazz = method.getDeclaringClass();
+        // 非静态方法，如果没有公有的无参构造方法，则抛出异常
+        if (!classHasPublicZeroArgsConstructor(clazz)) {
+            throw RESOURCE.requireDefaultConstructor(clazz.getName()).ex();
+        }
+    }
+    final Class<?> returnType = method.getReturnType();
+    // 如果表函数返回值不为 QueryableTable 或者 ScannableTable，则直接返回 null
+    if (!QueryableTable.class.isAssignableFrom(returnType) && !ScannableTable.class.isAssignableFrom(returnType)) {
+        return null;
+    }
+    // 创建调用实现器
+    CallImplementor implementor = createImplementor(method);
+    // 创建 TableFunctionImpl 对象
+    return new TableFunctionImpl(method, implementor);
 }
 ```
 
