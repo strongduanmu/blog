@@ -477,7 +477,7 @@ public static @Nullable TableFunction create(Class<?> clazz, String methodName) 
 }
 ```
 
-如果 `Method` 对象存在，TODO
+如果 `Method` 对象存在，则继续判断方法是否为静态，如果是非静态方法，则需要提供无参的构造方法，否则抛出异常。此外，表函数返回值需要是 `QueryableTable` 或者 `ScannableTable` 类型，否则表函数直接返回 null。`Method` 对象检查满足条件后，则调用 `createImplementor` 创建方法实现器，再调用私有的 `TableFunctionImpl` 构造方法创建表函数对象。
 
 ```java
 /**
@@ -503,12 +503,6 @@ public static @Nullable TableFunction create(final Method method) {
     return new TableFunctionImpl(method, implementor);
 }
 ```
-
-
-
-
-
-TODO
 
 ### 函数执行流程
 
