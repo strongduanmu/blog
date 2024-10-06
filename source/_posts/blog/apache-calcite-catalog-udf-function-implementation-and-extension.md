@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-05 08:00:00
+updated: 2024-10-06 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -504,9 +504,81 @@ public static @Nullable TableFunction create(final Method method) {
 }
 ```
 
+* TableMacro 接口：
+
+`TableMacro` 和 `TableFunction` 接口类似，都继承了 `Function` 接口，但是它是在编译期间进行调用，如下展示了 TableMacro 接口提供的 `apply` 方法，它可以根据传入的参数转换为 TranslatableTable，通过 `TranslatableTable#toRel` 方法，可以得到 `RelNode`。
+
+```java
+public interface TableMacro extends Function {
+    /**
+     * Applies arguments to yield a table.
+     *
+     * @param arguments Arguments
+     * @return Table
+     */
+    TranslatableTable apply(List<? extends @Nullable Object> arguments);
+}
+```
+
+* TableMacroImpl 类：
+
+`TableMacroImpl` 类实现了 `TableMacro` 接口，并继承了 `ReflectiveFunctionBase` 抽象类，私有构造方法接受一个 Method 参数，并会调用 `super(method)` 方法，处理函数参数。
+
+```java
+/**
+ * Private constructor; use {@link #create}.
+ */
+private TableMacroImpl(Method method) {
+    super(method);
+}
+```
+
+Calcite 内部通过 `create` 方法创建 `TableMacro` 对象，和 `TableFunction` 一样，在创建之前会判断方法是否为非静态方法，非静态方法必须提供公有无参构造方法。然后检查 TableMacro 函数返回值，必须为 `TranslatableTable` 类型，否则返回 null，最后调用 `TableMacroImpl` 构造方法创建表宏对象。
+
+```java
+/**
+ * Creates a {@code TableMacro} from a method.
+ */
+public static @Nullable TableMacro create(final Method method) {
+    Class clazz = method.getDeclaringClass();
+    // 非静态方法，必须提供公有无参构造方法
+    if (!isStatic(method)) {
+        if (!classHasPublicZeroArgsConstructor(clazz)) {
+            throw RESOURCE.requireDefaultConstructor(clazz.getName()).ex();
+        }
+    }
+    final Class<?> returnType = method.getReturnType();
+    // 检查表宏返回值是否为 TranslatableTable
+    if (!TranslatableTable.class.isAssignableFrom(returnType)) {
+        return null;
+    }
+    return new TableMacroImpl(method);
+}
+```
+
+TableMacroImpl 类中的 `apply` 方法负责调用 method 方法，并将参数 arguments 传递给该方法，最终会返回 `TranslatableTable` 对象。
+
+```java
+@Override
+public TranslatableTable apply(List<? extends @Nullable Object> arguments) {
+    try {
+        Object o = null;
+        if (!isStatic(method)) {
+            final Constructor<?> constructor = method.getDeclaringClass().getConstructor();
+            o = constructor.newInstance();
+        }
+        return (TranslatableTable) requireNonNull(method.invoke(o, arguments.toArray()), () -> "got null from " + method + " with arguments " + arguments);
+    } catch (IllegalArgumentException e) {
+        throw new RuntimeException("Expected " + Arrays.toString(method.getParameterTypes()) + " actual " + arguments, e);
+    } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
+        throw new RuntimeException(e);
+    }
+}
+```
+
 ### 函数执行流程
 
-我们以 CoreQuidemTest（https://github.com/julianhyde/quidem） 为例，看看 `functions.iq` 中的函数是如何执行的。
+前文我们介绍了标量函数、聚合函数、表函数和表宏中的核心类，下面我们将结合 Calcite 中的 CoreQuidemTest（该测试使用了 [quidem](https://github.com/julianhyde/quidem) 测试框架，可以像编写脚本一样编写测试程序），一起来看看 `functions.iq` 中的函数是如何执行的。
 
 TODO
 
