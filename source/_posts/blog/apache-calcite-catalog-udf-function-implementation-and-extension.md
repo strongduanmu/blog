@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-06 08:00:00
+updated: 2024-10-07 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -14,7 +14,7 @@ banner: /assets/banner/banner_9.jpg
 topic: calcite
 ---
 
-> 注意：本文基于 [Calcite main 分支 99a0df1](https://github.com/apache/calcite/commit/99a0df108a9f72805afb6d87ec5b2c0ed258f1ec) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
+> 注意：本文基于 [Calcite main 分支 60e0a3f](https://github.com/apache/calcite/commit/60e0a3f441a009e55a36cac192253a436bec3f6d) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
 
 ## 前言
 
@@ -578,7 +578,15 @@ public TranslatableTable apply(List<? extends @Nullable Object> arguments) {
 
 ### 函数执行流程
 
-前文我们介绍了标量函数、聚合函数、表函数和表宏中的核心类，下面我们将结合 Calcite 中的 CoreQuidemTest（该测试使用了 [quidem](https://github.com/julianhyde/quidem) 测试框架，可以像编写脚本一样编写测试程序），一起来看看 `functions.iq` 中的函数是如何执行的。
+前文我们介绍了标量函数、聚合函数、表函数和表宏中的核心类，下面我们将结合 Calcite 中的 CoreQuidemTest（该测试使用了 [quidem](https://github.com/julianhyde/quidem) 测试框架，可以像编写脚本一样编写测试程序），一起来看看 `functions.iq` 中的函数是如何执行的。下面的 SQL 取自 `functions.iq` 文件，它包含了 `concat_ws` 和 `cast` 两个函数，会将参数按照分隔符进行组装。
+
+```sql
+select concat_ws(',', 'a', cast(null as varchar), 'b');
+```
+
+测试程序的入口在 [QuidemTest#test](https://github.com/apache/calcite/blob/9f231cc5b91b100b6a6fbc3cd6324873529dbf49/testkit/src/main/java/org/apache/calcite/test/QuidemTest.java#L223) 方法，通过 `getPath` 获取 `functions.iq` 文件路径，然后调用 `checkRun` 中的 `new Quidem(config).execute()` 执行测试用例。我们可以在 `net/hydromatic/quidem/Quidem.java:285` 位置打断点，然后设置条件断点——`command instanceof SqlCommand && ((SqlCommand) command).sql.equalsIgnoreCase("select concat_ws(',', 'a', cast(null as varchar), 'b')")`，这样可以跟踪上面测试 SQL 的 `checkResult` 断言逻辑。
+
+
 
 TODO
 
