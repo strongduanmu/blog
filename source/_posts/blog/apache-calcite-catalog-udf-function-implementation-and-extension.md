@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-07 08:00:00
+updated: 2024-10-08 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -586,7 +586,27 @@ select concat_ws(',', 'a', cast(null as varchar), 'b');
 
 测试程序的入口在 [QuidemTest#test](https://github.com/apache/calcite/blob/9f231cc5b91b100b6a6fbc3cd6324873529dbf49/testkit/src/main/java/org/apache/calcite/test/QuidemTest.java#L223) 方法，通过 `getPath` 获取 `functions.iq` 文件路径，然后调用 `checkRun` 中的 `new Quidem(config).execute()` 执行测试用例。我们可以在 `net/hydromatic/quidem/Quidem.java:285` 位置打断点，然后设置条件断点——`command instanceof SqlCommand && ((SqlCommand) command).sql.equalsIgnoreCase("select concat_ws(',', 'a', cast(null as varchar), 'b')")`，这样可以跟踪上面测试 SQL 的 `checkResult` 断言逻辑。
 
+SQL 语句在 Calcite 中执行，首先会调用 [Avatica](https://calcite.apache.org/avatica/) 提供的 JDBC 接口，内部会对 SQL 语句进行解析，得到 SqlNode 对象。然后创建 `SqlValidator` 进行校验，校验器创建逻辑具体参考 [CalcitePrepareImpl#createSqlValidator](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L743)，首先会根据 `context.config()` 中配置的 `fun` 属性，获取对应方言中的函数或运算符，如果未配置或配置为 `standard`，则使用 `SqlStdOperatorTable.instance()` 创建 `SqlOperatorTable` 标准函数、运算符表对象。然后会将 CalciteCatalogReader 对象添加到集合中，CalciteCatalogReader 对象也实现了 SqlOperatorTable 接口，提供了 `lookupOperatorOverloads` 查找 Schema 中注册的函数和运算符。
 
+```java
+private static SqlValidator createSqlValidator(Context context, CalciteCatalogReader catalogReader, UnaryOperator<SqlValidator.Config> configTransform) {
+    // 根据 context.config() 中配置的 fun 属性，获取对应方言中的函数或运算符
+    // 未配置或配置为 standard，则使用 SqlStdOperatorTable.instance() 创建的标准函数、运算符表对象
+    final SqlOperatorTable opTab0 = context.config().fun(SqlOperatorTable.class, SqlStdOperatorTable.instance());
+    final List<SqlOperatorTable> list = new ArrayList<>();
+    list.add(opTab0);
+    // 添加 catalogReader
+    list.add(catalogReader);
+    // 组装为调用链 Chain
+    final SqlOperatorTable opTab = SqlOperatorTables.chain(list);
+    final JavaTypeFactory typeFactory = context.getTypeFactory();
+    final CalciteConnectionConfig connectionConfig = context.config();
+    final SqlValidator.Config config = configTransform.apply(SqlValidator.Config.DEFAULT.withLenientOperatorLookup(connectionConfig.lenientOperatorLookup()).withConformance(connectionConfig.conformance()).withDefaultNullCollation(connectionConfig.defaultNullCollation()).withIdentifierExpansion(true));
+    return new CalciteSqlValidator(opTab, catalogReader, typeFactory, config);
+}
+```
+
+`SqlOperatorTable` 对象实例是一个单例对象，只有在第一次执行 `ReflectiveSqlOperatorTable#init` 方法时才会创建，
 
 TODO
 
