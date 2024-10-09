@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-08 08:00:00
+updated: 2024-10-09 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -584,9 +584,52 @@ public TranslatableTable apply(List<? extends @Nullable Object> arguments) {
 select concat_ws(',', 'a', cast(null as varchar), 'b');
 ```
 
-测试程序的入口在 [QuidemTest#test](https://github.com/apache/calcite/blob/9f231cc5b91b100b6a6fbc3cd6324873529dbf49/testkit/src/main/java/org/apache/calcite/test/QuidemTest.java#L223) 方法，通过 `getPath` 获取 `functions.iq` 文件路径，然后调用 `checkRun` 中的 `new Quidem(config).execute()` 执行测试用例。我们可以在 `net/hydromatic/quidem/Quidem.java:285` 位置打断点，然后设置条件断点——`command instanceof SqlCommand && ((SqlCommand) command).sql.equalsIgnoreCase("select concat_ws(',', 'a', cast(null as varchar), 'b')")`，这样可以跟踪上面测试 SQL 的 `checkResult` 断言逻辑。
+测试程序的入口在 [QuidemTest#test](https://github.com/apache/calcite/blob/9f231cc5b91b100b6a6fbc3cd6324873529dbf49/testkit/src/main/java/org/apache/calcite/test/QuidemTest.java#L223) 方法，通过 `getPath` 获取 `functions.iq` 文件路径，然后调用 `checkRun` 中的 `new Quidem(config).execute()` 执行测试用例。我们可以在 `net/hydromatic/quidem/Quidem.java:285` 位置打断点，然后设置条件断点——`sqlCommand instanceof SqlCommand && ((SqlCommand) sqlCommand).sql.equalsIgnoreCase("select concat_ws(',', 'a', cast(null as varchar), 'b')")`，这样可以跟踪上面测试 SQL 的 `checkResult` 断言逻辑。
 
-SQL 语句在 Calcite 中执行，首先会调用 [Avatica](https://calcite.apache.org/avatica/) 提供的 JDBC 接口，内部会对 SQL 语句进行解析，得到 SqlNode 对象。然后创建 `SqlValidator` 进行校验，校验器创建逻辑具体参考 [CalcitePrepareImpl#createSqlValidator](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L743)，首先会根据 `context.config()` 中配置的 `fun` 属性，获取对应方言中的函数或运算符，如果未配置或配置为 `standard`，则使用 `SqlStdOperatorTable.instance()` 创建 `SqlOperatorTable` 标准函数、运算符表对象。然后会将 CalciteCatalogReader 对象添加到集合中，CalciteCatalogReader 对象也实现了 SqlOperatorTable 接口，提供了 `lookupOperatorOverloads` 查找 Schema 中注册的函数和运算符。
+#### CalciteSqlValidator 函数注册
+
+SQL 语句在 Calcite 中执行，首先会调用 [Avatica](https://calcite.apache.org/avatica/) 提供的 JDBC 接口，内部会对 SQL 语句进行解析，得到 SqlNode 对象。然后创建 `SqlValidator` 进行校验，校验器创建逻辑具体参考 [CalcitePrepareImpl#createSqlValidator](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L743)，首先会根据 `context.config()` 中配置的 `fun` 属性，获取对应方言中的函数或运算符，具体调用的方法是 `SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable()`，返回方言对应的函数、运算符表对象。
+
+```java
+@Override
+public <T> @PolyNull T fun(Class<T> operatorTableClass, @PolyNull T defaultOperatorTable) {
+    final String fun = CalciteConnectionProperty.FUN.wrap(properties).getString();
+    if (fun == null || fun.equals("") || fun.equals("standard")) {
+        return defaultOperatorTable;
+    }
+    // Parse the libraries
+    final List<SqlLibrary> libraryList = SqlLibrary.parse(fun);
+    // Load standard plus the specified libraries. If 'all' is among the
+    // specified libraries, it is expanded to all libraries (except standard,
+    // spatial, all).
+    final List<SqlLibrary> libraryList1 = SqlLibrary.expand(ConsList.of(SqlLibrary.STANDARD, libraryList));
+    // 根据 libraries 获取对应的 SqlLibraryOperatorTable
+    final SqlOperatorTable operatorTable = SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable(libraryList1);
+    return operatorTableClass.cast(operatorTable);
+}
+```
+
+`SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable()` 方法内部会遍历 `SqlLibraryOperators` 中的成员变量，获取类型为 `SqlOperator` 的变量，并判断 `LibraryOperator` 指定的方言和当前 `fun` 指定的方言是否一致，如果不匹配则继续比较方言继承的父类是否一致，一致则将 SqlOperator 添加到集合中，并组装为 SqlOperatorTable 返回。
+
+```java
+for (Class aClass : classes) {
+    for (Field field : aClass.getFields()) {
+        try {
+            if (SqlOperator.class.isAssignableFrom(field.getType())) {
+                final SqlOperator op = (SqlOperator) requireNonNull(field.get(this), () -> "null value of " + field + " for " + this);
+                // 判断 Library 是否一致
+                if (operatorIsInLibrary(op.getName(), field, librarySet)) {
+                    list.add(op);
+                }
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw Util.throwAsRuntime(Util.causeOrSelf(e));
+        }
+    }
+}
+```
+
+如果未配置或配置为 `standard`，则使用 `SqlStdOperatorTable.instance()` 创建 `SqlOperatorTable` 标准函数、运算符表对象。然后会将 CalciteCatalogReader 对象添加到集合中，CalciteCatalogReader 对象也实现了 SqlOperatorTable 接口，提供了 `lookupOperatorOverloads` 查找 Schema 中注册的函数和运算符。
 
 ```java
 private static SqlValidator createSqlValidator(Context context, CalciteCatalogReader catalogReader, UnaryOperator<SqlValidator.Config> configTransform) {
@@ -606,9 +649,50 @@ private static SqlValidator createSqlValidator(Context context, CalciteCatalogRe
 }
 ```
 
-`SqlOperatorTable` 对象实例是一个单例对象，只有在第一次执行 `ReflectiveSqlOperatorTable#init` 方法时才会创建，
+`SqlOperatorTable` 对象实例是一个单例对象，只有在第一次执行 `ReflectiveSqlOperatorTable#init` 方法时才会创建，`init` 方法会使用反射获取 `SqlStdOperatorTable` 类中的成员变量，遍历时会判断变量是否使用 `LibraryOperator` 注解标注，对于有注解但是没有包含 STANDARD 类型的方言函数，直接跳过。处理完成后，会将 SqlOperator 构建为 Map 结果，key 为 SqlOperator 大写名称，value 为 SqlOperator 对象，并存储到 SqlStdOperatorTable 中的 operators 对象中，方便后续使用。
 
-TODO
+```java
+public final SqlOperatorTable init() {
+    // Use reflection to register the expressions stored in public fields.
+    final List<SqlOperator> list = new ArrayList<>();
+    for (Field field : getClass().getFields()) {
+        try {
+            final Object o = field.get(this);
+            if (o instanceof SqlOperator) {
+                // Fields do not need the LibraryOperator tag, but if they have it,
+                // we index them only if they contain STANDARD library.
+                // 获取 LibraryOperator 注解，有注解但是没有 STANDARD 类型的函数为方言函数，直接跳过
+                LibraryOperator libraryOperator = field.getAnnotation(LibraryOperator.class);
+                if (libraryOperator != null) {
+                    if (Arrays.stream(libraryOperator.libraries()).noneMatch(library -> library == SqlLibrary.STANDARD)) {
+                        continue;
+                    }
+                }
+                // 标准函数大多不用 LibraryOperator 注解标记，直接添加到集合中
+                list.add((SqlOperator) o);
+            }
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            throw Util.throwAsRuntime(Util.causeOrSelf(e));
+        }
+    }
+    // 将 SqlOperator 构建为 Map 结果，key 为 SqlOperator 大写名称，value 为 SqlOperator 对象
+    // 存储到 SqlStdOperatorTable 中的 operators 对象中
+    setOperators(buildIndex(list));
+    return this;
+}
+```
+
+至此就完成了 CalciteSqlValidator 函数注册流程，函数和运算符会存储在 SqlOperatorTable 对象中，通过 `CalciteSqlValidator#getOperatorTable` 方法，可以快速获取到 SqlOperatorTable 进行函数和运算符查找。
+
+#### 函数解析和校验
+
+函数注册完成后，按照 Calcite SQL 执行的流程，会先对 SQL 语句进行解析，下图展示了 SQL 中函数解析的结果，`CONCAT_WS` 函数被解析为 `SqlUnresolvedFunction`，它表示该函数在 SQL 解析阶段无法处理，需要通过校验器从 SqlOperatorTable 中查找对应的函数，并将其改写为对应的函数类型。`CAST` 函数被解析为 `SqlCastFunction`，
+
+![函数解析结果](apache-calcite-catalog-udf-function-implementation-and-extension/function-parse-result.png)
+
+在 Parser.jj 中解析标准函数，方言函数都处理为 SqlUnresolvedFunction，然后在校验阶段转换为对应的函数对象。
+
+TODO https://stackoverflow.com/questions/73066108/calcite-does-not-return-correct-sqlkind
 
 ## UDF 函数扩展实践
 
