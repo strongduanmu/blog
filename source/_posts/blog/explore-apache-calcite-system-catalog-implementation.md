@@ -313,7 +313,7 @@ public void visit(JsonCustomSchema jsonSchema) {
     final JavaTypeFactory typeFactory = context.getTypeFactory();
   	// 初始化 CalciteCatalogReader
     CalciteCatalogReader catalogReader = new CalciteCatalogReader(context.getRootSchema(), context.getDefaultSchemaPath(), typeFactory, context.config());
-		// 创建 Planner Factory
+    // 创建 Planner Factory
   	final List<Function1<Context, RelOptPlanner>> plannerFactories = createPlannerFactories();
     RuntimeException exception = Util.FoundOne.NULL;
     for (Function1<Context, RelOptPlanner> plannerFactory : plannerFactories) {

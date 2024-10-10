@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-09 08:00:00
+updated: 2024-10-10 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -586,7 +586,7 @@ select concat_ws(',', 'a', cast(null as varchar), 'b');
 
 测试程序的入口在 [QuidemTest#test](https://github.com/apache/calcite/blob/9f231cc5b91b100b6a6fbc3cd6324873529dbf49/testkit/src/main/java/org/apache/calcite/test/QuidemTest.java#L223) 方法，通过 `getPath` 获取 `functions.iq` 文件路径，然后调用 `checkRun` 中的 `new Quidem(config).execute()` 执行测试用例。我们可以在 `net/hydromatic/quidem/Quidem.java:285` 位置打断点，然后设置条件断点——`sqlCommand instanceof SqlCommand && ((SqlCommand) sqlCommand).sql.equalsIgnoreCase("select concat_ws(',', 'a', cast(null as varchar), 'b')")`，这样可以跟踪上面测试 SQL 的 `checkResult` 断言逻辑。
 
-#### CalciteSqlValidator 函数注册
+#### SqlValidator 函数注册
 
 SQL 语句在 Calcite 中执行，首先会调用 [Avatica](https://calcite.apache.org/avatica/) 提供的 JDBC 接口，内部会对 SQL 语句进行解析，得到 SqlNode 对象。然后创建 `SqlValidator` 进行校验，校验器创建逻辑具体参考 [CalcitePrepareImpl#createSqlValidator](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/prepare/CalcitePrepareImpl.java#L743)，首先会根据 `context.config()` 中配置的 `fun` 属性，获取对应方言中的函数或运算符，具体调用的方法是 `SqlLibraryOperatorTableFactory.INSTANCE.getOperatorTable()`，返回方言对应的函数、运算符表对象。
 
@@ -686,13 +686,76 @@ public final SqlOperatorTable init() {
 
 #### 函数解析和校验
 
-函数注册完成后，按照 Calcite SQL 执行的流程，会先对 SQL 语句进行解析，下图展示了 SQL 中函数解析的结果，`CONCAT_WS` 函数被解析为 `SqlUnresolvedFunction`，它表示该函数在 SQL 解析阶段无法处理，需要通过校验器从 SqlOperatorTable 中查找对应的函数，并将其改写为对应的函数类型。`CAST` 函数被解析为 `SqlCastFunction`，
+函数注册完成后，按照 Calcite SQL 执行的流程，会先对 SQL 语句进行解析，下图展示了 SQL 中函数解析的结果，`CONCAT_WS` 函数被解析为 `SqlUnresolvedFunction`，它表示该函数在 SQL 解析阶段无法处理，需要通过校验器从 SqlOperatorTable 中查找对应的函数，并将其改写为对应的函数类型，`CAST` 函数被解析为 `SqlCastFunction`，在后续的校验阶段无需再进行处理。
 
 ![函数解析结果](apache-calcite-catalog-udf-function-implementation-and-extension/function-parse-result.png)
 
-在 Parser.jj 中解析标准函数，方言函数都处理为 SqlUnresolvedFunction，然后在校验阶段转换为对应的函数对象。
+那么，哪些函数会被解析为 `SqlUnresolvedFunction` 类型呢？根据 Julian 在 [Calcite does not return correct SqlKind](https://stackoverflow.com/questions/73066108/calcite-does-not-return-correct-sqlkind) 中的回答，所有函数在解析阶段都会被处理为 SqlUnresolvedFunction 类型，这样能够保持解析器简单、高效、可预测，在 Calcite 校验阶段，会从 SqlOperatorTable 中查找函数，并将 SqlUnresolvedFunction 转换为具体的 Function 对象。
 
-TODO https://stackoverflow.com/questions/73066108/calcite-does-not-return-correct-sqlkind
+但是实际上，从 Calcite `Parser.jj` 文件来看，不论是标准函数，还是方言函数，都有直接处理为具体 Function 对象的情况，SqlUnresolvedFunction 只是作为最后的处理方式。此外，SqlUnresolvedFunction 也适用于自定义函数场景，这些自定义函数，在 SQL 解析时是无法知道具体的函数对象。
+
+完成 SQL 解析后，Calcite 会调用校验器对 SqlNode 语法树进行校验，参考[深度探究 Apache Calcite SQL 校验器实现原理](https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html#performunconditionalrewrites)一文，我们知道，在校验阶段执行 `performUnconditionalRewrites` 方法时，会判断当前运算符是否为 `SqlUnresolvedFunction`，如果是则调用 `SqlOperatorTable#lookupOperatorOverloads` 方法，从 SqlOperatorTable 中查找函数，查找的范围包括内置函数以及元数据中注册的函数，然后替换 SqlNode 中的函数对象。
+
+```java
+// 判断当前 SqlNode 是否为 SqlCall
+if (node instanceof SqlCall) {
+    ...
+    SqlCall call = (SqlCall) node;
+    // 获取 SqlKind 类型
+    final SqlKind kind = call.getKind();
+    // 获取 SqlNode 中包含的运算符
+    final List<SqlNode> operands = call.getOperandList();
+    for (int i = 0; i < operands.size(); i++) {
+        SqlNode operand = operands.get(i);
+        ...
+        // 每一个运算法调用 performUnconditionalRewrites 并设置到 SqlCall 中
+        SqlNode newOperand = performUnconditionalRewrites(operand, childUnderFrom);
+        if (newOperand != null && newOperand != operand) {
+            call.setOperand(i, newOperand);
+        }
+    }
+
+    // 当前运算符为未解析函数 SqlUnresolvedFunction
+    if (call.getOperator() instanceof SqlUnresolvedFunction) {
+        final SqlUnresolvedFunction function = (SqlUnresolvedFunction) call.getOperator();
+        final List<SqlOperator> overloads = new ArrayList<>();
+        // 从 SqlOperatorTable 中查找函数，查找的范围包括内置函数以及元数据中注册的函数
+        opTab.lookupOperatorOverloads(function.getNameAsId(), function.getFunctionType(), SqlSyntax.FUNCTION, overloads, catalogReader.nameMatcher());
+        if (overloads.size() == 1) {
+          	// 查找到函数则设置新的运算符
+            ((SqlBasicCall) call).setOperator(overloads.get(0));
+        }
+    }
+}
+```
+
+校验完成后，可以看到 `SqlUnresolvedFunction` 被替换为 `SqlBasicFunction`，它是 SqlFunction 类的一个具体实现，主要用来处理常规的函数格式，例如：`NVL(value, value)`、`LENGTH(string)`、`LTRIM(string)` 等。而 `CAST(NULL AS VARCHAR)` 由于包含了类型信息，SqlBasicFunction 无法处理，因此需要额外定义一个 `SqlCastFunction`。
+
+![检验后的 SqlNode](apache-calcite-catalog-udf-function-implementation-and-extension/validated-sql-node.png)
+
+刚好聊到 `SqlFunction` 对象，我们结合下图，一起来看看 `SqlOperator` 和 `SqlFunction` 继承体系。下图展示了部分 SqlFunction 实现类，除了我们刚刚介绍的 `SqlBasicFunction`、`SqlCastFunction` 和 `SqlUnresolvedFunction` 外，还有 `SqlUserDefinedFunction`、`SqlUserDefinedAggFunction`、`SqlUserDefinedTableFunction` 和 `SqlUserDefinedTableMacro`，他们用于处理用户自定义的函数。
+
+![SqlOperator & SqlFunction 继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/sql-operator-function-inherited-class.png)
+
+* SqlOperator 抽象类：
+
+
+
+TODO
+
+#### SQL 优化和函数执行
+
+```
+LogicalProject(EXPR$0=[CONCAT_WS(',', 'a', null:VARCHAR, 'b')])
+  LogicalValues(tuples=[[{ 0 }]])
+
+EnumerableCalc(expr#0=[{inputs}], expr#1=[','], expr#2=['a'], expr#3=[null:VARCHAR], expr#4=['b'], expr#5=[CONCAT_WS($t1, $t2, $t3, $t4)], EXPR$0=[$t5])
+  EnumerableValues(tuples=[[{ 0 }]])
+```
+
+
+
+TODO
 
 ## UDF 函数扩展实践
 
