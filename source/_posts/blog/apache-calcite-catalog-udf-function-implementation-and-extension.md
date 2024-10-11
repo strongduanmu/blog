@@ -739,6 +739,84 @@ if (node instanceof SqlCall) {
 
 * SqlOperator 抽象类：
 
+`SqlOperator` 代表了 SQL 运算符，具体包括函数、运算符（例如：`=`）和语法结构（例如：`CASE` 语句），运算符可以表示查询级表达式（例如：`SqlSelectOperator`），也可以表示行级表达式（例如：`SqlBetweenOperator`）。
+
+SqlOperator 不是 SQL 解析树中的 SqlNode 节点，它具体表示了 SqlNode 所对应的运算符类型。运算符中通常包含了若干个操作数，例如：除法运算符中包含两个操作数，分别是分子和分母，而在 SqlFunction 函数中，参数则是操作数。
+
+如下展示了 SqlOperator 抽象类的核心字段和方法，包含了 `name`、`kind` 等表示名称、类型的基础字段，以及用于区分计算优先级的 `leftPrec` 和 `rightPrec`，此外，还包含了 `returnTypeInference`、`operandTypeInference` 字段，分别用于推断返回类型、操作数类型。
+
+```java
+public abstract class SqlOperator {
+    // 运算符/函数名称
+    private final String name;
+    // SqlNode 类型，例如：EQUALS，可以使用 exp.isA(EQUALS) 判断
+    public final SqlKind kind;
+    // 运算符绑定到左侧表达式的优先级，如果运算符是左结合，则此优先级低于右侧优先级
+    private final int leftPrec;
+    // 运算符绑定到右侧表达式的优先级，如果运算符是左结合，则此优先级高于右侧优先级
+    private final int rightPrec;
+    // 推断运算符调用后的返回类型
+    private final @Nullable SqlReturnTypeInference returnTypeInference;
+    // 推断操作数的类型
+    private final @Nullable SqlOperandTypeInference operandTypeInference;
+    // 用于校验操作数类型
+    private final @Nullable SqlOperandTypeChecker operandTypeChecker;
+    // 返回运算符的语法类型
+    public abstract SqlSyntax getSyntax();
+    // 推断运算符调用后的返回类型，仅在操作数的数量和类型校验后调用
+    public RelDataType inferReturnType(SqlOperatorBinding opBinding) {...}
+}
+```
+
+* SqlFunction 类：
+
+`SqlFunction` 继承了 `SqlOperator`，是用来表示函数调用语法的运算符，SqlFunction 中额外维护了 `category` 和 `sqlIdentifier` 字段，category 表示函数的分类，主要包括：`STRING`、`NUMERIC`、`TIMEDATE`、`SYSTEM` 等函数类型，完整函数类型可查看 [SqlFunctionCategory](https://github.com/apache/calcite/blob/edbd35acf76dbd44cc148f036d0d02cbe2105c81/core/src/main/java/org/apache/calcite/sql/SqlFunctionCategory.java#L33)，sqlIdentifier 表示函数的全限定名称，内置函数为 `null`。
+
+```java
+public class SqlFunction extends SqlOperator {
+    // SQL 函数分类
+    private final SqlFunctionCategory category;
+    // 函数的全限定名称，内置函数为 null
+    private final @Nullable SqlIdentifier sqlIdentifier;
+    
+    protected SqlFunction(String name, @Nullable SqlIdentifier sqlIdentifier, SqlKind kind, @Nullable SqlReturnTypeInference returnTypeInference, @Nullable SqlOperandTypeInference operandTypeInference, @Nullable SqlOperandTypeChecker operandTypeChecker, SqlFunctionCategory category) {
+        // SqlFunction 默认传递给父类 SqlOperator 的 leftPrec 和 rightPrec 为 100
+        super(name, kind, 100, 100, returnTypeInference, operandTypeInference, operandTypeChecker);
+        this.sqlIdentifier = sqlIdentifier;
+        this.category = requireNonNull(category, "category");
+    }
+    
+    // 获取语法类型，SqlSyntax.FUNCTION 表示 Foo(x, y) 格式的函数
+    @Override
+    public SqlSyntax getSyntax() {
+        return SqlSyntax.FUNCTION;
+    }
+}
+```
+
+* SqlBasicFunction 类：
+
+`SqlBasicFunction` 类继承了 `SqlFunction`，它是常规函数（例如：`NVL(value, value)`、`LENGTH(string)`、`LTRIM(string)`）的具体实现类，由于该类字段都是 `final` 类型，因此 SqlFunction 对象是不可变的，只允许通过 `with` 方法修改字段，然后创建一个新的对象。
+
+
+
+```java
+public class SqlBasicFunction extends SqlFunction {
+    
+    private final SqlSyntax syntax;
+    
+    private final boolean deterministic;
+    
+    private final SqlOperandHandler operandHandler;
+    
+    private final int callValidator;
+    
+    private final Function<SqlOperatorBinding, SqlMonotonicity> monotonicityInference;
+    
+    private final boolean dynamic;
+}
+```
+
 
 
 TODO
