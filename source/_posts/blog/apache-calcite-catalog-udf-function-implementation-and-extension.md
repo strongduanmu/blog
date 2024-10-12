@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-10 08:00:00
+updated: 2024-10-12 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -798,28 +798,88 @@ public class SqlFunction extends SqlOperator {
 
 `SqlBasicFunction` 类继承了 `SqlFunction`，它是常规函数（例如：`NVL(value, value)`、`LENGTH(string)`、`LTRIM(string)`）的具体实现类，由于该类字段都是 `final` 类型，因此 SqlFunction 对象是不可变的，只允许通过 `with` 方法修改字段，然后创建一个新的对象。
 
-
+SqlBasicFunction 字段中记录了 SqlSyntax，允许注册不同类型的函数语法，全部语法类型可以参考 [SqlSyntax](https://github.com/apache/calcite/blob/db60219198442f2c60345fda95a117d379d87a61/core/src/main/java/org/apache/calcite/sql/SqlSyntax.java#L28)。此外，还提供了 `deterministic` 和 `dynamic` 两个属性，`deterministic` 表示是否是确定函数，即：是否传入相同操作数时返回相同结果，默认为 true，`dynamic` 则表示是否是动态函数，即：是否传入相同操作数时返回不同结果，默认为 false，动态函数不能被缓存。`monotonicityInference` 是一个函数式接口，用于推测函数单调性的策略，入参是 SqlOperatorBinding，表示 SqlOperator 与操作数之间的绑定关系，出参则是 [SqlMonotonicity](https://github.com/apache/calcite/blob/571731b80a58eb095ebac7123285c375e7afff90/core/src/main/java/org/apache/calcite/sql/validate/SqlMonotonicity.java#L22)，表示 SQL 中值的单调性。
 
 ```java
 public class SqlBasicFunction extends SqlFunction {
-    
+    // 语法类型，可以使用 withSyntax 修改
     private final SqlSyntax syntax;
-    
+    // 是否是确定函数，即：是否传入相同操作数时返回相同结果，默认为 true
     private final boolean deterministic;
-    
+    // 操作数处理器
     private final SqlOperandHandler operandHandler;
-    
+    // 校验调用的策略，目前没有发现使用场景
     private final int callValidator;
-    
+    // 推断函数单调性的策略
+    // 入参是 SqlOperatorBinding，表示 SqlOperator 与操作数之间的绑定关系
+    // 出参是 SqlMonotonicity，表示 SQL 中值的单调性
     private final Function<SqlOperatorBinding, SqlMonotonicity> monotonicityInference;
-    
+    // 是否是动态函数，即：是否传入相同操作数时返回不同结果，默认为 false，动态函数不能被缓存
     private final boolean dynamic;
 }
 ```
 
+* SqlCastFunction 类：
 
+`SqlCastFunction` 类和 `SqlBasicFunction` 平级，都继承了 `SqlFunction`，它表示了常规函数之外的特殊函数，此处表示 `CAST(NULL AS VARCHAR)` 函数，其他特殊函数也有相应的函数类表示。
 
-TODO
+如下展示了 SqlCastFunction 中的核心方法，`getSignatureTemplate` 方法会返回一个模板，描述如何构建运算符签名，以 CAST 函数为例，`{0}` 表示运算符 CAST，`{1}`、`{2}`、`{3}` 是操作数。`getSyntax` 方法此处返回的是 `SqlSyntax.SPECIAL` 语法类型，它表示特殊语法，例如：CASE、CAST 运算符。`getMonotonicity` 方法用于获取函数的单调性，会根据函数操作数中配置的排序规则进行比较，如果排序规则的比较器不同，则返回 NOT_MONOTONIC，如果操作数的类型族包含在 `nonMonotonicCasts` 中，同样会返回 NOT_MONOTONIC 单调性，如果都不满足，则会返回第一个操作数的单调性。
+
+```java
+public class SqlCastFunction extends SqlFunction {
+    
+    // 所有不保持单调性的类型转换映射，getMonotonicity 方法根据 map 判断，包含在其中的，则返回 NOT_MONOTONIC
+    private final SetMultimap<SqlTypeFamily, SqlTypeFamily> nonMonotonicCasts = ImmutableSetMultimap.<SqlTypeFamily, SqlTypeFamily>builder().put(SqlTypeFamily.EXACT_NUMERIC, SqlTypeFamily.CHARACTER).put(SqlTypeFamily.NUMERIC, SqlTypeFamily.CHARACTER).put(SqlTypeFamily.APPROXIMATE_NUMERIC, SqlTypeFamily.CHARACTER).put(SqlTypeFamily.DATETIME_INTERVAL, SqlTypeFamily.CHARACTER).put(SqlTypeFamily.CHARACTER, SqlTypeFamily.EXACT_NUMERIC).put(SqlTypeFamily.CHARACTER, SqlTypeFamily.NUMERIC).put(SqlTypeFamily.CHARACTER, SqlTypeFamily.APPROXIMATE_NUMERIC).put(SqlTypeFamily.CHARACTER, SqlTypeFamily.DATETIME_INTERVAL).put(SqlTypeFamily.DATETIME, SqlTypeFamily.TIME).put(SqlTypeFamily.TIMESTAMP, SqlTypeFamily.TIME).put(SqlTypeFamily.TIME, SqlTypeFamily.DATETIME).put(SqlTypeFamily.TIME, SqlTypeFamily.TIMESTAMP).build();
+    
+    // 构造方法传入 name 和 kind，SAFE_CAST 和 CAST 类似，它转换失败时会返回 NULL，而不是异常
+    public SqlCastFunction(String name, SqlKind kind) {
+        super(name, kind, returnTypeInference(kind == SqlKind.SAFE_CAST), InferTypes.FIRST_KNOWN, null, SqlFunctionCategory.SYSTEM);
+        checkArgument(kind == SqlKind.CAST || kind == SqlKind.SAFE_CAST, kind);
+    }
+    
+    // 返回一个模板，描述如何构建运算符签名，以 CAST 函数为例，{0} 表示运算符 CAST，{1}、{2}、{3} 是操作数
+    @Override
+    public String getSignatureTemplate(final int operandsCount) {
+        assert operandsCount <= 3;
+        return "{0}({1} AS {2} [FORMAT {3}])";
+    }
+    
+    // 获取语法类型，SqlSyntax.SPECIAL 表示特殊语法，例如：CASE、CAST 运算符
+    @Override
+    public SqlSyntax getSyntax() {
+        return SqlSyntax.SPECIAL;
+    }
+    
+    @Override
+    public SqlMonotonicity getMonotonicity(SqlOperatorBinding call) {
+        // 获取第一个操作数类型，CAST 原始类型
+        final RelDataType castFromType = call.getOperandType(0);
+        // 获取第一个操作数类型族
+        final RelDataTypeFamily castFromFamily = castFromType.getFamily();
+        // 获取第一个操作数排序规则对应的排序器
+        final Collator castFromCollator = castFromType.getCollation() == null ? null : castFromType.getCollation().getCollator();
+        // 获取第二个操作数类型，CAST 目标类型
+        final RelDataType castToType = call.getOperandType(1);
+        // 获取第二个操作数类型族
+        final RelDataTypeFamily castToFamily = castToType.getFamily();
+        // 获取第二个操作数排序规则对应的排序器
+        final Collator castToCollator = castToType.getCollation() == null ? null : castToType.getCollation().getCollator();
+        // 如果两个操作数的排序器不同，则返回 NOT_MONOTONIC
+        if (!Objects.equals(castFromCollator, castToCollator)) {
+            // Cast between types compared with different collators: not monotonic.
+            return SqlMonotonicity.NOT_MONOTONIC;
+            // 如果两个操作数的类型族包含在 nonMonotonicCasts 中，则返回 NOT_MONOTONIC
+        } else if (castFromFamily instanceof SqlTypeFamily && castToFamily instanceof SqlTypeFamily && nonMonotonicCasts.containsEntry(castFromFamily, castToFamily)) {
+            return SqlMonotonicity.NOT_MONOTONIC;
+        } else {
+            // 否则返回第一个操作数的单调性策略
+            return call.getOperandMonotonicity(0);
+        }
+    }
+}
+```
+
+除了以上介绍的 `SqlOperator`、`SqlFunction`、`SqlBasicFunction` 以及 `SqlCastFunction`，其他的函数运算符，大家可以根据兴趣进行探索，本文就不再一一介绍，下面的小节，我们将继续跟踪函数语句的执行。
 
 #### SQL 优化和函数执行
 
