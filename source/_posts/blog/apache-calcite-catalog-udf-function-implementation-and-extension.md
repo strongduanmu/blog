@@ -956,6 +956,77 @@ EnumerableCalc(expr#0=[{inputs}], expr#1=[','], expr#2=['a'], expr#3=[null:VARCH
   EnumerableValues(tuples=[[{ 0 }]])
 ```
 
+由于 Calcite JDBC 默认使用 `Enumerable` 调用约定，生成的物理运算符都是 `EnumerableRel`，调用 `implement` 方法执行时，会调用 `EnumerableInterpretable.toBindable()` 方法生成 `Bindable` 对象，[Bindable](https://github.com/apache/calcite/blob/571731b80a58eb095ebac7123285c375e7afff90/core/src/main/java/org/apache/calcite/runtime/Bindable.java#L27) 类可以绑定 DataContext 生成 Enumerable 进行执行。`EnumerableInterpretable.toBindable()` 方法实现逻辑如下，它会调用 `implementRoot` 生成执行代码，然后使用 Janio 将代码库编译为 Bindable 实现类。
+
+```java
+public static Bindable toBindable(Map<String, Object> parameters, CalcitePrepare.@Nullable SparkHandler spark, EnumerableRel rel, EnumerableRel.Prefer prefer) {
+    EnumerableRelImplementor relImplementor = new EnumerableRelImplementor(rel.getCluster().getRexBuilder(), parameters);
+    // 调用 implementRoot 生成执行代码
+    final ClassDeclaration expr = relImplementor.implementRoot(rel, prefer);
+    String s = Expressions.toString(expr.memberDeclarations, "\n", false);
+    try {
+        if (spark != null && spark.enabled()) {
+            return spark.compile(expr, s);
+        } else {
+            // 使用 Janio 编译代码为 Bindable 实现类
+            return getBindable(expr, s, rel.getRowType().getFieldCount());
+        }
+    } catch (Exception e) {
+        throw Helper.INSTANCE.wrap("Error while compiling generated Java code:\n" + s, e);
+    }
+}
+```
+
+`implementRoot` 方法根据物理计划树进行遍历，首先调用 `EnumerableValues#implement()` 方法，生成的代码如下：
+
+```java
+{
+  return org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
+      0});
+}
+```
+
+然后会回到 `EnumerableCalc#implement` 继续执行，EnumerableValues 生成的结果会作为 EnumerableCalc 执行代码的一部分，生成的代码如下。对于函数的调用逻辑位于 `current()` 方法中，`CONCAT_WS` 函数会调用 `SqlFunctions.concatMultiWithSeparator()` 方法，并将 SQL 中的参数传递给函数方法。`CAST` 函数由于入参为 `null`，因此无需调用具体的函数，可以直接执行 `(String) null` 进行转换。
+
+函数执行代码生成：RexToLixTranslator#translateList
+
+org/apache/calcite/adapter/enumerable/RexToLixTranslator.java:1315
+
+```java
+{
+  final org.apache.calcite.linq4j.Enumerable _inputEnumerable = org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
+    0});
+  return new org.apache.calcite.linq4j.AbstractEnumerable(){
+      public org.apache.calcite.linq4j.Enumerator<String> enumerator() {
+        return new org.apache.calcite.linq4j.Enumerator<String>(){
+            public final org.apache.calcite.linq4j.Enumerator<int> inputEnumerator = _inputEnumerable.enumerator();
+            public void reset() {
+              inputEnumerator.reset();
+            }
+
+            public boolean moveNext() {
+              return inputEnumerator.moveNext();
+            }
+
+            public void close() {
+              inputEnumerator.close();
+            }
+
+            public Object current() {
+              return org.apache.calcite.runtime.SqlFunctions.concatMultiWithSeparator(new String[] {
+                  ",",
+                  "a",
+                  (String) null,
+                  "b"});
+            }
+
+          };
+      }
+
+    };
+}
+```
+
 
 
 TODO
