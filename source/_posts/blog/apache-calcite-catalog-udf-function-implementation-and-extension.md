@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-12 08:00:00
+updated: 2024-10-13 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -883,10 +883,75 @@ public class SqlCastFunction extends SqlFunction {
 
 #### SQL 优化和函数执行
 
+完成 SQL 语句的解析和校验后，我们就得到了一个包含不同 SqlFunction 运算符的 SqlNode 语法树，Caclite JDBC 流程会调用 `sqlToRelConverter.convertQuery(sqlQuery, needsValidation, true)`，将 SqlNode 转换为关系代数表达式 RelNode。
+
+由于示例 SQL 中的函数位于投影列中，因此我们只需要关注 Projection 转换逻辑即可，下面展示了 `SqlToRelConverter#convertSelectList` 的部分转换逻辑，投影列会调用 [Blackboard](https://github.com/apache/calcite/blob/98b252b36c84c4715c5bbe8c8a65355c103b3f9e/core/src/main/java/org/apache/calcite/sql2rel/SqlToRelConverter.java#L5116) 对象的 `convertExpression` 方法，该类实现了 `SqlVisitor` 接口，可以用于遍历 AST 处理对应 SqlNode 转换。
+
+```java
+// Project select clause.
+int i = -1;
+for (SqlNode expr : selectList) {
+    ++i;
+    final SqlNode measure = SqlValidatorUtil.getMeasure(expr);
+    final RexNode e;
+    if (measure != null) {
+        ...
+    } else {
+        // 调用 Blackboard 对象 convertExpression 方法，该类实现了 SqlVisitor，用于遍历 AST 处理对应 SqlCall 转换
+        e = bb.convertExpression(expr);
+    }
+    exprs.add(e);
+    fieldNames.add(deriveAlias(expr, aliases, i));
+}
+```
+
+由于 `expr` 是一个 `SqlBasicCall`，遍历语法树时会调用 `visit(SqlCall call)` 方法，该方法内部会调用 `exprConverter.convertCall` 方法，exprConverter 对应的类是 `SqlNodeToRexConverter` 用于将 SqlNode 转换为 `RexNode` 行表达式。
+
+```java
+public RexNode visit (SqlCall call){
+    if (agg != null) {
+        final SqlOperator op = call.getOperator();
+        if (window == null && (op.isAggregator() || op.getKind() == SqlKind.FILTER || op.getKind() == SqlKind.WITHIN_DISTINCT || op.getKind() == SqlKind.WITHIN_GROUP)) {
+            return requireNonNull(agg.lookupAggregates(call), () -> "agg.lookupAggregates for call " + call);
+        }
+    }
+    // 调用 SqlNodeToRexConverter#convertCall 方法，SqlNodeToRexConverter 用于将 SqlNode 转换为 RexNode 行表达式
+    return exprConverter.convertCall(this, new SqlCallBinding(validator(), scope, call).permutedCall());
+}
+```
+
+`SqlNodeToRexConverter#convertCall` 内部则是调用 `convertletTable` 获取 `SqlRexConvertlet`，然后调用 `SqlRexConvertlet#convertCall` 转换为 RexNode。
+
+![convertletTable 内部 map 维护的 SqlFunction 映射](apache-calcite-catalog-udf-function-implementation-and-extension/convertlet_table_map.png)
+
+`SqlRexConvertlet#convertCall` 通过反射调用 `StandardConvertletTable#convertFunction` 方法，`CONCAT_WS` 函数就会调用该方法进行转换，`CAST` 函数则会调用 `StandardConvertletTable#convertCast` 方法。Calcite 支持的运算符、函数转换逻辑，可以参考 [StandardConvertletTable](https://github.com/strongduanmu/calcite/blob/c8cb56525dbc908da4a9081f062d87adfe27ab80/core/src/main/java/org/apache/calcite/sql2rel/StandardConvertletTable.java#L120) 构造方法。
+
+```java
+public RexNode convertFunction(SqlRexContext cx, SqlFunction fun, SqlCall call) {
+    // 转换操作数为 RexNode
+    final List<RexNode> exprs = convertOperands(cx, call, SqlOperandTypeChecker.Consistency.NONE);
+    if (fun.getFunctionType() == SqlFunctionCategory.USER_DEFINED_CONSTRUCTOR) {
+        return makeConstructorCall(cx, fun, exprs);
+    }
+    RelDataType returnType = cx.getValidator().getValidatedNodeTypeIfKnown(call);
+    if (returnType == null) {
+        returnType = cx.getRexBuilder().deriveReturnType(fun, exprs);
+    }
+    // 调用 RexBuilder#makeCall 转换
+    return cx.getRexBuilder().makeCall(call.getParserPosition(), returnType, fun, exprs);
+}
+```
+
+转换完成后，我们就得到了逻辑执行计划树 `RelNode Tree`，通过 `RelOptUtil.toString()` 方法输出，可以得到如下结构，`CONCAT_WS` 函数被转换为 `LogicalProject(EXPR$0=[CONCAT_WS(',', 'a', null:VARCHAR, 'b')])`，而 `CAST` 函数则转换为 `null:VARCHAR`。
+
 ```
 LogicalProject(EXPR$0=[CONCAT_WS(',', 'a', null:VARCHAR, 'b')])
   LogicalValues(tuples=[[{ 0 }]])
+```
 
+经过 Calcite 优化后，逻辑执行计划会被转换为物理执行计划，如下展示了逻辑执行计划的结构，`CONCAT_WS` 被转换为 `expr#5=[CONCAT_WS($t1, $t2, $t3, $t4)`，`CAST` 函数被转换为 `expr#3=[null:VARCHAR]`。
+
+```
 EnumerableCalc(expr#0=[{inputs}], expr#1=[','], expr#2=['a'], expr#3=[null:VARCHAR], expr#4=['b'], expr#5=[CONCAT_WS($t1, $t2, $t3, $t4)], EXPR$0=[$t5])
   EnumerableValues(tuples=[[{ 0 }]])
 ```
