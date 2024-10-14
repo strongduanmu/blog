@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-13 08:00:00
+updated: 2024-10-14 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -956,7 +956,7 @@ EnumerableCalc(expr#0=[{inputs}], expr#1=[','], expr#2=['a'], expr#3=[null:VARCH
   EnumerableValues(tuples=[[{ 0 }]])
 ```
 
-由于 Calcite JDBC 默认使用 `Enumerable` 调用约定，生成的物理运算符都是 `EnumerableRel`，调用 `implement` 方法执行时，会调用 `EnumerableInterpretable.toBindable()` 方法生成 `Bindable` 对象，[Bindable](https://github.com/apache/calcite/blob/571731b80a58eb095ebac7123285c375e7afff90/core/src/main/java/org/apache/calcite/runtime/Bindable.java#L27) 类可以绑定 DataContext 生成 Enumerable 进行执行。`EnumerableInterpretable.toBindable()` 方法实现逻辑如下，它会调用 `implementRoot` 生成执行代码，然后使用 Janio 将代码库编译为 Bindable 实现类。
+由于 Calcite JDBC 默认使用 `Enumerable` 调用约定，生成的物理运算符都是 `EnumerableRel`，调用 `implement` 方法执行时，会调用 `EnumerableInterpretable#toBindable` 方法生成 `Bindable` 对象，[Bindable](https://github.com/apache/calcite/blob/571731b80a58eb095ebac7123285c375e7afff90/core/src/main/java/org/apache/calcite/runtime/Bindable.java#L27) 类可以绑定 DataContext 生成 Enumerable 进行执行。`EnumerableInterpretable#toBindable` 方法实现逻辑如下，它会调用 `implementRoot` 生成执行代码，然后使用 Janio 将代码库编译为 Bindable 实现类。
 
 ```java
 public static Bindable toBindable(Map<String, Object> parameters, CalcitePrepare.@Nullable SparkHandler spark, EnumerableRel rel, EnumerableRel.Prefer prefer) {
@@ -977,7 +977,7 @@ public static Bindable toBindable(Map<String, Object> parameters, CalcitePrepare
 }
 ```
 
-`implementRoot` 方法根据物理计划树进行遍历，首先调用 `EnumerableValues#implement()` 方法，生成的代码如下：
+`implementRoot` 方法根据物理计划树进行遍历，首先调用 `EnumerableValues#implement` 方法，生成的代码如下：
 
 ```java
 {
@@ -986,20 +986,94 @@ public static Bindable toBindable(Map<String, Object> parameters, CalcitePrepare
 }
 ```
 
-然后会回到 `EnumerableCalc#implement` 继续执行，EnumerableValues 生成的结果会作为 EnumerableCalc 执行代码的一部分，生成的代码如下。对于函数的调用逻辑位于 `current()` 方法中，`CONCAT_WS` 函数会调用 `SqlFunctions.concatMultiWithSeparator()` 方法，并将 SQL 中的参数传递给函数方法。`CAST` 函数由于入参为 `null`，因此无需调用具体的函数，可以直接执行 `(String) null` 进行转换。
-
-函数执行代码生成：RexToLixTranslator#translateList
-
-org/apache/calcite/adapter/enumerable/RexToLixTranslator.java:1315
+然后会回到 `EnumerableCalc#implement` 继续执行，EnumerableValues 生成的结果会作为 EnumerableCalc 执行代码的一部分，EnumerableCalc 核心生成投影列函数执行代码的逻辑如下，会调用 `RexToLixTranslator#translateProjects` 方法进行转换：
 
 ```java
-{
+// EnumerableValues#implement() 方法
+List<Expression> expressions = RexToLixTranslator.translateProjects(program, typeFactory, conformance, builder3, null, physType, DataContext.ROOT, new RexToLixTranslator.InputGetterImpl(input, result.physType), implementor.allCorrelateVariables);
+builder3.add(Expressions.return_(null, physType.record(expressions)));
+```
+
+`RexToLixTranslator#translateProjects` 内部则会继续调用 `RexToLixTranslator#translateList` 方法，translateList 方法会遍历运算符的操作数，此案例中操作数对象为 `RexLocalRef` 类型，内容为 `$t5`，表示引用 `expr#5=[CONCAT_WS($t1, $t2, $t3, $t4)]`，获取到 RexNode 后，会继续内部的调用 translate 方法，该方法内会使用 RexToLixTranslator（实现了 [RexVisitor](https://github.com/apache/calcite/blob/6f64865eb8c71a65bde60a19de2de42775fae4ed/core/src/main/java/org/apache/calcite/rex/RexVisitor.java#L33) 接口）访问 RexNode，该方法会访问 `RexToLixTranslator#visitLocalRef` 方法。
+
+```java
+public List<Expression> translateList(List<? extends RexNode> operandList, @Nullable List<? extends @Nullable Type> storageTypes) {
+    final List<Expression> list = new ArrayList<>(operandList.size());
+    // 遍历投影列操作数
+    for (int i = 0; i < operandList.size(); i++) {
+        // 返回 RexLocalRef 类型，内容为 $t5，表示引用 expr#5=[CONCAT_WS($t1, $t2, $t3, $t4)]
+        RexNode rex = operandList.get(i);
+        Type desiredType = null;
+        if (storageTypes != null) {
+            desiredType = storageTypes.get(i);
+        }
+        // 继续调用 translate 方法转换函数
+        final Expression translate = translate(rex, desiredType);
+        list.add(translate);
+        ...
+    }
+    return list;
+}
+
+Expression translate(RexNode expr, RexImpTable.NullAs nullAs, @Nullable Type storageType) {
+    currentStorageType = storageType;
+    // 使用 RexToLixTranslator 遍历 RexNode，该方法会访问 RexToLixTranslator#visitLocalRef 方法
+    final Result result = expr.accept(this);
+    final Expression translated = requireNonNull(EnumUtils.toInternal(result.valueVariable, storageType));
+    // When we asked for not null input that would be stored as box, avoid unboxing
+    if (RexImpTable.NullAs.NOT_POSSIBLE == nullAs && translated.type.equals(storageType)) {
+        return translated;
+    }
+    return nullAs.handle(translated);
+}
+```
+
+`visitLocalRef` 方法会根据 `RexLocalRef` 中记录的引用下标，将对象转换为 `RexCall`，然后继续使用 RexToLixTranslator 进行访问，最终逻辑会执行到 `RexToLixTranslator#visitCall` 方法。正如下面 Calcite java doc 中说明的那样，大部分的运算符实现时都会从 [RexImpTable](https://github.com/apache/calcite/blob/60e0a3f441a009e55a36cac192253a436bec3f6d/core/src/main/java/org/apache/calcite/adapter/enumerable/RexImpTable.java#L521) 中获取实现器，但也有些特殊的函数需要单独实现，例如 `CASE` 语句。
+
+```java
+/**
+ * Visit {@code RexCall}. For most {@code SqlOperator}s, we can get the implementor
+ * from {@code RexImpTable}. Several operators (e.g., CaseWhen) with special semantics
+ * need to be implemented separately.
+ */
+@Override
+public Result visitCall(RexCall call) {
+    ...
+    // 从 RexImpTable 中获取运算符实现器
+    final RexImpTable.RexCallImplementor implementor = RexImpTable.INSTANCE.get(operator);
+    if (implementor == null) {
+        throw new RuntimeException("cannot translate call " + call);
+    }
+    // 获取操作数
+    final List<RexNode> operandList = call.getOperands();
+    final List<@Nullable Type> storageTypes = EnumUtils.internalTypes(operandList);
+    final List<Result> operandResults = new ArrayList<>();
+    // 遍历操作数，调用各自的 implement 方法生成代码
+    for (int i = 0; i < operandList.size(); i++) {
+        final Result operandResult = implementCallOperand(operandList.get(i), storageTypes.get(i), this);
+        operandResults.add(operandResult);
+    }
+    callOperandResultMap.put(call, operandResults);
+    final Result result = implementor.implement(this, call, operandResults);
+    rexResultMap.put(call, result);
+    return result;
+}
+```
+
+下图展示了从 RexImpTable 中获取的运算符实现器，可以看到实现器中包含了 `CONCAT_WS` 函数对应的实现方法 `SqlFunctions.concatMultiWithSeparator()`。
+
+![CONCAT_WS 函数调用](apache-calcite-catalog-udf-function-implementation-and-extension/concat_ws_function_call.png)
+
+最终，Caclite 会生成如下的代码，对函数的调用逻辑位于 `current()` 方法中，`CONCAT_WS` 函数会调用 `SqlFunctions.concatMultiWithSeparator()` 方法，并将 SQL 中的参数传递给函数方法。`CAST` 函数由于入参为 `null`，因此无需调用具体的函数，可以直接执行 `(String) null` 进行转换。`getElementType` 用于返回 SQL 执行结果的类型，示例 SQL 返回结果为 String 类型。
+
+```java
+public org.apache.calcite.linq4j.Enumerable bind(final org.apache.calcite.DataContext root) {
   final org.apache.calcite.linq4j.Enumerable _inputEnumerable = org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
     0});
   return new org.apache.calcite.linq4j.AbstractEnumerable(){
-      public org.apache.calcite.linq4j.Enumerator<String> enumerator() {
-        return new org.apache.calcite.linq4j.Enumerator<String>(){
-            public final org.apache.calcite.linq4j.Enumerator<int> inputEnumerator = _inputEnumerable.enumerator();
+      public org.apache.calcite.linq4j.Enumerator enumerator() {
+        return new org.apache.calcite.linq4j.Enumerator(){
+            public final org.apache.calcite.linq4j.Enumerator inputEnumerator = _inputEnumerable.enumerator();
             public void reset() {
               inputEnumerator.reset();
             }
@@ -1025,11 +1099,13 @@ org/apache/calcite/adapter/enumerable/RexToLixTranslator.java:1315
 
     };
 }
+
+public Class getElementType() {
+  return java.lang.String.class;
+}
 ```
 
-
-
-TODO
+最后 Caclite JDBC 会调用 `Bindable#bind` 方法执行，会返回一个 Enumerable 枚举对象，使用枚举对象就可以很容易地获取到查询结果集。
 
 ## UDF 函数扩展实践
 
