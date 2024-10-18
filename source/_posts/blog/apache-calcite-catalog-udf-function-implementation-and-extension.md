@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-14 08:00:00
+updated: 2024-10-18 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -18,7 +18,7 @@ topic: calcite
 
 ## 前言
 
-最近，很多星友咨询关于 `Calcite UDF` 实现和扩展的问题，在之前 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)一文中，我们简单介绍过 `Catalog` 中的 `Function` 对象，也了解到 Calcite 内置了很多函数实现，但在实际使用中内置函数往往无法满足要求，用户需要能够根据自己的需求，灵活地注册新的函数。Caclite 允许用户动态注册 UDF 函数，从而实现更加复杂的 SQL 逻辑，下面本文将深入探讨 Calcite 内置函数的实现原理，UDF 函数的实现原理以及扩展方式，帮助大家更好地在项目中使用 Calcite UDF。
+最近，很多朋友咨询关于 `Calcite UDF` 实现和扩展的问题，在之前 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)一文中，我们简单介绍过 `Catalog` 中的 `Function` 对象，也了解到 Calcite 内置了很多函数实现，但在实际使用中内置函数往往无法满足要求，用户需要能够根据自己的需求，灵活地注册新的函数。Caclite 允许用户动态注册 UDF 函数，从而实现更加复杂的 SQL 逻辑，下面本文将深入探讨 Calcite 内置函数的实现原理，UDF 函数的实现原理以及扩展方式，帮助大家更好地在项目中使用 Calcite UDF。
 
 ## Calcite 函数简介
 
@@ -1093,10 +1093,8 @@ public org.apache.calcite.linq4j.Enumerable bind(final org.apache.calcite.DataCo
                   (String) null,
                   "b"});
             }
-
           };
       }
-
     };
 }
 
@@ -1109,11 +1107,246 @@ public Class getElementType() {
 
 ## UDF 函数扩展实践
 
+前文我们介绍了 Caclite 函数相关的实现类，带领大家一起探究了标量函数、聚合函数、表函数 & 表宏在 Schema 中的实现，并结合 Calcite 函数测试 Case，一起跟踪了函数的执行流程。**UDF 函数和 Calcite 内置函数类似，只是实现逻辑由用户提供并注册到 Schema 中，Calcite 在执行时会从 Schema 中找到函数实现类，并生成可执行代码**。下面小节，我们结合一些 UDF 案例，为大家介绍下不同类型的 UDF 函数如何扩展。
+
 ### UDF 标量函数扩展
 
-TODO
+首先，我们来实现一个自定义的标量函数 `INDEX_OF`，用于从 `content` 中查找 `target` 字符串，并返回其位置。我们知道，UDF 函数最重要的是函数实现逻辑，所以我们先来实现如下的 `indexOf` 方法，内部实现逻辑很简单，调用 `String#indexOf` 实现字符串位置查找。
 
-探索 UDF 注册 Oracle 无括号函数支持
+```java
+@SuppressWarnings("unused")
+public class UDFRegistry {
+    // 从 content 中查找 target 字符串，并返回其位置
+    public static int indexOf(String content, String target) {
+        return content.indexOf(target);
+    }
+}
+```
+
+实现函数逻辑后，第二步需要注册函数实现到 Schema 中，我们编写如下的逻辑，从 `calciteConnection` 中获取 `SchemaPlus` 对象，然后通过 `add` 方法将 `Function` 对象添加到 Schema 中。`ScalarFunctionImpl#create` 方法负责 `Function` 对象负责函数对象的创建，它的内部实现逻辑我们前文已经介绍，内部使用反射获取 Method 对象，然后创建 CallImplementor 存储在 ScalarFunctionImpl 中，用于后续的函数执行。
+
+```java
+@Slf4j
+public final class UDFExample {
+    
+    public static void main(String[] args) throws Exception {
+        Class.forName("org.apache.calcite.jdbc.Driver");
+        try (Connection connection = DriverManager.getConnection("jdbc:calcite:", initProps())) {
+            CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
+            SchemaPlus rootSchema = calciteConnection.getRootSchema();
+            Schema schema = createSchema(rootSchema);
+            rootSchema.add("calcite_function", schema);
+            rootSchema.add("INDEX_OF", Objects.requireNonNull(ScalarFunctionImpl.create(UDFRegistry.class, "indexOf")));
+            executeQuery(calciteConnection, "SELECT INDEX_OF(user_name, 'san') FROM calcite_function.t_user");
+        }
+    }
+}
+```
+
+那么，**自定义函数在执行阶段和内置函数又有什么不同呢**？我们来跟踪下这段代码，一起来看看内部实现有哪些差异。首先，Schema 中注册的 Function 对象，会在 Calcite JDBC 执行时，封装到 `CalciteCatalogReader` 对象中，并提供了 [lookupOperatorOverloads](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/prepare/CalciteCatalogReader.java#L254) 用于查找内置和自定义函数。然后会创建 `SqlValidator` 对象，此时会将 `CalciteCatalogReader` 对象封装到 `SqlOperatorTable` 对象中，用于后续运算符和函数的查找，也包含了自定义函数的查找。
+
+Calcite SQL 解析器会将 `SELECT INDEX_OF(user_name, 'san') FROM calcite_function.t_user` 解析为 SqlNode 抽象语法树，此时可以看到 `INDEX_OF` 函数被解析为 SqlUnresolvedFunction 对象。
+
+![用户自定义函数解析 AST](apache-calcite-catalog-udf-function-implementation-and-extension/select-user-defined-function-parse-result.png)
+
+解析完成后，会继续执行 SQL 校验，此时会调用 `SqlValidatorImpl#performUnconditionalRewrites` 方法，此时会判断运算符是否为 SqlUnresolvedFunction，是则从 opTab 中的 CalciteCatalogReader 查找自定义函数。
+
+```java
+if (call.getOperator() instanceof SqlUnresolvedFunction) {
+    assert call instanceof SqlBasicCall;
+    final SqlUnresolvedFunction function = (SqlUnresolvedFunction) call.getOperator();
+    // This function hasn't been resolved yet.  Perform
+    // a half-hearted resolution now in case it's a
+    // builtin function requiring special casing.  If it's
+    // not, we'll handle it later during overload resolution.
+    final List<SqlOperator> overloads = new ArrayList<>();
+    opTab.lookupOperatorOverloads(function.getNameAsId(), function.getFunctionType(), SqlSyntax.FUNCTION, overloads, catalogReader.nameMatcher());
+    if (overloads.size() == 1) {
+        ((SqlBasicCall) call).setOperator(overloads.get(0));
+    }
+}
+```
+
+最终从 Schema 中查找到了如下的自定义函数对象：
+
+![Schema 中查找到的自定义函数对象](apache-calcite-catalog-udf-function-implementation-and-extension/lookup-user-defined-function.png)
+
+然后调用 `CalciteCatalogReader#toOp` 将 Function 对象转换为 SQL 运算符，内部会根据 function 类型转换为不同函数运算符，标量函数会转换为 `SqlUserDefinedFunction` 对象。
+
+```java
+if (function instanceof ScalarFunction) {
+    final SqlReturnTypeInference returnTypeInference = infer((ScalarFunction) function);
+    // 标量函数转换为 SqlUserDefinedFunction
+    return new SqlUserDefinedFunction(name, kind, returnTypeInference, operandTypeInference, operandMetadata, function);
+} else if (function instanceof AggregateFunction) {
+    final SqlReturnTypeInference returnTypeInference = infer((AggregateFunction) function);
+    // 聚合函数转换为 SqlUserDefinedAggFunction
+    return new SqlUserDefinedAggFunction(name, kind, returnTypeInference, operandTypeInference, operandMetadata, (AggregateFunction) function, false, false, Optionality.FORBIDDEN);
+} else if (function instanceof TableMacro) {
+    // 表宏转换为 SqlUserDefinedTableMacro
+    return new SqlUserDefinedTableMacro(name, kind, ReturnTypes.CURSOR, operandTypeInference, operandMetadata, (TableMacro) function);
+} else if (function instanceof TableFunction) {
+    // 表函数转换为 SqlUserDefinedTableFunction
+    return new SqlUserDefinedTableFunction(name, kind, ReturnTypes.CURSOR, operandTypeInference, operandMetadata, (TableFunction) function);
+} else {
+    throw new AssertionError("unknown function type " + function);
+}
+```
+
+校验完成后，Calcite 会调用 SqlToRelConverter 将 SqlNode 转换为 RelNode，转换的流程和内置函数类似，最终会调用到 [StandardConvertletTable#convertFunction](https://github.com/apache/calcite/blob/c8cb56525dbc908da4a9081f062d87adfe27ab80/core/src/main/java/org/apache/calcite/sql2rel/StandardConvertletTable.java#L936) 方法，将函数运算符转换为 RexCall，完整的 RelNode 树如下：
+
+```
+LogicalProject(EXPR$0=[INDEX_OF($1, 'san')])
+  JdbcTableScan(table=[[calcite_function, t_user]])
+```
+
+经过 Calcite 内置的优化器和优化规则优化，可以得到如下的物理执行计划，最底层使用了 `JdbcTableScan` 运算符扫描表中的数据，然后使用 [JdbcToEnumerableConverter](https://github.com/apache/calcite/blob/b1308feff49c8b747b3bbb52e1519d334bc984ec/core/src/main/java/org/apache/calcite/adapter/jdbc/JdbcToEnumerableConverter.java#L72) 将 JdbcConvention 转换为 EnumerableConvention，转换后数据就可以传递给 `EnumerableCalc` 运算符进行处理。
+
+```
+EnumerableCalc(expr#0..3=[{inputs}], expr#4=['san'], expr#5=[INDEX_OF($t1, $t4)], EXPR$0=[$t5])
+  JdbcToEnumerableConverter
+    JdbcTableScan(table=[[calcite_function, t_user]])
+```
+
+最后会调用 `CalcitePrepareImpl#implement` 方法生成执行逻辑，内部生成自定义函数逻辑时会调用 `ReflectiveCallNotNullImplementor#implement` 方法，并返回一个 MethodCallExpression 对象，里面包含了对 UDF 函数的调用。
+
+![实现 INDEX_OF 标量函数](apache-calcite-catalog-udf-function-implementation-and-extension/implement-scalar-function.png)
+
+UDF 函数生成的代码逻辑如下，该逻辑会嵌入到最终的执行逻辑中，可以看到每行记录获取时，都会调用一次 UDF 函数，因此数据量越大，UDF 函数执行消耗的时间越多。
+
+```java
+{
+  final Object[] current = (Object[]) inputEnumerator.current();
+  return com.strongduanmu.udf.UDFRegistry.indexOf(current[1] == null ? null : current[1].toString(), "san");
+}
+```
+
+最终 SQL 执行结果如下，：
+
+```
+# 表中的 user_name 记录
+19:46:54.104 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: USER_NAME, ColumnValue: zhangsan
+19:46:54.104 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: USER_NAME, ColumnValue: lisi
+19:46:54.104 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: USER_NAME, ColumnValue: wangwu
+# user_name index_of 执行结果
+19:43:32.790 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: EXPR$0, ColumnValue: 5
+19:43:32.790 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: EXPR$0, ColumnValue: -1
+19:43:32.790 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: EXPR$0, ColumnValue: -1
+```
+
+除了前面介绍的 UDF 标量函数外，Calcite 社区的同学之前还咨询关于 Oracle `ROWNUM`、`SYSDATE` 这些特殊函数，在 Oracle 中无参数的函数不能写括号，无参数的函数通常也叫做 [Niladic Function](https://aplwiki.com/wiki/Niladic_function)，在 Calcite 中使用 `allowNiladicParentheses` 属性控制无参函数是否可以使用括号，像 MySQL、Apache Phoenix 就允许使用括号，而 Oracle、PostgreSQL、SQL Server 则不支持括号。
+
+![无括号 UDF 函数](apache-calcite-catalog-udf-function-implementation-and-extension/udf-without-parentheses.png)
+
+我们将上面的示例进行一些改造，设置 Calcite JDBC 中的 `conformance` 属性为 `ORACLE_12`，它对应的 `allowNiladicParentheses` 实现为 `false`。然后在 UDFRegistry 类中增加一个 `sysDate` 函数实现，并使用 `rootSchema.add("SYS_DATE", Objects.requireNonNull(ScalarFunctionImpl.create(UDFRegistry.class, "sysDate")));` 将 `SYS_DATE` 函数注册到 Schema 中。
+
+```java
+public static LocalDate sysDate() {
+    return LocalDate.now();
+}
+```
+
+然后执行 `SELECT SYS_DATE FROM calcite_function.t_user` 语句，按照预期 Calcite 应当能够正确执行该 SQL，并返回结果。但是执行之后，Calcite 却抛出了异常，具体异常堆栈信息如下：
+
+```
+Caused by: org.apache.calcite.runtime.CalciteContextException: From line 1, column 8 to line 1, column 15: Column 'SYS_DATE' not found in any table
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:423)
+	at org.apache.calcite.runtime.Resources$ExInstWithCause.ex(Resources.java:511)
+	at org.apache.calcite.sql.SqlUtil.newContextException(SqlUtil.java:952)
+	at org.apache.calcite.sql.SqlUtil.newContextException(SqlUtil.java:937)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.newValidationError(SqlValidatorImpl.java:5899)
+	at org.apache.calcite.sql.validate.DelegatingScope.fullyQualify(DelegatingScope.java:293)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl$Expander.visit(SqlValidatorImpl.java:7105)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl$SelectExpander.visit(SqlValidatorImpl.java:7276)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl$SelectExpander.visit(SqlValidatorImpl.java:7261)
+	at org.apache.calcite.sql.SqlIdentifier.accept(SqlIdentifier.java:324)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl$Expander.go(SqlValidatorImpl.java:7094)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.expandSelectExpr(SqlValidatorImpl.java:6665)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.expandSelectItem(SqlValidatorImpl.java:481)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateSelectList(SqlValidatorImpl.java:5015)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateSelect(SqlValidatorImpl.java:4096)
+	at org.apache.calcite.sql.validate.SelectNamespace.validateImpl(SelectNamespace.java:62)
+	at org.apache.calcite.sql.validate.AbstractNamespace.validate(AbstractNamespace.java:95)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateNamespace(SqlValidatorImpl.java:1206)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateQuery(SqlValidatorImpl.java:1177)
+	at org.apache.calcite.sql.SqlSelect.validate(SqlSelect.java:282)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validateScopedExpression(SqlValidatorImpl.java:1143)
+	at org.apache.calcite.sql.validate.SqlValidatorImpl.validate(SqlValidatorImpl.java:849)
+	at org.apache.calcite.sql2rel.SqlToRelConverter.convertQuery(SqlToRelConverter.java:624)
+	at org.apache.calcite.prepare.Prepare.prepareSql(Prepare.java:257)
+	at org.apache.calcite.prepare.Prepare.prepareSql(Prepare.java:220)
+	at org.apache.calcite.prepare.CalcitePrepareImpl.prepare2_(CalcitePrepareImpl.java:673)
+	at org.apache.calcite.prepare.CalcitePrepareImpl.prepare_(CalcitePrepareImpl.java:524)
+	at org.apache.calcite.prepare.CalcitePrepareImpl.prepareSql(CalcitePrepareImpl.java:492)
+	at org.apache.calcite.jdbc.CalciteConnectionImpl.parseQuery(CalciteConnectionImpl.java:237)
+	at org.apache.calcite.jdbc.CalciteMetaImpl.prepareAndExecute(CalciteMetaImpl.java:702)
+	at org.apache.calcite.avatica.AvaticaConnection.prepareAndExecuteInternal(AvaticaConnection.java:677)
+	at org.apache.calcite.avatica.AvaticaStatement.executeInternal(AvaticaStatement.java:157)
+	... 3 more
+```
+
+我们在 `SqlValidatorImpl.java:7105` 位置设置断点，可以发现在校验 SYS_DATE 函数标识符时，会调用 `validator.makeNullaryCall(id)` 方法，该方法内部加载完函数后，会判断运算符的语法类型是否为 [SqlSyntax.FUNCTION_ID](https://github.com/apache/calcite/blob/db60219198442f2c60345fda95a117d379d87a61/core/src/main/java/org/apache/calcite/sql/SqlSyntax.java#L139)，而 FUNCTION_ID 代表的就是类似于 CURRENTTIME 和 SYS_DATE 这样无括号的函数。
+
+```java
+// SqlValidatorImpl#Expander 类 visit 方法
+@Override
+public @Nullable SqlNode visit(SqlIdentifier id) {
+    // First check for builtin functions which don't have
+    // parentheses, like "LOCALTIME".
+    final SqlCall call = validator.makeNullaryCall(id);
+    if (call != null) {
+        return call.accept(this);
+    }
+    final SqlIdentifier fqId = getScope().fullyQualify(id).identifier;
+    SqlNode expandedExpr = expandDynamicStar(id, fqId);
+    validator.setOriginal(expandedExpr, id);
+    return expandedExpr;
+}
+
+// SqlValidatorImpl 类 makeNullaryCall 方法
+@Override
+public @Nullable SqlCall makeNullaryCall(SqlIdentifier id) {
+    if (id.names.size() == 1 && !id.isComponentQuoted(0)) {
+        final List<SqlOperator> list = new ArrayList<>();
+        opTab.lookupOperatorOverloads(id, null, SqlSyntax.FUNCTION, list, catalogReader.nameMatcher());
+        for (SqlOperator operator : list) {
+            if (operator.getSyntax() == SqlSyntax.FUNCTION_ID) {
+                // Even though this looks like an identifier, it is a
+                // actually a call to a function. Construct a fake
+                // call to this function, so we can use the regular
+                // operator validation.
+                return new SqlBasicCall(operator, ImmutableList.of(), id.getParserPosition(), null).withExpanded(true);
+            }
+        }
+    }
+    return null;
+}
+```
+
+那么问题的根源就变成了，为什么自定义函数转换为运算符后，它的语法类型不是 FUNCTION_ID？我们回顾下前面介绍的 `INDEX_OF` 函数执行过程，在 SQL 校验阶段，会将 ScalarFunction 转换为 SqlUserDefinedFunction 运算符，而它则继承了 SqlFunction 类，[SqlFunction#getSyntax](https://github.com/apache/calcite/blob/ba36004fb1e52b9bfb06623c7d869e6e01e25082/core/src/main/java/org/apache/calcite/sql/SqlFunction.java#L140) 方法默认返回 SqlSyntax.FUNCTION。笔者排查了 SqlUserDefinedFunction 类，发现 Calcite 没有提供用户自定义语法类型的 API，如果想要支持这种不带括号的写法，需要修改源码调整 CalciteCatalogReader 类中的 `toOp` 方法。
+
+本地尝试修改了下 Calcite CalciteCatalogReader 类源码，在 `toOp` 方法转换时，判断参数个数以及 allowNiladicParentheses 属性，如果无参数并且 allowNiladicParentheses 设置为 false，则将语法类型设置为 FUNCTION_ID。
+
+```java
+if (function instanceof ScalarFunction) {
+    final SqlReturnTypeInference returnTypeInference = infer((ScalarFunction) function);
+    SqlSyntax syntax = function.getParameters().isEmpty() && config.conformance().allowNiladicParentheses() ? SqlSyntax.FUNCTION : SqlSyntax.FUNCTION_ID;
+    return new SqlUserDefinedFunction(name, kind, returnTypeInference, operandTypeInference, operandMetadata, function, syntax);
+}
+```
+
+修改完成后，使用 `./gradlew publishToMavenLocal` 发布到本地 Maven 仓库进行测试，然后引入新版本测试 `SELECT SYS_DATE FROM calcite_function.t_user`，此时可以正确执行并返回结果。
+
+```
+08:49:17.625 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: SYS_DATE, ColumnValue: 2024-10-18
+08:49:17.648 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: SYS_DATE, ColumnValue: 2024-10-18
+08:49:17.668 [main] INFO com.strongduanmu.udf.UDFExample - ColumnLabel: SYS_DATE, ColumnValue: 2024-10-18
+```
+
+目前，该 PR 还存在部分单测异常，笔者稍后修复后会提交到 Calcite 仓库，争取下个版本能够支持自定义函数不带括号的写法。
 
 ### UDAF 聚合函数扩展
 
@@ -1124,38 +1357,6 @@ TODO
 TODO
 
 ## 结语
-
-Schema 中有 Function 接口，用于注册不同类型的函数
-
-SqlFunction 继承 SqlOperator
-
-SqlFunctionCategory 函数分类枚举
-SqlBasicFunction SqlUnresolvedFunction
-RexImpTable——注册 operator（包含函数，通过注解 @LibraryOperator 标记当前函数属于哪个方言）和 method（BuiltInMethod）对应关系，BuiltInMethod 中定义了对 SqlFunctions 等函数实现类的调用
-SqlLibraryOperators 用于定义非标准运算和函数，由 SqlLibraryOperatorTableFactory 调用读取到 SqlOperatorTable 中
-SqlStdOperatorTable 实现标准运算和函数
-
-普通函数 SqlFunctions 函数实现逻辑
-空间函数 SpatialTypeFunctions
-JSON 函数 JsonFunctions
-
-和 UDF 相关的 Jira：https://issues.apache.org/jira/browse/CALCITE-6363?jql=project%20%3D%20CALCITE%20AND%20resolution%20%3D%20Unresolved%20AND%20text%20~%20%22UDF%22%20ORDER%20BY%20created%20DESC%2C%20updated%20DESC%2C%20priority%20ASC
-
-改动 UDF 函数重载逻辑：https://issues.apache.org/jira/browse/CALCITE-3000?jql=project%20%3D%20CALCITE%20AND%20resolution%20%3D%20Unresolved%20AND%20text%20~%20%22UDF%22%20ORDER%20BY%20priority%20DESC%2C%20updated%20DESC
-
-UDF Test：calcite/core/src/test/java/org/apache/calcite/test/UdfTest.java at master · apache/calcite
-
-PI 函数带不带括号的讨论：https://issues.apache.org/jira/browse/CALCITE-6566?page=com.atlassian.jira.plugin.system.issuetabpanels%3Aall-tabpanel
-
-关于函数参数的讨论：https://mail.google.com/mail/u/0/#inbox/FMfcgzQXJGsbkVFdDsKlrjSHbGTVxflZ
-
-CoreQuidemTest（各种测试语句）：https://github.com/apache/calcite/tree/99a0df108a9f72805afb6d87ec5b2c0ed258f1ec/core/src/test/resources/sql
-
-
-
-
-
-
 
 TODO
 
