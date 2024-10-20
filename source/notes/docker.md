@@ -28,7 +28,7 @@ docker images
 # --name：设置容器别名
 docker run -itd -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql
 # 挂载本地 my.cnf 运行容器，避免中文乱码
-docker run -itd -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 --name mysql mysql -v /Users/strongduanmu/Softs/MySQL/my.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf
+docker run -itd -p 3306:3306 -v /Users/duanzhengqiang/softs/mysql/my.cnf:/etc/mysql/my.cnf -e MYSQL_ROOT_PASSWORD=123456 --name mysql_8.0 mysql:8.0
 # 查看容器运行状态
 docker ps
 # 在容器中执行命令

@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-18 08:00:00
+updated: 2024-10-20 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -1350,7 +1350,123 @@ if (function instanceof ScalarFunction) {
 
 ### UDAF 聚合函数扩展
 
-TODO
+聚合函数的扩展和标量函数稍有不同，聚合函数会将多个值组合转换为标量值，因此在聚合函数内部需要维护一个累加器，负责将数据行的值进行累加，当所有数据行遍历完成后，输出聚合函数的结果。因此，扩展聚合函数需要实现 `init`、`add` 和 `result` 方法，如下展示了一个将记录聚合为集合的函数实现：
+
+```java
+@SuppressWarnings("unused")
+public class UDAFRegistry {
+    
+    public Collection<Object> init() {
+        return new LinkedList<>();
+    }
+    
+    public Collection<Object> add(final Collection<Object> accumulator, final Object newElement) {
+        accumulator.add(newElement);
+        return accumulator;
+    }
+    
+    public Collection<Object> result(final Collection<Object> accumulator) {
+        return accumulator;
+    }
+}
+```
+
+在 `init` 方法中初始化了一个 `Collection<Object>` 容器，执行时每行数据都会调用 `add` 方法，并将 `Collection<Object>` 容器和当前行的元素传递进来，此时可以将新元数据添加到容器中，然后返回容器对象，最后所有行遍历完成后，会调用 `result` 方法，此时会返回容器对象，容器中记录了所有元素。
+
+实现完 UDAF 后，我们需要通过 `AggregateFunctionImpl#create` 方法，将其注册到 Scehma 中：
+
+```java
+public static void main(String[] args) throws Exception {
+    Class.forName("org.apache.calcite.jdbc.Driver");
+    try (Connection connection = DriverManager.getConnection("jdbc:calcite:", initProps())) {
+        CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
+        SchemaPlus rootSchema = calciteConnection.getRootSchema();
+        Schema schema = createSchema(rootSchema);
+        rootSchema.add("calcite_function", schema);
+        rootSchema.add("CONCAT_TO_LIST", Objects.requireNonNull(AggregateFunctionImpl.create(UDAFRegistry.class)));
+        executeQuery(calciteConnection, "SELECT CONCAT_TO_LIST(user_name) FROM calcite_function.t_user");
+    }
+}
+```
+
+然后我们执行 `SELECT CONCAT_TO_LIST(user_name) FROM calcite_function.t_user` 语句进行测试，执行结果如下，可以发现 `user_name` 列中的值被转换为数组进行输出。
+
+```sql
+10:50:18.709 [main] INFO com.strongduanmu.udaf.UDAFExample - ColumnLabel: EXPR$0, ColumnValue: [zhangsan, lisi, wangwu]
+```
+
+查看执行过程中的执行计划，可以发现聚合函数位于 LogicalAggregate 运算符中，并且没有指定分组条件，会对所有数据行进行聚合计算。
+
+```sql
+# 逻辑执行计划 
+LogicalAggregate(group=[{}], EXPR$0=[CONCAT_TO_LIST($0)])
+  LogicalProject(user_name=[$1])
+    JdbcTableScan(table=[[calcite_function, t_user]])
+
+# 物理执行计划
+EnumerableAggregate(group=[{}], EXPR$0=[CONCAT_TO_LIST($1)])
+  JdbcToEnumerableConverter
+    JdbcTableScan(table=[[calcite_function, t_user]])
+```
+
+跟踪
+
+```java
+java.util.List accumulatorAdders = new java.util.LinkedList();
+accumulatorAdders.add(new org.apache.calcite.linq4j.function.Function2() {
+  public Record3_0 apply(Record3_0 acc, Object[] in) {
+    if (!(in[1] == null || in[1].toString() == null)) {
+      acc.f2 = true;
+      // 调用 add 方法，增加新元数据
+      acc.f0 = acc.f1.add(acc.f0, in[1] == null ? null : in[1].toString());
+    }
+    return acc;
+  }
+  public Record3_0 apply(Object acc, Object in) {
+    return apply(
+      (Record3_0) acc,
+      (Object[]) in);
+  }
+}
+);
+org.apache.calcite.adapter.enumerable.AggregateLambdaFactory lambdaFactory = new org.apache.calcite.adapter.enumerable.BasicAggregateLambdaFactory(
+  new org.apache.calcite.linq4j.function.Function0() {
+    public Object apply() {
+      java.util.Collection a0s0;
+      com.strongduanmu.udaf.UDAFRegistry a0s1;
+      boolean a0s2;
+      a0s2 = false;
+      // 创建 UDAFRegistry 对象
+      a0s1 = new com.strongduanmu.udaf.UDAFRegistry();
+      // 调用 init 方法初始化
+      a0s0 = a0s1.init();
+      Record3_0 record0;
+      // 将聚合函数的累加器、
+      record0 = new Record3_0();
+      record0.f0 = a0s0;
+      record0.f1 = a0s1;
+      record0.f2 = a0s2;
+      return record0;
+    }
+  }
+,
+  accumulatorAdders);
+return org.apache.calcite.linq4j.Linq4j.singletonEnumerable(enumerable.aggregate(lambdaFactory.accumulatorInitializer().apply(), lambdaFactory.accumulatorAdder(), lambdaFactory.singleGroupResultSelector(new org.apache.calcite.linq4j.function.Function1() {
+    public Object apply(Record3_0 acc) {
+      return acc.f2 ? acc.f1.result(acc.f0) : null;
+    }
+    public Object apply(Object acc) {
+      return apply(
+        (Record3_0) acc);
+    }
+  }
+```
+
+
+
+
+
+
 
 ### UDTF 表函数 & 表宏扩展
 
