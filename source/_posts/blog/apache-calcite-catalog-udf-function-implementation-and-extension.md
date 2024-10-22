@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-20 08:00:00
+updated: 2024-10-22 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -981,8 +981,9 @@ public static Bindable toBindable(Map<String, Object> parameters, CalcitePrepare
 
 ```java
 {
-  return org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
-      0});
+    return org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
+        0
+    });
 }
 ```
 
@@ -1068,38 +1069,39 @@ public Result visitCall(RexCall call) {
 
 ```java
 public org.apache.calcite.linq4j.Enumerable bind(final org.apache.calcite.DataContext root) {
-  final org.apache.calcite.linq4j.Enumerable _inputEnumerable = org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
-    0});
-  return new org.apache.calcite.linq4j.AbstractEnumerable(){
-      public org.apache.calcite.linq4j.Enumerator enumerator() {
-        return new org.apache.calcite.linq4j.Enumerator(){
-            public final org.apache.calcite.linq4j.Enumerator inputEnumerator = _inputEnumerable.enumerator();
-            public void reset() {
-              inputEnumerator.reset();
-            }
+    final org.apache.calcite.linq4j.Enumerable _inputEnumerable = org.apache.calcite.linq4j.Linq4j.asEnumerable(new Integer[] {
+        0
+    });
+    return new org.apache.calcite.linq4j.AbstractEnumerable() {
+        public org.apache.calcite.linq4j.Enumerator enumerator() {
+            return new org.apache.calcite.linq4j.Enumerator() {
+                public final org.apache.calcite.linq4j.Enumerator inputEnumerator = _inputEnumerable.enumerator();
+                public void reset() {
+                    inputEnumerator.reset();
+                }
 
-            public boolean moveNext() {
-              return inputEnumerator.moveNext();
-            }
+                public boolean moveNext() {
+                    return inputEnumerator.moveNext();
+                }
 
-            public void close() {
-              inputEnumerator.close();
-            }
+                public void close() {
+                    inputEnumerator.close();
+                }
 
-            public Object current() {
-              return org.apache.calcite.runtime.SqlFunctions.concatMultiWithSeparator(new String[] {
-                  ",",
-                  "a",
-                  (String) null,
-                  "b"});
-            }
-          };
-      }
+                public Object current() {
+                    return org.apache.calcite.runtime.SqlFunctions.concatMultiWithSeparator(new String[] {
+                        ",",
+                        "a", (String) null,
+                        "b"
+                    });
+                }
+            };
+        }
     };
 }
 
 public Class getElementType() {
-  return java.lang.String.class;
+    return java.lang.String.class;
 }
 ```
 
@@ -1216,8 +1218,8 @@ UDF 函数生成的代码逻辑如下，该逻辑会嵌入到最终的执行逻�
 
 ```java
 {
-  final Object[] current = (Object[]) inputEnumerator.current();
-  return com.strongduanmu.udf.UDFRegistry.indexOf(current[1] == null ? null : current[1].toString(), "san");
+    final Object[] current = (Object[]) inputEnumerator.current();
+    return com.strongduanmu.udf.UDFRegistry.indexOf(current[1] == null ? null : current[1].toString(), "san");
 }
 ```
 
@@ -1376,17 +1378,8 @@ public class UDAFRegistry {
 实现完 UDAF 后，我们需要通过 `AggregateFunctionImpl#create` 方法，将其注册到 Scehma 中：
 
 ```java
-public static void main(String[] args) throws Exception {
-    Class.forName("org.apache.calcite.jdbc.Driver");
-    try (Connection connection = DriverManager.getConnection("jdbc:calcite:", initProps())) {
-        CalciteConnection calciteConnection = connection.unwrap(CalciteConnection.class);
-        SchemaPlus rootSchema = calciteConnection.getRootSchema();
-        Schema schema = createSchema(rootSchema);
-        rootSchema.add("calcite_function", schema);
-        rootSchema.add("CONCAT_TO_LIST", Objects.requireNonNull(AggregateFunctionImpl.create(UDAFRegistry.class)));
-        executeQuery(calciteConnection, "SELECT CONCAT_TO_LIST(user_name) FROM calcite_function.t_user");
-    }
-}
+rootSchema.add("CONCAT_TO_LIST", Objects.requireNonNull(AggregateFunctionImpl.create(UDAFRegistry.class)));
+CalciteJDBCUtils.executeQuery(calciteConnection, "SELECT CONCAT_TO_LIST(user_name) FROM calcite_function.t_user");
 ```
 
 然后我们执行 `SELECT CONCAT_TO_LIST(user_name) FROM calcite_function.t_user` 语句进行测试，执行结果如下，可以发现 `user_name` 列中的值被转换为数组进行输出。
@@ -1398,7 +1391,7 @@ public static void main(String[] args) throws Exception {
 查看执行过程中的执行计划，可以发现聚合函数位于 LogicalAggregate 运算符中，并且没有指定分组条件，会对所有数据行进行聚合计算。
 
 ```sql
-# 逻辑执行计划 
+# 逻辑执行计划
 LogicalAggregate(group=[{}], EXPR$0=[CONCAT_TO_LIST($0)])
   LogicalProject(user_name=[$1])
     JdbcTableScan(table=[[calcite_function, t_user]])
@@ -1409,68 +1402,173 @@ EnumerableAggregate(group=[{}], EXPR$0=[CONCAT_TO_LIST($1)])
     JdbcTableScan(table=[[calcite_function, t_user]])
 ```
 
-跟踪
+跟踪 Calcite 生成的执行代码，会依次调用 `apply()` 方法初始化，内部调用的是 `UDAFRegistry#init` 方法，然后调用 `accumulatorAdder()` 方法执行聚合逻辑，每行数据都会调用 `UDAFRegistry#add` 方法，最后调用 `singleGroupResultSelector` 获取结果，内部调用的是 `UDAFRegistry#result` 方法。
 
 ```java
 java.util.List accumulatorAdders = new java.util.LinkedList();
 accumulatorAdders.add(new org.apache.calcite.linq4j.function.Function2() {
-  public Record3_0 apply(Record3_0 acc, Object[] in) {
-    if (!(in[1] == null || in[1].toString() == null)) {
-      acc.f2 = true;
-      // 调用 add 方法，增加新元数据
-      acc.f0 = acc.f1.add(acc.f0, in[1] == null ? null : in[1].toString());
+    public Record3_0 apply(Record3_0 acc, Object[] in ) {
+        if (!( in [1] == null || in [1].toString() == null)) {
+            acc.f2 = true;
+            // 调用 add 方法，增加新元数据
+            acc.f0 = acc.f1.add(acc.f0, in [1] == null ? null : in [1].toString());
+        }
+        return acc;
     }
-    return acc;
-  }
-  public Record3_0 apply(Object acc, Object in) {
-    return apply(
-      (Record3_0) acc,
-      (Object[]) in);
-  }
-}
-);
+    public Record3_0 apply(Object acc, Object in ) {
+        return apply(
+            (Record3_0) acc, (Object[]) in );
+    }
+});
 org.apache.calcite.adapter.enumerable.AggregateLambdaFactory lambdaFactory = new org.apache.calcite.adapter.enumerable.BasicAggregateLambdaFactory(
-  new org.apache.calcite.linq4j.function.Function0() {
-    public Object apply() {
-      java.util.Collection a0s0;
-      com.strongduanmu.udaf.UDAFRegistry a0s1;
-      boolean a0s2;
-      a0s2 = false;
-      // 创建 UDAFRegistry 对象
-      a0s1 = new com.strongduanmu.udaf.UDAFRegistry();
-      // 调用 init 方法初始化
-      a0s0 = a0s1.init();
-      Record3_0 record0;
-      // 将聚合函数的累加器、
-      record0 = new Record3_0();
-      record0.f0 = a0s0;
-      record0.f1 = a0s1;
-      record0.f2 = a0s2;
-      return record0;
-    }
-  }
-,
-  accumulatorAdders);
+    new org.apache.calcite.linq4j.function.Function0() {
+        public Object apply() {
+            java.util.Collection a0s0;
+            com.strongduanmu.udaf.UDAFRegistry a0s1;
+            boolean a0s2;
+            a0s2 = false;
+            // 创建 UDAFRegistry 对象
+            a0s1 = new com.strongduanmu.udaf.UDAFRegistry();
+            // 调用 init 方法初始化
+            a0s0 = a0s1.init();
+            Record3_0 record0;
+            // 将聚合函数的累加器、UDF 对象、是否计算完成标记记录到 Record3_0 的 f0、f1 和 f2 中
+            record0 = new Record3_0();
+            record0.f0 = a0s0;
+            record0.f1 = a0s1;
+            record0.f2 = a0s2;
+            return record0;
+        }
+    },
+    accumulatorAdders);
+// 先调用 apply() 初始化，然后调用 accumulatorAdder() 执行聚合逻辑，最后调用 singleGroupResultSelector 获取结果
 return org.apache.calcite.linq4j.Linq4j.singletonEnumerable(enumerable.aggregate(lambdaFactory.accumulatorInitializer().apply(), lambdaFactory.accumulatorAdder(), lambdaFactory.singleGroupResultSelector(new org.apache.calcite.linq4j.function.Function1() {
-    public Object apply(Record3_0 acc) {
-      return acc.f2 ? acc.f1.result(acc.f0) : null;
-    }
-    public Object apply(Object acc) {
-      return apply(
-        (Record3_0) acc);
-    }
-  }
+                    public Object apply(Record3_0 acc) {
+                        // 判断是否计算完成，完成则调用 result 方法
+                        return acc.f2 ? acc.f1.result(acc.f0) : null;
+                    }
+                    public Object apply(Object acc) {
+                        return apply(
+                            (Record3_0) acc);
+                    }
+                }
 ```
-
-
-
-
-
-
 
 ### UDTF 表函数 & 表宏扩展
 
-TODO
+根据前文介绍，UDTF 表函数是指**在执行阶段将某些数据转换为表的函数**，而表宏则是指**在编译阶段将某些数据转换为表的函数**，两者都可以用于 FROM 子句中，作为一张表进行使用。本小节重点探究下 UDTF 表函数的扩展，来实现一个将 `java=1,go=2,scala=3` 结构数据，拆分为两列三行表结构的表函数，表宏的扩展方式类似，留给大家自行探究。
+
+首先，我们需要实现表函数的逻辑，根据前面介绍，表函数需要实现 `QueryableTable` 或者 `ScannableTable` 接口，然后才可以创建出 TableFunction 实现对象，在前面很多文章中，我们介绍过 ScannableTable，本次我们使用 QueryableTable 来实现表函数逻辑。
+
+UDTF 函数的实现逻辑如下，`eval` 方法是函数的主体逻辑，它接收 `content` 字符串以及 `columnSize` 数值两个参数，并返回 `QueryableTable` 实现对象。`eval` 方法内部我们创建了一个 `AbstractQueryableTable` 对象，构造方法中传递了函数的返回类型，是一个对象数组 `Object[].class`。
+
+[AbstractQueryableTable](https://github.com/apache/calcite/blob/66caa54c5e272f8287ca132ca012733898a38768/core/src/main/java/org/apache/calcite/adapter/java/AbstractQueryableTable.java#L30) 中需要实现 `asQueryable` 和 `getRowType` 方法，asQueryable 方法负责将数据转换为可以遍历的对象，内部可以覆盖 `enumerator` 方法，该方法内部函数会对传入的 `content` 字段进行切割处理，并根据 `columnSize` 组装结果集的列数，`moveNext` 方法会首先被调用，将游标移动到结果集的第一位，然后调用 `current` 方法获取当前记录，然后循环调用 `moveNext` 和 `current` 直到所有记录遍历完成，最后会调用 `reset` 和 `close` 方法重置和关闭资源。`getRowType` 方法用于返回 UDTF 计算结果集的类型，本案例中表函数返回 key、value 两列，分别为 String 和 int 类型。
+
+```java
+@SuppressWarnings({"unused", "unchecked"})
+public class UDTFRegistry {
+    
+    public static final Method UDTF_METHOD = Types.lookupMethod(UDTFRegistry.class, "eval", String.class, int.class);
+    
+    public QueryableTable eval(final String content, final int columnSize) {
+        return new AbstractQueryableTable(Object[].class) {
+            @Override
+            public <T> Queryable<T> asQueryable(final QueryProvider queryProvider, final SchemaPlus schema, final String tableName) {
+                return (Queryable<T>) new BaseQueryable<Object[]>(queryProvider, String.class, null) {
+                    @Override
+                    public Enumerator<Object[]> enumerator() {
+                        return new Enumerator<Object[]>() {
+                            String[] rows = content.split(",");
+                            int index = -1;
+                            
+                            @Override
+                            public Object[] current() {
+                                String row = rows[index];
+                                Object[] result = new Object[columnSize];
+                                String[] columns = row.split("=");
+                                Preconditions.checkArgument(columns.length == 2, String.format("Invalid row: %s, row must constains %d columns.", row, columnSize));
+                                return columns;
+                            }
+                            
+                            @Override
+                            public boolean moveNext() {
+                                if (index < rows.length - 1) {
+                                    index++;
+                                    return true;
+                                }
+                                return false;
+                            }
+                            
+                            @Override
+                            public void reset() {
+                            }
+                            
+                            @Override
+                            public void close() {
+                            }
+                        };
+                    }
+                };
+            }
+            
+            @Override
+            public RelDataType getRowType(final RelDataTypeFactory typeFactory) {
+                return typeFactory.createStructType(Arrays.asList(typeFactory.createJavaType(String.class), typeFactory.createJavaType(String.class)), Arrays.asList("key", "value"));
+            }
+        };
+    }
+}
+```
+
+实现完 UDTF 逻辑后，我们需要使用 `TableFunctionImpl#create` 方法，将 UDTF 函数注册到 Schema 中。
+
+```java
+rootSchema.add("EXTRACT_FROM_CSV", Objects.requireNonNull(TableFunctionImpl.create(UDTFRegistry.UDTF_METHOD)));
+CalciteJDBCUtils.executeQuery(calciteConnection, "SELECT * FROM EXTRACT_FROM_CSV('java=1,go=2,scala=3', 2)");
+```
+
+然后我们执行 `SELECT * FROM EXTRACT_FROM_CSV('java=1,go=2,scala=3', 2)` 语句，可以得到如下结果，可以看到原先的字符串，被表函数按照 `,` 拆分为 3 行，每行又按照 `=` 拆分为 2 列，列名也是我们指定的 `key` 和 `value`。
+
+```
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: key, ColumnValue: java
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: value, ColumnValue: 1
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: key, ColumnValue: go
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: value, ColumnValue: 2
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: key, ColumnValue: scala
+08:33:14.584 [main] INFO com.strongduanmu.common.CalciteJDBCUtils - ColumnLabel: value, ColumnValue: 3
+```
+
+跟踪 UDTF 函数的执行过程，我们可以发现 Calcite 解析后增加了一个 TABLE 函数嵌套在 `EXTRACT_FROM_CSV` 外部，用于标记这是一个表函数，内部的函数和其他自定义函数一样，是 SqlUnresolvedFunction 类型。
+
+![UDTF 函数解析结果](apache-calcite-catalog-udf-function-implementation-and-extension/udtf-parse-result.png)
+
+在校验阶段，TABLE 函数会被转换为 `SqlCollectionTableOperator`，根据 Calcite 注释说明，它表示表函数派生表运算符，用于将表函数的值转换为关系 Relation，EXTRACT_FROM_CSV 函数被转换为 SqlUserDefinedTableFunction 对象。
+
+![经过校验的 UTDF SqlNode](apache-calcite-catalog-udf-function-implementation-and-extension/validated-udtf-sqlnode.png)
+
+校验完成后，Calcite 又生成了如下的逻辑执行计划和物理执行计划，可以看到最终物理执行计划只包含了 EnumerableTableFunctionScan，这是因为我们使用 `*` 查询，最终的投影列和 EnumerableTableFunctionScan 一致，因此无需再进行投影计算。EnumerableTableFunctionScan 中还包含了函数调用信息，以及返回结果类型信息。
+
+```sql
+# 逻辑执行计划
+LogicalProject(key=[$0], value=[$1])
+  LogicalTableFunctionScan(invocation=[EXTRACT_FROM_CSV('java=1,go=2,scala=3', 2)], rowType=[RecordType(JavaType(class java.lang.String) key, JavaType(class java.lang.String) value)], elementType=[class [Ljava.lang.Object;])
+
+# 物理执行计划
+EnumerableTableFunctionScan(invocation=[EXTRACT_FROM_CSV('java=1,go=2,scala=3', 2)], rowType=[RecordType(JavaType(class java.lang.String) key, JavaType(class java.lang.String) value)], elementType=[class [Ljava.lang.Object;])
+```
+
+最终通过 Calcite 代码生成，生成的可执行逻辑如下，在调用 `bind` 方法时，内部会调用到 `UDTFRegistry#eval` 方法，并转换为可枚举的 Enumerable 对象，最终通过 Calcite JDBC 提供查询结果。
+
+```java
+public org.apache.calcite.linq4j.Enumerable bind(final org.apache.calcite.DataContext root) {
+    final com.strongduanmu.udtf.UDTFRegistry f = new com.strongduanmu.udtf.UDTFRegistry();
+    return f.eval("java=1,go=2,scala=3", 2).asQueryable(root.getQueryProvider(), (org.apache.calcite.schema.SchemaPlus) null, "EXTRACT_FROM_CSV").asEnumerable();
+}
+
+public Class getElementType() {
+    return java.lang.Object[].class;
+}
+```
 
 ## 结语
 
