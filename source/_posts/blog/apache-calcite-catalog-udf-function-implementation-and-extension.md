@@ -3,7 +3,7 @@ title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00
-updated: 2024-10-22 08:00:00
+updated: 2024-10-23 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite——新增动态 UDF 支持](https://blog.csdn.net/it_dx/article/details/117948590)'
@@ -18,7 +18,7 @@ topic: calcite
 
 ## 前言
 
-最近，很多朋友咨询关于 `Calcite UDF` 实现和扩展的问题，在之前 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)一文中，我们简单介绍过 `Catalog` 中的 `Function` 对象，也了解到 Calcite 内置了很多函数实现，但在实际使用中内置函数往往无法满足要求，用户需要能够根据自己的需求，灵活地注册新的函数。Caclite 允许用户动态注册 UDF 函数，从而实现更加复杂的 SQL 逻辑，下面本文将深入探讨 Calcite 内置函数的实现原理，UDF 函数的实现原理以及扩展方式，帮助大家更好地在项目中使用 Calcite UDF。
+最近，很多朋友咨询关于 `Calcite UDF` 实现和扩展的问题，在之前 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)一文中，我们简单介绍过 `Catalog` 中的 `Function` 对象，也了解到 Calcite 内置了很多函数实现，但在实际使用中内置函数往往无法满足要求，用户需要能够根据自己的需求，灵活地注册新的函数。Caclite 允许用户动态注册 UDF 函数，从而实现更加复杂的 SQL 逻辑，下面本文将深入探讨 Calcite 函数的实现原理，以及 UDF 函数的扩展方式，帮助大家更好地在项目中使用 Calcite UDF。
 
 ## Calcite 函数简介
 
@@ -1572,7 +1572,13 @@ public Class getElementType() {
 
 ## 结语
 
-TODO
+本文首先介绍了 Calcite 函数相关的概念和构成体系，然后按照函数的分类：**标量函数、聚合函数以及表函数/表宏**，为大家介绍了这些函数内部的实现细节，并通过 Calcite `functions.iq` 测试用例中的一个典型案例，和大家一起跟踪了函数的执行流程。
+
+Calcite 函数执行的过程中，首先会创建 `SqlValidator` 对象，此时会将 Calcite 内置函数以及用户自定义函数注册进来。然后会依次进行 SQL 解析和 SQL 校验，通常函数都会被解析为 `SqlUnresolvedFunction` 对象，并在 SQL 校验时，通过查找函数注册表将 SqlUnresolvedFunction 转换为 SqlBasicFunction 或其他函数运算符对象。SQL 校验完成后，Calcite 会继续进行 SQL 优化和 SQL 执行，优化阶段会调用 `StandardConvertletTable#convertFunction` 方法，将函数运算符转换为 RexNode，并和其他 SQL 部分一起构成一个 RelNode 执行计划树。最后 Calcite 会调用 `implement` 方法生成可执行代码，此时会将内置函数或自定义函数的实现逻辑，嵌入到整个可执行代码中，通过 Janio 将代码编译为可执行的对象，这样就完成了整个 SQL 执行逻辑。
+
+在文章的最后部分，我们又介绍了不同类型函数的扩展方式。Calcite 扩展函数非常简单，用户只需按照规范编写函数逻辑，然后通过 Schema API 注册到 Calcite 中，就可以成功执行函数逻辑，感兴趣的同学可以参考文中的代码示例，尝试实现不同逻辑的自定义函数。
+
+根据 [Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)中介绍，Calcite Catalog 中除了函数外，还包含了**类型系统、视图、物化视图等**对象，这些对象在日常数据处理中也都非常重要，我们将在后续文章中继续探究学习，欢迎感兴趣的朋友持续关注。
 
 
 
