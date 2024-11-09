@@ -57,6 +57,8 @@ breadcrumb: false
 {% link https://github.com/strongduanmu Github icon:/assets/placeholder/github.svg %}
 {% endgrid %}
 
+![微信公众号](/assets/wechat/gongzhonghao.png)
+
 <style>
 .tag-plugin.gallery.grid-box .grid-cell {
   background: none;
