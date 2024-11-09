@@ -9,9 +9,9 @@ updated: 2024-03-13 08:00:00
 banner: /assets/banner/banner_7.jpg
 ---
 
-## 在线课程
+## SQL & 数据库
 
-{% sites online_course %}
+{% sites sql_and_database %}
 
 ## 技术论坛
 

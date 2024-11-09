@@ -122,3 +122,11 @@ protected final void assertResultSet(final ResultSet actualResultSet, final Resu
 修改完测试 SQL 后再次测试，集成测试能正常通过，结果如下。这个问题也提醒大家在编写 SQL 测试用例时，需要关注测试用例的有序性，默认的排序规则通常是不稳定的，需要通过显示地声明排序规则来避免意料之外的问题。
 
 ![修复后 E2E 测试](/assets/blog/2022/07/22/1658452827.png)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

@@ -142,3 +142,11 @@ private static ShardingSphereSchema createSchema(final Collection<InputStream> s
 * [学习 Java 的调试技术](https://www.aneasystone.com/archives/2017/09/java-debugging.html)
 * [Java Application Remote Debugging](https://www.baeldung.com/java-application-remote-debugging)
 * [SpringBoot 打包为 JAR 包后访问不到 Resources 下的文件问题](https://homxuwang.github.io/2019/12/26/SpringBoot%E6%89%93%E5%8C%85%E4%B8%BAJAR%E5%8C%85%E5%90%8E%E8%AE%BF%E9%97%AE%E4%B8%8D%E5%88%B0Resources%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

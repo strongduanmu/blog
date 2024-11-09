@@ -152,3 +152,9 @@ System-R 优化器的枚举算法演示了两个重要的技术：使用动态�
 [^59]: Srivastava D., Dar S., Jagadish H.V., Levy A.: Answering Queries with Aggregation Using Views. Proc. of VLDB, Mumbai, 1996.
 [^60]: Yan, Y.P., Larson P.A. Eager aggregation and lazy aggregation. In Proc. of VLDB Conference, Zurich, 1995.
 [^61]: Yang, H.Z., Larson P.A. Query Transformation for PSJ-Queries. In Proc. of VLDB, 1987.
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

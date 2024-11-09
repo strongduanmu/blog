@@ -109,3 +109,9 @@ Apache ShardingSphere 项目仍然在快速发展中，在后续的版本中，�
 * [新版发布｜ShardingSphere 5.0.0-beta 来了](https://mp.weixin.qq.com/s/MjvoJ_GVbgtWq2HHwLIZAg)
 * [细数 ShardingSphere 5.0.0-beta 版本新功能](https://mp.weixin.qq.com/s/hqFHEAPZHcoEfC4ghj3QSA)
 * [从中间件到分布式数据库生态，ShardingSphere 5.x革新变旧](https://mp.weixin.qq.com/s/ltyO4PAFvLw8nusalGBgPA)
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

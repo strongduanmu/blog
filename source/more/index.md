@@ -57,6 +57,10 @@ breadcrumb: false
 {% link https://github.com/strongduanmu Github icon:/assets/placeholder/github.svg %}
 {% endgrid %}
 
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
 ![微信公众号](/assets/wechat/gongzhonghao.png)
 
 <style>

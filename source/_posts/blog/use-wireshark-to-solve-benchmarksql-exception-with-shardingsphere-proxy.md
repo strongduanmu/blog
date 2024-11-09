@@ -319,3 +319,11 @@ ER_PS_MANY_PARAM(XOpenSQLState.GENERAL_ERROR, 1390, "Prepared statement contains
 ## 结语
 
 本文介绍了 BenchmarkSQL 测试 Proxy 出现参数 Index 越界异常后，使用 Wireshark 排查问题的过程。通过强大的 Wireshark 工具，我们很清晰地观测到请求过程中出现的问题，进而找到解决问题的方案，这也印证了那句老话「**工欲善其事，必先利其器**」。本案例的排查思路也适合其他 Proxy 接入端的问题，希望对大家有用，由于本人对 Wireshark 使用经验有限，如果问题也欢迎指正。
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

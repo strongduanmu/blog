@@ -56,3 +56,11 @@ JVM 虚拟机原理及其相关的调优技术是每一位 Java 工程师必备�
 * [Optimizing Performance with GraalVM](https://archive.qconsf.com/system/files/presentation-slides/qconsf2019-alina-yurenko-jit-vs-aot-performance-with-graalvm.pdf)
 
 * [Run Code in Any Language Anywhere with GraalVM](https://www.youtube.com/watch?v=JoDOo4FyYMU)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

@@ -451,3 +451,11 @@ mkdir -p ./reflection/src/main/resources/META-INF/native-image
 最后一个部分，我们介绍了 GraalVM AOT 实战，从基础的 SDK 安装，到第一个 HelloWorld 程序，带大家一起体验了下 GraalVM 的基础使用。然后我们参考了项目实际情况，使用 Maven 工具构建了一个简单的二进制程序。此外，由于现实中的 Java 程序具有很多动态特性，我们展示了反射程序如何通过 Agent 收集元数据，并将元数据维护在 `META-INF/native-image` 目录下，最终成功执行了带有反射的本地程序。
 
 GraalVM 为 Java 领域带来新的发展机遇，相信随着 GraalVM 的成熟，越来越多应用程序将以 Native 的方式运行在不同环境中。作为 Java 工程师，也需要紧跟时代发展，不断探索新的技术，完善自己的技能栈。本系列后续还会探究更多关于 GraalVM 的新技术，欢迎感兴趣的朋友持续关注，本文如有不足之处，也欢迎留言探讨。
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

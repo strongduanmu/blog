@@ -616,3 +616,9 @@ clear success!
 ```
 
 本案例源码参考 Github 仓库中的 [antlr-learn/calculator](https://github.com/strongduanmu/antlr-learn.git)。ANTLR 的功能非常强大，上面的示例只是一个入门的应用，大家如果对 ANTLR 感兴趣，欢迎参与 ShardingSphere 项目的 SQL 解析，在实战中加深对 ANTLR 的理解。
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

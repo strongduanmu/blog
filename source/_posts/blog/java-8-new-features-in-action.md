@@ -925,3 +925,11 @@ try {
 - [Java8 新特性，你应该了解这些](https://juejin.im/post/5ae6bfb66fb9a07a9b35bac1#heading-7)
 - [Guide To Java 8 Optional](https://www.baeldung.com/java-optional)
 - [一文带你玩转 Java8 Stream 流，从此操作集合 So Easy](https://juejin.im/post/5cc124a95188252d891d00f2)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

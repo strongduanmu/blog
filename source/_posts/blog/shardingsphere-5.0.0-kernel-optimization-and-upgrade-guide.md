@@ -641,3 +641,11 @@ SELECT * FROM t_user WHERE user_id = 1;
 - [从中间件到分布式数据库生态，ShardingSphere 5.x革新变旧](https://mp.weixin.qq.com/s/ltyO4PAFvLw8nusalGBgPA)
 
 - [ShardingSphere X openGauss，将会产生怎样的化学反应](https://community.sphere-ex.com/t/topic/119)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

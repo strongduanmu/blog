@@ -289,3 +289,11 @@ show_compatibility_56 = on
 
 * [Installing MySQL on Unix/Linux Using Generic Binaries](https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html)
 * [MySQL 配置文件 my.cnf / my.ini 逐行详解](https://juejin.cn/post/7038235607578968078)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

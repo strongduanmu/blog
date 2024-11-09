@@ -430,3 +430,11 @@ mysql> SELECT * FROM t_user WHERE user_id = 10;
 ## 结语
 
 Apache ShardingSphere 5.3.1 新增的动态数据脱敏功能，是对 ShardingSphere 数据安全方案的进一步补充和完善，未来数据脱敏将会尝试和用户权限、SQL 审计等功能进行结合，根据企业内部的角色划分，进行不同维度的数据脱敏处理。欢迎社区的同学积极参与进来，共同提升 Apache ShardingSphere 的脱敏功能，为社区提供更好的使用体验。
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

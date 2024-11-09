@@ -274,3 +274,11 @@ references:
 | 202              | 0xca               | breakpoint | 调试断点                       |
 | 254              | 0xfe               | impdep1    | 用于在特定硬件中使用的语言后门 |
 | 255              | 0xff               | impdep2    | 用于在特定硬件中使用的语言后门 |
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

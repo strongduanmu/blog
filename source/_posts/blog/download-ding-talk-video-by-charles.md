@@ -78,3 +78,9 @@ ffmpeg -i "https://lzdliving.alicdn.com/live_hp/2fa194dc-044e-43f6-b964-3a09a43a
 -   [钉钉群直播提取视频文件](https://yzxoi.top/archives/1274)
 -   [搞定 m3u8 视频下载](https://sspai.com/post/43468)
 -   [m3u8 文件格式详解](https://www.jianshu.com/p/e97f6555a070)
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)

@@ -29,3 +29,11 @@ MySQL 是当前最流行的开源数据库，国内外众多公司基本都使�
 ## 网络资料
 
 * [数据库内核月报](http://mysql.taobao.org/monthly/)
+
+
+
+{% quot 欢迎关注 %}
+
+欢迎关注「**端小强的博客**」微信公众号，会不定期分享日常学习和工作经验，欢迎大家关注交流。
+
+![微信公众号](/assets/wechat/gongzhonghao.png)
