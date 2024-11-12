@@ -141,7 +141,9 @@ inject:
     - <link rel="stylesheet" href="/css/lxgwwenkaiscreen.css" media="all" onload="this.media='all'">
   script:
     - <!-- Chatra {literal} --><script async>(function(d, w, c) {w.ChatraID = 'PHWnu7Bamcwtbnx2d'; var s = d.createElement('script'); w[c] = w[c] || function() {(w[c].q = w[c].q || []).push(arguments);}; s.async = true; s.src = 'https://call.chatra.io/chatra.js'; if (d.head) d.head.appendChild(s);})(document, window, 'Chatra');</script><!-- /Chatra {/literal} -->
-    - <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    # - <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    # - <script defer src="https://busuanzi.strongduanmu.com/js"></script>
+    - <script defer src="https://cn.vercount.one/js"></script>
     - <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous">
     - <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
     - <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/contrib/auto-render.min.js" integrity="sha384-mll67QQFJfxn0IYznZYonOWZ644AWYC+Pt2cHqMaRhXVrursRwvLnLaebdGIlYNa" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
