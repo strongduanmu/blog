@@ -32,7 +32,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * Calcite 源码学习第 8 弹：TODO
 * Calcite 源码学习第 9 弹：TODO
 * Calcite 源码学习第 10 弹：[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)
-* Calcite 源码学习第 11 弹：TODO
+* Calcite 源码学习第 11 弹：[Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT](https://strongduanmu.com/blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html)
 
 ## 官方文档
 
@@ -60,6 +60,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 
 * [Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)
 * [Cascades Optimizer](https://zhuanlan.zhihu.com/p/73545345)
+* [The Volcano/Cascades Optimizer](https://www.slideshare.net/slideshow/the-volcanocascades-optimizer/127681467#1)
 
 ### 执行器
 
