@@ -3,6 +3,7 @@ title: ShardingSphere Proxy 适配 MySQL addBatch/executeBatch 数组结果实�
 tags: [ShardingSphere, MySQL]
 categories: [ShardingSphere]
 date: 2024-11-22 20:14:04
+updated: 2024-11-24 19:45:00
 cover: /assets/blog/2021/06/25/1624608310.png
 banner: /assets/banner/banner_11.jpg
 references:
@@ -259,7 +260,41 @@ public boolean useMultiResults() {
 可以看到该判断主要依赖 `clientParam` 变量，`NativeAuthenticationProvider` 方法会在登录认证通过后，调用 `setClientParam` 方法初始化该变量，具体代码逻辑位置如下。
 
 ```Java
-/Users/duanzhengqiang/.m2/repository/com/mysql/mysql-connector-j/8.0.31/mysql-connector-j-8.0.31-sources.jar!/com/mysql/cj/protocol/a/NativeAuthenticationProvider.java:201
+// /Users/duanzhengqiang/.m2/repository/com/mysql/mysql-connector-j/8.0.31/mysql-connector-j-8.0.31-sources.jar!/com/mysql/cj/protocol/a/NativeAuthenticationProvider.java:201
+long clientParam = capabilityFlags & NativeServerSession.CLIENT_LONG_PASSWORD //
+| (this.propertySet.getBooleanProperty(PropertyKey.useAffectedRows).getValue() ? //
+        0 : capabilityFlags & NativeServerSession.CLIENT_FOUND_ROWS) //
+| capabilityFlags & NativeServerSession.CLIENT_LONG_FLAG //
+| (this.useConnectWithDb ? capabilityFlags & NativeServerSession.CLIENT_CONNECT_WITH_DB : 0) //
+| (this.propertySet.getBooleanProperty(PropertyKey.useCompression).getValue() ? //
+        capabilityFlags & NativeServerSession.CLIENT_COMPRESS : 0) //
+| (this.propertySet.getBooleanProperty(PropertyKey.allowLoadLocalInfile).getValue()
+        || this.propertySet.getStringProperty(PropertyKey.allowLoadLocalInfileInPath).isExplicitlySet() ? //
+                capabilityFlags & NativeServerSession.CLIENT_LOCAL_FILES : 0) //
+| capabilityFlags & NativeServerSession.CLIENT_PROTOCOL_41 //
+| (this.propertySet.getBooleanProperty(PropertyKey.interactiveClient).getValue() ? //
+        capabilityFlags & NativeServerSession.CLIENT_INTERACTIVE : 0) //
+| (this.propertySet.<SslMode>getEnumProperty(PropertyKey.sslMode).getValue() != SslMode.DISABLED ? //
+        capabilityFlags & NativeServerSession.CLIENT_SSL : 0) //
+| capabilityFlags & NativeServerSession.CLIENT_TRANSACTIONS // Required to get server status values.
+| NativeServerSession.CLIENT_SECURE_CONNECTION //
+| (this.propertySet.getBooleanProperty(PropertyKey.allowMultiQueries).getValue() ? //
+        capabilityFlags & NativeServerSession.CLIENT_MULTI_STATEMENTS : 0) //
+| capabilityFlags & NativeServerSession.CLIENT_MULTI_RESULTS // Always allow multiple result sets.
+| capabilityFlags & NativeServerSession.CLIENT_PS_MULTI_RESULTS // Always allow multiple result sets for SSPS.
+| NativeServerSession.CLIENT_PLUGIN_AUTH //
+| (NONE.equals(this.propertySet.getStringProperty(PropertyKey.connectionAttributes).getValue()) ? //
+        0 : capabilityFlags & NativeServerSession.CLIENT_CONNECT_ATTRS) //
+| capabilityFlags & NativeServerSession.CLIENT_PLUGIN_AUTH_LENENC_CLIENT_DATA //
+| (this.propertySet.getBooleanProperty(PropertyKey.disconnectOnExpiredPasswords).getValue() ? //
+        0 : capabilityFlags & NativeServerSession.CLIENT_CAN_HANDLE_EXPIRED_PASSWORD) //
+| (this.propertySet.getBooleanProperty(PropertyKey.trackSessionState).getValue() ? //
+        capabilityFlags & NativeServerSession.CLIENT_SESSION_TRACK : 0) //
+| capabilityFlags & NativeServerSession.CLIENT_DEPRECATE_EOF //
+| capabilityFlags & NativeServerSession.CLIENT_QUERY_ATTRIBUTES //
+| capabilityFlags & NativeServerSession.CLIENT_MULTI_FACTOR_AUTHENTICATION;
+
+sessState.setClientParam(clientParam);
 ```
 
 Proxy 端通过 `MySQLAuthenticationEngine` 处理 MySQL 登录认证，会将握手结果封装在 `MySQLHandshakePacket` 中，其中包含了 `capabilityFlags` 服务端能力标志位的信息。
@@ -281,7 +316,7 @@ public int handshake(final ChannelHandlerContext context) {
 
 参考 [MySQL Client/Server Protocol 文档 - Capabilities Flags](https://dev.mysql.com/doc/dev/mysql-server/latest/group__group__cs__capabilities__flags.html#details)，能力标志位共 32 个 bit 位，每个 bit 位代表协议的一个可选功能，客户端和服务端的交集，共同决定了将使用协议的哪些可选部分。
 
-按照功能属于高 16 位，还是低 16 位，需要分别将功能设置到 `capabilityFlagsLower` 和 `capabilityFlagsUpper` 中。查看 `CLIENT_MULTI_RESULTS` 和 `CLIENT_PS_MULTI_RESULTS`，它们属于高位功能，因此**在 calculateHandshakeCapabilityFlagsUpper 中增加 Flags 即可**，如下是具体设置代码。
+按照功能属于高 16 位，还是低 16 位，需要分别将功能设置到 `capabilityFlagsLower` 和 `capabilityFlagsUpper` 中。查看 `CLIENT_MULTI_RESULTS` 和 `CLIENT_PS_MULTI_RESULTS`，它们属于高位功能，因此**在 calculateHandshakeCapabilityFlagsUpper 方法中增加 Flags 即可**，如下是具体设置代码。
 
 ```Java
 CLIENT_MULTI_RESULTS(0x00020000),
