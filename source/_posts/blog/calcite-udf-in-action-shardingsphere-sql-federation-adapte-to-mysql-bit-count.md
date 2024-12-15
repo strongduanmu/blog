@@ -3,7 +3,7 @@ title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00
-updated: 2024-12-13 08:39:40
+updated: 2024-12-15 08:39:40
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)'
@@ -18,7 +18,7 @@ topic: calcite
 
 熟悉 Apache ShardingSphere 的朋友们，可能听说过 SQL Federation 功能，它主要适用于海量数据水平分片场景下，提供对`跨节点关联查询`、`子查询`、`分页`、`排序`、`聚合查询`等复杂查询语句的支持。SQL Federation 功能内部使用了 Apache Calcite 项目，来实现 SQL 优化和执行。随着 [Calcite 1.38.0 版本](https://calcite.apache.org/docs/history.html#v1-38-0)的发布，Calcite 对于不同数据库的函数支持度进一步提升，为了提升 SQL Federation 功能支持度，升级 Calcite 至 1.38.0 版本也成为必然的选择。
 
-由于升级前 ShardingSphere 使用的 Caclite 1.35.0 版本，该版本和 1.38.0 相差了 1 年多，Calcite 内部进行了大量的优化和增强，因此升级后出现了 `BIT_COUNT` 函数无法执行的问题，下图展示了 ShardingSphere E2E 中出现异常的 `BIT_COUNT` Case。
+由于升级前 ShardingSphere 使用的是 Caclite 1.35.0 版本，该版本和 1.38.0 相差了 1 年多，Calcite 内部进行了大量的优化和增强，因此升级后出现了 `BIT_COUNT` 函数无法执行的问题，下图展示了 ShardingSphere E2E 中出现异常的 `BIT_COUNT` Case。
 
 ![ShardingSphere E2E BIT_COUNT 异常](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/shardingsphere-e2e-bit-count-error.png)
 
@@ -28,7 +28,7 @@ topic: calcite
 
 ### NumberFormatException
 
-
+首先，我们来看下 `NumberFormatException`，根据异常信息可以看出，Calcite 会将 BIT_COUNT 函数的参数，转换为 `BigDecimal` 类型，然后在初始化 `BigDecimal` 对象时，遇到了不支持的字符 `a`。检查联邦查询的测试 Case，确实存在包含字符 `a` 的 SQL。
 
 ```
 java.lang.NumberFormatException: Character a is neither a decimal digit number, decimal point, nor "e" notation exponential mark.
@@ -47,13 +47,21 @@ java.lang.NumberFormatException: Character a is neither a decimal digit number, 
 	at org.apache.shardingsphere.test.e2e.engine.type.dql.GeneralDQLE2EIT.assertExecuteQuery(GeneralDQLE2EIT.java:55)
 ```
 
+在 MySQL 中执行可以发现，当 BIT_COUNT 函数的参数，包含了 `abcdefg` 等非数值字符时，BIT_COUNT 函数会返回 0，而非抛出异常。因此，我们需要为 Calcite 函数进行增强，来支持 BIT_COUNT 函数包含非法字符的 SQL 场景。
 
-
-
+```sql
+mysql> SELECT bit_count(123456), bit_count('123456'), bit_count('abcdefg');
++-------------------+---------------------+----------------------+
+| bit_count(123456) | bit_count('123456') | bit_count('abcdefg') |
++-------------------+---------------------+----------------------+
+|                 6 |                   6 |                    0 |
++-------------------+---------------------+----------------------+
+1 row in set, 1 warning (0.00 sec)
+```
 
 ### CalciteContextException
 
-
+我们再来看下 `CalciteContextException` 异常，根据异常堆栈可以发现，该异常是 Calcite 进行元数据校验时抛出的，`checkOperandTypes` 方法在进行操作数类型判断时，发现当前 Case 中的 `BIT_COUNT(<JAVATYPE(CLASS JAVA.LANG.BOOLEAN)>)` 还不支持，因此抛出了异常，我们需要为 Calcite BIT_COUNT 函数适配 `Boolean` 类型的参数。
 
 ```
 Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column 0: Cannot apply 'BIT_COUNT' to arguments of type 'BIT_COUNT(<JAVATYPE(CLASS JAVA.LANG.BOOLEAN)>)'. Supported form(s): 'BIT_COUNT(<NUMERIC>)'
@@ -101,9 +109,15 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column
 	at org.apache.shardingsphere.driver.jdbc.core.statement.ShardingSpherePreparedStatement.executeQuery(ShardingSpherePreparedStatement.java:180)
 ```
 
+## BIT_COUNT 函数调研
+
+TODO
 
 
-### Calcite BIT_COUNT 实现梳理
+
+## Calcite BIT_COUNT 适配
+
+### Calcite BIT_COUNT 现状梳理
 
 之前社区完成的 BIT_COUNT 函数：https://issues.apache.org/jira/browse/CALCITE-3697
 
@@ -111,13 +125,9 @@ TODO
 
 
 
-## BIT_COUNT 函数调研
-
-TODO
+### Calcite BIT_COUNT 增强适配
 
 
-
-## Calcite BIT_COUNT 函数适配
 
 TODO
 
