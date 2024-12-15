@@ -10,6 +10,7 @@ references:
   - '[Fix sql federaion case exception caused by upgrade calcite version to 1.38.0](https://github.com/apache/shardingsphere/issues/33385)'
   - '[ShardingSphere 联邦查询](https://shardingsphere.apache.org/document/current/cn/features/sql-federation/)'
   - '[ShardingSphere 联邦查询使用配置](https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-jdbc/yaml-config/rules/sql-federation/)'
+  - '[MySQL BIT_COUNT 函数文档](https://dev.mysql.com/doc/refman/8.4/en/bit-functions.html#function_bit-count)'
 banner: /assets/banner/banner_7.jpg
 topic: calcite
 ---
@@ -109,7 +110,11 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column
 	at org.apache.shardingsphere.driver.jdbc.core.statement.ShardingSpherePreparedStatement.executeQuery(ShardingSpherePreparedStatement.java:180)
 ```
 
-## BIT_COUNT 函数调研
+## MySQL BIT_COUNT 调研
+
+初步分析了 ShardingSphere 联邦查询中的 BIT_COUNT 函数异常后，我们再来调研下 MySQL BIT_COUNT 函数，看下该函数的实际作用，以及它支持的参数类型。
+
+https://dev.mysql.com/doc/refman/8.4/en/bit-functions.html#function_bit-count
 
 TODO
 
