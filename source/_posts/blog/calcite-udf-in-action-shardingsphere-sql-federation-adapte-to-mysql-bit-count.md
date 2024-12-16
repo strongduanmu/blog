@@ -3,7 +3,7 @@ title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00
-updated: 2024-12-15 08:39:40
+updated: 2024-12-16 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)'
@@ -114,11 +114,58 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column
 
 初步分析了 ShardingSphere 联邦查询中的 BIT_COUNT 函数异常后，我们再来调研下 MySQL BIT_COUNT 函数，看下该函数的实际作用，以及它支持的参数类型。
 
-https://dev.mysql.com/doc/refman/8.4/en/bit-functions.html#function_bit-count
+根据 MySQL [BIT_COUNT 函数](https://dev.mysql.com/doc/refman/8.4/en/bit-functions.html#function_bit-count)文档说明，函数语法格式为 `BIT_COUNT(N)`，用于计算参数 `N` 的二进制形式中 `1` 的个数，如果参数为 NULL，BIT_COUNT 函数也会返回 NULL。
 
-TODO
+```
+Returns the number of bits that are set in the argument N as an unsigned 64-bit integer, or NULL if the argument is NULL.
+以无符号 64 位整数形式返回参数 N 中设置的位数，如果参数为 NULL，则返回 NULL。
+```
 
+MySQL 文档中并未具体说明 BIT_COUNT 具体支持哪些参数，我们使用 MySQL 来实际测试下 BIT_COUNT 函数。如下是一些常用类型的测试，包括数值类型、字符串类型，数值表达式，Boolean 类型以及 NULL。可以看到，当字符串中包含非 `0-9` 数字时，BIT_COUNT 函数会直接返回 0，而对于 Boolean 类型，会将 `true`、`false` 转换为 `1` 和 `0`，然后再进行 BIT_COUNT 计算。
 
+```sql
+mysql> SELECT bit_count(123456), bit_count('123456'), bit_count('abcdefg'), BIT_COUNT('abcdef1234'), bit_count(''), bit_count(1 + 1), bit_count(true), bit_count(null);
++-------------------+---------------------+----------------------+-------------------------+---------------+------------------+-----------------+-----------------+
+| bit_count(123456) | bit_count('123456') | bit_count('abcdefg') | BIT_COUNT('abcdef1234') | bit_count('') | bit_count(1 + 1) | bit_count(true) | bit_count(null) |
++-------------------+---------------------+----------------------+-------------------------+---------------+------------------+-----------------+-----------------+
+|                 6 |                   6 |                    0 |                       0 |             0 |                1 |               1 |            NULL |
++-------------------+---------------------+----------------------+-------------------------+---------------+------------------+-----------------+-----------------+
+1 row in set, 3 warnings (0.00 sec)
+```
+
+除了数值类型外，BIT_COUNT 函数还支持日期/时间类型，MySQL BIT_COUNT 对于日期和时间的处理也比较特别，它会删除日期和时间格式中的非数字字符，例如：`BIT_COUNT(TIMESTAMP '1996-08-03 16:22:34')` 会转换为 `BIT_COUNT('19960803162234')` 进行计算。
+
+```sql
+mysql> SELECT BIT_COUNT(DATE '1996-08-03'), BIT_COUNT(TIME '16:22:34'), BIT_COUNT(TIMESTAMP '1996-08-03 16:22:34') UNION ALL
+    -> SELECT BIT_COUNT(DATE '2001-01-01'), BIT_COUNT(TIME '12:20:00'), BIT_COUNT(TIMESTAMP '2001-01-01 12:20:00') UNION ALL
+    -> SELECT BIT_COUNT(DATE '2002-05-03'), BIT_COUNT(TIME '13:12:14'), BIT_COUNT(TIMESTAMP '2002-05-03 13:12:14') UNION ALL
+    -> SELECT BIT_COUNT(DATE '2005-09-07'), BIT_COUNT(TIME '06:02:04'), BIT_COUNT(TIMESTAMP '2005-09-07 06:02:04') UNION ALL
+    -> SELECT BIT_COUNT(DATE '2007-01-01'), BIT_COUNT(TIME '23:09:59'), BIT_COUNT(TIMESTAMP '2007-01-01 23:09:59');
++------------------------------+----------------------------+--------------------------------------------+
+| BIT_COUNT(DATE '1996-08-03') | BIT_COUNT(TIME '16:22:34') | BIT_COUNT(TIMESTAMP '1996-08-03 16:22:34') |
++------------------------------+----------------------------+--------------------------------------------+
+|                           12 |                         11 |                                         24 |
+|                           12 |                          8 |                                         22 |
+|                           14 |                          5 |                                         22 |
+|                           16 |                          9 |                                         25 |
+|                           14 |                         10 |                                         21 |
++------------------------------+----------------------------+--------------------------------------------+
+5 rows in set (0.03 sec)
+```
+
+此外，BIT_COUNT 函数还支持 `BINARY` 和 `VARBINARY` 类型以及负数等特殊类型和数值，下面展示了 `BINARY` 类型和 `-1` 计算 BIT_COUNT 值的结果。
+
+```sql
+mysql> SELECT BIT_COUNT(CAST(x'ad' AS BINARY(1))), BIT_COUNT(-1);
++-------------------------------------+---------------+
+| BIT_COUNT(CAST(x'ad' AS BINARY(1))) | BIT_COUNT(-1) |
++-------------------------------------+---------------+
+|                                   5 |            64 |
++-------------------------------------+---------------+
+1 row in set (0.01 sec)
+```
+
+了解了 MySQL 中 BIT_COUNT 函数的含义，以及支持的类型后，下面我们再来探究下 Calcite 目前对 BIT_COUNT 函数的适配，以及我们如何扩展 BIT_COUNT 函数，能让它适配更多的 MySQL 数据类型，从而解决 ShardingSphere 联邦查询中出现的问题。
 
 ## Calcite BIT_COUNT 适配
 
