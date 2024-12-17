@@ -3,7 +3,7 @@ title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00
-updated: 2024-12-16 08:00:00
+updated: 2024-12-17 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)'
@@ -171,15 +171,124 @@ mysql> SELECT BIT_COUNT(CAST(x'ad' AS BINARY(1))), BIT_COUNT(-1);
 
 ### Calcite BIT_COUNT 现状梳理
 
-之前社区完成的 BIT_COUNT 函数：https://issues.apache.org/jira/browse/CALCITE-3697
+参考 [CALCITE-3697](https://issues.apache.org/jira/browse/CALCITE-3697)，在 Calcite `1.38.0` 版本中，`Norman Jordan` 支持了 MySQL `BIT_COUNT` 函数。MySQL BIT_COUNT 函数除了支持标准 BITCOUNT 函数中的数值类型和二进制类型外，它还支持小数类型的参数，会使用参数的整数部分进行计算，下面展示了 MySQL BIT_COUNT 函数的一些示例。
 
-TODO
+|           Expression            | Result |
+| :-----------------------------: | :----: |
+|         bit_count(5.23)         |   2    |
+| bit_count(18446744073709551615) |   64   |
+| bit_count(18446744073709551616) |   63   |
+| bit_count(18446744073709551617) |   63   |
+| bit_count(-9223372036854775808) |   1    |
+| bit_count(-9223372036854775809) |   1    |
 
+Norman Jordan 在 [PR#3927](https://github.com/apache/calcite/pull/3927/files) 中增加了标准 `BITCOUNT` 函数，以及 `BIT_COUNT_BIG_QUERY` 和 `BIT_COUNT_MYSQL` 方言函数，函数实现都是调用的 `BuiltInMethod.BITCOUNT.method` 方法，`NullPolicy.STRICT` 表示参数为 NULL 时，函数直接返回 NULL 结果。
 
+```java
+// bitwise
+defineMethod(BITCOUNT, BuiltInMethod.BITCOUNT.method, NullPolicy.STRICT);
+defineMethod(BIT_COUNT_BIG_QUERY, BuiltInMethod.BITCOUNT.method, NullPolicy.STRICT);
+defineMethod(BIT_COUNT_MYSQL, BuiltInMethod.BITCOUNT.method, NullPolicy.STRICT);
+```
+
+MySQL `BIT_COUNT` 函数声明接受 `NUMERIC` 或者 `BINARY` 类型的参数，因此 ShardingSphere 联邦查询传递字符 `a` 以及 `Boolean` 类型时，会出现报错。此外，MySQL 支持的 `DATE/TIME` 类型，Calcite `BIT_COUNT` 函数也没有进行实现。
+
+```java
+@LibraryOperator(libraries = {MYSQL})
+public static final SqlFunction BIT_COUNT_MYSQL =
+    new SqlFunction(
+        "BIT_COUNT",
+        SqlKind.OTHER_FUNCTION,
+        ReturnTypes.BIGINT_NULLABLE,
+        null,
+        OperandTypes.NUMERIC.or(OperandTypes.BINARY),
+        SqlFunctionCategory.NUMERIC);
+```
+
+`BIT_COUNT` 函数的具体实现逻辑在 `SqlFunctions` 类中，目前支持 `long`、`BigDecimal` 及 `ByteString` 3 种参数类型，`long` 类型入参用于支持常规的整数类型参数，直接调用 `Long#bitCount` 实现计算。
+
+```java
+/**
+ * Helper function for implementing <code>BITCOUNT</code>. Counts the number
+ * of bits set in an integer value.
+ */
+public static long bitCount(long b) {
+    return Long.bitCount(b);
+}
+```
+
+如果参数类型是 `BigDecimal`，则会比较参数值是否在 `(-2^63, 2^64 - 1)` 范围内，如果等于最大值，则返回 `64`，如果大于最大值，则返回 `63`，如果小于等于最小值，则固定返回 `1`，如果在区间范围内，则会丢弃小数部分，然后按照整数计算 BIT_COUNT 结果。
+
+```java
+private static final BigDecimal BITCOUNT_MAX = new BigDecimal(2).pow(64).subtract(new BigDecimal(1));
+private static final BigDecimal BITCOUNT_MIN = new BigDecimal(2).pow(63).negate();
+
+/**
+ * Helper function for implementing <code>BITCOUNT</code>. Counts the number
+ * of bits set in the integer portion of a decimal value.
+ */
+public static long bitCount(BigDecimal b) {
+    final int comparison = b.compareTo(BITCOUNT_MAX);
+    if (comparison < 0) {
+        if (b.compareTo(BITCOUNT_MIN) <= 0) {
+            return 1;
+        } else {
+            return bitCount(b.setScale(0, RoundingMode.DOWN).longValue());
+        }
+    } else if (comparison == 0) {
+        return 64;
+    } else {
+        return 63;
+    }
+}
+```
+
+对于二进制类型，BIT_COUNT 函数会使用 `0xff` 逐字节去计算，然后将 BIT 位为 1 的个数进行累加，得到最终 BIT_COUNT 结果。
+
+```java
+/**
+ * Helper function for implementing <code>BITCOUNT</code>. Counts the number
+ * of bits set in a ByteString value.
+ */
+public static long bitCount(ByteString b) {
+    long bitsSet = 0;
+    for (int i = 0; i < b.length(); i++) {
+        bitsSet += Integer.bitCount(0xff & b.byteAt(i));
+    }
+    return bitsSet;
+}
+```
+
+从 Calcite BIT_COUNT 实现逻辑可以了解到，目前，Calcite 还没有适配非数值字符、Boolean 以及日期/时间类型，下面我们来探究下如何增强 BIT_COUNT 实现逻辑，来支持 MySQL 的这些特殊类型。
 
 ### Calcite BIT_COUNT 增强适配
 
+想要为 BIT_COUNT 函数适配更多的数据类型，首先需要在 `SqlLibraryOperators` 中为 BIT_COUNT 函数声明更多的参数类型，我们增加如下的 `OperandTypes.BOOLEAN`、`OperandTypes.CHARACTER`、`OperandTypes.DATETIME`、`OperandTypes.DATE`、`OperandTypes.TIME` 和 `OperandTypes.TIMESTAMP` 类型。
 
+```java
+@LibraryOperator(libraries = {MYSQL})
+public static final SqlFunction BIT_COUNT_MYSQL =
+    new SqlFunction(
+        "BIT_COUNT",
+        SqlKind.OTHER_FUNCTION,
+        ReturnTypes.BIGINT_NULLABLE,
+        null,
+        OperandTypes.or(OperandTypes.NUMERIC,
+            OperandTypes.BINARY,
+            OperandTypes.BOOLEAN,
+            OperandTypes.CHARACTER,
+            OperandTypes.DATETIME,
+            OperandTypes.DATE,
+            OperandTypes.TIME,
+            OperandTypes.TIMESTAMP),
+        SqlFunctionCategory.NUMERIC);
+```
+
+
+
+
+
+https://github.com/apache/calcite/pull/4074/files
 
 TODO
 
