@@ -3,7 +3,7 @@ title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00
-updated: 2024-12-17 08:00:00
+updated: 2024-12-18 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)'
@@ -11,6 +11,7 @@ references:
   - '[ShardingSphere 联邦查询](https://shardingsphere.apache.org/document/current/cn/features/sql-federation/)'
   - '[ShardingSphere 联邦查询使用配置](https://shardingsphere.apache.org/document/current/cn/user-manual/shardingsphere-jdbc/yaml-config/rules/sql-federation/)'
   - '[MySQL BIT_COUNT 函数文档](https://dev.mysql.com/doc/refman/8.4/en/bit-functions.html#function_bit-count)'
+  - '[[CALCITE-6700] MySQL BIT_COUNT function should return result when parameter is Boolean, String, Date, Time and Timestamp types](https://github.com/apache/calcite/pull/4074/files)'
 banner: /assets/banner/banner_7.jpg
 topic: calcite
 ---
@@ -284,11 +285,62 @@ public static final SqlFunction BIT_COUNT_MYSQL =
         SqlFunctionCategory.NUMERIC);
 ```
 
+然后我们需要在 `RexImpTable` 类中定义函数实现，将上面的函数声明对象 `BIT_COUNT_MYSQL` 和具体的函数实现逻辑关联上。下面展示了定义函数实现的具体逻辑，Calcite 动态编译会根据这个映射关系，找到函数的具体实现，即：`SqlFunctions#bitCountMySQL`，声明中最后一个参数 `Object.class` 代表的函数的参数类型，由于 MySQL BIT_COUNT 函数支持多种类型，因此我们先将参数类型定义为 `Object.class`。
 
+```java
+// 定义函数实现
+defineMethod(BIT_COUNT_MYSQL, BuiltInMethod.BIT_COUNT_MYSQL.method, NullPolicy.STRICT);
+// 声明 MySQL BIT_COUNT 函数实现方法
+BIT_COUNT_MYSQL(SqlFunctions.class, "bitCountMySQL", Object.class),
+```
 
+`SqlFunctions#bitCountMySQL` 具体实现逻辑如下，除了支持原有的数值和二进制类型，我们还增加了 Boolean 和 String 类型，并且当 String 类型中出现非数字字符时，捕获异常然后返回 0。对于 `Date`、`Time` 和 `Timestamp`，实现逻辑中模拟了 MySQL 的行为，将这几个类型中的非数字字符去除，然后计算 `BIT_COUNT` 值。
 
+```java
+/**
+ * Helper function for implementing <code>BIT_COUNT_MYSQL</code>. Counts the number
+ * of bits set in an Object value.
+ */
+public static long bitCountMySQL(Object b) {
+    // Boolean 转换为 1 或 0 计算
+    if (b instanceof Boolean) {
+        return Long.bitCount((Boolean) b ? 1L : 0L);
+    }
+    // 当出现非数字字符时，捕获异常返回 0
+    if (b instanceof String) {
+        try {
+            return bitCount(new BigDecimal((String) b));
+        } catch (Exception ignore) {
+            return 0;
+        }
+    }
+    if (b instanceof Number) {
+        return bitCount(new BigDecimal(b.toString()));
+    }
+    if (b instanceof ByteString) {
+        return bitCount((ByteString) b);
+    }
+    // Date 去除非数字字符后计算
+    if (b instanceof java.sql.Date) {
+        return bitCountMySQL(new SimpleDateFormat("yyyyMMdd").format(((java.sql.Date) b)));
+    }
+    // Time 去除非数字字符后计算
+    if (b instanceof Time) {
+        return bitCountMySQL(new SimpleDateFormat("HHmmss").format(((Time) b)));
+    }
+    // Timestamp 去除非数字字符后计算
+    if (b instanceof Timestamp) {
+        return bitCountMySQL(new SimpleDateFormat("yyyyMMddHHmmss").format(((Timestamp) b)));
+    }
+    return 0;
+}
+```
 
-https://github.com/apache/calcite/pull/4074/files
+`BIT_COUNT` 实现逻辑增强后，我们在 Calcite `functions.iq` 文件中增加相关类型的测试用例，执行后发现 `Date`、`Time` 和 `Timestamp` 类型计算的结果和 MySQL 不一致，这又是为什么呢？
+
+跟踪 `BIT_COUNT` 函数的执行逻辑可以发现，Calcite 在生成执行代码前，会调用 `implement` 方法生成可执行代码，生成的过程中会调用 `RexToLixTranslator` 将日期、时间类型转换为自 1970 年以来的整数值，因此传入 `bitCountMySQL` 方法的日期、时间参数被转换为整数，此时计算的 `BIT_COUNT` 结果出现了错误。
+
+![Date、Time、Timestamp 转换为内部数值](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/date-time-timestamp-to-int-long.png)
 
 TODO
 
