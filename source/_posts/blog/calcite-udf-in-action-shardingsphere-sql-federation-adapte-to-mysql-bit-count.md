@@ -3,7 +3,7 @@ title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00
-updated: 2024-12-18 08:00:00
+updated: 2024-12-20 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展](https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html)'
@@ -264,6 +264,8 @@ public static long bitCount(ByteString b) {
 
 ### Calcite BIT_COUNT 增强适配
 
+#### 初步尝试
+
 想要为 BIT_COUNT 函数适配更多的数据类型，首先需要在 `SqlLibraryOperators` 中为 BIT_COUNT 函数声明更多的参数类型，我们增加如下的 `OperandTypes.BOOLEAN`、`OperandTypes.CHARACTER`、`OperandTypes.DATETIME`、`OperandTypes.DATE`、`OperandTypes.TIME` 和 `OperandTypes.TIMESTAMP` 类型。
 
 ```java
@@ -285,7 +287,7 @@ public static final SqlFunction BIT_COUNT_MYSQL =
         SqlFunctionCategory.NUMERIC);
 ```
 
-然后我们需要在 `RexImpTable` 类中定义函数实现，将上面的函数声明对象 `BIT_COUNT_MYSQL` 和具体的函数实现逻辑关联上。下面展示了定义函数实现的具体逻辑，Calcite 动态编译会根据这个映射关系，找到函数的具体实现，即：`SqlFunctions#bitCountMySQL`，声明中最后一个参数 `Object.class` 代表的函数的参数类型，由于 MySQL BIT_COUNT 函数支持多种类型，因此我们先将参数类型定义为 `Object.class`。
+然后我们需要在 `RexImpTable` 类中定义函数实现，将上面的函数声明对象 `BIT_COUNT_MYSQL` 和具体的函数实现逻辑关联上。下面展示了定义函数实现的具体逻辑，Calcite 动态生成的代码会根据这个映射关系，找到函数的具体实现，即：`SqlFunctions#bitCountMySQL`，声明中最后一个参数 `Object.class` 代表的函数的参数类型，由于 MySQL BIT_COUNT 函数支持多种类型，因此我们先将参数类型定义为 `Object.class`。
 
 ```java
 // 定义函数实现
@@ -342,13 +344,239 @@ public static long bitCountMySQL(Object b) {
 
 ![Date、Time、Timestamp 转换为内部数值](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/date-time-timestamp-to-int-long.png)
 
-TODO
+解决这个问题最直接的想法是，去除将日期/时间转换为整数值的逻辑，直接将原始对象传递到 `bitCountMySQL` 方法中，但由于笔者缺乏对 Calcite 执行逻辑的研究，调整日期/时间转换可能影响到其他功能，因此打算先提交 PR，看看社区大佬是否能提供一些思路。
 
+#### 社区交流
 
+![PR 4074 Review 建议](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/pr-4074-review-comment.png)
+
+提交 PR 后，很快 `mihaibudiu` 大佬就 Review 了 PR（**非常感谢大佬多次指导**），建议通过传递一个额外的类型参数，来解决这个问题。笔者按照这个思路，又研究了下 Calcite 生成代码的逻辑，发现调用 `SqlFunctions.bitCountMySQL` 之前，先调用了 `SqlFunctions.toInt`（如下所示），如果能够将 `toInt` 转换为 `toDate`，是否就能实现 MySQL DATE 相关的处理逻辑呢？我们先来研究下 `toInt` 函数生成代码的逻辑，然后参考 `toInt` 实现方式，应该就能实现 Date/Time 类型传递到 BIT_COUNT 函数中。
+
+```java
+// 执行 SELECT BIT_COUNT(joinedate) FROM EMPS_DATE_TIME LIMIT 1 生成代码
+public org.apache.calcite.linq4j.Enumerable bind(final org.apache.calcite.DataContext root) {
+  final org.apache.calcite.linq4j.Enumerable _inputEnumerable = org.apache.calcite.linq4j.Linq4j.asEnumerable(new Object[] {
+    new Object[] {
+      100,
+      "Fred",
+      10,
+      null,
+      null,
+      40,
+      Integer.valueOf(25),
+      Boolean.valueOf(true),
+      false,
+      // DATE '1996-08-03' 转换为 9711
+      9711},
+    new Object[] {
+      110,
+      "Eric",
+      20,
+      "M",
+      "San Francisco",
+      3,
+      Integer.valueOf(80),
+      null,
+      false,
+      // DATE '2001-01-01' 转换为 11323
+      11323},
+    new Object[] {
+      110,
+      "John",
+      40,
+      "M",
+      "Vancouver",
+      2,
+      null,
+      Boolean.valueOf(false),
+      true,
+      // DATE '2002-05-03' 转换为 11810
+      11810},
+    new Object[] {
+      120,
+      "Wilma",
+      20,
+      "F",
+      null,
+      1,
+      Integer.valueOf(5),
+      null,
+      true,
+      // DATE '2005-09-07' 转换为 13033
+      13033},
+    new Object[] {
+      130,
+      "Alice",
+      40,
+      "F",
+      "Vancouver",
+      2,
+      null,
+      Boolean.valueOf(false),
+      true,
+      // DATE '2007-01-01' 转换为 13514
+      13514}}).take(1);
+  return new org.apache.calcite.linq4j.AbstractEnumerable(){
+      public org.apache.calcite.linq4j.Enumerator enumerator() {
+        return new org.apache.calcite.linq4j.Enumerator(){
+            public final org.apache.calcite.linq4j.Enumerator inputEnumerator = _inputEnumerable.enumerator();
+            public void reset() {
+              inputEnumerator.reset();
+            }
+
+            public boolean moveNext() {
+              return inputEnumerator.moveNext();
+            }
+
+            public void close() {
+              inputEnumerator.close();
+            }
+
+            public Object current() {
+              // 先调用 SqlFunctions.toInt，将 long 转为 int，再调用 SqlFunctions.bitCountMySQL
+              return org.apache.calcite.runtime.SqlFunctions.bitCountMySQL(org.apache.calcite.runtime.SqlFunctions.toInt(((Object[]) inputEnumerator.current())[9]));
+            }
+          };
+      }
+    };
+}
+
+public Class getElementType() {
+  return long.class;
+}
+```
+
+跟踪 `implement` 方法内部的执行代码生成逻辑，Calcite 在生成投影列中的函数执行逻辑时，会调用 [translateProjects](https://github.com/apache/calcite/blob/87485a90737ded1f7324870e761b94d78a41b5e0/core/src/main/java/org/apache/calcite/adapter/enumerable/RexToLixTranslator.java#L191) 方法，该方法会记录 `storageTypes` 表示存储数据的类型，由于在 `EnumerableValues` 取值时，将 DATE 类型转换成了 long 类型，因此 storageTypes 记录的存储类型为 long 类型。
+
+![translateProjects 处理逻辑](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/translate-projects-storage-types.png)
+
+然后 `translateProjects` 方法会调用到前文我们提到的 `RexToLixTranslator` 类，具体调用的方法是 `translateList`，跟踪 `translateList` 方法内部逻辑，参数 `operandList` 此时为 `$t10`，`desiredType`（期望类型）为 `long`。
+
+![translateList 处理逻辑](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/translate-list.png)
+
+每个操作数 `operand` 都会调用 `translate` 方法，方法内部会将 `$t10` 转换为 `BIT_COUNT($t9)`，再根据 `BIT_COUNT` 函数从 `RexImpTable.INSTANCE` 中获取函数实现器 Implementor，具体实现逻辑如下。
+
+```java
+/**
+ * Visit {@code RexCall}. For most {@code SqlOperator}s, we can get the implementor
+ * from {@code RexImpTable}. Several operators (e.g., CaseWhen) with special semantics
+ * need to be implemented separately.
+ */
+@Override
+public Result visitCall(RexCall call) {
+    if (rexResultMap.containsKey(call)) {
+        return rexResultMap.get(call);
+    }
+    ...
+    // 从 RexImpTable.INSTANCE 中获取函数实现器 Implementor
+    final RexImpTable.RexCallImplementor implementor = RexImpTable.INSTANCE.get(operator);
+    if (implementor == null) {
+        throw new RuntimeException("cannot translate call " + call);
+    }
+    // 获取函数操作数
+    final List<RexNode> operandList = call.getOperands();
+    // 转换为内部类型
+    final List<@Nullable Type> storageTypes = EnumUtils.internalTypes(operandList);
+    final List<Result> operandResults = new ArrayList<>();
+    // 遍历操作数，实现函数逻辑
+    for (int i = 0; i < operandList.size(); i++) {
+        final Result operandResult = implementCallOperand(operandList.get(i), storageTypes.get(i), this);
+        operandResults.add(operandResult);
+    }
+    callOperandResultMap.put(call, operandResults);
+    final Result result = implementor.implement(this, call, operandResults);
+    rexResultMap.put(call, result);
+    return result;
+}
+```
+
+`EnumUtils.internalTypes` 会将操作数类型转换为内部类型，可以看到 DATE、TIME 类型会被转换为 Integer 或 int 类型，而 TIMESTAMP 类型则会被转换为 Long 或 long 类型。由于我们测试的 Date 类型，内部最终会使用 Integer 或 int 类型，因此在生成代码时需要调用 toInt 方法进行转换。
+
+```java
+// EnumUtils#toInternal 方法
+static @Nullable Type toInternal(RelDataType type, boolean forceNotNull) {
+    switch (type.getSqlTypeName()) {
+        case DATE:
+        case TIME:
+            return type.isNullable() && !forceNotNull ? Integer.class : int.class;
+        case TIMESTAMP:
+            return type.isNullable() && !forceNotNull ? Long.class : long.class;
+        default:
+            return null; // we don't care; use the default storage type
+    }
+}
+```
+
+了解完 toInt 函数生成的逻辑，笔者根据 `mihaibudiu` 建议，在 `bitCountMySQL` 方法中增加额外的类型参数，但此时出现了报错，Calcite 会在 `RexImpTable` 中查找函数，并根据方法名和参数进行调用，由于参数个数不匹配，此时会出现找不到函数异常。难道这样的方式就没法实现吗？让我们继续探究函数的实现逻辑。
+
+![调用带类型参数的 bitCountMySQL 异常](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/call-bit-count-mysql-error.png)
+
+#### 最终实现
+
+增加额外的类型参数执行出现了异常，笔者又进行了一番深入思考，想到之前贡献的 SYSDATE 函数——https://github.com/apache/calcite/pull/4029，在调用函数实现时，传递了额外的 DataContext 参数，`bitCountMySQL` 可以参考 `sysDate` 函数的实现方式。Calcite 调用 `sysDate` 执行时，是通过 `SystemFunctionImplementor` 进行实现，该类不根据参数进行查找，直接判断 `op` 的类型，然后通过 `Expressions.call` 生成 `sysDate(DateContext)` 调用，`root` 就是额外传递的 DataContext 参数。
+
+![SystemFunctionImplementor 实现逻辑](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/system-function-implementor.png)
+
+而 BIT_COUNT 函数目前则是通过 `MethodImplementor` 类进行处理，该类实现函数逻辑时会根据参数个数进行查找。因此，可以考虑自行实现一个 `BitCountMySQLImplementor`，内部判断参数的类型，如果是 DATE、TIME 或 TIMESTAMP 类型，则将内部表示的整数值，转换为对应的日期、时间类型，然后调用 bitCountMySQL 函数实现。
+
+`BitCountMySQLImplementor` 最终的实现逻辑如下，内部会根据 SqlTypeName 判断不同类型的处理方式，例如二进制类型，会调用原有的 bitCount 函数实现，而 DATE、TIME、TIMESTAMP 类型，则会先调用转换方法，再调用 bitCountMySQL 函数实现。
+
+```java
+/**
+ * Implementor for MYSQL {@code BIT_COUNT} function.
+ */
+private static class BitCountMySQLImplementor extends AbstractRexCallImplementor {
+    BitCountMySQLImplementor() {
+        super("bitCount", NullPolicy.STRICT, false);
+    }
+    
+    @Override
+    Expression implementSafe(final RexToLixTranslator translator, final RexCall call, final List<Expression> argValueList) {
+        Expression expr = argValueList.get(0);
+        RelDataType relDataType = call.getOperands().get(0).getType();
+        if (SqlTypeUtil.isNull(relDataType)) {
+            return argValueList.get(0);
+        }
+        // In MySQL, BIT_COUNT(TIMESTAMP '1996-08-03 16:22:34') is converted to
+        // BIT_COUNT('19960803162234') for calculation, so the internal int value
+        // needs to be converted to DATE/TIME and TIMESTAMP.
+        SqlTypeName type = relDataType.getSqlTypeName();
+        switch (type) {
+            case VARBINARY:
+            case BINARY:
+                return Expressions.call(SqlFunctions.class, "bitCount", expr);
+            case DATE:
+                expr = Expressions.call(BuiltInMethod.INTERNAL_TO_DATE.method, expr);
+                break;
+            case TIME:
+                expr = Expressions.call(BuiltInMethod.INTERNAL_TO_TIME.method, expr);
+                break;
+            case TIMESTAMP:
+                expr = Expressions.call(BuiltInMethod.INTERNAL_TO_TIMESTAMP.method, expr);
+                break;
+            default:
+                break;
+        }
+        return Expressions.call(SqlFunctions.class, "bitCountMySQL", Expressions.box(expr));
+    }
+}
+```
+
+新增 BitCountMySQLImplementor 后，我们需要调整函数实现注册逻辑，自定义的 Implementor 需要通过 `define` 方法进行注册。
+
+```java
+define(BIT_COUNT_MYSQL, new BitCountMySQLImplementor());
+```
+
+最后，我们再对日期类型进行测试，可以发现此时的执行结果已经正确。
+
+![Calcite 日期类型测试](calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count/date-calcite-execute-result.png)
 
 ## 结语
 
-TODO
+本文介绍了笔者在升级 Calcite 版本过程中，遇到的 `BIT_COUNT` 函数不支持 Case，经过一步步地调研探索，以及与 Calcite 社区大佬交流，最终解决了 MySQL `BIT_COUNT` 函数支持不完善的问题。在探索过程中，加深了笔者对于 Calcite 生成可执行代码的理解，也对 Calcite 时间、日期类型的实现有了更深入的认识。
+
+笔者本地打包 `Calcite 1.39.0-SNAPSHOT`，使用 ShardingSphere 联邦查询 E2E 重新进行了测试，之前不支持的 Boolean，字符串以及日期、时间等类型都可以正确执行，目前还遗留了一个 `MySQL UNSIGNED` 类型不支持问题，笔者将继续探索 Calcite 支持 `UNSIGNED` 类型的方案，争取让 ShardingSphere 联邦查询更完美地适配各种数据类型，欢迎大家持续关注。
 
 
 
