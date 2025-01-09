@@ -7,6 +7,8 @@ updated: 2025-01-09 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite 的类型系统](https://blog.csdn.net/qq_31183071/article/details/102817214)'
+  - '[五分钟了解 Databend 全新 SQL 类型系统](https://xie.infoq.cn/article/46792cb71e3617a782ebeb991)'
+  - '[PolarDB-X 类型系统概述](https://zhuanlan.zhihu.com/p/374130246)'
 banner: /assets/banner/banner_6.jpg
 topic: calcite
 ---
@@ -17,7 +19,17 @@ topic: calcite
 
 
 
-## 隐式类型转换
+## 类型推导
+
+
+
+## 类型转换
+
+### 显示转换
+
+
+
+### 隐式转换
 
 
 
