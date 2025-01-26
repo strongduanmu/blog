@@ -1,0 +1,16 @@
+name: Avatica
+title: Avatica 官方文档中文版
+subtitle: '用于构建数据库驱动程序的框架'
+tags: Database
+description: Avatica 由客户端、服务器以及两者间的协议 API 组成，Avatica 服务器是 HTTP 服务器，Avatica 客户端是 JDBC 驱动程序，协议 API 由 JSON 或 Protobuf 缓冲区定义。协议 API 和 HTTP 传输的灵活性允许使用任何语言构建其他 Avatica 客户端，实现任何客户端规范。
+icon: /assets/wiki/avatica/avatica_logo.png
+cover: /assets/wiki/avatica/avatica_logo.png
+coverpage: true
+search:
+  filter: /wiki/avatica/
+  placeholder: 在 Avatica 中搜索...
+leftbar: 
+  - tree
+base_dir: /wiki/avatica/
+tree:
+  - background
