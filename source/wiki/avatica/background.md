@@ -13,31 +13,31 @@ Avatica 是一个用于构建数据库 JDBC 和 ODBC 驱动程序，以及 RPC �
 
 ![Avatica 架构](/wiki/avatica/background/avatica-architecture.png)
 
-Avatica 的 Java 绑定依赖性非常小。尽管它是 Apache Calcite 的一部分，但它并不依赖于 Calcite 的其他部分。它仅依赖于 JDK 8+ 和 Jackson。
+Avatica 的 Java 绑定依赖性非常小。尽管它是 Apache Calcite 的一部分，但它并不依赖于 Calcite 的其他部分。它仅依赖于 `JDK 8+` 和 `Jackson`。
 
-Avatica 的有线协议是 JSON 或 HTTP 上的协议缓冲区。JSON 协议的 Java 实现使用 [Jackson](https://github.com/FasterXML/jackson) 将请求/响应命令对象转换为 JSON 或从 JSON 转换为 JSON。
+Avatica 的有线协议是 JSON 或 HTTP 上的协议缓冲区。JSON 协议的 Java 实现使用 [Jackson](https://github.com/FasterXML/jackson)，将请求命令对象转换为 JSON，或从 JSON 转换为响应命令对象。
 
-Avatica-Server 是 Avatica RPC 的 Java 实现。
+`Avatica-Server` 是 Avatica RPC 的 Java 实现。
 
 核心概念：
 
-- [Meta](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/Meta.html) 是一个足以实现任何 Avatica 提供程序的本地 API；
+- [Meta](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/Meta.html) 是一个本地 API，通过它能够实现任何 `Avatica provider` 提供程序；
 - [AvaticaFactory](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/AvaticaFactory.html) 在 `Meta` 之上创建 JDBC 类的实现；
 - [Service](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/remote/Service.html) 是一个接口，它实现了 `Meta` 在请求和响应命令对象方面的功能。
 
 ## JDBC
 
-Avatica implements JDBC by means of [AvaticaFactory](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/AvaticaFactory.html). An implementation of `AvaticaFactory` creates implementations of the JDBC classes ([Driver](https://docs.oracle.com/javase/8/docs/api//java/sql/Driver.html), [Connection](https://docs.oracle.com/javase/8/docs/api//java/sql/Connection.html), [Statement](https://docs.oracle.com/javase/8/docs/api//java/sql/Statement.html), [ResultSet](https://docs.oracle.com/javase/8/docs/api//java/sql/ResultSet.html)) on top of a `Meta`.
+Avatica 通过 [AvaticaFactory](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/AvaticaFactory.html) 实现 JDBC。`AvaticaFactory` 的实现在 `Meta` 之上创建 JDBC 类 ([Driver](https://docs.oracle.com/javase/8/docs/api//java/sql/Driver.html)、[Connection](https://docs.oracle.com/javase/8/docs/api//java/sql/Connection.html)、[Statement](https://docs.oracle.com/javase/8/docs/api//java/sql/Statement.html)、[ResultSet](https://docs.oracle.com/javase/8/docs/api//java/sql/ResultSet.html)) 的实现。
 
 ## ODBC
 
-Work has not started on Avatica ODBC.
+Avatica ODBC 的工作尚未开始。
 
-Avatica ODBC would use the same wire protocol and could use the same server implementation in Java. The ODBC client would be written in C or C++.
+Avatica ODBC 将使用相同的有线协议，并可以使用 Java 中的相同服务器实现。ODBC 客户端将用 C 或 C++ 编写。
 
-Since the Avatica protocol abstracts many of the differences between providers, the same ODBC client could be used for different databases.
+由于 Avatica 协议抽象了 `provider` 提供程序之间的许多差异，因此相同的 ODBC 客户端可用于不同的数据库。
 
-Although the Avatica project does not include an ODBC driver, there are ODBC drivers written on top of the Avatica protocol, for example [an ODBC driver for Apache Phoenix](http://hortonworks.com/hadoop-tutorial/bi-apache-phoenix-odbc/).
+虽然 Avatica 项目不包含 ODBC 驱动程序，但是有基于 Avatica 协议编写的 ODBC 驱动程序，例如 [Apache Phoenix 的 ODBC 驱动程序](http://hortonworks.com/hadoop-tutorial/bi-apache-phoenix-odbc/)。
 
 ## HTTP Server
 

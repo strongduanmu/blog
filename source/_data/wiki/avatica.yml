@@ -13,4 +13,5 @@ leftbar:
   - tree
 base_dir: /wiki/avatica/
 tree:
-  - background
+  '概述':
+    - background
