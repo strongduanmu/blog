@@ -39,13 +39,13 @@ Avatica ODBC 将使用相同的有线协议，并可以使用 Java 中的相同�
 
 虽然 Avatica 项目不包含 ODBC 驱动程序，但是有基于 Avatica 协议编写的 ODBC 驱动程序，例如 [Apache Phoenix 的 ODBC 驱动程序](http://hortonworks.com/hadoop-tutorial/bi-apache-phoenix-odbc/)。
 
-## HTTP Server
+## HTTP 服务
 
-Avatica-server embeds the Jetty HTTP server, providing a class [HttpServer](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/server/HttpServer.html) that implements the Avatica RPC protocol and can be run as a standalone Java application.
+Avatica 服务端嵌入了 `Jetty HTTP` 服务器，提供了一个实现 `Avatica RPC` 协议的 [HttpServer](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/server/HttpServer.html) 类，可以作为独立的 Java 应用程序运行。
 
-Connectors in HTTP server can be configured if needed by extending `HttpServer` class and overriding its `configureConnector()` method. For example, user can set `requestHeaderSize` to 64K bytes as follows:
+如果需要，可以通过扩展 `HttpServer` 类，并重写其 `configureConnector()` 方法，来配置 HTTP 服务器中的连接器。例如，用户可以将 `requestHeaderSize` 设置为 64K 字节，如下所示：
 
-```
+```java
 HttpServer server = new HttpServer(handler) {
   @Override
   protected ServerConnector configureConnector(
@@ -59,24 +59,24 @@ HttpServer server = new HttpServer(handler) {
 server.start();
 ```
 
-## Project structure
+## 项目结构
 
-We know that it is important that client libraries have minimal dependencies.
+我们知道客户端库具有最小的依赖性非常重要。
 
-Avatica is a sub-project of [Apache Calcite](https://calcite.apache.org/), maintained in a separate repository. It does not depend upon any other part of Calcite.
+Avatica 是 [Apache Calcite](https://calcite.apache.org/) 的一个子项目，在一个单独的存储库中维护。它不依赖于 Calcite 的任何其他部分。
 
-Packages:
+软件包：
 
-- [org.apache.calcite.avatica](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/package-summary.html) Core framework
-- [org.apache.calcite.avatica.remote](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/remote/package-summary.html) JDBC driver that uses remote procedure calls
-- [org.apache.calcite.avatica.server](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/server/package-summary.html) HTTP server
-- [org.apache.calcite.avatica.util](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/util/package-summary.html) Utilities
+- [org.apache.calcite.avatica](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/package-summary.html) 核心框架；
+- [org.apache.calcite.avatica.remote](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/remote/package-summary.html) 使用远程过程调用的 JDBC 驱动程序；
+- [org.apache.calcite.avatica.server](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/server/package-summary.html) HTTP 服务器；
+- [org.apache.calcite.avatica.util](https://calcite.apache.org/avatica/javadocAggregate/org/apache/calcite/avatica/util/package-summary.html) 实用程序。
 
-## Status
+## 状态
 
-### Implemented
+### 已实现的
 
-- Create connection, create statement, metadata, prepare, bind, execute, fetch
+- 创建连接 `create connection`、创建语句 `create statement`、元数据 `metadata`、准备 `prepare`、绑定 `bind`、执行 `execute`、获取 `fetch`；
 - RPC using JSON over HTTP
 - Local implementation
 - Implementation over an existing JDBC driver
