@@ -77,78 +77,78 @@ Avatica 是 [Apache Calcite](https://calcite.apache.org/) 的一个子项目，�
 ### 已实现的
 
 - 创建连接 `create connection`、创建语句 `create statement`、元数据 `metadata`、准备 `prepare`、绑定 `bind`、执行 `execute`、获取 `fetch`；
-- RPC using JSON over HTTP
-- Local implementation
-- Implementation over an existing JDBC driver
-- Composite RPCs (combining several requests into one round trip)
-  - Execute-Fetch
-  - Metadata-Fetch (metadata calls such as getTables return all rows)
+- 通过 HTTP 使用 JSON 格式进行 RPC 调用；
+- 本地实现；
+- 通过现有的 JDBC 驱动程序实现；
+- 复合 RPC 调用（将多个请求组合成一次往返）：
+  - 执行 - 获取；
+  - 元数据获取（元数据调用，例如 `getTables` 返回所有行）。
 
-### Not implemented
+### 未实现的
 
-- ODBC
-- RPCs
-  - CloseStatement
-  - CloseConnection
-- Composite RPCs
-  - CreateStatement-Prepare
-  - CloseStatement-CloseConnection
-  - Prepare-Execute-Fetch (Statement.executeQuery should fetch first N rows)
-- Remove statements from statement table
-- DML (INSERT, UPDATE, DELETE)
-- Statement.execute applied to SELECT statement
+- ODBC；
+- RPC 调用：
+  - CloseStatement；
+  - CloseConnection；
+- 复合 RPC 调用：
+  - CreateStatement - Prepare；
+  - CloseStatement - CloseConnection；
+  - 准备 - 执行 - 获取（`Statement.executeQuery` 应该获取前 N 行）。
+- 从语句表中删除语句；
+- DML (INSERT, UPDATE, DELETE)；
+- `Statement.execute` 应用于 SELECT 语句。
 
-## Clients
+## 客户端
 
-The following is a list of available Avatica clients. Several describe themselves as adapters for [Apache Phoenix](http://phoenix.apache.org/) but also work with other Avatica back-ends. Contributions for clients in other languages are highly welcomed!
+以下是可用的 Avatica 客户端列表，其中一些客户端是 [Apache Phoenix](http://phoenix.apache.org/) 的适配器，但也与其他 Avatica 后端兼容。非常欢迎为其他语言的客户端做出贡献！
 
-### Microsoft .NET driver for Apache Phoenix Query Server
+### 适用于 Apache Phoenix 查询服务器的 Microsoft .NET 驱动程序
 
-- [Home page](https://github.com/Azure/hdinsight-phoenix-sharp)
-- Language: C#
-- *License*: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- Avatica version 1.2.0 onwards
-- *Maintainer*: Microsoft Azure
+- [主页](https://github.com/Azure/hdinsight-phoenix-sharp)
+- 语言：C#
+- 许可证：[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- Avatica 版本 1.2.0 及以上
+- 维护者：Microsoft Azure
 
-### Apache Phoenix/Avatica SQL Driver
+### Apache Phoenix/Avatica SQL 驱动程序
 
-- [Home page](https://github.com/apache/calcite-avatica-go)
-- *Language*: Go
-- *License*: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- Avatica version 1.8.0 onwards
-- *Maintainer*: Boostport and the Apache Calcite community
+- [主页](https://github.com/apache/calcite-avatica-go)
+- 语言：Go
+- 许可证：[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- Avatica 版本 1.8.0 及以上
+- 维护者：Boostport 和 Apache Calcite 社区
 
-### Avatica thin client
+### Avatica thin 客户端
 
-- [Home page](https://calcite.apache.org/avatica)
-- *Language*: Java
-- *License*: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- Any Avatica version
-- *Maintainer*: Apache Calcite community
+- [主页](https://calcite.apache.org/avatica)
+- 语言：Java
+- 许可证：[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- 任何 Avatica 版本
+- 维护者：Apache Calcite 社区
 
-### Apache Phoenix database adapter for Python
+### 适用于 Python 的 Apache Phoenix 数据库适配器
 
-- [Home page](https://phoenix.apache.org/python.html)
-- Language: Python
-- *License*: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- Avatica version 1.2.0 onwards
-- *Maintainer*: Apache Phoenix community
+- [主页](https://phoenix.apache.org/python.html)
+- 语言：Python
+- 许可证：[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- Avatica 版本 1.2.0 及以上
+- 维护者：Apache Phoenix 社区
 
-### JavaScript binding to Calcite Avatica Server
+### JavaScript 绑定到 Calcite Avatica 服务器
 
-- [Home page](https://github.com/waylayio/avatica-js)
-- Language: JavaScript
-- *License*: [MIT](https://opensource.org/licenses/MIT)
-- Any Avatica version
-- *Maintainer*: Waylay.io
+- [主页](https://github.com/waylayio/avatica-js)
+- 语言：JavaScript
+- 许可证：[MIT](https://opensource.org/licenses/MIT)
+- 任何 Avatica 版本
+- 维护者：`Waylay.io`
 
-### Calcite Avatica CLI: A Go-based Tool
+### Calcite Avatica CLI：基于 Go 的工具
 
-- [Home page](https://github.com/satyakommula96/calcite-cli)
-- Language: Go
-- *License*: [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
-- Avatica version 1.8.0 onwards
-- *Maintainer*: [Satya Kommula](https://github.com/satyakommula96)
+- [主页](https://github.com/satyakommula96/calcite-cli)
+- 语言：Go
+- 许可证：[Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+- Avatica 版本 1.8.0 及以上
+- 维护者：[Satya Kommula](https://github.com/satyakommula96)
 
 
 
