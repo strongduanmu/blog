@@ -1,0 +1,17 @@
+name: CMU 15-799
+title: CMU 15-799 学习笔记
+subtitle: '热门的数据库优化课程 | 网红教授 Andy 亲自授课教学'
+tags: Database
+description: CMU 15-799 是卡内基梅隆大学 Andy Pavlo 教授推出的数据库优化器专题课程，主要介绍了将 SQL 转换为物理查询计划的经典方法及最新方法，同时也介绍了成本模型，自适应查询优化等内容，适合有一定数据库基础想要继续深入研究优化器的同学学习。
+icon: /assets/blog/2023/10/31/1698714330.png
+cover: /assets/blog/2023/10/31/1698714330.png
+coverpage: true
+search:
+  filter: /wiki/cmu_15_799/
+  placeholder: 在 CMU 15-799 中搜索...
+leftbar: 
+  - tree
+base_dir: /wiki/cmu_15_799/
+tree:
+  - index
+  - intro_to_query_optimization

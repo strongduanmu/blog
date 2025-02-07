@@ -1,7 +1,7 @@
 name: C
 title: C 语言基础教程
 subtitle: '修炼编程内功的必经之路'
-tags: C_C++
+tags: Code
 description: C 语言是一门简单通用的早期编程语言，是后来 C++、Java、Go 等高级语言的原型语言，学习 C 语言有助于加深对其他语言的理解。此外，由于 C 语言抽象程度很低，非常适合用来帮助理解计算机系统底层的运行机制，可以说学习 C 语言，是修炼编程内功的必经之路。
 icon: /assets/wiki/c/c_logo.png
 cover: /assets/wiki/c/c_logo.png
