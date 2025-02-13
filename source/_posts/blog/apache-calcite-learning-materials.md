@@ -60,6 +60,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * [Apache Calcite 优化器详解（二）](http://matt33.com/2019/03/17/apache-calcite-planner/)
 * [Cascades Optimizer](https://zhuanlan.zhihu.com/p/73545345)
 * [The Volcano/Cascades Optimizer](https://www.slideshare.net/slideshow/the-volcanocascades-optimizer/127681467#1)
+* [Extensible Query Optimizers in Practice](https://www.microsoft.com/en-us/research/publication/extensible-query-optimizers-in-practice/)
 
 ### 执行器
 
