@@ -24,7 +24,37 @@ banner: /assets/banner/banner_2.jpg
 
 ## 查询优化
 
-TODO
+SQL 是一种声明性的查询语句，用户通常只需要通过 SQL 语句（如下展示），告诉数据库管理系统（`DBMS`）查询哪些数据，而不需要告诉它如何完成这些任务。
+
+```sql
+SELECT DISTINCT ename
+FROM Emp E
+	JOIN Dept D ON E.did = D.did
+WHERE D.dname = 'Toy'
+```
+
+对于一个给定的查询，DBMS 会尝试找到一个正确并且高效的执行计划，这也是**本门课程的目标，即：正确（correct）、高效（best cost）地执行 SQL**。
+
+### 诞生的背景
+
+正确执行 SQL 是一个基本前提，满足了这个基本前提后，我们会更加关注 SQL 执行的效率。因此，我们需要通过代价（cost）这样的指标，来表示 SQL 执行计划的效率，从而可以对不同执行计划进行比较。
+
+那么，**查询优化和现实世界有什么样的联系呢**？假设我们有 2 张表，分别是员工表（`Emp`）和部门表（`Dept`），我们使用如下的 SQL 语句，尝试从 `Toy` 部门查找到该部门下所有员工的不同名字。
+
+```sql
+SELECT DISTINCT ename
+FROM Emp E
+	JOIN Dept D ON E.did = D.did
+WHERE D.dname = 'Toy'
+```
+
+为了能够有效地执行这条 SQL，我们会在 `Catalog` 中记录列索引，包括：聚簇索引（`Clustered Index`）和非聚簇索引（`Unclustered Index`），以及表的记录数和页数。除了这些信息，`Catalog` 中还会记录额外的元数据，或者表中内容的摘要，这些信息会用来确定基数估计（`Cardinality Estimation`）、谓词选择性（`Predicate Selectivity`）。
+
+![按字面意思将 SQL 翻译为执行计划](/wiki/cmu_15_799/intro_to_query_optimization/translate-sql-to-query-plan-according-to-literal.png)
+
+按照 SQL 字面意思，我们将 SQL 语句翻译为上图所示的执行计划，最底部我们对 `Emp` 和 `Dept` 进行扫描，
+
+
 
 ## 参考资料
 
