@@ -28,6 +28,9 @@ git fetch upstream pull/11150/head:dev-0705
 # 拉取远程库 TAG 代码到 5.3.0-test 分支
 git fetch upstream refs/tags/5.3.0:5.3.0-test
 
+# 和上游 master 分支同步
+git rebase upstream/master
+
 # 根据指定 commitId 创建新分支
 git checkout commitId -b branchName
 
