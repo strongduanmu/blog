@@ -162,4 +162,25 @@ export DOCKER_HOST=tcp://127.0.0.1:2375
 ./mvnw -B clean install -am -pl test/e2e/sql -Pit.env.docker -DskipTests -Dspotless.apply.skip=true -T 1C 
 ```
 
-​	
+## all predefined address pools have been fully subnetted
+
+执行 ShardingSphere E2E 程序，Docker 启动容器时出现 `BadRequestException: Status 400: {"message":"all predefined address pools have been fully subnetted"}` 异常，参考 [issues#3529](https://github.com/coollabsio/coolify/issues/3529)，需要修改 `etc/docker/daemon.json` 文件，增加 `default-address-pools` 配置，具体配置如下：
+
+```json
+{
+    "log-level": "warn",
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "10m",
+        "max-file": "5"
+    },
+    "default-address-pools": [
+        {
+            "base": "172.16.0.0/12",
+            "size": 24
+        }
+    ]
+}
+```
+
+增加完成后，重启 Docker 服务，再次执行 E2E 成功。
