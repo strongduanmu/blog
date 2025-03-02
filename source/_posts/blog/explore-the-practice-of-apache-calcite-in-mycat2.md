@@ -118,7 +118,95 @@ mysql> SHOW DATABASES;
 
 ### 业务库配置
 
-完成原型库配置后，我们再来配置业务库。和原型库的配置类似，我们同样需要先注册 MySQL 数据源，然后将数据源构建为集群。
+完成原型库配置后，我们再来配置业务库。和原型库的配置类似，我们同样需要先注册 MySQL 数据源，然后将数据源构建为集群。MyCat2 提供了一种注释 SQL，用来注册数据源和集群。我们使用 `mysql -h127.0.0.1 -uroot -p -P8066 --binary-as-hex=0 -c -A` 连接 MyCat2 服务，并执行以下 SQL 注册数据源。为了模拟 MySQL 主从同步，我们将从库的数据库设置为和主库相同。
+
+```sql
+/*+ mycat:createDataSource{
+	"name":"ds_write_0",
+	"url":"jdbc:mysql://127.0.0.1:3306/ds_write_0",
+	"user":"root",
+	"password":"123456"
+} */;
+
+/*+ mycat:createDataSource{
+	"name":"ds_read_0",
+	"url":"jdbc:mysql://127.0.0.1:3306/ds_write_0",
+	"user":"root",
+	"password":"123456"
+} */;
+
+/*+ mycat:createDataSource{
+	"name":"ds_write_1",
+	"url":"jdbc:mysql://127.0.0.1:3306/ds_write_1",
+	"user":"root",
+	"password":"123456"
+} */;
+
+/*+ mycat:createDataSource{
+	"name":"ds_read_1",
+	"url":"jdbc:mysql://127.0.0.1:3306/ds_write_1",
+	"user":"root",
+	"password":"123456"
+} */;
+```
+
+然后，我们基于创建的数据源构建集群，执行以下 SQL 创建集群：
+
+```sql
+/*! mycat:createCluster{
+	"name":"c0",
+	"masters":["ds_write_0"],
+	"replicas":["ds_read_0"]
+} */;
+
+/*! mycat:createCluster{
+	"name":"c1",
+	"masters":["ds_write_1"],
+	"replicas":["ds_read_1"]
+} */;
+```
+
+创建完集群后，我们就可以创建一些不同维度的分片表，并通过这些表来观察 MyCat2 是如何支持分布式 SQL 的，执行如下 SQL 创建分片表。
+
+```sql
+CREATE DATABASE sharding_db;
+USE sharding_db;
+
+-- 创建 3 张不同维度的分片表
+CREATE TABLE `sbtest_sharding_id` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `k` int(11) NOT NULL DEFAULT '0',
+  `c` char(120) NOT NULL DEFAULT '',
+  `pad` char(60) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) DBPARTITION BY HASH(id) DBPARTITIONS 2;
+  
+CREATE TABLE `sbtest_sharding_k` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `k` int(11) NOT NULL DEFAULT '0',
+  `c` char(120) NOT NULL DEFAULT '',
+  `pad` char(60) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) DBPARTITION BY HASH(k) DBPARTITIONS 2;
+
+CREATE TABLE `sbtest_sharding_c` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `k` int(11) NOT NULL DEFAULT '0',
+  `c` char(120) NOT NULL DEFAULT '',
+  `pad` char(60) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) DBPARTITION BY HASH(c) DBPARTITIONS 2;
+```
+
+### 初始化数据
+
+TODO 初始化数据
+
+
+
+## MyCat2 Calcite 实践探究
+
+TODO
 
 
 
