@@ -3,10 +3,11 @@ title: Apache Calcite 在 MyCat2 中的实践探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-02-17 08:33:30
-updated: 2025-03-02 08:33:30
+updated: 2025-03-20 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[入门 MyCat2](https://www.yuque.com/ccazhw/ml3nkf/fb2285b811138a442eb850f0127d7ea3?)'
+  - '[MyCat2 SQL 编写指导](https://www.yuque.com/ccazhw/ml3nkf/hdqguz)'
 banner: /assets/banner/banner_8.jpg
 topic: calcite
 ---
@@ -200,11 +201,58 @@ CREATE TABLE `sbtest_sharding_c` (
 
 ### 初始化数据
 
-TODO 初始化数据
+创建好分片表后，我们再使用 [sysbench](https://github.com/akopytov/sysbench) 工具向 `sbtest1` 表插入 10w 条数据，执行如下脚本初始化数据：
 
+```bash
+sysbench /opt/homebrew/Cellar/sysbench/1.0.20_6/share/sysbench/oltp_read_write.lua --tables=1 --table_size=100000 --mysql-user=root --mysql-password=123456 --mysql-host=127.0.0.1 --mysql-port=8066 --mysql-db=sharding_db prepare
+```
 
+由于 MyCat2 不支持 `INSERT ... SELECT ...` 语句，因此需要先使用 `mysqldump` 将 `sbtest1` 中的数据导出到文件。
+
+```bash
+mysqldump -h127.0.0.1 -uroot -p -P8066 sharding_db sbtest1 > sbtest1.sql
+```
+
+然后修改 `sbtest1.sql` 文件，注释掉文件中除了 `INSERT` 外的语句，并将 `sbtest1` 分别修改为 `sbtest_sharding_id`、`sbtest_sharding_k` 和 `sbtest_sharding_c`，然后执行 `mysql> source ~/sbtest1.sql` 导入数据到目标表。使用 `SELECT COUNT(1)` 检查各个表的数据量，都是 10w 条记录，符合我们的预期。
+
+```sql
+mysql> SELECT COUNT(1) FROM sbtest_sharding_id;
++----------+
+| COUNT(1) |
++----------+
+|   100000 |
++----------+
+
+mysql> SELECT COUNT(1) FROM sbtest_sharding_k;
++----------+
+| COUNT(1) |
++----------+
+|   100000 |
++----------+
+
+mysql> SELECT COUNT(1) FROM sbtest_sharding_c;
++----------+
+| COUNT(1) |
++----------+
+|   100000 |
++----------+
+```
 
 ## MyCat2 Calcite 实践探究
+
+参考 [MyCat2 SQL 编写指导](https://www.yuque.com/ccazhw/ml3nkf/hdqguz)，MyCat2 SQL 执行流程如下，服务端接收到 SQL 字符串或模板化 SQL 后，会先将 SQL 解析为 SQL AST，然后使用 `Hack Router` 进行路由判断，如果是一些简单的单节点 SQL，`Hack Router` 会直接将 SQL 路由到 DB 中执行，其他复杂的 SQL 则会进入 DRDS 处理流程。DRDS 处理流程中，会使用 Calcite 对 SQL 语句进行编译，然后生成关系代数树，并经过逻辑优化和物理优化两步，最终执行返回 SQL 结果。
+
+![MyCat 2 SQL 执行流程](explore-the-practice-of-apache-calcite-in-mycat2/sql-execute-progress.png)
+
+由于本文主要关注 MyCat2 对于 Calcite 的应用，因此后续介绍中其他流程不会过多介绍，感兴趣的朋友可以下载源码自行探索。我们执行如下的 SQL 示例，来跟踪下 MyCat2 的执行流程，并探索在 SQL 执行过程中，Calcite 查询引擎都负责了哪些事情。
+
+```sql
+SELECT * FROM sbtest_sharding_id i INNER JOIN sbtest_sharding_k k ON i.id = k.id INNER JOIN sbtest_sharding_c c ON k.id = c.id LIMIT 10;
+```
+
+
+
+
 
 TODO
 
