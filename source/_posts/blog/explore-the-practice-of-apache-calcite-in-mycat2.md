@@ -3,7 +3,7 @@ title: Apache Calcite 在 MyCat2 中的实践探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-02-17 08:33:30
-updated: 2025-03-20 08:00:00
+updated: 2025-03-21 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[入门 MyCat2](https://www.yuque.com/ccazhw/ml3nkf/fb2285b811138a442eb850f0127d7ea3?)'
@@ -240,14 +240,86 @@ mysql> SELECT COUNT(1) FROM sbtest_sharding_c;
 
 ## MyCat2 Calcite 实践探究
 
+### 执行流程概览
+
 参考 [MyCat2 SQL 编写指导](https://www.yuque.com/ccazhw/ml3nkf/hdqguz)，MyCat2 SQL 执行流程如下，服务端接收到 SQL 字符串或模板化 SQL 后，会先将 SQL 解析为 SQL AST，然后使用 `Hack Router` 进行路由判断，如果是一些简单的单节点 SQL，`Hack Router` 会直接将 SQL 路由到 DB 中执行，其他复杂的 SQL 则会进入 DRDS 处理流程。DRDS 处理流程中，会使用 Calcite 对 SQL 语句进行编译，然后生成关系代数树，并经过逻辑优化和物理优化两步，最终执行返回 SQL 结果。
 
-![MyCat 2 SQL 执行流程](explore-the-practice-of-apache-calcite-in-mycat2/sql-execute-progress.png)
+![MyCat2 SQL 执行流程](explore-the-practice-of-apache-calcite-in-mycat2/sql-execute-progress.png)
 
-由于本文主要关注 MyCat2 对于 Calcite 的应用，因此后续介绍中其他流程不会过多介绍，感兴趣的朋友可以下载源码自行探索。我们执行如下的 SQL 示例，来跟踪下 MyCat2 的执行流程，并探索在 SQL 执行过程中，Calcite 查询引擎都负责了哪些事情。
+### 初看 SQL 执行
+
+由于本文主要关注 MyCat2 对于 Calcite 的应用，因此后续介绍中其他流程不会过多探究，感兴趣的朋友可以下载源码自行研究。我们执行如下的 SQL 示例，来跟踪 MyCat2 的执行流程，并探索在 SQL 执行过程中，Calcite 查询引擎都进行了哪些优化。
 
 ```sql
 SELECT * FROM sbtest_sharding_id i INNER JOIN sbtest_sharding_k k ON i.id = k.id INNER JOIN sbtest_sharding_c c ON k.id = c.id LIMIT 10;
+```
+
+首先，我们可以执行 `EXPLAIN` 语句，先观察下这条语句的执行计划（省略了执行计划中生成的执行代码 `Code` 部分）。对于这 3 张表的 JOIN 处理，MyCat2 优化器选择了 `SortMergeJoin` 的方式，从 MySQL 中查询 `sharding_db.sbtest_sharding_id` 和 `sharding_db.sbtest_sharding_k` 表时，会使用 `Join Key` 进行排序，对于已经排序的结果集，再拉取到内存中进行 `SortMergeJoin`。处理完 Join 后，会对结果集进行一次内存排序，然后和 `sharding_db.sbtest_sharding_c` 表再进行一次 `SortMergeJoin`，最终的结果集经过内存排序后获取出前 10 条结果。
+
+可以看到，MyCat2 中将分片的逻辑表封装为 MycatView，MycatView 在内部下推执行时，会根据分片的规则改写为不同的真实 SQL，执行计划中的 `Each` 部分展示了下推 DB 执行的 SQL 语句，由于使用了 `SortMergeJoin`，因此下推语句中包含了 `ORDER BY` 排序处理。
+
+```sql
+mysql> EXPLAIN SELECT * FROM sbtest_sharding_id i INNER JOIN sbtest_sharding_k k ON i.id = k.id INNER JOIN sbtest_sharding_c c ON k.id = c.id LIMIT 10;
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| plan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| Plan:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| MycatMemSort(fetch=[?0])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|   MycatSortMergeJoin(condition=[=($4, $8)], joinType=[inner])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+|     MycatMemSort(sort0=[$4], dir0=[ASC])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|       MycatSortMergeJoin(condition=[=($0, $4)], joinType=[inner])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+|         MycatView(distribution=[[sharding_db.sbtest_sharding_id]], mergeSort=[true])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+|         MycatView(distribution=[[sharding_db.sbtest_sharding_k]], mergeSort=[true])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+|     MycatView(distribution=[[sharding_db.sbtest_sharding_c]], mergeSort=[true])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| Each(targetName=c0, sql=SELECT * FROM sharding_db_0.sbtest_sharding_id_0 AS `sbtest_sharding_id` ORDER BY (`sbtest_sharding_id`.`id` IS NULL), `sbtest_sharding_id`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Each(targetName=c1, sql=SELECT * FROM sharding_db_1.sbtest_sharding_id_0 AS `sbtest_sharding_id` ORDER BY (`sbtest_sharding_id`.`id` IS NULL), `sbtest_sharding_id`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| Each(targetName=c0, sql=SELECT * FROM sharding_db_0.sbtest_sharding_k_0 AS `sbtest_sharding_k` ORDER BY (`sbtest_sharding_k`.`id` IS NULL), `sbtest_sharding_k`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Each(targetName=c1, sql=SELECT * FROM sharding_db_1.sbtest_sharding_k_0 AS `sbtest_sharding_k` ORDER BY (`sbtest_sharding_k`.`id` IS NULL), `sbtest_sharding_k`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Each(targetName=c0, sql=SELECT * FROM sharding_db_0.sbtest_sharding_c_0 AS `sbtest_sharding_c` ORDER BY (`sbtest_sharding_c`.`id` IS NULL), `sbtest_sharding_c`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Each(targetName=c1, sql=SELECT * FROM sharding_db_1.sbtest_sharding_c_0 AS `sbtest_sharding_c` ORDER BY (`sbtest_sharding_c`.`id` IS NULL), `sbtest_sharding_c`.`id`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
++----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+170 rows in set (0.46 sec)
+```
+
+### 从 SQL 到执行计划
+
+通过 MyCat2 的执行计划，我们对于分片表的多表关联查询有了初步的认识，下面我们来探究下 MyCat2 的代码实现，看看一条 SQL 是如何转换为执行计划的。我们执行如下的 SQL 语句：
+
+```sql
+SELECT * FROM sbtest_sharding_id i INNER JOIN sbtest_sharding_k k ON i.id = k.id INNER JOIN sbtest_sharding_c c ON k.id = c.id LIMIT 10;
+```
+
+MyCat2 SQL 执行的入口在 [MycatdbCommand](https://github.com/strongduanmu/Mycat2/blob/803bda6a02aa64d7fc16b521f04da06ce4bce2db/mycat2/src/main/java/io/mycat/commands/MycatdbCommand.java#L493) 类中，它会根据 SQL 语句的类型生成不同的 Handler 类，`SQLSelectStatement` 查询语句对应的是 `ShardingSQLHandler`。
+
+![MycatdbCommand 入口获取 ShardingSQLHandler](explore-the-practice-of-apache-calcite-in-mycat2/mycat2-command.png)
+
+获取到 `ShardingSQLHandler` 后，会调用 `AbstractSQLHandler#execute` 方法，最终会调用到 `ShardingSQLHandler#onExecute` 方法中，方法内部会使用 `hackRouter` 的 `analyse` 方法进行分析，用来决定 SQL 直接执行还是走 DRDS 执行。`analyse` 方法内部会先提取出语句中的表，然后调用 `checkVaildNormalRoute` 方法，对不同表的路由进行 `check` 并记录数据分布结果，最后根据数据分布结果决定执行方式。
+
+```java
+public class ShardingSQLHandler extends AbstractSQLHandler<SQLSelectStatement> {
+
+    @Override
+    protected Future<Void> onExecute(SQLRequest<SQLSelectStatement> request,
+        MycatDataContext dataContext, Response response) {
+        Optional<Future<Void>> op = Optional.empty();
+        ...
+        // SQL 模板化处理，转换为 select * from `sharding_db`.sbtest_sharding_id i inner join `sharding_db`.sbtest_sharding_k k on i.id = k.id inner join `sharding_db`.sbtest_sharding_c c on k.id = c.id limit ? 和参数 10
+        DrdsSqlWithParams drdsSqlWithParams = DrdsRunnerHelper.preParse(request.getAst(), dataContext.getDefaultSchema());
+        HackRouter hackRouter = new HackRouter(drdsSqlWithParams.getParameterizedStatement(), dataContext);
+        try {
+            // 分析 SQL 中表的数据分布，然后决定透传执行还是走 DRDS 执行
+            if (hackRouter.analyse()) {
+                Pair<String, String> plan = hackRouter.getPlan();
+                return response.proxySelect(Collections.singletonList(plan.getKey()), plan.getValue(), drdsSqlWithParams.getParams());
+            } else {
+                return DrdsRunnerHelper.runOnDrds(dataContext, drdsSqlWithParams, response);
+            }
+        } catch (Throwable throwable) {
+            LOGGER.error(request.getAst().toString(), throwable);
+            return Future.failedFuture(throwable);
+        }
+    }
+}
 ```
 
 
@@ -256,7 +328,9 @@ SELECT * FROM sbtest_sharding_id i INNER JOIN sbtest_sharding_k k ON i.id = k.id
 
 TODO
 
+### 执行代码生成
 
+TODO
 
 ## 结语
 
