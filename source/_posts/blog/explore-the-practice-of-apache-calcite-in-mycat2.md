@@ -3,7 +3,7 @@ title: Apache Calcite 在 MyCat2 中的实践探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-02-17 08:33:30
-updated: 2025-03-21 08:00:00
+updated: 2025-03-23 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[入门 MyCat2](https://www.yuque.com/ccazhw/ml3nkf/fb2285b811138a442eb850f0127d7ea3?)'
@@ -322,6 +322,62 @@ public class ShardingSQLHandler extends AbstractSQLHandler<SQLSelectStatement> {
 }
 ```
 
+`DrdsRunnerHelper#runOnDrds` 方法逻辑如下，`getPlan` 用于获取 SQL 对应的执行计划，然后再调用 `getPlanImplementor` 获取执行计划的执行器并执行 SQL 语句，并返回 Future 对象等待返回结果。
+
+```java
+public static Future<Void> runOnDrds(MycatDataContext dataContext, DrdsSqlWithParams drdsSqlWithParams, Response response) {
+    PlanImpl plan = getPlan(drdsSqlWithParams);
+    PlanImplementor planImplementor = getPlanImplementor(dataContext, response, drdsSqlWithParams);
+    return impl(plan, planImplementor);
+}
+
+@NotNull
+public static PlanImpl getPlan(DrdsSqlWithParams drdsSqlWithParams) {
+    QueryPlanner planner = MetaClusterCurrent.wrapper(QueryPlanner.class);
+    PlanImpl plan;
+    ParamHolder paramHolder = ParamHolder.CURRENT_THREAD_LOCAL.get();
+    try {
+        paramHolder.setData(drdsSqlWithParams.getParams(), drdsSqlWithParams.getTypeNames());
+        CodeExecuterContext codeExecuterContext = planner.innerComputeMinCostCodeExecuterContext(drdsSqlWithParams);
+        plan = new PlanImpl(codeExecuterContext.getMycatRel(), codeExecuterContext, drdsSqlWithParams.getAliasList());
+    } finally {
+    }
+    return plan;
+}
+```
+
+`getPlan` 方法内部主要调用的是 `QueryPlanner#innerComputeMinCostCodeExecuterContext` 方法，它负责从缓存中获取
+
+```java
+public CodeExecuterContext innerComputeMinCostCodeExecuterContext(DrdsSql sqlSelectStatement) {
+    // 创建 RelOptCluster，内部注册 HintStrategyTable 处理 Hint 语法
+    RelOptCluster relOptCluster = DrdsSqlCompiler.newCluster();
+    // 从缓存中获取 MyCatRelList，如果不存在，则生成 MyCatRelList
+    List<CodeExecuterContext> codeExecuterContexts = getAcceptedMycatRelList(sqlSelectStatement);
+    int size = codeExecuterContexts.size();
+    // 比较 Cost 获取最小的 CodeExecuterContext
+}
+
+public List<CodeExecuterContext> getAcceptedMycatRelList(DrdsSql drdsSql) {
+    List<CodeExecuterContext> acceptedMycatRelList = planCache.getAcceptedMycatRelList(drdsSql);
+    if (acceptedMycatRelList.isEmpty()) {
+        synchronized (this) {
+            // 从缓存中获取 MyCatRelList，存在直接返回
+            acceptedMycatRelList = planCache.getAcceptedMycatRelList(drdsSql);
+            if (!acceptedMycatRelList.isEmpty()) {
+                return acceptedMycatRelList;
+            } else {
+                // 不存在则调用 add 方法生成 MyCatRelList，并添加到缓存中
+                PlanResultSet add = planCache.add(false, drdsSql);
+                return Collections.singletonList(add.getContext());
+            }
+        }
+    } else {
+        return acceptedMycatRelList;
+    }
+}
+```
+
 
 
 
@@ -329,6 +385,16 @@ public class ShardingSQLHandler extends AbstractSQLHandler<SQLSelectStatement> {
 TODO
 
 ### 执行代码生成
+
+```java
+public static Future<Void> runOnDrds(MycatDataContext dataContext, DrdsSqlWithParams drdsSqlWithParams, Response response) {
+    PlanImpl plan = getPlan(drdsSqlWithParams);
+    PlanImplementor planImplementor = getPlanImplementor(dataContext, response, drdsSqlWithParams);
+    return impl(plan, planImplementor);
+}
+```
+
+
 
 TODO
 
