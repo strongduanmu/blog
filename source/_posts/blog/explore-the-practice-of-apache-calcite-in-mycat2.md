@@ -322,7 +322,7 @@ public class ShardingSQLHandler extends AbstractSQLHandler<SQLSelectStatement> {
 }
 ```
 
-`DrdsRunnerHelper#runOnDrds` 方法逻辑如下，`getPlan` 用于获取 SQL 对应的执行计划，然后再调用 `getPlanImplementor` 获取执行计划的执行器并执行 SQL 语句，并返回 Future 对象等待返回结果。
+`DrdsRunnerHelper#runOnDrds` 方法逻辑如下，`getPlan` 用于获取 SQL 对应的执行计划，然后再调用 `getPlanImplementor` 获取执行计划的执行器，并执行 SQL 语句，然后返回 Future 对象等待返回结果。
 
 ```java
 public static Future<Void> runOnDrds(MycatDataContext dataContext, DrdsSqlWithParams drdsSqlWithParams, Response response) {
@@ -346,7 +346,7 @@ public static PlanImpl getPlan(DrdsSqlWithParams drdsSqlWithParams) {
 }
 ```
 
-`getPlan` 方法内部主要调用的是 `QueryPlanner#innerComputeMinCostCodeExecuterContext` 方法，它负责从缓存中获取
+我们先重点关注 `getPlan` 方法是如何生成执行计划的，该方法内部调用的是 `QueryPlanner#innerComputeMinCostCodeExecuterContext` 方法，它负责从缓存中获取 `MyCatRelList` 执行计划，如果缓存中不存在则调用 `add` 方法生成执行计划，并将执行计划添加到缓存中。
 
 ```java
 public CodeExecuterContext innerComputeMinCostCodeExecuterContext(DrdsSql sqlSelectStatement) {
@@ -378,9 +378,26 @@ public List<CodeExecuterContext> getAcceptedMycatRelList(DrdsSql drdsSql) {
 }
 ```
 
+TODO
 
-
-
+```java
+public synchronized PlanResultSet add(boolean fix, DrdsSql drdsSql) {
+    Long baselineId = null;
+    // 获取 SQL 执行计划基线，用于提供稳定的执行计划
+    Baseline baseline = this.getBaseline(drdsSql);
+    DrdsSqlCompiler drdsSqlCompiler = MetaClusterCurrent.wrapper(DrdsSqlCompiler.class);
+    OptimizationContext optimizationContext = new OptimizationContext();
+    // 生成 MycatRel 执行计划树，内部包含了 RBO 和 CBO 优化
+    MycatRel mycatRel = drdsSqlCompiler.dispatch(optimizationContext, drdsSql);
+    RelJsonWriter relJsonWriter = new RelJsonWriter();
+    mycatRel.explain(relJsonWriter);
+    long hash = planIds.nextPlanId();
+    // 生成新的执行计划基线
+    BaselinePlan newBaselinePlan = new BaselinePlan(drdsSql.getParameterizedSQL(), relJsonWriter.asString(), hash, baselineId = baseline.getBaselineId(), null);
+    getCodeExecuterContext(baseline,newBaselinePlan,optimizationContext, mycatRel);
+    return saveBaselinePlan(fix, false, baseline, newBaselinePlan);
+}
+```
 
 TODO
 
