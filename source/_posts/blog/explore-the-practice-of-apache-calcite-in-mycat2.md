@@ -3,7 +3,7 @@ title: Apache Calcite 在 MyCat2 中的实践探究
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-02-17 08:33:30
-updated: 2025-03-23 08:00:00
+updated: 2025-03-25 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[入门 MyCat2](https://www.yuque.com/ccazhw/ml3nkf/fb2285b811138a442eb850f0127d7ea3?)'
@@ -378,7 +378,7 @@ public List<CodeExecuterContext> getAcceptedMycatRelList(DrdsSql drdsSql) {
 }
 ```
 
-TODO
+`add` 方法内部首先会获取 SQL 执行计划的基线，用于提供稳定的执行计划，然后调用 `drdsSqlCompiler#dispatch` 方法，内部包含了 CBO 和 RBO 优化，会生成 `MycatRel` 执行计划树。生成的执行计划树通过 `RelJsonWriter` 工具类转换为字符串，存储到新的执行计划基线中，最终调用 `saveBaselinePlan` 保存下来。
 
 ```java
 public synchronized PlanResultSet add(boolean fix, DrdsSql drdsSql) {
@@ -398,6 +398,132 @@ public synchronized PlanResultSet add(boolean fix, DrdsSql drdsSql) {
     return saveBaselinePlan(fix, false, baseline, newBaselinePlan);
 }
 ```
+
+`drdsSqlCompiler#dispatch` 方法负责将不同的 SQL 语句进行转换处理，如果是 `SQLSelectStatement`，则会调用 `compileQuery` 方法，方法实现逻辑如下：
+
+```java
+public MycatRel compileQuery(OptimizationContext optimizationContext, SchemaPlus plus, DrdsSql drdsSql) {
+    RelNode logPlan;
+    RelNodeContext relNodeContext = null;
+    {
+        // 创建 SqlToRelConverter 将 SQL AST 转换为 RelNode 关系代数树
+        relNodeContext = getRelRoot(plus, drdsSql);
+        logPlan = relNodeContext.getRoot().rel;
+        optimizationContext.relNodeContext = relNodeContext;
+    }
+    RelDataType finalRowType = logPlan.getRowType();
+    // RBO 优化
+    RelNode rboLogPlan = optimizeWithRBO(logPlan);
+    // CBO 优化
+    MycatRel mycatRel = optimizeWithCBO(rboLogPlan, Collections.emptyList());
+    if (!RelOptUtil.areRowTypesEqual(mycatRel.getRowType(), finalRowType, true)) {
+        Project relNode = (Project) relNodeContext.getRelBuilder().push(mycatRel).rename(finalRowType.getFieldNames()).build();
+        mycatRel = MycatProject.create(relNode.getInput(), relNode.getProjects(), relNode.getRowType());
+    }
+    return mycatRel;
+}
+```
+
+`optimizeWithRBO` 主要进行逻辑优化，包括：子查询优化、聚合查询优化、JOIN 顺序优化、其他优化（包括 MyCat2 自定义的优化），逻辑优化基本都采用了 `HepPlanner` 优化器，通过 `HepProgramBuilder` 添加的优化规则，builder 中可以调用 `addMatchLimit` 设置最大匹配次数。
+
+```java
+private RelNode optimizeWithRBO(RelNode logPlan) {
+    // 子查询优化
+    Program subQueryProgram = getSubQueryProgram();
+    RelNode unSubQuery = subQueryProgram.run(null, logPlan, null, Collections.emptyList(), Collections.emptyList());
+    // 聚合查询优化
+    RelNode unAvg = resolveAggExpr(unSubQuery);
+    ...
+    // JOIN 顺序优化
+    RelNode joinClustering = toMultiJoin(unAvg).map(relNode -> {
+        HepProgramBuilder builder = new HepProgramBuilder();
+        builder.addMatchLimit(1024);
+        builder.addGroupBegin();
+        builder.addRuleInstance(MycatHepJoinClustering.Config.DEFAULT.toRule());
+        builder.addGroupEnd();
+        builder.addMatchLimit(64);
+        builder.addGroupBegin();
+        builder.addRuleInstance(CoreRules.MULTI_JOIN_OPTIMIZE);
+        builder.addGroupEnd();
+        HepPlanner planner = new HepPlanner(builder.build());
+        planner.setRoot(relNode);
+        RelNode bestExp = planner.findBestExp();
+        return bestExp;
+    }...;
+    // 其他优化规则
+    HepProgramBuilder builder = new HepProgramBuilder();
+    builder.addMatchLimit(1024);
+    builder.addGroupBegin().addRuleCollection(ImmutableList.of(AggregateExpandDistinctAggregatesRule.Config.DEFAULT.toRule(), CoreRules.AGGREGATE_ANY_PULL_UP_CONSTANTS, CoreRules.PROJECT_MERGE, CoreRules.PROJECT_CORRELATE_TRANSPOSE, CoreRules.PROJECT_SET_OP_TRANSPOSE, CoreRules.PROJECT_JOIN_TRANSPOSE, CoreRules.PROJECT_WINDOW_TRANSPOSE, CoreRules.PROJECT_FILTER_TRANSPOSE, ProjectRemoveRule.Config.DEFAULT.toRule())).addGroupEnd().addMatchOrder(HepMatchOrder.BOTTOM_UP);
+    builder.addMatchLimit(1024);
+    builder.addGroupBegin().addRuleCollection(FILTER).addGroupEnd().addMatchOrder(HepMatchOrder.BOTTOM_UP);
+    builder.addMatchLimit(1024);
+    builder.addGroupBegin().addRuleInstance(CoreRules.PROJECT_MERGE).addGroupEnd().addMatchOrder(HepMatchOrder.ARBITRARY);
+    builder.addMatchLimit(1024);
+    // MyCat2 自定义规则，包括：单表、广播表下推，JOIN ER 表下推等
+    builder.addGroupBegin().addRuleCollection(LocalRules.RBO_RULES).addRuleInstance(MycatAggDistinctRule.Config.DEFAULT.toRule()).addGroupEnd().addMatchOrder(HepMatchOrder.BOTTOM_UP);
+    builder.addMatchLimit(1024);
+    HepPlanner planner = new HepPlanner(builder.build());
+    planner.setRoot(joinClustering);
+    RelNode bestExp = planner.findBestExp();
+    return bestExp;
+}
+```
+
+`optimizeWithCBO` 主要进行物理优化，它根据这种方案的 Cost 选择最优的执行计划。`optimizeWithCBO` 逻辑如下，如果 `logPlan` 已经是 `MycatRel`，则直接返回，否则继续执行进行优化。MyCat2 物理优化中使用了许多 Calcite 内置的优化规则，同时也扩展了一些适合于 MyCat2 的规则，例如：`MycatTableLookupSemiJoinRule`、`MycatJoinTableLookupTransposeRule`，感兴趣的朋友可以构造相关的 SQL 研究具体的优化规则逻辑。
+
+`optimizeWithCBO` 方法最后使用 `MatierialRewriter` 对执行计划树进行改写，`MatierialRewriter` 主要用于处理计算过程中需要消耗较多内存、网络调用的场景，例如：`MycatNestedLoopJoin`，会将右表 `right` 替换为 `MycatMatierial`，然后在执行时 `MycatMatierial` 会一次读取右表（Inner）的数据，并写入到本地文件中，这样计算 `MycatNestedLoopJoin` 时，MyCat2 就无需频繁地去 MySQL 中获取 Inner 表中的数据，直接从本地文件就可以快速获取。
+
+```java
+public MycatRel optimizeWithCBO(RelNode logPlan, Collection<RelOptRule> relOptRules) {
+    if (logPlan instanceof MycatRel) {
+        return (MycatRel) logPlan;
+    } else {
+        RelOptCluster cluster = logPlan.getCluster();
+        RelOptPlanner planner = cluster.getPlanner();
+        planner.clear();
+        MycatConvention.INSTANCE.register(planner);
+        ImmutableList.Builder<RelOptRule> listBuilder = ImmutableList.builder();
+        listBuilder.addAll(MycatExtraSortRule.RULES);
+        listBuilder.addAll(LocalRules.CBO_RULES);
+        // 算子交换
+        // Filter/Join, TopN/Join, Agg/Join, Filter/Agg, Sort/Project, Join/TableLookup
+        listBuilder.add(CoreRules.JOIN_PUSH_EXPRESSIONS);
+        listBuilder.add(CoreRules.FILTER_INTO_JOIN);
+        // TopN/Join
+        listBuilder.add(CoreRules.SORT_JOIN_TRANSPOSE.config.withOperandFor(MycatTopN.class, Join.class).toRule());
+        listBuilder.add(CoreRules.FILTER_SET_OP_TRANSPOSE.config.toRule());
+        listBuilder.add(CoreRules.AGGREGATE_JOIN_TRANSPOSE.config.withOperandFor(Aggregate.class, Join.class, false).toRule());
+        // Sort/Project
+        listBuilder.add(CoreRules.SORT_PROJECT_TRANSPOSE.config.withOperandFor(Sort.class, Project.class).toRule());
+        // index
+        listBuilder.add(MycatViewIndexViewRule.DEFAULT_CONFIG.toRule());
+        if (DrdsSqlCompiler.RBO_BKA_JOIN) {
+            // TABLELOOKUP
+            listBuilder.add(MycatTableLookupSemiJoinRule.INSTANCE);
+            listBuilder.add(MycatTableLookupCombineRule.INSTANCE);
+            listBuilder.add(MycatJoinTableLookupTransposeRule.LEFT_INSTANCE);
+            listBuilder.add(MycatJoinTableLookupTransposeRule.RIGHT_INSTANCE);
+            listBuilder.add(MycatValuesJoinRule.INSTANCE);
+        }
+        listBuilder.build().forEach(c -> planner.addRule(c));
+        MycatConvention.INSTANCE.register(planner);
+        if (relOptRules != null) {
+            for (RelOptRule relOptRule : relOptRules) {
+                planner.addRule(relOptRule);
+            }
+        }
+        ...
+        logPlan = planner.changeTraits(logPlan, cluster.traitSetOf(MycatConvention.INSTANCE));
+        planner.setRoot(logPlan);
+        RelNode bestExp = planner.findBestExp();
+        // MatierialRewriter 对需要消耗内存、网络调用的算子进行改写，将数据物化存储到本地文件
+        RelNode accept = bestExp.accept(new MatierialRewriter());
+        return (MycatRel) accept;
+    }
+}
+```
+
+
 
 TODO
 
