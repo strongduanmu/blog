@@ -523,27 +523,252 @@ public MycatRel optimizeWithCBO(RelNode logPlan, Collection<RelOptRule> relOptRu
 }
 ```
 
-
-
-TODO
-
-### 执行代码生成
+完成 CBO 优化后，最后会判断逻辑计划和优化后的执行计划 `RowType` 是否相同，如果不同则使用 `RelBuilder` 对优化后的执行计划进行改名，保证最终返回的列名和逻辑计划中的一致。执行到这里，就完成了从 SQL 到执行计划的全过程，其中有一些涉及优化规则的细节，由于文章的篇幅就不再一一研究，感兴趣的读者可以对照代码进行调试学习。
 
 ```java
-public static Future<Void> runOnDrds(MycatDataContext dataContext, DrdsSqlWithParams drdsSqlWithParams, Response response) {
-    PlanImpl plan = getPlan(drdsSqlWithParams);
-    PlanImplementor planImplementor = getPlanImplementor(dataContext, response, drdsSqlWithParams);
-    return impl(plan, planImplementor);
+if (!RelOptUtil.areRowTypesEqual(mycatRel.getRowType(), finalRowType, true)) {
+    Project relNode = (Project) relNodeContext.getRelBuilder().push(mycatRel).rename(finalRowType.getFieldNames()).build();
+    mycatRel = MycatProject.create(relNode.getInput(), relNode.getProjects(), relNode.getRowType());
 }
 ```
 
+### 执行代码生成
 
+有了物理执行计划后，最后一步就是根据执行计划生成可执行代码，并执行 SQL 返回结果。执行代码生成的逻辑在 `DrdsExecutorCompiler#getCodeExecuterContext` 方法中，MyCat2 生成代码的方式和 Calcite 一致，都是采用 Linq4j 进行生成，MyCat2 根据自身项目需求，调整了一些算子生成代码的逻辑。
 
-TODO
+```java
+public static CodeExecuterContext getCodeExecuterContext(Map<RexNode, RexNode> constantMap, MycatRel relNode, boolean forUpdate) {
+    HashMap<String, Object> varContext = new HashMap<>(2);
+    StreamMycatEnumerableRelImplementor mycatEnumerableRelImplementor = new StreamMycatEnumerableRelImplementor(varContext);
+    HashMap<String, MycatRelDatasourceSourceInfo> stat = new HashMap<>();
+    ...
+    ClassDeclaration classDeclaration = mycatEnumerableRelImplementor.implementHybridRoot(relNode, EnumerableRel.Prefer.ARRAY);
+    String code = Expressions.toString(classDeclaration.memberDeclarations, "\n", false);
+    CodeContext codeContext = new CodeContext(classDeclaration.name, code);
+    CodeExecuterContext executerContext = CodeExecuterContext.of(constantMap, stat, varContext, relNode, codeContext);
+    return executerContext;
+}
+```
+
+`StreamMycatEnumerableRelImplementor` 是代码生成的入口类，调用 `implementHybridRoot` 方法遍历执行计划树。生成代码过程中通过 `visitChild` 方法访问子节点，从而调用子节点 `implement` 方法（每个物理算子都实现了 implement 方法），最终实现整个执行计划树的代码生成。`MycatSortMergeJoin` 的 implement 方法如下：
+
+```java
+@Override
+public Result implement(MycatEnumerableRelImplementor implementor, Prefer pref) {
+    BlockBuilder builder = new BlockBuilder();
+    // visitChild 访问 left 节点，并生成代码，存储在 Result 对象中
+    final Result leftResult = implementor.visitChild(this, 0, (EnumerableRel) left, pref);
+    final Expression leftExpression = toEnumerate(builder.append("left", leftResult.block));
+    final ParameterExpression left_ = Expressions.parameter(leftResult.physType.getJavaRowType(), "left");
+    final Result rightResult = implementor.visitChild(this, 1, (EnumerableRel) right, pref);
+    final Expression rightExpression = toEnumerate(builder.append("right", rightResult.block));
+    final ParameterExpression right_ = Expressions.parameter(rightResult.physType.getJavaRowType(), "right");
+    final JavaTypeFactory typeFactory = implementor.getTypeFactory();
+    final PhysType physType = PhysTypeImpl.of(typeFactory, getRowType(), pref.preferArray());
+    final List<Expression> leftExpressions = new ArrayList<>();
+    final List<Expression> rightExpressions = new ArrayList<>();
+    for (Pair<Integer, Integer> pair : Pair.zip(joinInfo.leftKeys, joinInfo.rightKeys)) {
+        final RelDataType keyType = typeFactory.leastRestrictive(ImmutableList.of(left.getRowType().getFieldList().get(pair.left).getType(), right.getRowType().getFieldList().get(pair.right).getType()));
+        final Type keyClass = typeFactory.getJavaClass(keyType);
+        leftExpressions.add(EnumUtils.convert(leftResult.physType.fieldReference(left_, pair.left), keyClass));
+        rightExpressions.add(EnumUtils.convert(rightResult.physType.fieldReference(right_, pair.right), keyClass));
+    }
+    Expression predicate = Expressions.constant(null);
+    if (!joinInfo.nonEquiConditions.isEmpty()) {
+        final RexNode nonEquiCondition = RexUtil.composeConjunction(getCluster().getRexBuilder(), joinInfo.nonEquiConditions, true);
+        if (nonEquiCondition != null) {
+            predicate = EnumUtils.generatePredicate(implementor, getCluster().getRexBuilder(), left, right, leftResult.physType, rightResult.physType, nonEquiCondition);
+        }
+    }
+    final PhysType leftKeyPhysType = leftResult.physType.project(joinInfo.leftKeys, JavaRowFormat.LIST);
+    final PhysType rightKeyPhysType = rightResult.physType.project(joinInfo.rightKeys, JavaRowFormat.LIST);
+    // Generate the appropriate key Comparator (keys must be sorted in ascending order, nulls last).
+    final int keysSize = joinInfo.leftKeys.size();
+    final List<RelFieldCollation> fieldCollations = new ArrayList<>(keysSize);
+    for (int i = 0; i < keysSize; i++) {
+        fieldCollations.add(new RelFieldCollation(i, RelFieldCollation.Direction.ASCENDING, RelFieldCollation.NullDirection.LAST));
+    }
+    final RelCollation collation = RelCollations.of(fieldCollations);
+    final Expression comparator = leftKeyPhysType.generateComparator(collation);
+    // 生成调用 MERGE_JOIN 方法的代码，内部调用 EnumerableDefaults#mergeJoin 方法
+    return implementor.result(physType, builder.append(Expressions.call(BuiltInMethod.MERGE_JOIN.method, Expressions.list(leftExpression, rightExpression, Expressions.lambda(leftKeyPhysType.record(leftExpressions), left_), Expressions.lambda(rightKeyPhysType.record(rightExpressions), right_), predicate, EnumUtils.joinSelector(joinType, physType, ImmutableList.of(leftResult.physType, rightResult.physType)), Expressions.constant(EnumUtils.toLinq4jJoinType(joinType)), comparator))).toBlock());
+}
+```
+
+MycatSortMergeJoin 生成代码的逻辑，主要都是围绕 `BuiltInMethod.MERGE_JOIN.method` 方法进行的，该方法是排序合并连接的核心逻辑，它的具体实现是 `EnumerableDefaults#mergeJoin`。调用 `mergeJoin` 方法需要传递左表（outer）、右表（inner）的结果集遍历器 `Enumerable`，以及左表和右表关联 Key 的选择器，通过选择器能够从行记录中选择出关联 Key，`comparator` 则是判断关联条件是否成立的比较器。
+
+```java
+@API(since = "1.23", status = API.Status.EXPERIMENTAL)
+public static <TSource, TInner, TKey extends Comparable<TKey>, TResult> Enumerable<TResult> mergeJoin(final Enumerable<TSource> outer, final Enumerable<TInner> inner, final Function1<TSource, TKey> outerKeySelector, final Function1<TInner, TKey> innerKeySelector, final Predicate2<TSource, TInner> extraPredicate, final Function2<TSource, TInner, TResult> resultSelector, final JoinType joinType, final Comparator<TKey> comparator) {
+    if (!isMergeJoinSupported(joinType)) {
+        throw new UnsupportedOperationException("MergeJoin unsupported for join type " + joinType);
+    }
+    return new AbstractEnumerable<TResult>() {
+        public Enumerator<TResult> enumerator() {
+            return new MergeJoinEnumerator<>(outer, inner, outerKeySelector, innerKeySelector, extraPredicate, resultSelector, joinType, comparator);
+        }
+    };
+}
+```
+
+最终生成的可执行代码如下，**笔者个人是不太推荐 Calcite 代码生成的方式，因为不管是生成代码的逻辑，还是生成后的执行代码，他们的可阅读性都比较差，后期维护的压力会比较大**。
+
+```java
+public Object bindObservable(final org.apache.calcite.runtime.NewMycatDataContext root) {
+    final java.util.Comparator comparator = new java.util.Comparator() {
+        public int compare(Object[] v0, Object[] v1) {
+            int c;
+            return 0;
+        }
+        
+        public int compare(Object o0, Object o1) {
+            return this.compare((Object[]) o0, (Object[]) o1);
+        }
+    };
+    return org.apache.calcite.linq4j.EnumerableDefaults.orderBy(org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(org.apache.calcite.linq4j.EnumerableDefaults.mergeJoin(org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(org.apache.calcite.linq4j.EnumerableDefaults.orderBy(org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(org.apache.calcite.linq4j.EnumerableDefaults.mergeJoin(org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(root.getObservable("MycatView.MYCAT2.[0](relNode=LocalSort#107,distribution=[sharding_db.sbtest_sharding_id],mergeSort=true)", new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] v) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(v[0]);
+        }
+        
+        public Object apply(Object v) {
+            return apply((Object[]) v);
+        }
+    }, org.apache.calcite.linq4j.function.Functions.nullsComparator(false, false), 0, 2147483647)), org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(root.getObservable("MycatView.MYCAT2.[0](relNode=LocalSort#111,distribution=[sharding_db.sbtest_sharding_k],mergeSort=true)", new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] v) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(v[0]);
+        }
+        
+        public Object apply(Object v) {
+            return apply((Object[]) v);
+        }
+    }, org.apache.calcite.linq4j.function.Functions.nullsComparator(false, false), 0, 2147483647)), new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] left) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(left[0]);
+        }
+        
+        public Object apply(Object left) {
+            return apply((Object[]) left);
+        }
+    }, new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] right) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(right[0]);
+        }
+        
+        public Object apply(Object right) {
+            return apply((Object[]) right);
+        }
+    }, null, new org.apache.calcite.linq4j.function.Function2() {
+        public Object[] apply(Object[] left, Object[] right) {
+            return new Object[]{left[0], left[1], left[2], left[3], right[0], right[1], right[2], right[3]};
+        }
+        
+        public Object[] apply(Object left, Object right) {
+            return apply((Object[]) left, (Object[]) right);
+        }
+    }, org.apache.calcite.linq4j.JoinType.INNER, new java.util.Comparator() {
+        public int compare(Long v0, Long v1) {
+            final int c;
+            c = org.apache.calcite.runtime.Utilities.compare(v0, v1);
+            if (c != 0) {
+                return c;
+            }
+            return 0;
+        }
+        
+        public int compare(Object o0, Object o1) {
+            return this.compare((Long) o0, (Long) o1);
+        }
+        
+    })), new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] v) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(v[4]);
+        }
+        
+        public Object apply(Object v) {
+            return apply((Object[]) v);
+        }
+    }, org.apache.calcite.linq4j.function.Functions.nullsComparator(false, false), 0, 2147483647)), org.apache.calcite.util.RxBuiltInMethodImpl.toEnumerable(root.getObservable("MycatView.MYCAT2.[0](relNode=LocalSort#140,distribution=[sharding_db.sbtest_sharding_c],mergeSort=true)", new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] v) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(v[0]);
+        }
+        
+        public Object apply(Object v) {
+            return apply((Object[]) v);
+        }
+    }, org.apache.calcite.linq4j.function.Functions.nullsComparator(false, false), 0, 2147483647)), new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] left) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(left[4]);
+        }
+        
+        public Object apply(Object left) {
+            return apply((Object[]) left);
+        }
+    }, new org.apache.calcite.linq4j.function.Function1() {
+        public long apply(Object[] right) {
+            return org.apache.calcite.runtime.SqlFunctions.toLong(right[0]);
+        }
+        
+        public Object apply(Object right) {
+            return apply((Object[]) right);
+        }
+    }, null, new org.apache.calcite.linq4j.function.Function2() {
+        public Object[] apply(Object[] left, Object[] right) {
+            return new Object[]{left[0], left[1], left[2], left[3], left[4], left[5], left[6], left[7], right[0], right[1], right[2], right[3]};
+        }
+        
+        public Object[] apply(Object left, Object right) {
+            return apply((Object[]) left, (Object[]) right);
+        }
+    }, org.apache.calcite.linq4j.JoinType.INNER, new java.util.Comparator() {
+        public int compare(Long v0, Long v1) {
+            final int c;
+            c = org.apache.calcite.runtime.Utilities.compare(v0, v1);
+            if (c != 0) {
+                return c;
+            }
+            return 0;
+        }
+        
+        public int compare(Object o0, Object o1) {
+            return this.compare((Long) o0, (Long) o1);
+        }        
+    })), org.apache.calcite.linq4j.function.Functions.identitySelector(), comparator, 0, (Integer) root.get("?0"));
+}
+
+public boolean isObservable() {
+    return false;
+}
+
+public Class getElementType() {
+    return java.lang.Object[].class;
+}
+```
+
+生成了可执行代码字符串后，MyCat2 会获取 `PlanImplementor`，此处获取的实现类是 `ObservableColocatedImplementor`。由于本文的 Case 是查询语句，执行时会调用 executeQuery 方法，内部调用 `executorProvider#prepare` 方法时会通过 janino 编译并创建 ArrayBindable 实例。
+
+获取到 ArrayBindable 后，MyCat2 会调用 `PrepareExecutor#getMysqlPayloadObjectObservable` 方法，为 ArrayBindable 绑定可观察对象 `AsyncMycatDataContextImpl`。AsyncMycatDataContextImpl 类内部提供了 `getObservables` 方法，如下图所示，getObservables 方法会在对应的数据源上执行下推的 SQL，并封装为 Observable 对象。
+
+![getObservables 方法中执行物理 SQL](explore-the-practice-of-apache-calcite-in-mycat2/actual-sql-execute-observable.png)
+
+获取到 observable 对象后，MyCat2 会增加执行结果订阅，将 observable 内部执行返回的结果数据存储到 `MysqlObjectArrayRow` 对象中，再作为新的 `Observable<MysqlPayloadObject>` 可观察对象。最终查询结果通过 `MysqlPayloadObjectObserver` 类进行输出，根据 MySQL 协议的要求进行封包，然后返回给客户端程序。
+
+```java
+observable.subscribe(objects -> emitter.onNext(new MysqlObjectArrayRow(objects)), throwable -> {
+    newMycatDataContext.endFuture().onComplete(event -> emitter.onError(throwable));
+}, () -> {
+    CompositeFuture compositeFuture = newMycatDataContext.endFuture();
+    compositeFuture.onSuccess(event -> emitter.onComplete());
+    compositeFuture.onFailure(event -> emitter.onError(event));
+});
+```
 
 ## 结语
 
+本文主要介绍了 Apache Calcite 在 MyCat2 项目中的实践经验，我们先搭建了一个 MyCat2 开发环境，了解了 MyCat2 中原型库、业务库等基础概念，然后借助 sysbench 工具初始化了 10w 条数据，并创建了 3 张不同维度的分片表。
 
+实践探究部分，我们参考 MyCat2 官方文档，学习了 MyCat2 中 SQL 的执行流程，MyCat2 的执行流程和传统的关系型数据库类似，需要经过 SQL 编译、逻辑优化、物理优化、SQL 执行等关键步骤。我们通过 SQL 执行计划，初步了解了 SQL 是如何执行的，然后结合一个 SQL 示例，探究了 MyCat2 如何使用 Apache Calcite 生成执行计划，MyCat2 也结合项目特点，扩展了很多优化规则。获取到执行计划后，MyCat2 最后会通过 Linq4j 生成可执行代码，并通过 Janio 编译创建实例对象，生成的代码中使用 RxJava 异步处理数据流。
+
+MyCat2 对于 Apache Calcite 的实践非常有代表性，很多实践方案也参考了诸如 PolarDB-X 等优秀项目，大家如果想深入学习 Calcite，MyCat2 值得好好研究，
 
 
 
