@@ -766,7 +766,7 @@ observable.subscribe(objects -> emitter.onNext(new MysqlObjectArrayRow(objects))
 
 本文主要介绍了 Apache Calcite 在 MyCat2 分布式查询引擎中的实践应用。我们首先搭建了一个 MyCat2 开发环境，了解了 MyCat2 中原型库、业务库等基础概念，然后借助 sysbench 工具初始化了 10w 条数据，并创建了 3 张不同维度的分片表，方便后续探究 SQL 内部实现。
 
-实践探究部分，我们参考 MyCat2 官方文档，学习了 MyCat2 中 SQL 的执行流程，MyCat2 的执行流程和传统的关系型数据库类似，需要经过 SQL 编译、逻辑优化、物理优化、SQL 执行等关键步骤。我们通过 SQL 执行计划，初步了解了 SQL 是如何执行的，然后结合一个 SQL 示例，探究了 MyCat2 如何使用 Apache Calcite 生成执行计划，MyCat2 也结合项目特点，扩展了很多优化规则。获取到执行计划后，MyCat2 最后会通过 Linq4j 生成可执行代码，并通过 Janio 编译创建实例对象，生成的代码中使用 RxJava 异步处理数据流。
+实践探究部分，我们参考 MyCat2 官方文档，学习了 MyCat2 中 SQL 的执行流程，MyCat2 的执行流程和传统的关系型数据库类似，需要经过 **SQL 编译、逻辑优化、物理优化、SQL 执行**等关键步骤。我们通过 SQL 执行计划，初步了解了 SQL 是如何执行的，然后结合一个 SQL 示例，探究了 MyCat2 如何使用 Apache Calcite 生成执行计划，MyCat2 也结合项目特点，扩展了很多优化规则。获取到执行计划后，MyCat2 最后会通过 Linq4j 生成可执行代码，并通过 Janio 编译创建实例对象，生成的代码中使用 RxJava 异步处理数据流。
 
 尽管 MyCat2 项目已停止维护，但其基于 Calcite 的优化器设计仍具借鉴意义。通过规则优化与代价模型的结合，MyCat2 实现了对跨库复杂查询的支持，尤其在分片键路由、多表 Join 优化等场景中展现了 Calcite 的灵活性。大家如果工作中有类似的 Calcite 实践需求，也可以参考 MyCat2 的实现进行增强，欢迎大家一起研究探讨。
 
