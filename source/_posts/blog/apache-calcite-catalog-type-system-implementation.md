@@ -2,8 +2,8 @@
 title: Apache Calcite Catalog 拾遗之类型系统实现
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
-date: 2025-01-09 08:00:00
-updated: 2025-01-09 08:00:00
+date: 2025-05-26 08:00:00
+updated: 2025-05-26 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Apache Calcite 的类型系统](https://blog.csdn.net/qq_31183071/article/details/102817214)'
