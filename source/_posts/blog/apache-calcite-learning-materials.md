@@ -43,6 +43,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * [Calcite 社区](https://calcite.apache.org/community/)
 * [Calcite Jira](https://issues.apache.org/jira/projects/CALCITE/issues/CALCITE-4589?filter=allopenissues)
 * [Calcite StackOverflow](https://stackoverflow.com/questions/tagged/apache-calcite?tab=Newest)
+* [Calcite Deep Wiki](https://deepwiki.com/apache/calcite)
 
 ## 网络资料
 

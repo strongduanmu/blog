@@ -56,6 +56,10 @@ WHERE D.dname = 'Toy'
 
 因此，如果我们直接将 SQL 按照字面意思翻译为执行计划，那么整个执行过程大约需要 200 万次 IO 操作，这个查询成本显然是非常高的。那么，**我们可以让这条 SQL 执行地更高效吗**？为了实现这个目标，首先可以假设 `I/Os` 是成本指标中的一项，我们可以根据 `I/Os` 大小，来简单确定某个执行计划是否是最优的，降低 `I/Os` 可以直接提升 SQL 执行效率。
 
+前文生成的执行计划采用的是笛卡尔积 Join，这会产生大量的 `I/Os` 操作，为了减少 `I/Os` 成本，可以将关联条件 `E.did = D.did` 下推到 Join 中，这样就可以使用其他更高效的 Join 运算符，例如：`Page Nested-Loop Join`，下图展示了 `Page Nested-Loop Join` 的执行计划，由于提前过滤 Join 关联条件，整个执行计划只需要 5 万 4 千次 `I/Os`。
+
+![将关联条件下推到 Join 运算符内部](/wiki/cmu_15_799/intro_to_query_optimization/push-join-condition-to-join-operator.png)
+
 
 
 ## 参考资料
