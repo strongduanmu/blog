@@ -60,7 +60,17 @@ WHERE D.dname = 'Toy'
 
 ![将关联条件下推到 Join 运算符内部](/wiki/cmu_15_799/intro_to_query_optimization/push-join-condition-to-join-operator.png)
 
+**优化器的职责就是识别出哪些执行计划效率低，并将这些低效率的执行计划优化为语义等价且高效的执行计划**。优化器可能会进行更进一步地优化，例如：使用 `Sort Merge Join` 来替换 `Page Nested-Loop Join`，这种操作本质上改变了 Join 运算符的物理运算符。
 
+除了 Join 运算符层面的优化，优化器还可以对查询执行模型进行优化，例如我们使用物化模型（`Materialization Model`）进行查询，每个运算符都需要执行完所有操作，并将数据写入到临时文件中，然后再从临时文件中读取出来，这种执行模型没有采用流水线执行方式（`No Pipelining`）。我们可以尝试将执行模型切换为向量化执行模型（`Vectorization Model`），它可以充分利用流水线的优势，无需完成运算符的所有数据计算，只需要向上传递一个元组向量，整体的 `I/Os` 可以下降一半。
+
+![向量化执行模型](/wiki/cmu_15_799/intro_to_query_optimization/vectorization-model.png)
+
+前面我们讨论的主要是如何对 Join 运算符进行优化，除了 Join 优化外，还可以将谓词下推到 Join 运算符之下，从而大幅度减少 `I/Os`。`dname = 'Toy'` 是 `Dept` 表的谓词，如果在 Join 之后做谓词过滤，则会导致 Join 的计算量特别大，因此优化器会将谓词下推到 Join 运算符之下，这样优化后的 `I/Os` 可以降低到 37。
+
+![谓词下推](/wiki/cmu_15_799/intro_to_query_optimization/push-down-filter.png)
+
+经过这些优化，我们可以看出优化器的重要价值，从最开始的 200 万次 `I/Os`，一直减少到 37 次 `I/Os`，SQL 执行的性能也因此大幅度提升。以上展示的还只是一个简单的 SQL Case，对于复杂的 CTE，嵌套子查询，优化器带来的性能提升将会更高。
 
 ## 参考资料
 
