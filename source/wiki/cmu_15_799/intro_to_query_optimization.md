@@ -92,6 +92,47 @@ WHERE D.dname = 'Toy'
 
 理想情况下，不管查询表达式如何书写，查询优化器都要能够生成出最佳的执行计划（**复杂的 SQL 场景下，找出最优执行计划的过程就需要消耗大量时间，因此通常会找出相对高效的执行计划**）。
 
+### 逻辑计划 VS 物理计划
+
+物理执行计划由物理运算符组成，物理运算符则定义了具体的执行策略，例如：访问路径、Join 算法等。物理运算符还会依赖他们处理数据的物理格式，例如：排序、压缩等。需要注意的是，逻辑运算符和物理运算符并不是 `1:1` 对应的，例如：逻辑运算符 `LogicalScan` 可以转换为 `TableScan` 或 `IndexScan`，逻辑运算符 `LogicalJoin` 可以转换为 `NestedLoopJoin`、`SortMergeJoin` 或 `HashJoin`。
+
+### 课程主题
+
+如下是 `15-799` 查询优化课程包含的主题：
+
+* 搜索策略（`Search Strategies`）
+* 枚举 / 转换（`Enumeration / Transformations`）
+* 并行化（`Parallelization`）
+* 统计 / 汇总（`Statistics / Summarization`）
+* 基数估计 / 参数化（`Cardinality Estimation / Parameterization`）
+* 自适应 / 反馈机制（`Adaptivity / Feedback Mechanisms`）
+* 现实世界的实现（`Real-world Implementations`）
+
+### 搜索策略
+
+**启发式规则：**
+
+* 重写查询以消除（猜测的，或基于经验的）低效率的运算符；
+* 例如：始终先进行选择，或尽可能早地下推投影；
+* 这些技术可能需要检查目录（`Catalog`），但不需要检查数据。
+
+**基于代价的搜索：**
+
+* 使用模型估算执行计划的成本；
+* 列举查询的多个等效计划，并选择成本最低的计划。
+
+### 自上而下 VS 自下而上
+
+**自上而下优化：**
+
+* 从查询所需的结果开始，然后沿着树向下查找能够实现该目标的最佳计划；
+* 例如：`Volcano`、`Cascades`。
+
+**自下而上优化：**
+
+* 从零开始，然后制定计划，以实现你想要的结果。自下而上优化是边进行，边构建所需的运算符；
+* 例如：`System R`、`Starburst`。
+
 ## 参考资料
 
 * [EQOP Book ](https://www.microsoft.com/en-us/research/publication/extensible-query-optimizers-in-practice/) (Chapter 1)
