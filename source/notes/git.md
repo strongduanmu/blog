@@ -32,6 +32,9 @@ git fetch upstream refs/tags/5.3.0:5.3.0-test
 git fetch upstream
 git rebase upstream/master
 
+# 修改 commit 信息
+git commit --amend
+
 # 根据指定 commitId 创建新分支
 git checkout commitId -b branchName
 
