@@ -2,14 +2,16 @@
 title: Apache Calcite Catalog 拾遗之类型系统实现
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
-date: 2025-05-26 08:00:00
-updated: 2025-05-26 08:00:00
+date: 2025-10-21 08:00:00
+updated: 2025-10-21 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
+  - '[Calcite DeepWiki SQL Type System](https://deepwiki.com/apache/calcite/4.3-sql-type-system)'
+  - '[ChatGPT 推荐 Calcite 类型系统学习路径](https://chatgpt.com/share/68f6df95-5cec-800b-83a5-178578d50e5d)'
   - '[Apache Calcite 的类型系统](https://blog.csdn.net/qq_31183071/article/details/102817214)'
   - '[五分钟了解 Databend 全新 SQL 类型系统](https://xie.infoq.cn/article/46792cb71e3617a782ebeb991)'
   - '[PolarDB-X 类型系统概述](https://zhuanlan.zhihu.com/p/374130246)'
-banner: /assets/banner/banner_6.jpg
+banner: /assets/banner/banner_7.jpg
 topic: calcite
 ---
 
