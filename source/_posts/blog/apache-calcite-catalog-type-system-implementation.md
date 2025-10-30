@@ -2,24 +2,23 @@
 title: Apache Calcite Catalog 拾遗之类型系统实现
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
-date: 2025-10-21 08:00:00
-updated: 2025-10-21 08:00:00
+date: 2025-10-30 08:00:00
+updated: 2025-10-30 08:00:00
 cover: /assets/cover/calcite.jpg
 references:
   - '[Calcite DeepWiki SQL Type System](https://deepwiki.com/apache/calcite/4.3-sql-type-system)'
   - '[ChatGPT 推荐 Calcite 类型系统学习路径](https://chatgpt.com/share/68f6df95-5cec-800b-83a5-178578d50e5d)'
   - '[Apache Calcite 的类型系统](https://blog.csdn.net/qq_31183071/article/details/102817214)'
-  - '[五分钟了解 Databend 全新 SQL 类型系统](https://xie.infoq.cn/article/46792cb71e3617a782ebeb991)'
   - '[PolarDB-X 类型系统概述](https://zhuanlan.zhihu.com/p/374130246)'
 banner: /assets/banner/banner_7.jpg
 topic: calcite
 ---
 
+注意：本文基于 [Calcite main 分支 34989b0](https://github.com/apache/calcite/commit/34989b0ed7793cedf713c2f159de6247a730458c) 版本源码进行学习研究，其他版本可能会存在实现逻辑差异，对源码感兴趣的读者**请注意版本选择**。
+
 ## 前言
 
-123
-
-
+在之前发布的[深度探究 Apache Calcite SQL 校验器实现原理](https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html)一文中，我们详细介绍了 Calcite 校验器的实现原理，在 SQL 校验的过程中，Calcite 会不断调用 `deriveType` 进行类型推断，当时由于篇幅的原因，我们在文章中没有进行过多介绍。今天，让我们继续刨根问底，专门从 Calcite 类型系统的角度，深入探究 Calcite 的类型体系，了解在校验过程时如何进行类型推导和类型转换的。
 
 ## 类型推导
 
