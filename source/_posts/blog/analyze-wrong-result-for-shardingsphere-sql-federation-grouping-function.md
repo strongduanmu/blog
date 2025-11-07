@@ -164,9 +164,9 @@ DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing Name 1, M
 DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, true, false
 ```
 
-可以看到最后 2 列的值固定为 `true` 和 `false`，而这 2 列对应的是执行计划中的 `expr#13=[=($t11, $t12)]`（即：`$t11 = 0`），以及 `expr#15=[=($t11, $t14)]`（即：`$t11 = 1`），由于 `DBPlusEngineHashAggregate` 返回的结果都是 `0`，因此这 2 列计算结果为 `true` 和 `false`。
+可以看到最后 2 列的值固定为 `true` 和 `false`，而这 2 列对应的是执行计划中的 `expr#13=[=($t11, $t12)]`（即：`$t11 = 0`），以及 `expr#15=[=($t11, $t14)]`（即：`$t11 = 1`），由于 `DBPlusEngineHashAggregate` 返回的结果都是 `0`，因此这 2 列计算结果为 `true` 和 `false`。`DBPlusEngineCalc` 上层的 `DBPlusEngineHashAggregate` 会根据这 2 列来过滤数据，由于 `MIN($10) FILTER $12`  对应的状态都是 false，因此导致 SQL 聚合列为 NULL。
 
-![image-20251107184436431](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/explain-using-grouping-result.png)
+![执行计划使用 GROUPING 结果部分](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/explain-using-grouping-result.png)
 
 TODO
 
