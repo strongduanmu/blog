@@ -118,13 +118,57 @@ mysql> EXPLAIN SELECT plan_entity_code
 6 rows in set (1.60 sec)
 ```
 
-为了排查具体是哪个运算符执行器导致数据出错，笔者尝试在执行器 `current` 方法中打印出数据行，
+为了排查具体是哪个运算符执行时数据出错，笔者尝试在执行器 `current` 方法中打印出数据行。首先观察最底层的 `DBPlusEngineHashAggregate` 执行结果，可以看到，除了返回分组条件 `group=[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}` 对应的值之外，数据行中还额外包含了 2 列，分别对应执行计划中的 `$f10=[MAX($10)]` 和 `$g=[GROUPING($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)]`。
 
+```
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, Global_Summary, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-002, CN1, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, CN1, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-003, CN1, SPDT004, PS004, Marketing Name 4, MAT004, New, MODEL1, ACTIVE, CN1#SPDT004#PS004#Marketing Name 4#MAT004#New#950, 950, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-002, Global_Summary, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, Overseas_Regional_Summary, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, Overseas_Regional_Summary, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-002, Overseas_Regional_Summary, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, Global_Summary, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, 1023
+DBPlusEngineHashAggregateExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, 1023
+```
 
+`MAX` 函数没什么特别，`GROUPING` 具体是用来做什么的呢？从网上查阅了一些资料，`GROUPING` 函数是用于在 `GROUPING SETS` 多维度分组中标识哪些列被聚合（即不在当前分组中），`GROUPING` 函数返回一个位掩码，其中每位对应了一个分组列，若该列被聚合（即不在当前分组中），则位值为 1，否则为 0。按照 `GROUPING` 函数的定义，当前分组为 `group=[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}]`，所有列都在分组中，应当全部为 0，而数据行中返回的则是 1023，显然是 `GROUPING` 函数的计算逻辑出错了。
 
 ## 问题解决
 
+搞清楚问题后，我们尝试修改 `GroupingAggregateFunctionEvaluator` 计算逻辑，如下图所示，左侧逻辑是之前参考 Calcite 内置的 `GroupingImplementor` 执行逻辑实现的，该逻辑似乎和 `Grouping` 函数的语义相反，如果当前列不被聚合（即在当前分组中），则位值为 1，否则为 0。我们暂且先不深究 Calcite 的实现逻辑，按照 `Grouping` 函数语义，笔者对函数逻辑进行了修改，严格按照函数语义实现，只有当该列被聚合（即不在当前分组中），才将当前位赋值为 1。
 
+![修改 Grouping 聚合函数逻辑](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/modify-grouping-aggregate-function-logic.png)
+
+修改完成后，通过 IDEA Debug 观察 `GROUPING` 函数的计算结果，可以看到这次得到了符合预期的结果 `0`。
+
+![GROUPING 函数第一次修改后函数结果](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/grouping-function-result-after-first-modify.png)
+
+不过意外情况又出现了，修改完 GROUPING 函数逻辑后，SQL 的执行结果仍然不正确。
+
+![GROUPING 函数第一次修改后 SQL 结果](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/sql-execute-result-after-first-modify.png)
+
+问题又是出在哪里呢？无奈继续观察前面输出的数据行日志，排查 `DBPlusEngineHashAggregate` 上层的 `DBPlusEngineCalc` 执行结果，如下是具体的数据：
+
+```
+DBPlusEngineCalcExecutor: LTB-2023-001, Overseas_Regional_Summary, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, true, false
+DBPlusEngineCalcExecutor: LTB-2023-003, CN1, SPDT004, PS004, Marketing Name 4, MAT004, New, MODEL1, ACTIVE, CN1#SPDT004#PS004#Marketing Name 4#MAT004#New#950, 950, true, false
+DBPlusEngineCalcExecutor: LTB-2023-002, Overseas_Regional_Summary, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, true, false
+DBPlusEngineCalcExecutor: LTB-2023-001, Global_Summary, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, true, false
+DBPlusEngineCalcExecutor: LTB-2023-001, Global_Summary, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, true, false
+DBPlusEngineCalcExecutor: LTB-2023-002, Global_Summary, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, true, false
+DBPlusEngineCalcExecutor: LTB-2023-001, Overseas_Regional_Summary, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, true, false
+DBPlusEngineCalcExecutor: LTB-2023-002, CN1, SPDT003, PS003, Marketing Name 3, MAT003, EOL, MODEL3, ACTIVE, CN1#SPDT003#PS003#Marketing Name 3#MAT003#EOL#850, 850, true, false
+DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing Name 1, MAT001, New, MODEL1, ACTIVE, CN1#SPDT001#PS001#Marketing Name 1#MAT001#New#650, 650, true, false
+DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, true, false
+```
+
+可以看到最后 2 列的值固定为 `true` 和 `false`，而这 2 列对应的是执行计划中的 `expr#13=[=($t11, $t12)]`（即：`$t11 = 0`），以及 `expr#15=[=($t11, $t14)]`（即：`$t11 = 1`），由于 `DBPlusEngineHashAggregate` 返回的结果都是 `0`，因此这 2 列计算结果为 `true` 和 `false`。
+
+![image-20251107184436431](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/explain-using-grouping-result.png)
+
+TODO
 
 ## 结语
 
