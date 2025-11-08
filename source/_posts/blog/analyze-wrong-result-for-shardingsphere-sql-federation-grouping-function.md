@@ -137,9 +137,9 @@ DBPlusEngineHashAggregateExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing 
 
 ## 问题解决
 
-搞清楚问题后，我们尝试修改 `GroupingAggregateFunctionEvaluator` 计算逻辑，如下图所示，左侧逻辑是之前参考 Calcite 内置的 `GroupingImplementor` 执行逻辑实现的，该逻辑似乎和 `Grouping` 函数的语义相反，如果当前列不被聚合（即在当前分组中），则位值为 1，否则为 0。我们暂且先不深究 Calcite 的实现逻辑，按照 `Grouping` 函数语义，笔者对函数逻辑进行了修改，严格按照函数语义实现，只有当该列被聚合（即不在当前分组中），才将当前位赋值为 1。
+搞清楚问题后，我们尝试修改 `GroupingAggregateFunctionEvaluator` 计算逻辑，如下图所示，左侧逻辑是之前参考 Calcite 内置的 `GroupingImplementor` 执行逻辑实现的，该逻辑似乎和 `GROUPING` 函数的语义相反，如果当前列不被聚合（即在当前分组中），则位值为 1，否则为 0。我们暂且先不深究 Calcite 的实现逻辑，按照 `GROUPING` 函数语义，笔者对函数逻辑进行了修改，严格按照函数语义实现，只有当该列被聚合（即不在当前分组中），才将当前位赋值为 1。
 
-![修改 Grouping 聚合函数逻辑](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/modify-grouping-aggregate-function-logic.png)
+![修改 GROUPING 聚合函数逻辑](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/modify-grouping-aggregate-function-logic.png)
 
 修改完成后，通过 IDEA Debug 观察 `GROUPING` 函数的计算结果，可以看到这次得到了符合预期的结果 `0`。
 
@@ -164,9 +164,31 @@ DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing Name 1, M
 DBPlusEngineCalcExecutor: LTB-2023-001, CN1, SPDT002, PS002, Marketing Name 2, MAT002, Mature, MODEL2, ACTIVE, CN1#SPDT002#PS002#Marketing Name 2#MAT002#Mature#750, 750, true, false
 ```
 
-可以看到最后 2 列的值固定为 `true` 和 `false`，而这 2 列对应的是执行计划中的 `expr#13=[=($t11, $t12)]`（即：`$t11 = 0`），以及 `expr#15=[=($t11, $t14)]`（即：`$t11 = 1`），由于 `DBPlusEngineHashAggregate` 返回的结果都是 `0`，因此这 2 列计算结果为 `true` 和 `false`。`DBPlusEngineCalc` 上层的 `DBPlusEngineHashAggregate` 会根据这 2 列来过滤数据，由于 `MIN($10) FILTER $12`  对应的状态都是 false，因此导致 SQL 聚合列为 NULL。
+可以看到最后 2 列的值固定为 `true` 和 `false`，而这 2 列对应的是执行计划中（如下图）的 `expr#13=[=($t11, $t12)]`（即：`$t11 = 0`），以及 `expr#15=[=($t11, $t14)]`（即：`$t11 = 1`），由于 `DBPlusEngineHashAggregate` 返回的结果都是 `0`，因此这 2 列计算结果为 `true` 和 `false`。`DBPlusEngineCalc` 上层的 `DBPlusEngineHashAggregate` 会根据这 2 列来过滤数据，由于 `MIN($10) FILTER $12`  对应的状态都是 false，因此导致 SQL 聚合列为 NULL。
 
 ![执行计划使用 GROUPING 结果部分](analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function/explain-using-grouping-result.png)
+
+为什么 `DBPlusEngineCalc` 中的 `expr#13=[=($t11, $t12)]` 和 `expr#15=[=($t11, $t14)]` 会引用相同的列 `$t11` 呢？笔者回想到最开始实现 `GROUPING` 函数时，参考了 Calcite 内置的 `GroupingImplementor`，既然已经提供了函数实现，Calcite 大概率是支持 `GROUPING` 函数的。
+
+为了彻底搞清楚 `GROUPING` 函数的含义，笔者切换到 ShardingSphere 开源版联邦查询功能进行测试，由于 Calcite 内置的执行器是通过 Linq4j 生成并使用 Janino 编译，如果想要调试这部分逻辑，需要在 JVM 参数中增加如下内容。
+
+```
+-Dorg.codehaus.janino.source_debugging.enable=true
+-Dorg.codehaus.janino.source_debugging.dir=/Users/duanzhengqiang/softs/calcite/janio
+```
+
+首先，我们获取下这条 SQL 在开源版联邦查询中的执行计划，除了物理运算符的类型不同外，执行计划整体上都是相同的。
+
+```sql
+EnumerableSort(sort0=[$2], sort1=[$3], sort2=[$4], sort3=[$5], sort4=[$6], sort5=[$7], sort6=[$8], dir0=[ASC], dir1=[ASC], dir2=[ASC], dir3=[ASC], dir4=[ASC], dir5=[ASC], dir6=[ASC])
+  EnumerableCalc(expr#0..10=[{inputs}], expr#11=[CAST($t10):VARCHAR CHARACTER SET "UTF-8"], expr#12=[CONCAT($t9, $t11)], expr#13=[CAST($t1):VARCHAR CHARACTER SET "UTF-8"], expr#14=[_UTF-8'CN1':VARCHAR CHARACTER SET "UTF-8"], expr#15=[=($t13, $t14)], expr#16=[_UTF-8'1':VARCHAR CHARACTER SET "UTF-8"], expr#17=[_UTF-8'Overseas_Regional_Summary':VARCHAR CHARACTER SET "UTF-8"], expr#18=[=($t13, $t17)], expr#19=[_UTF-8'2':VARCHAR CHARACTER SET "UTF-8"], expr#20=[_UTF-8'Global_Summary':VARCHAR CHARACTER SET "UTF-8"], expr#21=[=($t13, $t20)], expr#22=[_UTF-8'3':VARCHAR CHARACTER SET "UTF-8"], expr#23=[_UTF-8'NULL':VARCHAR CHARACTER SET "UTF-8"], expr#24=[CASE($t15, $t16, $t18, $t19, $t21, $t22, $t23)], expr#25=[IS NULL($t6)], expr#26=[_UTF-8'0':VARCHAR CHARACTER SET "UTF-8"], expr#27=[CAST($t6):VARCHAR CHARACTER SET "UTF-8"], expr#28=[_UTF-8'New':VARCHAR CHARACTER SET "UTF-8"], expr#29=[=($t27, $t28)], expr#30=[_UTF-8'Mature':VARCHAR CHARACTER SET "UTF-8"], expr#31=[=($t27, $t30)], expr#32=[_UTF-8'EOL':VARCHAR CHARACTER SET "UTF-8"], expr#33=[=($t27, $t32)], expr#34=[CASE($t25, $t26, $t29, $t16, $t31, $t19, $t33, $t22, $t23)], plan_entity_code=[$t1], regional_adjustment_summary=[$t12], test_number=[$t0], EXPR$3=[$t24], product_line_code=[$t2], product_series_code=[$t3], marketing_name=[$t4], material_category_code=[$t5], EXPR$8=[$t34])
+    EnumerableAggregate(group=[{0, 1, 2, 3, 4, 5, 6, 7, 8}], agg#0=[LISTAGG($9) FILTER $11], agg#1=[MIN($10) FILTER $12])
+      EnumerableCalc(expr#0..11=[{inputs}], expr#12=[0], expr#13=[=($t11, $t12)], expr#14=[1], expr#15=[=($t11, $t14)], proj#0..10=[{exprs}], $g_0=[$t13], $g_1=[$t15])
+        EnumerableAggregate(group=[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}], groups=[[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}, {0, 1, 2, 3, 4, 5, 6, 7, 8}]], $f10=[MAX($10)], $g=[GROUPING($0, $1, $2, $3, $4, $5, $6, $7, $8, $9)])
+          EnumerableScan(table=[[sphereex_db_tbl_sql_federation_honor, test_analysis_result]], sql=[SELECT `test_number`, `plan_entity_code`, `product_line_code`, `product_series_code`, `marketing_name`, `material_category_code`, `product_status`, `calculation_method`, `warranty_type`, CONCAT(`source_plan_entity_code`, '#', `product_line_code`, '#', `product_series_code`, '#', `marketing_name`, '#', `material_category_code`, '#', `product_status`, '#', CAST(`adjusted_regional` AS CHAR)) AS `$f9`, `adjusted_regional` FROM `sphereex_db_tbl_sql_federation_honor`.`test_analysis_result`], dynamicParameters=[null])
+```
+
+
 
 TODO
 
