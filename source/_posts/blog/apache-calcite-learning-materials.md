@@ -34,6 +34,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * Calcite 源码学习第 11 弹：[Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT](https://strongduanmu.com/blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html)
 * Calcite 源码学习第 12 弹：TODO
 * Calcite 项目实战第 1 弹：[Apache Calcite 在 MyCat2 中的实践探究](https://strongduanmu.com/blog/explore-the-practice-of-apache-calcite-in-mycat2.html)
+* Calcite 项目实战第 2 弹：[ShardingSphere 联邦查询 GROUPING 聚合结果问题分析](https://strongduanmu.com/blog/analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function.html)
 
 ## 官方文档
 
