@@ -3,7 +3,7 @@ title: ShardingSphere 联邦查询 GROUPING 聚合结果问题分析
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-11-03 08:52:14
-updated: 2025-11-07 08:52:14
+updated: 2025-11-08 08:52:14
 cover: /assets/cover/calcite.jpg
 references:
   - '[DBPlusEngine 联邦查询](https://docs.sphere-ex.com/sphereex-dbplussuite/master/zh/docs/plugin-guide/sql-federation/)'
