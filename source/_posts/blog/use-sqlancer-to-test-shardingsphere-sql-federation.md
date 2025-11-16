@@ -7,6 +7,7 @@ updated: 2025-11-16 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
+  - '[Finding Logic Bugs in Database Management Systems (Manuel Rigger, ETH SQLancer)](https://www.youtube.com/watch?v=Np46NQ6lqP8)'
   - '[Mining for logic bugs in the Citus extension to Postgres with SQLancer](https://techcommunity.microsoft.com/blog/adforpostgresql/mining-for-logic-bugs-in-the-citus-extension-to-postgres-with-sqlancer/1634393)'
   - '[数据库进阶测试三部曲 - 从 PQS 到 NoREC 再到 TLP](https://zhuanlan.zhihu.com/p/144725800)'
 banner: /assets/banner/banner_12.jpg
@@ -18,9 +19,13 @@ banner: /assets/banner/banner_12.jpg
 
 ## 什么是 SQLacner
 
+[SQLacner](https://github.com/sqlancer/sqlancer) 项目，是由 [Manuel Rigger](https://www.manuelrigger.at/) 教授创建的，旨在发现数据库 SQL 引擎的逻辑 BUG，Manuel Rigger 教授曾在 Andy 组织的线上分享中介绍过 SQLacner，感兴趣的朋友可以观看 [Finding Logic Bugs in Database Management Systems](https://www.youtube.com/watch?v=Np46NQ6lqP8) 视频了解。
+
+> SQLancer is a tool to automatically test Database Management Systems (DBMSs) in order to find bugs in their implementation. That is, it finds bugs in the code of the DBMS implementation, rather than in queries written by the user. SQLancer has found hundreds of bugs in mature and widely-known DBMSs.
+
+根据官方文档介绍，SQLancer 是一款用于自动测试数据库管理系统的工具，用于查找数据库实现逻辑中的错误。它查找的是 DBMS 实现代码中的错误，而不是用户编写 SQL 中的错误。目前，SQLancer 已在众多主流的 DBMS 中发现了数百个错误。
 
 
-  [Manuel Rigger](https://www.manuelrigger.at/)
 
 TODO
 
