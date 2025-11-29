@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-11-15 08:24:20
-updated: 2025-11-16 08:30:00
+updated: 2025-11-29 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -23,11 +23,13 @@ banner: /assets/banner/banner_12.jpg
 
 > SQLancer is a tool to automatically test Database Management Systems (DBMSs) in order to find bugs in their implementation. That is, it finds bugs in the code of the DBMS implementation, rather than in queries written by the user. SQLancer has found hundreds of bugs in mature and widely-known DBMSs.
 
-根据官方文档介绍，SQLancer 是一款用于自动测试数据库管理系统的工具，用于查找数据库实现逻辑中的错误。它查找的是 DBMS 实现代码中的错误，而不是用户编写 SQL 中的错误。目前，SQLancer 已在众多主流的 DBMS 中发现了数百个错误。
+根据官方文档介绍，SQLancer 是一款用于自动测试数据库管理系统的工具，用于查找**数据库实现逻辑中的错误**。它查找的是 **DBMS 实现代码中的错误**，而不是用户编写 SQL 中的错误。目前，SQLancer 已在众多主流的 DBMS 中发现了数百个错误。
 
+下图展示了一个具体的逻辑错误，当用户输入 SQL 语句查询数据时，原本数据库中存在 2 条匹配的数据，但由于数据库的 SQL 引擎存在**逻辑错误**，最终只返回了 1 条数据。除了**少返回数据行**外，逻辑错误还包含了：**错误返回过滤条件外的结果**，**返回的数据行内容错误**等。
 
+![什么是逻辑错误](use-sqlancer-to-test-shardingsphere-sql-federation/waht_is_logical_bug.png)
 
-TODO
+**数据库逻辑错误**相比于**语法错误**危害性更大，语法错误会在执行时通过异常码反馈出来，中断当前的 SQL 执行，逻辑错误则会返回不正确的查询结果，用户无法通过任何信息识别出当前的逻辑错误，最终可能会导致严重的业务错误。使用 SQLancer 测试工具，可以快速发现 SQL 逻辑问题，帮助提升 SQL 引擎的正确性，下面小节我们将介绍 SQLancer 常用的几种测试方法，看看这些方法是如何检测 SQL 逻辑问题。
 
 ## PQS 测试方法
 
