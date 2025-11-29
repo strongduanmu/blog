@@ -27,7 +27,7 @@ banner: /assets/banner/banner_12.jpg
 
 下图展示了一个具体的逻辑错误，当用户输入 SQL 语句查询数据时，原本数据库中存在 2 条匹配的数据，但由于数据库的 SQL 引擎存在**逻辑错误**，最终只返回了 1 条数据。除了**少返回数据行**外，逻辑错误还包含了：**错误返回过滤条件外的结果**，**返回的数据行内容错误**等。
 
-![什么是逻辑错误](use-sqlancer-to-test-shardingsphere-sql-federation/waht_is_logical_bug.png)
+![什么是逻辑错误](use-sqlancer-to-test-shardingsphere-sql-federation/what_is_logical_bugs.png)
 
 **数据库逻辑错误**相比于**语法错误**危害性更大，语法错误会在执行时通过异常码反馈出来，中断当前的 SQL 执行，逻辑错误则会返回不正确的查询结果，用户无法通过任何信息识别出当前的逻辑错误，最终可能会导致严重的业务错误。使用 SQLancer 测试工具，可以快速发现 SQL 逻辑问题，帮助提升 SQL 引擎的正确性，下面小节我们将介绍 SQLancer 常用的几种测试方法，看看这些方法是如何检测 SQL 逻辑问题。
 
