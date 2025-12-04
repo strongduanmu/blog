@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-11-15 08:24:20
-updated: 2025-11-29 08:30:00
+updated: 2025-12-04 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -35,9 +35,20 @@ banner: /assets/banner/banner_12.jpg
 
 ## PQS 测试方法
 
+PQS 全称为 `Pivoted Query Synthesis（枢轴查询合成）`，该方法详细的介绍可以参考论文——[Testing Database Engines via
+Pivoted Query Synthesis](https://arxiv.org/pdf/2001.04174)。它的**核心思想**是：随机选择一条记录（即枢轴记录），然后基于这条记录生成过滤条件和查询语句，再去 DBMS 中执行查询，如果 DBMS 返回的结果集没有包含这条记录，则说明 DBMS 存在问题。
+
 ![SQLancer PQS 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-pivoted-query-synthesis-technique.png)
 
+上图展示了 PQS 测试方法的详细步骤，总结下来包括如下 7 个步骤：
 
+1. 随机生成一些表（`t0` 和 `t1` 表）和数据行（`t0` 表 `c0:3, c1:TRUE` 数据行，`t1` 表 `c0:-5` 数据行）；
+2. 从每张表中随机的选择一行数据，将这行数据作为基准行；
+3. 基于选择的基准行，随机生成表达式，并根据基准行的值计算出表达式结果；
+4. 根据表达式的计算结果调整表达式，直到表达式的计算结果为 `TRUE`，例如：上图步骤 3 中表达式计算结果为 `FALSE`，步骤 4 中通过增加 `NOT` 将计算结果调整为 `TRUE`；
+5. 基于表达式随机生成查询语句，表达式使用在查询的 `WHERE` 或者 `JOIN` 子句中，查询语句会返回基准行对应的列（`SELECT t0.c0, t0.c1, t1.c0`）；
+6. 将查询语句提交到 DBMS 中执行，获取返回的结果集；
+7. 校验结果集是否包含最初选择的基准行，如果不包含，说明 DBMS 可能存在缺陷。
 
 
 
@@ -51,7 +62,7 @@ TODO
 
 TODO
 
-## CERT 测试方法
+## DQE 测试方法
 
 TODO
 
