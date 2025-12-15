@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20
-updated: 2025-12-14 08:30:00
+updated: 2025-12-15 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -50,13 +50,19 @@ Pivoted Query Synthesis](https://arxiv.org/pdf/2001.04174)。它的**核心思�
 6. 将查询语句提交到 DBMS 中执行，获取返回的结果集；
 7. 校验结果集是否包含最初选择的基准行，如果不包含，说明 DBMS 可能存在缺陷。
 
-PQS 测试方法是 SQLancer 支持的第一个测试方法，由于该测试方法落地实现的工作量巨大，目前 SQLancer 已经不再维护该方法，官方推荐使用其他测试方法。
+PQS 测试方法是 SQLancer 支持的第一个测试方法，由于该测试方法落地实现的工作量巨大，目前 SQLancer 已经不再维护，官方推荐使用其他测试方法。如果大家对这个测试方法感兴趣，仍然可以使用如下的命令执行 PQS 测试，`--oracle pqs` 属性用于指定测试预言机的类型。
 
+```bash
 java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 123456 mysql --oracle pqs
+```
 
-TODO
+下图展示了使用 SQLancer PQS 方法测试 MySQL 的截图，测试出的不支持 SQL 可以在 `target/logs` 目录下查看。
+
+![使用 SQLancer PQS 方法测试 MySQL](use-sqlancer-to-test-shardingsphere-sql-federation/test-with-qps.png)
 
 ## NoREC 测试方法
+
+
 
 TODO
 
