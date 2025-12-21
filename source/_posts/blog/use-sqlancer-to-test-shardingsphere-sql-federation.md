@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20
-updated: 2025-12-15 08:30:00
+updated: 2025-12-21 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -36,7 +36,7 @@ banner: /assets/banner/banner_12.jpg
 ## PQS 测试方法
 
 PQS 全称为 `Pivoted Query Synthesis（枢轴查询合成）`，该方法详细的介绍可以参考论文——[Testing Database Engines via
-Pivoted Query Synthesis](https://arxiv.org/pdf/2001.04174)。它的**核心思想**是：随机选择一条记录（即枢轴记录），然后基于这条记录生成过滤条件和查询语句，再去 DBMS 中执行查询，如果 DBMS 返回的结果集没有包含这条记录，则说明 DBMS 存在问题。
+Pivoted Query Synthesis](https://arxiv.org/pdf/2001.04174)。它的**核心思想**是：**随机选择一条记录（即枢轴记录），然后基于这条记录生成过滤条件和查询语句，再去 DBMS 中执行查询，如果 DBMS 返回的结果集没有包含这条记录，则说明 DBMS 存在问题**。
 
 ![SQLancer PQS 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-pivoted-query-synthesis-technique.png)
 
@@ -50,7 +50,7 @@ Pivoted Query Synthesis](https://arxiv.org/pdf/2001.04174)。它的**核心思�
 6. 将查询语句提交到 DBMS 中执行，获取返回的结果集；
 7. 校验结果集是否包含最初选择的基准行，如果不包含，说明 DBMS 可能存在缺陷。
 
-PQS 测试方法是 SQLancer 支持的第一个测试方法，由于该测试方法落地实现的工作量巨大，目前 SQLancer 已经不再维护，官方推荐使用其他测试方法。如果大家对这个测试方法感兴趣，仍然可以使用如下的命令执行 PQS 测试，`--oracle pqs` 属性用于指定测试预言机的类型。
+PQS 测试方法是 SQLancer 支持的第一个测试方法，它支持 `SQLite（3.28）`、`MySQL（8.0.16）` 及 `PostgreSQL（11.4）` 数据库，由于该测试方法实现的工作量巨大，需要为每个 DB 实现 AST 解释器，并且无法支持聚合函数、窗口函数测试，目前 **SQLancer 已经不再维护**，官方推荐使用其他测试方法。如果大家对这个测试方法感兴趣，仍然可以使用如下的命令执行 PQS 测试，`--oracle pqs` 属性用于指定测试预言机的类型。
 
 ```bash
 java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 123456 mysql --oracle pqs
@@ -62,7 +62,11 @@ java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 
 
 ## NoREC 测试方法
 
+`NoREC` 是 SQLancer 支持的第二个测试方法，全称是 `Non-Optimizing Reference Engine Construction（非优化参考引擎构造）`，该方法的详细内容可参考论文——[Detecting Optimization Bugs in Database Engines via Non-Optimizing Reference Engine Construction](https://arxiv.org/pdf/2007.08292)。
 
+`NoREC` 的**核心思想**是：**通过对比优化查询与非优化查询的结果差异，来检测 SQL 优化可能存在的漏洞**。优化查询具体指：`SELECT * FROM t0 WHERE φ`，这条 SQL 可能会被 SQL 引擎优化，`NoREC` 测试方法会将这条 SQL 转换为非优化查询——`SELECT (φ IS TRUE) FROM t0`，将过滤条件移动到投影列中。
+
+![SQLancer NoREC 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-norec-technique.png)
 
 TODO
 
