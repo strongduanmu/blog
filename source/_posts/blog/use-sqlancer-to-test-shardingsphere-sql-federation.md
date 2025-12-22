@@ -68,7 +68,21 @@ java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 
 
 ![SQLancer NoREC 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-norec-technique.png)
 
-TODO
+上图展示了 NoREC 测试方法的详细步骤，测试逻辑非常简单，具体如下：
+
+1. 随机生成一条较高优化潜力的 SQL（数据库中大多数优化都和过滤相关，因此生成包含 WHERE 条件的 SQL，预期将会被数据库管理系统进行优化），例如：`SELECT * FROM t0 WHERE φ`；
+2. 将优化 SQL 转换为无法优化的形式，具体来说，是将 WHERE 条件中的表达式移动到投影列中，例如：`SELECT (φ IS TRUE) FROM t0`，这种查询缺乏 WHERE 条件，数据库管理系统必须检索所有记录；
+3. 执行优化 SQL 和未优化 SQL 并比较结果集，如果未优化 SQL 返回 TRUE 的行数不等于优化 SQL 返回行数，则说明存在 BUG。
+
+NoREC 测试方法支持 `SQLite`、`MariaDB`、`PostgreSQL` 和 `CockroachDB` 数据库，支持 `WHERE`、`JOIN`、`ORDER BY` 等子句测试，暂不支持 `DISTINCT`、`窗口函数` 测试。相比于 PQS，NoREC 增加了对聚合函数的支持，并且可以检测重复记录错误。执行如下的命令测试 NoREC 方法，通过 `--oracle norec` 参数指定 NoREC 方法：
+
+```bash
+java -jar sqlancer-*.jar --num-threads 4 --port 3344 --username root --password 123456 mariadb --oracle norec
+```
+
+下图展示了使用 SQLancer PQS 方法测试 MariaDB 的截图，测试出的不支持 SQL 可以在 `target/logs` 目录下查看。
+
+![使用 SQLancer PQS 方法测试 MariaDB](use-sqlancer-to-test-shardingsphere-sql-federation/test-with-norec.png)
 
 ## TLP 测试方法
 
