@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20
-updated: 2025-12-21 08:30:00
+updated: 2025-12-24 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -86,7 +86,32 @@ java -jar sqlancer-*.jar --num-threads 4 --port 3344 --username root --password 
 
 ## TLP 测试方法
 
-TODO
+`TLP` 测试方法全称为 `Ternary Logic Partitioning（三元逻辑分区）`，该方法的详细介绍可以参考论文——[Finding bugs in database systems via query partitioning](https://dl.acm.org/doi/pdf/10.1145/3428279)。
+
+`TLP` 测试方法的**核心思想**是：将一个原始查询分解为多个分区查询，每个分区查询计算原始查询结果的一个子集，然后通过组合操作将这些子集合并，验证合并结果是否与原始查询结果一致，不一致则说明存在 BUG。从 `TLP` 的命名我们可以看出，在进行分区查询时，该方法采用了**三元逻辑分区**，基于 SQL 的三值逻辑（`TRUE`、`FALSE`、`NULL`），将原始查询分解为三个分区查询，分别对应谓词为 `TRUE`、`FALSE` 和 `NULL` 的情况。
+
+![SQLancer TLP 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-tlp-technique.png)
+
+上图展示了 TLP 测试方法的实现原理，具体测试流程如下：
+
+1. 随机生成数据库和查询语句；
+2. 根据原始查询生成分区查询，例如：`WHERE p`、`WHERE NOT p`、`WHERE p IS NULL`；
+3. 执行分区查询并合并查询结果；
+4. 与原始查询结果对比，不一致则发现 DB BUG。
+
+如下表所示，`TLP` 测试方法相比 `PQS`（主要测试 WHERE）和 `NoREC`（主要测试 WHERE，部分聚合），能够支持更多的语法类型，包括：`WHERE`、`GROUP BY`、`HAVING`、聚合函数（如 `MIN`、`MAX`、`SUM`、`COUNT`、`AVG`）和 `DISTINCT` 查询。目前，`TLP` 测试方法已经支持了 `SQLite`、`MySQL`、`PostgreSQL` 等多种数据库，可以将 `TLP` 和其他测试方法结合，覆盖更多的测试场景。
+
+![TLP 测试方法覆盖的 SQL 语法](use-sqlancer-to-test-shardingsphere-sql-federation/sql-feature-tlp-oracles-design-to-test.png)
+
+执行如下的命令测试 TLP 方法，通过 `--oracle tlp_where` 参数指定 TLP 方法：
+
+```bash
+java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 123456 mysql --oracle tlp_where
+```
+
+下图展示了使用 SQLancer TLP 方法测试 MySQL 的截图，测试出的不支持 SQL 可以在 `target/logs` 目录下查看。
+
+![使用 SQLancer TLP 方法测试 MySQL](use-sqlancer-to-test-shardingsphere-sql-federation/test-with-tlp.png)
 
 ## DQE 测试方法
 
