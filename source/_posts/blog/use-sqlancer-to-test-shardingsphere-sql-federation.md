@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20
-updated: 2025-12-24 08:30:00
+updated: 2025-12-25 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -114,6 +114,23 @@ java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 
 ![使用 SQLancer TLP 方法测试 MySQL](use-sqlancer-to-test-shardingsphere-sql-federation/test-with-tlp.png)
 
 ## DQE 测试方法
+
+`DQE` 测试方法全称为 `Differential Query Execution（差分查询执行）`，该方法由国内研究团队提出，详细论文内容可以参考——[Testing Database Systems via Differential Query Execution](https://share.note.youdao.com/s/1IGOxnvZ)。
+
+`DQE` 测试方法的**核心思想**是：使用相同谓词（WHERE 条件）生成 `SELECT`、`UPDATE` 和 `DELETE` 语句，然后分别执行这 3 条语句，观察他们操作的数据行，如果操作的数据行不一致，则可能存在逻辑错误。
+
+![SQLancer DQE 测试原理](use-sqlancer-to-test-shardingsphere-sql-federation/sqlancer-dqe-technique.png)
+
+上图展示了 DQE 测试方法的详细流程，具体测试细节如下：
+
+1. 生成随机的库（`t1`、`t2`）和表（`c1`、`c2`）；
+2. 生成随机谓词，例如：`NOT t1.c1`；
+3. 基于相同的谓词，生成一个查询元组，包含 `SELECT`、`UPDATE` 和 `DELETE` 语句；
+4. 在相同的数据库状态下，执行 `SELECT`、`UPDATE` 和 `DELETE` 语句；
+5. 获取 `SELECT`、`UPDATE` 和 `DELETE` 语句执行结果；
+6. 比较执行结果：`SELECT` 语句返回 `rowId`，确定访问的数据行范围。`UPDATE` 语句除了更新常规字段外，还额外更新 `updated` 为 1，执行后检查 `updated = 1` 的数据行及其 `rowId`，确认修改行是否和 `SELECT` 一致。`DELETE` 语句执行前记录所有 `rowId`，执行后比较出删除的 `rowId` 范围，并和 `SELECT` 语句对比是否一致。
+
+
 
 TODO
 
