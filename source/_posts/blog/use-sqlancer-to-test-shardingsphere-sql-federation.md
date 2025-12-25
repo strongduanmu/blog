@@ -130,9 +130,17 @@ java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 
 5. 获取 `SELECT`、`UPDATE` 和 `DELETE` 语句执行结果；
 6. 比较执行结果：`SELECT` 语句返回 `rowId`，确定访问的数据行范围。`UPDATE` 语句除了更新常规字段外，还额外更新 `updated` 为 1，执行后检查 `updated = 1` 的数据行及其 `rowId`，确认修改行是否和 `SELECT` 一致。`DELETE` 语句执行前记录所有 `rowId`，执行后比较出删除的 `rowId` 范围，并和 `SELECT` 语句对比是否一致。
 
+`DQE` 相比前文提到的其他测试方法，首次提出了针对 `UPDATE` 和 `DELETE` 语句逻辑错误的检测方法，并且支持 `MySQL`、`MariaDB`、`CockroachDB` 等数据库，完善了 SQLancer 测试工具覆盖的 SQL 场景。但是差分测试也存在一定的局限性，例如：无法测试出 `SELECT`、`UPDATE` 和 `DELETE` 语句同时出现相同错误的场景，不支持 `DISTINCT`、`GROUP BY` 等语法，以及包含非确定函数的场景（例如：`RAND` 函数）。
 
+执行如下的命令测试 DQE 方法，通过 `--oracle dqe` 参数指定 DQE 方法：
 
-TODO
+```bash
+java -jar sqlancer-*.jar --num-threads 4 --port 3306 --username root --password 123456 mysql --oracle dqe
+```
+
+下图展示了使用 SQLancer DQE 方法测试 MySQL 的截图，测试出的不支持 SQL 可以在 `target/logs` 目录下查看。
+
+![使用 SQLancer DQE 方法测试 MySQL](use-sqlancer-to-test-shardingsphere-sql-federation/test-with-dqe.png)
 
 ## 联邦查询测试实战
 
