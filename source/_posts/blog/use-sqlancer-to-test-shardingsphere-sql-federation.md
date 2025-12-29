@@ -3,7 +3,7 @@ title: 使用 SQLancer 测试 ShardingSphere 联邦查询
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20
-updated: 2025-12-27 08:30:00
+updated: 2025-12-29 08:30:00
 cover: /assets/blog/blog/sqlancer-logo.png
 references:
   - '[SQLacner 官方文档](https://github.com/sqlancer/sqlancer)'
@@ -216,7 +216,7 @@ Usage: SQLancer [options] [command] [command options]
     --print-progress-summary
       # 退出时打印执行汇总（总查询数 / 错误数等），测试结束后统计结果
       Whether to print an execution summary when exiting SQLancer
-      Default: false
+      Default: true
     --random-seed
       # 随机种子，设为非 -1 值（如 12345）可复现测试过程（确定性生成）
       A seed value != -1 that can be set to make the query and database 
@@ -266,7 +266,7 @@ Usage: SQLancer [options] [command] [command options]
 
 由于 ShardingSphere 有逻辑库和存储单元（物理库）的概念，因此需要对 SQLancer 进行一些改造，才能测试 ShardingSphere 联邦查询。从上面的属性可以看出，我们新增了 `storage-unit-host`、`storage-unit-port`、`storage-unit-username` 和 `storage-unit-password` 属性，用于指定 ShardingSphere 存储单元的连接信息。而 SQLancer 原有的属性 `host`、`port`、`username`、`password`，则用于连接 ShardingSphere Proxy 接入端。
 
-当 SQLancer 工具创建测试库时，不仅会在 Proxy 接入端创建逻辑库，还会额外通过 DistSQL 注册物理存储单元，然后再进行建表、生成数据和 SQL 测试等操作。我们执行如下的命令测试 ShardingSphere 联邦查询，`--storage-unit-*` 属性用于指定存储单元的连接信息，`--num-tries` 用于控制发现多少个错误则终止测试。
+当 SQLancer 工具创建测试库时，不仅会在 Proxy 接入端创建逻辑库，还会额外通过 DistSQL 注册物理存储单元，然后再进行建表、生成数据和 SQL 测试等操作。我们执行如下的命令测试 ShardingSphere 联邦查询，`--storage-unit-*` 属性用于指定存储单元的连接信息，`--num-threads` 用来指定测试线程数，`--num-tries` 则用于控制发现多少个错误则终止测试。
 
 ```bash
 java -jar sqlancer-*.jar \
@@ -282,9 +282,171 @@ java -jar sqlancer-*.jar \
   --oracle tlp_where
 ```
 
+ShardingSphere 商业联邦查询的配置可以参考[联邦查询-配置示例](https://docs.sphere-ex.com/sphereex-dbplussuite/master/zh/docs/plugin-guide/sql-federation/#%E9%85%8D%E7%BD%AE%E7%A4%BA%E4%BE%8B)文档，首先在 Proxy 端执行以下的 DistSQL 开启联邦查询，`ALL_QUERY_USE_SQL_FEDERATION` 设置为 `true`，保证所有的 DML SQL 使用联邦查询引擎执行。
 
+```sql
+ALTER SQL_FEDERATION RULE (
+    SQL_FEDERATION_ENABLED=true,
+    ALL_QUERY_USE_SQL_FEDERATION=true,
+    EXECUTION_PLAN_CACHE(INITIAL_CAPACITY=2000, MAXIMUM_SIZE=65535, TTL_MILLI_SECONDS=86400000),
+    MAX_USAGE_MEMORY_PER_QUERY='10M',
+    SPILL_ENABLED=true,
+    SPILL_PATH="file:///tmp/dbplusengine/spill",
+    SPILL_COMPRESSION_ENABLED=true
+);
+```
 
-TODO
+然后我们再开启统计信息收集功能，支持 SQLancer 对库、表、列等信息的查询，确保 SQLancer 测试逻辑能够正常运行。
+
+```sql
+ALTER STATISTICS_STORAGE RULE (
+    NAME_PREFIX=sphereex,
+    STORAGE UNIT (
+        URL = "jdbc:mysql://127.0.0.1:3306?serverTimezone=UTC&useSSL=false&allowPublicKeyRetrieval=true",
+        USER = "root",
+        PASSWORD = "123456",
+        PROPERTIES("minPoolSize"=1, "maxPoolSize"=2)
+    )
+);
+```
+
+开启统计信息收集，需要在 MySQL 中执行 Grant 语句给 `STATISTICS_STORAGE Rule` 中的账号赋权（如下数据库账号按照实际情况修改）。
+
+```sql
+GRANT CREATE, SELECT, INSERT, UPDATE, DELETE, DROP ON sphereex_information_schema.* TO 'root'@'%';
+GRANT CREATE, SELECT, INSERT, UPDATE, DELETE, DROP ON sphereex_shardingsphere.* TO 'root'@'%';
+```
+
+再执行 DistSQL 设置统计信息收集间隔，并开启统计信息收集功能。
+
+```sql
+SET DIST VARIABLE proxy_meta_data_collector_cron = '0 0/30 * * * ?';
+SET DIST VARIABLE proxy_meta_data_collector_enabled = 'true';
+```
+
+首次开启统计信息功能，我们可以主动执行 `REFRESH STATISTICS METADATA;` 更新统计信息。
+
+```sql
+REFRESH STATISTICS METADATA;
+```
+
+配置完联邦查询功能，并开启统计信息收集后，我们可以执行前面的 SQLancer 命令，来测试下 ShardingSphere 联邦查询功能，很快我们就测试出了第一个联邦查询不支持的 Case——`IS UNKNOWN` 语法（异常 Case 会输出到 `target/logs/mysql` 目录下）。
+
+![使用 SQLancer 测试 ShardingSphere 联邦查询](use-sqlancer-to-test-shardingsphere-sql-federation/use-sqlancer-to-test-shardingsphere-sql-federation.png)
+
+SQLancer 提供的报错信息很全面，不仅包含了异常堆栈信息，还提供了复现这个异常所需的 SQL 操作步骤，我们依次执行 SQL 语句，就可以快速复现异常。
+
+```sql
+java.lang.AssertionError: SELECT ALL t2.c1 AS ref0 FROM t2 WHERE NULL UNION ALL SELECT t2.c1 AS ref0 FROM t2 WHERE (NOT (NULL)) UNION ALL SELECT t2.c1 AS ref0 FROM t2 WHERE (NULL) IS UNKNOWN;
+        at sqlancer.common.query.SQLQueryAdapter.checkException(SQLQueryAdapter.java:166)
+        at sqlancer.common.query.SQLQueryAdapter.internalExecuteAndGet(SQLQueryAdapter.java:207)
+        at sqlancer.common.query.SQLQueryAdapter.executeAndGet(SQLQueryAdapter.java:177)
+        at sqlancer.common.query.SQLQueryAdapter.executeAndGet(SQLQueryAdapter.java:172)
+        at sqlancer.ComparatorHelper.getResultSetFirstColumnAsString(ComparatorHelper.java:56)
+        at sqlancer.ComparatorHelper.getCombinedResultSet(ComparatorHelper.java:151)
+        at sqlancer.common.oracle.TLPWhereOracle.check(TLPWhereOracle.java:110)
+        at sqlancer.ProviderAdapter.generateAndTestDatabase(ProviderAdapter.java:61)
+        at sqlancer.Main$DBMSExecutor.run(Main.java:467)
+        at sqlancer.Main$2.run(Main.java:684)
+        at sqlancer.Main$2.runThread(Main.java:666)
+        at sqlancer.Main$2.run(Main.java:657)
+        at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+        at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+        at java.base/java.lang.Thread.run(Thread.java:840)
+Caused by: java.sql.SQLSyntaxErrorException: Unsupported SQL operator: `IS`
+        at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:120)
+        at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+        at com.mysql.cj.jdbc.StatementImpl.executeQuery(StatementImpl.java:1200)
+        at sqlancer.common.query.SQLQueryAdapter.internalExecuteAndGet(SQLQueryAdapter.java:196)
+        ... 13 more
+--java.lang.AssertionError: SELECT ALL t2.c1 AS ref0 FROM t2 WHERE NULL UNION ALL SELECT t2.c1 AS ref0 FROM t2 WHERE (NOT (NULL)) UNION ALL SELECT t2.c1 AS ref0 FROM t2 WHERE (NULL) IS UNKNOWN;
+--      at sqlancer.common.query.SQLQueryAdapter.checkException(SQLQueryAdapter.java:166)
+--      at sqlancer.common.query.SQLQueryAdapter.internalExecuteAndGet(SQLQueryAdapter.java:207)
+--      at sqlancer.common.query.SQLQueryAdapter.executeAndGet(SQLQueryAdapter.java:177)
+--      at sqlancer.common.query.SQLQueryAdapter.executeAndGet(SQLQueryAdapter.java:172)
+--      at sqlancer.ComparatorHelper.getResultSetFirstColumnAsString(ComparatorHelper.java:56)
+--      at sqlancer.ComparatorHelper.getCombinedResultSet(ComparatorHelper.java:151)
+--      at sqlancer.common.oracle.TLPWhereOracle.check(TLPWhereOracle.java:110)
+--      at sqlancer.ProviderAdapter.generateAndTestDatabase(ProviderAdapter.java:61)
+--      at sqlancer.Main$DBMSExecutor.run(Main.java:467)
+--      at sqlancer.Main$2.run(Main.java:684)
+--      at sqlancer.Main$2.runThread(Main.java:666)
+--      at sqlancer.Main$2.run(Main.java:657)
+--      at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
+--      at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
+--      at java.base/java.lang.Thread.run(Thread.java:840)
+--Caused by: java.sql.SQLSyntaxErrorException: Unsupported SQL operator: `IS`
+--      at com.mysql.cj.jdbc.exceptions.SQLError.createSQLException(SQLError.java:120)
+--      at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:122)
+--      at com.mysql.cj.jdbc.StatementImpl.executeQuery(StatementImpl.java:1200)
+--      at sqlancer.common.query.SQLQueryAdapter.internalExecuteAndGet(SQLQueryAdapter.java:196)
+--      ... 13 more
+--
+-- Time: 2025/12/28 20:31:14
+-- Database: database0
+-- Database version: 5.7.22-DBPlusEngine-Proxy 5.5.3-SNAPSHOT-82e26ad
+-- seed value: 1766925060265
+DROP DATABASE IF EXISTS database0;
+CREATE DATABASE database0;
+USE database0;
+CREATE TABLE t0(c0 VARCHAR(500)  COMMENT 'asdf'  NULL COLUMN_FORMAT DEFAULT, c1 DECIMAL  STORAGE MEMORY) ;
+INSERT INTO t0(c0) VALUES(0.5415928422036966);
+UPDATE t0 SET c1=0.6302674886178765, c0="0.6302674886178765";
+INSERT DELAYED INTO t0(c1, c0) VALUES(NULL, 'h{|Ij#k}');
+INSERT INTO t0(c1) VALUES(0.3379070670876593);
+UPDATE t0 SET c1=-947955752 WHERE CAST(' *Y' AS SIGNED);
+UPDATE t0 SET c1=(NOT ( EXISTS (SELECT 1 wHERE FALSE))), c0=t0.c0;
+INSERT INTO t0(c1) VALUES("(g");
+INSERT IGNORE INTO t0(c1) VALUES("9");
+DELETE IGNORE FROM t0;
+INSERT IGNORE INTO t0(c1) VALUES(NULL), (NULL), (0.2584659624758967), (NULL), ("i|&");
+DELETE IGNORE FROM t0;
+ALTER TABLE t0 DELAY_KEY_WRITE 0, COMPRESSION 'ZLIB';
+SHOW TABLES;
+INSERT HIGH_PRIORITY IGNORE INTO t0(c1) VALUES(1634001425);
+INSERT LOW_PRIORITY INTO t0(c0) VALUES("");
+SHOW TABLES;
+UPDATE t0 SET c0=-1148055694;
+UPDATE t0 SET c0=17125872;
+INSERT IGNORE INTO t0(c1, c0) VALUES(0.3283236604697395, NULL);
+INSERT INTO t0(c1) VALUES(0.048050841555574375);
+ALTER TABLE t0 DROP c0, FORCE, CHECKSUM 1;
+INSERT LOW_PRIORITY INTO t0(c1) VALUES(0.07787208116702882);
+DELETE LOW_PRIORITY QUICK IGNORE FROM t0;
+INSERT IGNORE INTO t0(c1) VALUES(829218842);
+INSERT LOW_PRIORITY INTO t0(c1) VALUES(NULL);
+INSERT IGNORE INTO t0(c1) VALUES(NULL);
+INSERT INTO t0(c1) VALUES(0.02242428818878528);
+DELETE QUICK IGNORE FROM t0;
+ALTER TABLE t0 INSERT_METHOD FIRST, PACK_KEYS 1, DISABLE KEYS, COMPRESSION 'NONE', ROW_FORMAT FIXED, CHECKSUM 0, STATS_PERSISTENT DEFAULT, FORCE, RENAME AS t0, DELAY_KEY_WRITE 0, ALGORITHM DEFAULT, STATS_AUTO_RECALC DEFAULT;
+ALTER TABLE t0 ENABLE KEYS, ALGORITHM INPLACE, STATS_PERSISTENT 0, CHECKSUM 0, PACK_KEYS 0, INSERT_METHOD LAST;
+ALTER TABLE t0 FORCE, ROW_FORMAT REDUNDANT, INSERT_METHOD NO, STATS_AUTO_RECALC DEFAULT, PACK_KEYS 0, ENABLE KEYS, STATS_PERSISTENT 1, RENAME AS t0, ALGORITHM DEFAULT;
+ALTER TABLE t0 PACK_KEYS 0, STATS_PERSISTENT DEFAULT, ENABLE KEYS, ALGORITHM COPY, ROW_FORMAT DYNAMIC, RENAME t2, CHECKSUM 0, COMPRESSION 'NONE', STATS_AUTO_RECALC 1, DELAY_KEY_WRITE 0, INSERT_METHOD NO, FORCE;
+INSERT HIGH_PRIORITY IGNORE INTO t2(c1) VALUES(-1656112204);
+UPDATE t2 SET c1= EXISTS (SELECT 1 wHERE FALSE);
+INSERT DELAYED IGNORE INTO t2(c1) VALUES('1e500');
+SHOW TABLES;
+INSERT HIGH_PRIORITY IGNORE INTO t2(c1) VALUES(0.9546301382857064);
+```
+
+另外，我们还可以根据 `seed value: 1766925060265` 来控制 SQLancer 生成的 Case，使用相同的种子值（通过参数 `--random-seed 1766925060265` 控制），可以生成相同的测试 Case，这样我们就可以稳定复现异常。
+
+```bash
+java -jar sqlancer-*.jar \
+  --port 3307 \
+  --username root \
+  --password root \
+  --storage-unit-port 3306 \
+  --storage-unit-username root \
+  --storage-unit-password 123456 \
+  --random-seed 1766925060265 \
+  --num-threads 1 \
+  --num-tries 1000 \
+  mysql \
+  --oracle tlp_where
+```
+
+SQLancer 测试工具功能强大，目前已经测试出一批 ShardingSphere 联邦查询不支持的 Case，由于篇幅限制，本文就不一一介绍了，笔者会根据这些异常信息，逐个进行分析和修复，不断提升 ShardingSphere 联邦查询的 SQL 支持度。大家如果有 SQL 引擎的测试需求，不妨也尝试下 SQLancer，相信它一定能够发现更多潜在的问题，帮助大家提升 SQL 引擎的稳定性。由于笔者也是初次探索和使用 SQLancer，如果文章有错误之处，或者其他 SQLancer 使用技巧，欢迎大家留言指导。
 
 
 
