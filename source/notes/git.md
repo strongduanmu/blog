@@ -187,7 +187,7 @@ Hi strongduanmu! You've successfully authenticated, but GitHub does not provide 
 
 为了不影响工作效率，尝试将 SSH 替换为 HTTPS，参考 [Managing your personal access tokens](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)，点击个人头像下的 **Settings**，然后选择 `Developer settings -> Personal access tokens -> Fine-grained personal access tokens Beta -> Generate new token`，生成 token 如下图所示。
 
-![生成 token](/assets/blog/blog/202309151042092.png)
+![生成 Token](/assets/blog/blog/202309151042092.png)
 
 生成完成后，执行 `git fetch` 等命令时，输入用户名和密码（生成的 token）。
 
@@ -197,3 +197,60 @@ Password for 'https://strongduanmu@github.com': {token}
 ```
 
 此外，为了避免频繁输入用户名和密码，可以执行 `git config --global credential.helper store `，将认证信息存储下来，这样后续执行就无需重复输入了。
+
+## Git 提交超大文件
+
+当 PR 中包含超大文件时（超过 50 MB），此时无法将这些文件提交到仓库中，需要通过大文件提交方式进行处理。
+
+```bash
+ ~/IdeaProjects/dbplus-engine-honor │ dev-5.5.1-fix-0104 *34 +10 !9  git push                                                                                                                                                                      PIPE ✘ │ 5m 52s 
+Uploading LFS objects: 100% (2/2), 439 MB | 0 B/s, done.                                                                                                                                                                                                              
+Enumerating objects: 762, done.
+Counting objects: 100% (541/541), done.
+Delta compression using up to 12 threads
+Compressing objects: 100% (142/142), done.
+Writing objects: 100% (193/193), 38.50 MiB | 1.89 MiB/s, done.
+Total 193 (delta 77), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: Resolving deltas: 100% (77/77), completed with 32 local objects.
+remote: warning: File test/e2e/sql/src/test/resources/env/scenario/sphereex_db_tbl_sql_federation_honor/data/expected/init-sql/mysql/02-expected-prps_asc_stock_keep_list_t-init.sql is 80.21 MB; this is larger than GitHub's recommended maximum file size of 50.00 MB
+remote: error: Trace: 28a0369f24fb235ec54356e77d75564ec23819e687079bf342ad247ff6bd5ca2
+remote: error: See https://gh.io/lfs for more information.
+remote: error: File test/e2e/sql/src/test/resources/env/scenario/sphereex_db_tbl_sql_federation_honor/data/expected/init-sql/mysql/02-expected-rps_actual_material_consume_rate_t-init.sql is 337.76 MB; this exceeds GitHub's file size limit of 100.00 MB
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.
+To github.com:strongduanmu/dbplus-engine-honor.git
+ ! [remote rejected]         dev-5.5.1-fix-0104 -> dev-5.5.1-fix-0104 (pre-receive hook declined)
+error: failed to push some refs to 'github.com:strongduanmu/dbplus-engine-honor.git'
+```
+
+首先，安装 `git-lfs` 工具，并在代码仓库目录下执行 `git lfs install` 进行初始化。
+
+```bash
+brew install git-lfs
+git lfs install
+```
+
+然后使用如下的命令追踪大文件：
+
+```bash
+git lfs track "test/e2e/sql/src/test/resources/env/scenario/sphereex_db_tbl_sql_federation_honor/data/expected/init-sql/mysql/02-expected-prps_asc_stock_keep_list_t-init.sql"
+git lfs track "test/e2e/sql/src/test/resources/env/scenario/sphereex_db_tbl_sql_federation_honor/data/expected/init-sql/mysql/02-expected-rps_actual_material_consume_rate_t-init.sql"
+```
+
+`git lfs track` 命令会自动生成 / 修改 `.gitattributes` 文件，我们需要将这个文件提交到仓库：
+
+```bash
+git add .gitattributes
+```
+
+最后，我们需要撤销上一次提交，因为大文件已经被纳入了之前的提交记录，执行如下的命令先撤销提交，再重新处理并 `push`。
+
+```bash
+git reset --soft HEAD~1
+# 修改成你要提交的具体文件
+git add .
+git commit -m "commit message"
+git push
+```
+
+![大文件 Push 成功](/notes/git/push-pr-with-large-files.png)
+

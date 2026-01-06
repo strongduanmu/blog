@@ -9,9 +9,9 @@ banner: /assets/banner/banner_9.jpg
 
 ## Mac Wireshark 无法抓包，出现无权限异常
 
-![image-20250709174005916](wireshark/image-20250709174005916.png)
+{% image /notes/wireshark/image-20250709174005916.png Mac Wireshark 权限异常 width:300px padding:10px bg:transparent %}
 
 ```bash
-  sudo chmod 777 /dev/bpf*
+sudo chmod 777 /dev/bpf*
 ```
 
