@@ -5,7 +5,7 @@ categories: [Calcite]
 references:
   - '[DBPlusEngine 联邦查询](https://docs.sphere-ex.com/sphereex-dbplussuite/master/zh/docs/plugin-guide/sql-federation/)'
 date: 2026-01-13 08:00:00
-updated: 2026-01-14 08:00:00
+updated: 2026-01-15 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_1.jpg
 topic: calcite
@@ -84,17 +84,54 @@ LIMIT 0, 10;
 24 rows in set (0.97 sec)
 ```
 
-为了找到解决问题的方案，我们来跟踪下这条 SQL 的优化过程，观察从最开始的逻辑执行计划，依次经过 `RBO` 和 `CBO` 优化后，执行计划的变化情况。
+为了找到解决问题的方案，我们来跟踪下这条 SQL 的优化过程，观察从最开始的逻辑执行计划，依次经过 `RBO` 和 `CBO` 优化后，执行计划的变化情况。下图展示了 Calcite 生成的原始执行计划，可以看到原始 SQL 中的 2 个 `IN` 过滤条件，都包含在 `LogicalFilter` 算子的 `condition` 中。
 
 ![未优化的逻辑执行计划](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/not-optimize-logical-plan.png)
 
-
+经过 `RBO` 优化的执行计划如下图所示，此时 `LogicalFilter` 算子已经被优化， `condition` 中的 2 个 `IN` 过滤条件被转换为 `JOIN`，因此可以将问题的范围缩小到 `RBO` 优化过程。
 
 ![RBO 优化后的逻辑执行计划](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/logical-plan-after-rbo.png)
 
-
+由于 `RBO` 优化已经将 `IN` 转换为 `JOIN`，后续 `CBO` 继续处理时，只能基于 `JOIN` 的运算方式，选择代价最小的物理算子，无法再对执行方式进行修改。
 
 ![CBO 优化后的逻辑执行计划](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/logical-plan-after-cbo.png)
+
+现在我们已经将问题的范围缩小到 `RBO` 优化过程，但是 `RBO` 优化使用的优化规则很多，具体是哪一个优化规则导致的呢？我们首先来 Debug，观察原始逻辑执行计划生成的过程，了解 `IN` 算组在 `RelNode` 中是如何表示的，再根据 `RelNode` 去排查优化规则。
+
+Calcite 在转换逻辑执行计划时，会从 `WHERE` 中首先提取出 `IN` 子查询，然后尝试将 `IN` 子查询进行替换，如下是 `replaceSubQueries` 实现逻辑：
+
+```java
+protected void replaceSubQueries(final Blackboard bb, final SqlNode expr, RelOptUtil.Logic logic) {
+    // 查找 expr 中的子查询，本案例中是查找 where 条件的 in 子查询
+    findSubQueries(bb, expr, logic, false);
+    for (SubQuery node : bb.subQueryList) {
+        // 替换 in 子查询
+        substituteSubQuery(bb, node);
+    }
+}
+```
+
+在 `substituteSubQuery` 替换逻辑中，会判断当前 IN 运算值的个数，如果个数小于 20（或者值列表中引用了列），则会将 IN 转换为 OR 拼接的条件。由于我们的查询 Case 模拟业务场景，IN 个数都超过了 20，感兴趣的朋友可以自行尝试，生成对应的执行计划。
+
+![当 IN 值个数小于 20，将 IN 转换为 OR](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/convert-in-to-or-when-value-size-less-than-20.png)
+
+由于我们的 IN 值个数不小于 20，逻辑会继续向下执行，将 IN 转换为 `RexSubQuery` 子查询。从源码注释中，我们也可以看到，后续这个对象会通过 `SubQueryRemoveRule` 规则进行优化。
+
+![当 IN 值个数不小于 20，将 IN 转换为 RexSubQuery](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/convert-in-to-subquery-when-value-size-greater-or-equals-20.png)
+
+TODO
+
+
+
+如下图所示，`IN` 被表示为 `RexSubQuery` 对象，也就说在 Calcite 中，`IN` 被处理成了子查询。而在 `RBO` 优化中，和子查询转 `JOIN` 相关的规则是 `CoreRules.FILTER_SUB_QUERY_TO_CORRELATE`，内部实现对应的是 `SubQueryRemoveRule` 规则。
+
+![IN 运算符对应的 RelNode](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/in-operator-rel-node.png)
+
+
+
+
+
+
 
 
 
