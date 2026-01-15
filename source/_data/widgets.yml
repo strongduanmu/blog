@@ -44,3 +44,16 @@ ghuser:
   username: strongduanmu # your github login username
   avatar: false # show avatar or not
   menu: true # show menu or not
+
+adsense:
+  layout: markdown
+  title: 赞助商
+  content: |
+    <amp-ad width="100vw" height="320"
+         type="adsense"
+         data-ad-client="ca-pub-9880881761323734"
+         data-ad-slot="1987141063"
+         data-auto-format="rspv"
+         data-full-width="">
+      <div overflow=""></div>
+    </amp-ad>

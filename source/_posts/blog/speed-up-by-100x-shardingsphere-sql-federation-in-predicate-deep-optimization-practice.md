@@ -119,11 +119,7 @@ protected void replaceSubQueries(final Blackboard bb, final SqlNode expr, RelOpt
 
 ![当 IN 值个数不小于 20，将 IN 转换为 RexSubQuery](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/convert-in-to-subquery-when-value-size-greater-or-equals-20.png)
 
-TODO
-
-
-
-如下图所示，`IN` 被表示为 `RexSubQuery` 对象，也就说在 Calcite 中，`IN` 被处理成了子查询。而在 `RBO` 优化中，和子查询转 `JOIN` 相关的规则是 `CoreRules.FILTER_SUB_QUERY_TO_CORRELATE`，内部实现对应的是 `SubQueryRemoveRule` 规则。
+如下图所示，在 Calcite 最终生成的逻辑执行计划中，`IN` 被表示为 `RexSubQuery` 对象。而在 `RBO` 优化中，和子查询转 `JOIN` 相关的规则是 `CoreRules.FILTER_SUB_QUERY_TO_CORRELATE`，内部实现对应的是 `SubQueryRemoveRule` 规则，负责将谓词中的子查询转换为其他结构。
 
 ![IN 运算符对应的 RelNode](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/in-operator-rel-node.png)
 
