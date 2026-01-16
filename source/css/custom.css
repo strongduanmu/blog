@@ -129,3 +129,100 @@ pre {
 li>code:not([class]), p>code:not([class]) {
   color: #ff5724;
 }
+
+/* TOC 透明样式 */
+.widget-wrapper.toc {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.widget-wrapper.toc .widget-body {
+  background: transparent !important;
+}
+
+.widget-wrapper.toc .widget-header {
+  background: transparent !important;
+  border-bottom: none !important;
+}
+
+.widget-wrapper.toc .widget-header .name {
+  color: var(--text-p2);
+  font-weight: 500;
+}
+
+.widget-wrapper.toc .widget-body a {
+  color: var(--text-p3);
+  transition: color 0.2s ease;
+}
+
+.widget-wrapper.toc .widget-body a:hover {
+  color: var(--theme);
+}
+
+.widget-wrapper.toc .widget-body .toc-item.active > a {
+  color: var(--theme);
+  font-weight: 500;
+}
+
+/* 左侧栏 TOC 滚动容器样式 */
+.l_left .widget-wrapper.toc .widget-body .toc {
+  max-height: 50vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* 左侧栏 TOC 滚动条样式 - 超强优先级 */
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar,
+.l_left.widget-wrapper.toc .widget-body .toc::-webkit-scrollbar {
+  width: 3px !important;
+  height: 3px !important;
+}
+
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-track,
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-track-piece,
+.l_left.widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
+}
+
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-thumb,
+.l_left.widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.35) !important;
+  border-radius: 2px !important;
+  cursor: pointer !important;
+  border: none !important;
+}
+
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-thumb:hover,
+.l_left.widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.55) !important;
+}
+
+.l_left .widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-corner,
+.l_left.widget-wrapper.toc .widget-body .toc::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
+
+/* 同时也针对所有左侧栏组件的滚动条 */
+.l_left .widget-body::-webkit-scrollbar {
+  width: 3px !important;
+}
+
+.l_left .widget-body::-webkit-scrollbar-track,
+.l_left .widget-body::-webkit-scrollbar-track-piece {
+  background: transparent !important;
+}
+
+.l_left .widget-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3) !important;
+  border-radius: 2px !important;
+  border: none !important;
+}
+
+.l_left .widget-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5) !important;
+}
+
+.l_left .widget-body::-webkit-scrollbar-corner {
+  background: transparent !important;
+}
