@@ -31,6 +31,8 @@ inject:
       }
     </style>
 preconnect:
+  - https://pagead2.googlesyndication.com
+  - https://googleads.g.doubleclick.net
   # - https://gcore.jsdelivr.net
   # - https://unpkg.com
   # - https://cdn.bootcdn.net

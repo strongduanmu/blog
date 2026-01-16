@@ -136,11 +136,13 @@ inject:
     - <link rel="icon" type="image/png" sizes="32x32" href="/assets/placeholder/favicon-32x32.png">
     - <link rel="icon" type="image/png" sizes="16x16" href="/assets/placeholder/favicon-16x16.png">
     - <link rel="manifest" href="/assets/placeholder/site.webmanifest">
-    - <link rel="stylesheet" href="/css/custom.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/css/custom.css"></noscript>
+    - <link rel="stylesheet" href="/css/custom.css">
     - <link rel="stylesheet" href="/css/lxgwwenkaimono-bold.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/css/lxgwwenkaimono-bold.css"></noscript>
     - <link rel="stylesheet" href="/css/lxgwwenkaiscreen.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/css/lxgwwenkaiscreen.css"></noscript>
     - <link rel="preconnect" href="https://cdn.jsdelivr.net">
     - <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+    - <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+    - <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
   script:
     - <!-- Chatra {literal} --><script async>(function(d, w, c) {w.ChatraID = 'PHWnu7Bamcwtbnx2d'; var s = d.createElement('script'); w[c] = w[c] || function() {(w[c].q = w[c].q || []).push(arguments);}; s.async = true; s.src = 'https://call.chatra.io/chatra.js'; if (d.head) d.head.appendChild(s);})(document, window, 'Chatra');</script><!-- /Chatra {/literal} -->
     # - <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
