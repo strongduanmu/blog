@@ -10,8 +10,8 @@ stellar:
 ######## head tags ########
 inject:
   head: |
-    <!-- Google AdSense AMP Script -->
-    <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>
+    <!-- Google AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9880881761323734" crossorigin="anonymous"></script>
     <style>
       /* AdSense widget 样式调整 */
       .widget-wrapper.adsense {
@@ -24,7 +24,7 @@ inject:
       .widget-wrapper.adsense .widget-body p {
         margin: 0 !important;
       }
-      .widget-wrapper.adsense amp-ad {
+      .widget-wrapper.adsense ins.adsbygoogle {
         display: block;
         border-radius: 12px;
         overflow: hidden;
