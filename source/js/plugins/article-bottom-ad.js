@@ -63,7 +63,7 @@
     adIns.setAttribute('data-ad-format', 'auto');
     adIns.setAttribute('data-full-width-responsive', 'true');
 
-    // 添加占位文本（默认显示"赞助商（加载中...）"）
+    // 添加占位文本（默认显示"赞助商"）
     const placeholder = document.createElement('div');
     placeholder.className = 'ad-placeholder';
     placeholder.style.cssText = `
@@ -82,7 +82,7 @@
       z-index: 1;
       white-space: nowrap;
     `;
-    placeholder.innerHTML = '赞助商（加载中...）';
+    placeholder.innerHTML = '赞助商';
 
     adInner.appendChild(adIns);
     adInner.appendChild(placeholder);
@@ -91,17 +91,37 @@
     // 在评论区之前插入广告
     commentsSection.parentNode.insertBefore(adContainer, commentsSection);
 
-    // 监听广告加载状态，如果广告成功加载则隐藏占位文本
+    // 监听广告加载状态，如果广告成功加载则隐藏占位文本和边框
     function checkAdLoaded() {
       // 检查是否有 iframe（广告加载成功的标志）
       const iframe = adIns.querySelector('iframe');
-      if (iframe) {
+      if (iframe && iframe.contentDocument) {
+        // iframe 存在且有内容，说明广告加载成功
         placeholder.style.display = 'none';
         // 移除边框和背景
         adContainer.style.border = 'none';
         adContainer.style.background = 'transparent';
         return true;
       }
+
+      // 检查 AdSense 是否已经处理完成（data-adsbygoogle-status="done"）
+      // 如果完成但没有 iframe，说明没有展示广告，隐藏占位框但保留样式
+      if (adIns.getAttribute('data-adsbygoogle-status') === 'done') {
+        // AdSense 处理完成，延迟一段时间再最终检查
+        setTimeout(function() {
+          const finalIframe = adIns.querySelector('iframe');
+          if (!finalIframe) {
+            // 没有广告内容，完全移除占位框和边框背景
+            placeholder.style.display = 'none';
+            adContainer.style.border = 'none';
+            adContainer.style.background = 'transparent';
+            adContainer.style.padding = '0';
+            adContainer.style.minHeight = '0';
+          }
+        }, 1000);
+        return true;
+      }
+
       return false;
     }
 
@@ -110,12 +130,20 @@
       return;
     }
 
-    // 定期检查广告是否加载（最多检查10次，每次间隔500ms）
+    // 定期检查广告是否加载
     let checkCount = 0;
     const checkInterval = setInterval(function() {
       checkCount++;
-      if (checkAdLoaded() || checkCount >= 10) {
+      if (checkAdLoaded() || checkCount >= 20) {
         clearInterval(checkInterval);
+        // 超过检查次数后，隐藏占位框
+        if (checkCount >= 20) {
+          placeholder.style.display = 'none';
+          adContainer.style.border = 'none';
+          adContainer.style.background = 'transparent';
+          adContainer.style.padding = '0';
+          adContainer.style.minHeight = '0';
+        }
       }
     }, 500);
 
