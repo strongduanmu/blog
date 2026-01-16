@@ -1,0 +1,20 @@
+<%
+// 只在文章页面显示广告
+const showAd = page.layout === 'post' || page.layout === 'wiki'
+if (showAd) {
+%>
+<div class="article-bottom-ad">
+  <div class="ad-container">
+    <!-- Google AdSense - 网站底部广告位 -->
+    <ins class="adsbygoogle"
+         style="display:block"
+         data-ad-client="ca-pub-9880881761323734"
+         data-ad-slot="6799117067"
+         data-ad-format="auto"
+         data-full-width-responsive="true"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  </div>
+</div>
+<% } %>

@@ -12,6 +12,10 @@ inject:
   head: |
     <!-- Google AdSense Script -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9880881761323734" crossorigin="anonymous"></script>
+    <!-- Article Bottom Ad Script -->
+    <script src="/js/plugins/article-bottom-ad.js"></script>
+    <!-- Sticky AdSense Script -->
+    <script src="/js/plugins/sticky-adsense.js"></script>
     <style>
       /* AdSense widget 样式调整 */
       .widget-wrapper.adsense {
@@ -28,6 +32,20 @@ inject:
         display: block;
         border-radius: 12px;
         overflow: hidden;
+      }
+      /* 文章底部广告样式 */
+      .article-bottom-ad {
+        margin: 2rem 0;
+        padding: 1rem;
+        text-align: center;
+      }
+      .article-bottom-ad .ad-container {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      .article-bottom-ad ins.adsbygoogle {
+        display: block;
+        background: transparent;
       }
     </style>
 preconnect:

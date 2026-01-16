@@ -1,0 +1,92 @@
+<%
+const { layout } = page
+// 是否使用 Heti 布局插件
+const isUsingHeti = theme.plugins.heti?.enable
+
+const notebook = theme.notebooks.tree[page.notebook]
+if (notebook) {
+    page.menu_id ??= notebook.menu_id
+    page.license ??= notebook.license
+    page.share ??= notebook.share
+}
+
+// 默认的 menu_id
+if (page.menu_id == null) {
+  if (page.wiki?.length > 0) {
+    page.menu_id = theme.site_tree.wiki.menu_id
+  } else if (page.topic?.length > 0) {
+    page.menu_id = theme.site_tree.topic.menu_id
+  } else {
+    page.menu_id = theme.site_tree.post.menu_id
+  }
+}
+// 默认的 title
+if (page.title == null) {
+  if (page.wiki) {
+    page.title = __('btn.wiki')
+  }
+}
+
+function articleClass() {
+  var str = `md-text content${scrollreveal(' ')}`
+  if (isUsingHeti) {
+    str += ' heti'
+  }
+  return str
+}
+
+// 文章底部广告 HTML
+function getBottomAdHtml() {
+  // 只在文章页面显示广告
+  if (layout !== 'post' && layout !== 'wiki') {
+    return ''
+  }
+  var adHtml = '<div class="article-bottom-ad">'
+  adHtml += '<div class="ad-container">'
+  adHtml += '<!-- Google AdSense - 网站底部广告位 -->'
+  adHtml += '<ins class="adsbygoogle"'
+  adHtml += ' style="display:block"'
+  adHtml += ' data-ad-client="ca-pub-9880881761323734"'
+  adHtml += ' data-ad-slot="6799117067"'
+  adHtml += ' data-ad-format="auto"'
+  adHtml += ' data-full-width-responsive="true"></ins>'
+  adHtml += '<script>'
+  adHtml += '(adsbygoogle = window.adsbygoogle || []).push({});'
+  adHtml += '</script>'
+  adHtml += '</div></div>'
+  return adHtml
+}
+
+function layoutDiv() {
+  var el = ''
+  if (page.nav_tabs) {
+    el += partial('_partial/main/navbar/nav_tabs_blog')
+  }
+  if (page.h1 || page.title || (page.content && page.content.length > 0)) {
+    el += partial('_partial/main/navbar/article_banner')
+  }
+  el += `<article class="${articleClass()}">`
+  if (page.content && page.content.length > 0) {
+    el += page.content
+  }
+  if (notebook) {
+    el += partial('_partial/main/notebook/note_tags', { notebook: notebook })
+  }
+  if (layout === 'post' || page.wiki || notebook) {
+    el += partial('_partial/main/article/article_footer')
+  }
+  el += `</article>`
+  if (layout === 'post' || page.wiki) {
+    el += partial('_partial/main/article/read_next')
+  }
+  if (layout === 'post') {
+    el += partial('_partial/main/article/related_posts')
+  }
+  // 在评论区之前插入广告
+  el += getBottomAdHtml()
+  el += partial('_partial/comments/layout')
+  return el
+}
+%>
+
+<%- layoutDiv() %>
