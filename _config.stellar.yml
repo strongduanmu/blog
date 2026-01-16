@@ -16,6 +16,8 @@ inject:
     <script src="/js/plugins/article-bottom-ad.js"></script>
     <!-- Sticky AdSense Script -->
     <script src="/js/plugins/sticky-adsense.js"></script>
+    <!-- Adblock Detector -->
+    <script src="/js/plugins/adblock-detector.js"></script>
     <style>
       /* AdSense widget 样式调整 */
       .widget-wrapper.adsense {
