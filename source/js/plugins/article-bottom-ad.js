@@ -2,15 +2,20 @@
  * 在文章内容后、评论区前注入 Google AdSense 广告
  */
 (function() {
+  console.log('[AdSense Debug] Script loaded');
+  console.log('[AdSense Debug] Current path:', window.location.pathname);
+
   // 只在文章页面和 wiki 页面注入广告
   const path = window.location.pathname;
-
   const isBlogPost = path.includes('/blog/') || path.startsWith('blog/');
   const isWikiPage = path.includes('/wiki/') || path.startsWith('wiki/');
 
   if (!isBlogPost && !isWikiPage) {
+    console.log('[AdSense Debug] Not a blog or wiki page, skipping');
     return;
   }
+
+  console.log('[AdSense Debug] Page matched, will insert ad');
 
   // 等待 DOM 加载完成
   function insertAd() {
@@ -18,6 +23,7 @@
     const commentsSection = document.querySelector('#comments');
 
     if (!commentsSection) {
+      console.log('[AdSense Debug] Comments section not found, retrying...');
       // 如果评论区还没加载，延迟再试
       setTimeout(insertAd, 500);
       return;
@@ -25,10 +31,13 @@
 
     // 检查是否已经插入过广告
     if (document.querySelector('.article-bottom-ad')) {
+      console.log('[AdSense Debug] Ad already inserted');
       return;
     }
 
-    // 创建广告容器（带占位框）
+    console.log('[AdSense Debug] Creating ad container');
+
+    // 创建广告容器（固定显示，不隐藏）
     const adContainer = document.createElement('div');
     adContainer.className = 'article-bottom-ad';
     adContainer.style.cssText = `
@@ -52,6 +61,7 @@
       margin: 0 auto;
       position: relative;
       min-height: 100px;
+      width: 100%;
     `;
 
     // 创建广告元素
@@ -63,7 +73,9 @@
     adIns.setAttribute('data-ad-format', 'auto');
     adIns.setAttribute('data-full-width-responsive', 'true');
 
-    // 添加占位文本（默认显示"赞助商"）
+    console.log('[AdSense Debug] Ad element created with slot: 6799117067');
+
+    // 添加占位文本（始终显示）
     const placeholder = document.createElement('div');
     placeholder.className = 'ad-placeholder';
     placeholder.style.cssText = `
@@ -90,75 +102,84 @@
 
     // 在评论区之前插入广告
     commentsSection.parentNode.insertBefore(adContainer, commentsSection);
+    console.log('[AdSense Debug] Ad container inserted into page');
 
-    // 监听广告加载状态，如果广告成功加载则隐藏占位文本和边框
-    function checkAdLoaded() {
-      // 检查是否有 iframe（广告加载成功的标志）
+    // 监听广告加载状态（仅用于调试，不隐藏任何内容）
+    function checkAdStatus() {
       const iframe = adIns.querySelector('iframe');
-      if (iframe && iframe.contentDocument) {
-        // iframe 存在且有内容，说明广告加载成功
+      const status = adIns.getAttribute('data-adsbygoogle-status');
+
+      console.log('[AdSense Debug] Checking ad status...');
+      console.log('[AdSense Debug] data-adsbygoogle-status:', status);
+      console.log('[AdSense Debug] Has iframe:', !!iframe);
+
+      if (iframe) {
+        console.log('[AdSense Debug] Ad loaded successfully! Hiding placeholder');
         placeholder.style.display = 'none';
-        // 移除边框和背景
+        // 如果有真实广告，移除边框和背景
         adContainer.style.border = 'none';
         adContainer.style.background = 'transparent';
         return true;
       }
 
-      // 检查 AdSense 是否已经处理完成（data-adsbygoogle-status="done"）
-      // 如果完成但没有 iframe，说明没有展示广告，隐藏占位框但保留样式
-      if (adIns.getAttribute('data-adsbygoogle-status') === 'done') {
-        // AdSense 处理完成，延迟一段时间再最终检查
-        setTimeout(function() {
-          const finalIframe = adIns.querySelector('iframe');
-          if (!finalIframe) {
-            // 没有广告内容，完全移除占位框和边框背景
-            placeholder.style.display = 'none';
-            adContainer.style.border = 'none';
-            adContainer.style.background = 'transparent';
-            adContainer.style.padding = '0';
-            adContainer.style.minHeight = '0';
-          }
-        }, 1000);
-        return true;
+      if (status === 'done') {
+        console.log('[AdSense Debug] AdSense processed but no iframe (no ad content)');
+        console.log('[AdSense Debug] Possible reasons: no bids, low bids, or blocked');
+        return false;
       }
 
       return false;
     }
 
     // 立即检查一次
-    if (checkAdLoaded()) {
-      return;
-    }
+    checkAdStatus();
 
-    // 定期检查广告是否加载
+    // 定期检查广告状态（仅用于调试）
     let checkCount = 0;
     const checkInterval = setInterval(function() {
       checkCount++;
-      if (checkAdLoaded() || checkCount >= 20) {
+      const hasAd = checkAdStatus();
+
+      if (hasAd || checkCount >= 20) {
         clearInterval(checkInterval);
-        // 超过检查次数后，隐藏占位框
-        if (checkCount >= 20) {
-          placeholder.style.display = 'none';
-          adContainer.style.border = 'none';
-          adContainer.style.background = 'transparent';
-          adContainer.style.padding = '0';
-          adContainer.style.minHeight = '0';
+        console.log('[AdSense Debug] Final check count:', checkCount);
+        console.log('[AdSense Debug] Final status - Has ad:', hasAd);
+
+        if (!hasAd) {
+          console.log('[AdSense Debug] No ad loaded. Keeping placeholder visible.');
         }
       }
     }, 500);
 
     // 推送广告
     try {
+      console.log('[AdSense Debug] Pushing ad to AdSense...');
+      console.log('[AdSense Debug] adsbygoogle object before push:', window.adsbygoogle);
       (adsbygoogle = window.adsbygoogle || []).push({});
+      console.log('[AdSense Debug] Ad pushed successfully');
     } catch (e) {
-      // 忽略错误
+      console.error('[AdSense Debug] Error pushing ad:', e);
     }
+
+    // 监听广告加载事件
+    adIns.addEventListener('DOMContentLoaded', function() {
+      console.log('[AdSense Debug] Ad DOMContentLoaded event fired');
+    });
+
+    // 监听广告错误
+    window.addEventListener('error', function(e) {
+      if (e.target === adIns || e.target.src && e.target.src.includes('googlesyndication')) {
+        console.error('[AdSense Debug] AdSense script error:', e);
+      }
+    }, true);
   }
 
   // 在 DOM 加载完成后执行
   if (document.readyState === 'loading') {
+    console.log('[AdSense Debug] Waiting for DOMContentLoaded');
     document.addEventListener('DOMContentLoaded', insertAd);
   } else {
+    console.log('[AdSense Debug] DOM already loaded, executing immediately');
     insertAd();
   }
 })();
