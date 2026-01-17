@@ -23,7 +23,6 @@
     "hexo-generator-index": "4.0.0",
     "hexo-generator-sitemap": "3.0.1",
     "hexo-generator-tag": "2.0.0",
-    "hexo-google-adsense": "^0.0.8",
     "hexo-html-minifier": "1.0.0",
     "hexo-image-link": "^0.0.6",
     "hexo-pagination": "^4.0.0",

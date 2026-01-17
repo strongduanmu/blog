@@ -123,7 +123,7 @@ protected void replaceSubQueries(final Blackboard bb, final SqlNode expr, RelOpt
 
 ![IN 运算符对应的 RelNode](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/in-operator-rel-node.png)
 
-由于每个优化
+我们来具体看下 `CoreRules.FILTER_SUB_QUERY_TO_CORRELATE` 的配置，这个优化规则匹配 `Filter` 中包含子查询的场景，通过 `RexUtil.SubQueryFinder::containsSubQuery` 来判断谓词中是否包含子查询。
 
 ```java
 Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
@@ -135,7 +135,7 @@ Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
     .withDescription("SubQueryRemoveRule:Filter");
 ```
 
-
+当规则匹配到谓词中的 `IN` 子查询时，会继续调用 `SubQueryRemoveRule::matchFilter` 对关系代数进行变换，
 
 
 
