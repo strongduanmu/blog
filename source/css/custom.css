@@ -130,14 +130,31 @@ li>code:not([class]), p>code:not([class]) {
   color: #ff5724;
 }
 
-/* TOC 透明样式 */
-.widget-wrapper.toc {
+/* TOC 专栏风格样式 */
+.l_left .widget-wrapper.toc {
   background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 12px;
+  overflow: hidden;
   box-shadow: none !important;
+  margin-top: 1.5rem !important;
+}
+
+/* 减少评论标题与底部边框的距离 */
+.article-footer {
+  margin-bottom: 0.5rem !important;
+}
+
+.article-footer .title {
+  margin-bottom: 0.25rem !important;
 }
 
 .widget-wrapper.toc .widget-body {
   background: transparent !important;
+}
+
+.widget-wrapper.toc .widget-body:before {
+  display: none; /* 移除原有的左侧装饰条 */
 }
 
 .widget-wrapper.toc .widget-header {
@@ -148,20 +165,32 @@ li>code:not([class]), p>code:not([class]) {
 .widget-wrapper.toc .widget-header .name {
   color: var(--text-p2);
   font-weight: 500;
+  font-size: 0.8125rem;
 }
 
 .widget-wrapper.toc .widget-body a {
-  color: var(--text-p3);
-  transition: color 0.2s ease;
+  color: var(--text-p2);
+  transition: all 0.2s ease;
+  border-radius: 4px;
 }
 
+/* 悬停效果 - 白色背景 */
 .widget-wrapper.toc .widget-body a:hover {
-  color: var(--theme);
+  background: rgba(255, 255, 255, 1);
+  color: var(--text);
 }
 
-.widget-wrapper.toc .widget-body .toc-item.active > a {
+/* 移除活动项的蓝色竖线 */
+.widget-wrapper.toc .toc a.active:before {
+  display: none;
+}
+
+/* 选中效果 - 与专栏一致 */
+.widget-wrapper.toc .widget-body .toc-item.active > a,
+.widget-wrapper.toc .toc a.active {
   color: var(--theme);
   font-weight: 500;
+  background: var(--alpha50);
 }
 
 /* 左侧栏 TOC 滚动容器样式 */
