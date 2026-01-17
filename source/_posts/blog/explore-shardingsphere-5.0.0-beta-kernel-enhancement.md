@@ -33,6 +33,10 @@ banner: /assets/banner/banner_10.jpg
 
 在回顾了 ShardingSphere 内核原理后，下面让我们来具体看看 `5.0.0-beta` 版内核增强。
 
+
+
+{% GoogleAdsense %}
+
 ## SQL 基础解析能力增强
 
 SQL 解析引擎是 ShardingSphere 项目的基石，也是项目中最稳定的基础设施。在 `5.0.0-alpha` 版中，我们将 SQL 解析引擎与主项目完全剥离，为开发者提供了一套独立的 SQL 解析引擎组件，相比其他老牌 SQL 解析引擎，ShardingSphere SQL 解析引擎具有易于扩展和更完善的 SQL 方言支持等特性。目前，用户可将 ShardingSphere SQL 解析引擎作为独立解析器，进行 SQL 解析，详见[官网链接](https://shardingsphere.apache.org/document/current/cn/features/sharding/principle/parse/#sql-解析引擎)。

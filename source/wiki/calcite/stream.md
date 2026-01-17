@@ -36,6 +36,10 @@ Calcite 的 SQL 是标准 SQL 的扩展，而不是另一种 `类 SQL` 语言。
 - `Products (rowtime, productId, name)`——一张表；
 - `Shipments (rowtime, orderId)`——一个流。
 
+
+
+{% GoogleAdsense %}
+
 ## 一个简单的查询
 
 让我们从最简单的流式查询开始：

@@ -77,6 +77,10 @@ public DataSource getTargetDataSource(final String serverLists) {
 
 ![IDEA Debug 配置](/assets/blog/2022/07/21/1658404492.png)
 
+
+
+{% GoogleAdsense %}
+
 ## 问题解决
 
 我们以下面的查询作为示例，使用远程调试技术来定位下问题，从异常提示来看 `content` 别名的使用方式在 PostgreSQL 下有语法异常，我们将 SQL 拷贝到原生 PostgreSQL 数据库执行，出现了同样的异常提示。

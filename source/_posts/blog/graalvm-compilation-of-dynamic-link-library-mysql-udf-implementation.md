@@ -60,6 +60,10 @@ static int add(IsolateThread thread, int a, int b) {
 int add(graal_isolatethread_t* thread, int a, int b);
 ```
 
+
+
+{% GoogleAdsense %}
+
 ## MySQL UDF 规范
 
 介绍完 GraalVM 编译动态链接库，我们再来了解下 MySQL UDF 的使用规范。MySQL 8.0 官方文档 [Adding a Loadable Function](https://dev.mysql.com/doc/extending-mysql/8.0/en/adding-loadable-function.html) 详细介绍了如何使用 `C/C++` 编写 MySQL UDF，并将其编译为动态链接库部署到 MySQL `plugin` 目录中，然后通过 `CREATE FUNCTION ... RETURNS ... SONAME 'xxx.so'` 语句创建 UDF 函数。

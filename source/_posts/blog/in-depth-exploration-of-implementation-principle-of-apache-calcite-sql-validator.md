@@ -133,6 +133,10 @@ Calcite 会从查询语句中提取出 4 个命名空间，分别如下所示，
 * `(SELECT expr2 FROM t3) AS q3`：子查询所代表的关系；
 * `(SELECT expr3 FROM t4)`：子查询所代表的关系。
 
+
+
+{% GoogleAdsense %}
+
 ## SQL 校验器执行流程
 
 前文我们对 Caclite 校验器中核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 类进行了介绍，想必大家对校验器有了一些基础的认识。本节我们通过如下所示的 `CsvTest#testPushDownProjectAggregateNested` 单测，来跟踪下 SQL 校验器的执行流程，该示例 SQL 中包含了常用的子查询、聚合查询以及 `MAX` 和 `COUNT` 聚合函数，可以帮助大家了解这些核心类在校验流程中是如何使用的。

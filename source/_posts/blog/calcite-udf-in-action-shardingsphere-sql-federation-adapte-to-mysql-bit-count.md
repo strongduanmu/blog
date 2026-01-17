@@ -111,6 +111,10 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column
 	at org.apache.shardingsphere.driver.jdbc.core.statement.ShardingSpherePreparedStatement.executeQuery(ShardingSpherePreparedStatement.java:180)
 ```
 
+
+
+{% GoogleAdsense %}
+
 ## MySQL BIT_COUNT 调研
 
 初步分析了 ShardingSphere 联邦查询中的 BIT_COUNT 函数异常后，我们再来调研下 MySQL BIT_COUNT 函数，看下该函数的实际作用，以及它支持的参数类型。

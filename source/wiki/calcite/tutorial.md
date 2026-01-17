@@ -106,6 +106,10 @@ sqlline> VALUES CHAR_LENGTH('Hello, ' || 'world!');
 
 Calcite 有许多其他 SQL 特性。我们没有时间在这里介绍它们。你可以再写一些查询来进行实验。
 
+
+
+{% GoogleAdsense %}
+
 ## 模式发现
 
 那么，Calcite 是如何发现这些表的呢？记住，Calcite 内核对 CSV 文件一无所知（作为一个没有存储层的数据库，Calcite 不了解任何文件格式）。Calcite 知道这些表，完全是因为我们告诉它去执行 `calcite-example-csv` 项目中的代码。

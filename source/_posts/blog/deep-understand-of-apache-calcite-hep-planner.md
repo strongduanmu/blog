@@ -22,6 +22,10 @@ topic: calcite
 
 
 
+
+
+{% GoogleAdsense %}
+
 ## HepPlanner 中的基础概念
 
 * `HepPlanner`：基于规则的启发式优化器，实现了 RelOptPlanner 优化器接口；

@@ -306,6 +306,10 @@ Function<String, BigInteger> function = BigInteger::new;
 System.out.println(function.apply("12345678901234567890"));
 ```
 
+
+
+{% GoogleAdsense %}
+
 ## Stream API
 
 ### 什么是 Stream

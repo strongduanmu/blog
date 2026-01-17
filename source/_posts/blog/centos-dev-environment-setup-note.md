@@ -21,6 +21,10 @@ references:
 * 安装 `VirtualBox 6.1`；
 * 下载 `CentOS-7-x86_64-Minimal-1708.iso` 镜像（官网[下载地址](https://www.centos.org/download/)）。
 
+
+
+{% GoogleAdsense %}
+
 ## 创建虚拟机
 
 首先，打开 VirtualBox，然后选择 `新建`，创建虚拟机，然后填入名称 `centos7`，并选择虚拟机的类型 `Linux` 和版本 `Red Hat (64-bit)`。

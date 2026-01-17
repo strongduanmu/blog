@@ -42,6 +42,10 @@ references:
 
 日志节点提供完全兼容 `MySQL Binlog` 格式和协议的增量订阅能力，提供兼容 `MySQL Replication` 协议的主从复制能力。
 
+
+
+{% GoogleAdsense %}
+
 ## PolarDB-X 开发环境搭建
 
 ### 源码下载编译

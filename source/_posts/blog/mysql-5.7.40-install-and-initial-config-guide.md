@@ -57,6 +57,10 @@ tar zxvf mysql-5.7.40-linux-glibc2.12-x86_64.tar.gz
 | `share`         | 错误消息、字典和用于数据库安装的 SQL                         |
 | `support-files` | 其他支持文件                                                 |
 
+
+
+{% GoogleAdsense %}
+
 ## MySQL 安装
 
 参考 MySQL 官方文档 [Installing MySQL on Unix/Linux Using Generic Binaries](https://dev.mysql.com/doc/refman/5.7/en/binary-installation.html) 进行安装，安装之前需要先确保系统上没有安装过 MySQL，并且需要删除 `/etc/my.cnf` 和 `/etc/mysql` 目录中的配置。可以使用如下命令检查是否已安装 MySQL：

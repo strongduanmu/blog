@@ -43,6 +43,10 @@ Calcite 包含许多机器生成的代码。默认情况下，它们会在每次
 
 [运行测试](https://strongduanmu.com/wiki/calcite/howto.html#%E8%BF%90%E8%A1%8C%E6%B5%8B%E8%AF%95)描述了如何运行更多或更少的测试。
 
+
+
+{% GoogleAdsense %}
+
 ## Gradle 与 Gradle 包装器
 
 Calcite 使用 Gradle Wrapper 来创建一致的构建环境。在典型情况下，你不需要手动安装 Gradle， `./gradlew` 会为你下载正确的版本并验证预期的校验和。

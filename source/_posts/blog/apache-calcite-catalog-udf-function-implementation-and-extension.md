@@ -40,6 +40,10 @@ TableFunction 和 TableMacro 都对应了表函数，会返回一个表，他们
 
 ![Calcite Function 继承体系](apache-calcite-catalog-udf-function-implementation-and-extension/calcite-function-inherit-class.png)
 
+
+
+{% GoogleAdsense %}
+
 ## 内置函数实现探究
 
 ### 标量函数

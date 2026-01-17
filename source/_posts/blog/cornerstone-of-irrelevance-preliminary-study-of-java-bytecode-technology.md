@@ -33,6 +33,10 @@ references:
 
 除此之外，还有一些用于执行专门任务的指令，例如**同步指令、异常指令**等，完整的 JVM 指令可以参考 [Java 虚拟机指令操作码和助记符映射关系](https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html)。
 
+
+
+{% GoogleAdsense %}
+
 ## 如何查看字节码
 
 ### 通过 `javap` 命令查看

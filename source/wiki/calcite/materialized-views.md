@@ -308,6 +308,10 @@ GROUP BY empid, deptname
 
 
 
+
+
+{% GoogleAdsense %}
+
 ## 参考文档
 
 [^1]: [GL01] Jonathan Goldstein and Per-åke Larson. [Optimizing queries using materialized views: A practical, scalable solution](https://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.95.113). In *Proc. ACM SIGMOD Conf.*, 2001.

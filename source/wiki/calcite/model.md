@@ -109,6 +109,10 @@ path:
 
 在模式中显式创建的表、函数、类型和子模式不受此缓存机制的影响。它们总是立即出现在模式中，并且永远不会被刷新。
 
+
+
+{% GoogleAdsense %}
+
 ## Map 模式
 
 与基类 [Schema](https://strongduanmu.com/wiki/calcite/model.html#%E6%A8%A1%E5%BC%8F) 一样，Map 模式同样出现在 `root.schemas` 中。

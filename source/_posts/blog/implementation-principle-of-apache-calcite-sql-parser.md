@@ -195,6 +195,10 @@ SqlNode ExprOrJoinOrOrderedQuery(ExprContext exprContext) :
 
 以上大致介绍了 Calcite SQL Parser 使用到的 JavaCC 相关知识，如果读者对 JavaCC 感兴趣，可以查看参考资料中的官方文档以及 JavaCC 博文进行学习。下面让我们再来学习下 Calcite SQL Parser 的整体实现，如何通过 Java 代码调用解析逻辑，实现 SQL 字符串到 AST 的解析。
 
+
+
+{% GoogleAdsense %}
+
 ## Calcite SQL Parser 实现
 
 Calcite SQL Parser 的核心实现在 `calcite-core` 模块，在 `src/main` 下包含了 `codegen` 目录，`Parser.jj` 文件是 SQL Parser 相关的词法和语法规则文件，并且为了实现 SQL Parser 的扩展，Calcite 采用了 Freemarker 模板引擎，`config.fmpp` 和 `default_config.fmpp` 用于定义 Freemarker 模板的属性。

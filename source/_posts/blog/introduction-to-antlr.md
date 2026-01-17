@@ -194,6 +194,10 @@ alias antlr4='java -Xmx500M -cp "/usr/local/lib/antlr-4.8-complete.jar:$CLASSPAT
 alias grun='java -Xmx500M -cp "/usr/local/lib/antlr-4.8-complete.jar:$CLASSPATH" org.antlr.v4.gui.TestRig'
 ```
 
+
+
+{% GoogleAdsense %}
+
 ## 理解 ANTLR 语法分析
 
 ### ANTLR 语法分析流程

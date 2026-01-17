@@ -39,6 +39,10 @@ banner: /assets/banner/banner_5.jpg
 
 许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询` 和 `物化视图重写`。他们中的一些列在了 [由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html) 页面上。
 
+
+
+{% GoogleAdsense %}
+
 ## 驱动
 
 驱动允许你从应用程序连接到 Calcite。

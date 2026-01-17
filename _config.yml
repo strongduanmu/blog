@@ -168,3 +168,10 @@ deploy:
   type: git
   repo: git@github.com:strongduanmu/strongduanmu.github.io.git
   branch: master
+
+# Google AdSense Plugin
+hexo_google_adsense:
+  enable: true
+  log_msg: true
+  tag_name: 'GoogleAdsense'
+  file_path: 'source/ads/google/article_ads.html'

@@ -63,6 +63,10 @@ topic: calcite
 * `Net`：代表网络的逻辑 IO 次数（交互次数及传输量）；
 * 最终 `Cost` = (CPU, Memory, IO, Net) · (w<sub>1</sub>, w<sub>2</sub>, w<sub>3</sub>, w<sub>4</sub>)，w 为权重向量。
 
+
+
+{% GoogleAdsense %}
+
 ## Calcite 统计信息实现
 
 Calcite 将统计信息存储在元数据对象中进行管理，通过 `RelMetadataQuery` 类提供了所有元数据的访问入口，该类包含每个元数据的访问方法，访问方法中需要传递对应的关系代数类 RelNode 及其他参数。例如，获取基数 `Cardinality` 只需要 RelNode，而获取选择率 `Selectivity` 还需要传入谓词 `predicate`：

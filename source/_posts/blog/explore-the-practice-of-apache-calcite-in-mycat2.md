@@ -238,6 +238,10 @@ mysql> SELECT COUNT(1) FROM sbtest_sharding_c;
 +----------+
 ```
 
+
+
+{% GoogleAdsense %}
+
 ## MyCat2 Calcite 实践探究
 
 ### 执行流程概览

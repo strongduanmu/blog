@@ -335,6 +335,10 @@ public static int calculateHandshakeCapabilityFlagsUpper() {
 
 修改完成后，再次使用 Demo 程序测试，发现已经能够返回正确的结果，通过 JDBC 可以正常执行 `addBatch/executeBatch` 并返回 `int[]` 数组。
 
+
+
+{% GoogleAdsense %}
+
 ## 功能测试
 
 最后，我们使用全局索引功能 E2E 再次进行测试，原先断言失败的 Case 现在终于可以通过，大家终于可以放心使用商业版全局索引功能。在此，也真心向大家推荐 SphereEx 的 DBPlusEngine，相比开源的 ShardingSphere，它具有更完善的企业级功能，不仅能够进行海量数据的分片管理，还可以用于数据安全加密和数据库替换等场景，更多信息可以查看 [SphereEx 官网](https://www.sphere-ex.cn/)。

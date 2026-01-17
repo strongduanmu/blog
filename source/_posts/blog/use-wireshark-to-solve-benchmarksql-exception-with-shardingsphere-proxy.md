@@ -281,6 +281,10 @@ public final class MySQLComStmtPrepareOKPacket extends MySQLPacket {
 
 到这里问题终于明确了，Proxy 对于预编译参数超过 65535 的情况，未进行异常校验，导致通过 Netty 返回报文时丢失了一个字节，进而出现 MySQL 驱动中报出的参数 Index 越界异常。
 
+
+
+{% GoogleAdsense %}
+
 ## 问题解决
 
 使用 Wireshark 我们搞清楚了 Proxy 执行 BenchmarkSQL 出现参数 Index 越界的原因，当预编译参数超过 65535 时，需要参考 MySQL 的行为抛出异常，此时 MySQL 驱动会再次发起非预编译的请求，将参数拼接在 VALUES 中。在 Proxy MySQLComStmtPrepareExecutor 类中，我们增加对参数个数的校验，超过 65535 则抛出异常。

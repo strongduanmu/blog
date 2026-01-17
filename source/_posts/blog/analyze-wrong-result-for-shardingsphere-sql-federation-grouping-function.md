@@ -135,6 +135,10 @@ DBPlusEngineHashAggregateExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing 
 
 `MAX` 函数没什么特别，`GROUPING` 具体是用来做什么的呢？从网上查阅了一些资料，`GROUPING` 函数是用于在 `GROUPING SETS` 多维度分组中标识哪些列被聚合（即不在当前分组中），`GROUPING` 函数返回一个位掩码，其中每位对应了一个分组列，若该列被聚合（即不在当前分组中），则位值为 1，否则为 0。按照 `GROUPING` 函数的定义，当前分组为 `group=[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}]`，所有列都在分组中，应当全部为 0，而数据行中返回的则是 1023，显然是 `GROUPING` 函数的计算逻辑出错了。
 
+
+
+{% GoogleAdsense %}
+
 ## 问题解决
 
 搞清楚问题后，我们尝试修改 `GroupingAggregateFunctionEvaluator` 计算逻辑，如下图所示，左侧逻辑是之前参考 Calcite 内置的 `GroupingImplementor` 执行逻辑实现的，该逻辑似乎和 `GROUPING` 函数的语义相反，如果当前列不被聚合（即在当前分组中），则位值为 1，否则为 0。我们暂且先不深究 Calcite 的实现逻辑，按照 `GROUPING` 函数语义，笔者对函数逻辑进行了修改，严格按照函数语义实现，只有当该列被聚合（即不在当前分组中），才将当前位赋值为 1。
