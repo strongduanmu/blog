@@ -123,6 +123,18 @@ protected void replaceSubQueries(final Blackboard bb, final SqlNode expr, RelOpt
 
 ![IN 运算符对应的 RelNode](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/in-operator-rel-node.png)
 
+由于每个优化
+
+```java
+Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
+    .withMatchHandler(SubQueryRemoveRule::matchFilter)
+    .build()
+    .withOperandSupplier(b ->
+        b.operand(Filter.class)
+            .predicate(RexUtil.SubQueryFinder::containsSubQuery).anyInputs())
+    .withDescription("SubQueryRemoveRule:Filter");
+```
+
 
 
 
