@@ -5,7 +5,7 @@ categories: [Calcite]
 references:
   - '[DBPlusEngine 联邦查询](https://docs.sphere-ex.com/sphereex-dbplussuite/master/zh/docs/plugin-guide/sql-federation/)'
 date: 2026-01-13 08:00:00
-updated: 2026-01-15 08:00:00
+updated: 2026-01-17 08:00:00
 cover: /assets/blog/2022/04/05/1649126780.jpg
 banner: /assets/banner/banner_1.jpg
 topic: calcite
