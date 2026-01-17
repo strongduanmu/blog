@@ -17,7 +17,7 @@ topic: calcite
 
 ![执行 SQL 出现 Communications link failure 异常](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/communication-link-failure.png)
 
-笔者刚看到这个异常时，怀疑是超长 SQL 过于复杂，导致在 **SQL 解析、SQL 绑定或者生成执行计划**的过程中出现问题，但是看到这条 SQL 的执行计划时，大概了解了问题的原因——Calcite 对于 IN 查询，会通过 `SubQueryRemoveRule` 规则，将 `IN` 查询转换为 JOIN。由于超长 SQL 中包含了大量的 IN 查询过滤条件，转换为 JOIN 方式执行，会导致下推的 SQL 缺失 IN 过滤条件，查询数据量相比预期要多很多，从而触发多轮磁盘文件交换，最终导致执行超时异常。
+笔者刚看到这个异常，怀疑是超长 SQL 过于复杂，导致在 **SQL 解析、SQL 绑定或者生成执行计划**的过程中出现问题，但是看到这条 SQL 的执行计划时，大概了解了问题的原因——Calcite 对于 IN 查询，会通过 `SubQueryRemoveRule` 规则，将 `IN` 查询转换为 JOIN。由于超长 SQL 中包含了大量的 IN 查询过滤条件，转换为 JOIN 方式执行，会导致下推的 SQL 缺失 IN 过滤条件，查询数据量相比预期要多很多，从而触发多轮磁盘文件交换，最终导致执行超时异常。
 
 为了彻底解决 IN 查询的问题，笔者对 Calcite IN 查询内部处理逻辑进行了深入探究，通过对 `SubQueryRemoveRule` 规则进行优化，以及联邦查询谓词下推规则 `PushFilterIntoScanRule` 的适配，同时还重写了 `Calcite RelToSqlConverter` 中 IN 语法树转换 SQL 逻辑，最终将 `2w6k` 行超长 SQL 的查询耗时缩减到 1s 左右，实现了百倍以上的性能提升。
 
@@ -50,7 +50,7 @@ ORDER BY order_id ASC
 LIMIT 0, 10;
 ```
 
-我们执行 EXPLAIN 观察这条 SQL 的执行计划，可以看到和用户反馈 SQL 的执行计划类似，2 个 `IN` 过滤条件依次被转换为 `DBPlusEngineLookupJoin` 和 `DBPlusEngineSortMergeJoin`，这些 `JOIN` 通过关联 `DBPlusEngineValues` 中的常量列表来实现数据过滤。此外，`DBPlusEngineScan` 算子中的下推 SQL，只包含了单列 IN 过滤条件，没有包含多列 IN 过滤条件，这会导致查询到内存的数据量比预期要大，通过内存过滤多列 IN，查询的性能要差很多。
+我们通过 EXPLAIN 语句观察这条 SQL 的执行计划，可以看到和用户反馈 SQL 的执行计划类似，2 个 `IN` 过滤条件依次被转换为 `DBPlusEngineLookupJoin` 和 `DBPlusEngineSortMergeJoin`，这些 `JOIN` 通过关联 `DBPlusEngineValues` 中的常量列表来实现数据过滤。此外，`DBPlusEngineScan` 算子中的下推 SQL，只包含了单列 IN 过滤条件，没有包含多列 IN 过滤条件，这会导致查询到内存的数据量比预期要大，通过内存过滤多列 IN，查询的性能要差很多。
 
 ```sql
 +---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
@@ -139,7 +139,7 @@ Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
 
 ![SubQueryRemoveRule 改写 IN 子查询](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/sub-query-remove-rule-rewrite-in.png)
 
-如上图所示，`IN` 子查询会被改写为 `JOIN` 关联查询。这就是本案例 Case 查询慢的根本原因，对于 `IN` 常量集合，无需进行改写，只需要将 `IN` 条件完整地下推到底层数据库，就可以提前过滤掉大部分数据，从而提升查询性能。
+如上图所示，`IN` 子查询会被改写为 `JOIN` 关联查询。这就是本案例查询慢的根本原因，对于 `IN` 常量集合，无需进行改写，只需要将 `IN` 条件完整地下推到底层数据库，就可以提前过滤掉大部分数据，从而提升查询性能。
 
 {% GoogleAdsense %}
 
@@ -193,7 +193,7 @@ Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
 
 ![优化前业务 SQL 执行时间](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/execute-time-before-optimize.png)
 
-经过本文优化之后，所有原始 SQL 中的 `IN` 过滤条件都能下推到 `Scan` 中，因此无需再进行磁盘交换，联邦查询引擎通过流式方式获取 `Scan` 中的数据，仅需要再对多个 `UNION ALL` 的查询进行数据合并，查询性能得到了极大地提升，本地 Mac 执行仅需 `0.295s`，相比原来的 `28s`，**性能提升了 100 倍**。
+经过本文优化之后，所有原始 SQL 中的 `IN` 过滤条件都能下推到 `Scan` 中，因此无需再进行磁盘交换，联邦查询引擎通过流式方式获取 `Scan` 中的数据，仅需要再对多个 `UNION ALL` 的查询进行数据合并，查询性能得到了极大的提升，本地 Mac 执行仅需 `0.295s`，相比原来的 `28s`，**性能提升了 100 倍**。
 
 ![优化后业务 SQL 执行时间](speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice/execute-time-after-optimize.png)
 
