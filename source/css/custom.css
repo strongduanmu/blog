@@ -290,3 +290,71 @@ li>code:not([class]), p>code:not([class]) {
     background: transparent !important;
   }
 }
+
+/* 文章底部广告位样式 - 防止移动端图片溢出 */
+.article-bottom-ad,
+.article-bottom-ad .widget-body {
+  overflow: hidden;
+}
+
+.article-bottom-ad ins,
+.article-bottom-ad iframe,
+.article-bottom-ad img {
+  max-width: 100% !important;
+  height: auto !important;
+  overflow: hidden;
+}
+
+/* 移动端广告位额外限制 */
+@media screen and (max-width: 768px) {
+  .article-bottom-ad {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .article-bottom-ad ins,
+  .article-bottom-ad iframe,
+  .article-bottom-ad img {
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: hidden;
+  }
+}
+
+/* 文章中间广告位样式 - 参考底部广告位 */
+.article-inline-ad-wrapper {
+  position: relative;
+  background: var(--block);
+  border-radius: 10px;
+  padding: 0.5rem;
+  margin: 1.5rem 0;
+  overflow: hidden;
+}
+
+.article-inline-ad-container {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.5rem;
+  background: var(--card);
+  overflow: hidden;
+}
+
+.article-inline-ad-container ins,
+.article-inline-ad-container iframe,
+.article-inline-ad-container img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.article-inline-ad-label {
+  display: inline-block;
+  font-size: .8125rem;
+  color: var(--text-p2);
+  line-height: 1.5;
+  text-align: center;
+  margin-top: 0.5rem;
+  width: 100%;
+}
