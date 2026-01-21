@@ -135,9 +135,37 @@ li>code:not([class]), p>code:not([class]) {
   background: transparent !important;
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: none !important;
   margin-top: 1.5rem !important;
+  padding: 16px var(--gap-padding) !important;
+}
+
+/* 调整 TOC 底部 footer 的间距，使其与目录项间距一致 */
+.l_left .widget-wrapper.toc .widget-footer {
+  margin-top: 0;
+  padding-top: 0;
+}
+
+/* TOC footer 链接样式与目录项一致 */
+.l_left .widget-wrapper.toc .widget-footer a {
+  padding: 6px calc(var(--gap-padding) / 2) !important;
+  margin: 0 calc(var(--gap-padding) / 2) !important;
+  background: transparent !important;
+  color: var(--text-p2) !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* TOC footer 链接悬停效果与目录项一致 */
+.l_left .widget-wrapper.toc .widget-footer a:hover {
+  background: rgba(255, 255, 255, 1) !important;
+  color: var(--text) !important;
+}
+
+/* 移除 TOC 目录与 footer 之间的分割线 */
+.l_left .widget-wrapper.toc .widget-footer:before {
+  display: none !important;
 }
 
 /* 减少评论标题与底部边框的距离 */
@@ -254,4 +282,11 @@ li>code:not([class]), p>code:not([class]) {
 
 .l_left .widget-body::-webkit-scrollbar-corner {
   background: transparent !important;
+}
+
+/* 移动端 TOC footer 链接透明背景 */
+@media screen and (max-width: 1024px) {
+  .widget-wrapper.toc .widget-footer a {
+    background: transparent !important;
+  }
 }
