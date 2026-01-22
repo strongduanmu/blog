@@ -3,7 +3,7 @@ layout: wiki
 wiki: calcite
 order: 200
 title: 参考指南
-date: 2023-10-26 09:00:00
+date: 2026-01-22 08:00:00
 banner: /assets/banner/banner_1.jpg
 ---
 
@@ -1576,7 +1576,7 @@ nullBehavior:
 
 以下运算符不在 SQL 标准中，并且未在 Calcite 的默认运算符表中启用。仅当您的会话启用了额外的运算符表时，它们才可用于查询。
 
-要启用操作员表，请设置 [fun](https://calcite.apache.org/docs/adapter.html#jdbc-connect-string-parameters) 连接字符串参数。
+要启用操作员表，请设置 [fun](/wiki/calcite/adapters.html#jdbc-连接字符串参数) 连接字符串参数。
 
 “C”（兼容性）列包含值：
 
@@ -2081,7 +2081,7 @@ parameters:
   |   identifier
 ```
 
-高阶函数未包含在 SQL 标准中，因此所有函数也将在[方言特定运算符](https://calcite.apache.org/docs/reference.html#dialect-specific-operators)中列出。
+高阶函数未包含在 SQL 标准中，因此所有函数也将在[方言特定运算符](#方言特定运算符)中列出。
 
 带有 lambda 参数的函数示例为 *EXISTS*。
 

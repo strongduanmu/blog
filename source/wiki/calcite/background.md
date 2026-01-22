@@ -3,7 +3,7 @@ layout: wiki
 wiki: calcite
 order: 0
 title: 背景
-date: 2021-11-11 11:15:27
+date: 2026-01-22 08:00:00
 banner: /assets/banner/banner_7.jpg
 ---
 
@@ -62,11 +62,11 @@ Calcite 将在 JDBC 中执行相同的查询。对应用来说，数据和 API �
 
 ## 编写一个适配器
 
-`example/csv` 目录下的子项目提供了一个功能齐全、可用于应用程序的 CSV 适配器。它也足够简单，如果您正在编写自己的适配器，它可以作为一个很好的模板。
+`example/csv` 子项目提供了一个功能齐全、可用于应用程序的 CSV 适配器。它也足够简单，如果您正在编写自己的适配器，它可以作为一个很好的模板。
 
-关于使用 CSV 适配器和编写其他适配器的信息，请参阅 [教程](https://strongduanmu.com/wiki/calcite/tutorial.html)。
+关于使用 CSV 适配器和编写其他适配器的信息，请参阅 [教程](/wiki/calcite/tutorial.html)。
 
-关于使用其他适配器以及常规使用 Calcite 的更多信息，请参阅 [如何去做](https://calcite.apache.org/docs/howto.html)。
+关于使用其他适配器以及常规使用 Calcite 的更多信息，请参阅 [如何去做](/wiki/calcite/howto.html)。
 
 ## 状态
 
@@ -77,9 +77,9 @@ Calcite 将在 JDBC 中执行相同的查询。对应用来说，数据和 API �
 - 许多标准函数和聚合函数；
 - 针对 `Linq4j` 和 JDBC 后端的 JDBC 查询；
 - `Linq4j` 前端；
-- SQL 特性：`SELECT`、`FROM`（包括 `JOIN` 语法）、`WHERE`、`GROUP BY`（包括 `GROUPING SETS`）、聚合函数（包括 `COUNT(DISTINCT ...)` 和 `FILTER`）、`HAVING`、`ORDER BY`（包括 `NULLS FIRST/LAST`）、集合操作（`UNION`、`INTERSECT`、`MINUS`)、子查询（包括相关子查询）、窗口聚合、`LIMIT`（如 [Postgres](https://www.postgresql.org/docs/8.4/static/sql-select.html#SQL-LIMIT) 语法）——更多详细信息参考 [SQL 参考](https://calcite.apache.org/docs/reference.html)；
+- SQL 特性：`SELECT`、`FROM`（包括 `JOIN` 语法）、`WHERE`、`GROUP BY`（包括 `GROUPING SETS`）、聚合函数（包括 `COUNT(DISTINCT ...)` 和 `FILTER`）、`HAVING`、`ORDER BY`（包括 `NULLS FIRST/LAST`）、集合操作（`UNION`、`INTERSECT`、`MINUS`)、子查询（包括相关子查询）、窗口聚合、`LIMIT`（如 [Postgres](https://www.postgresql.org/docs/8.4/static/sql-select.html#SQL-LIMIT) 语法）——更多详细信息参考 [SQL 参考](/wiki/calcite/reference.html)；
 - 本地和远程 JDBC 驱动程序——参考 [Avatica](https://calcite.apache.org/docs/avatica_overview.html)；
-- 多个 [适配器](https://calcite.apache.org/docs/adapter.html)；
+- 多个 [适配器](/wiki/calcite/adapters.html)；
 
 
 

@@ -31,7 +31,7 @@ $ cd calcite
 $ ./gradlew build
 ```
 
-HOWTO 描述了如何[从源代码发行版进行构建](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)、[设置用于贡献的 IDE](https://calcite.apache.org/docs/howto.html#setting-up-an-ide-for-contributing)、[运行更多或更少的测试](https://calcite.apache.org/docs/howto.html#running-tests)以及[运行集成测试](https://calcite.apache.org/docs/howto.html#running-integration-tests)。
+HOWTO 描述了如何[从源代码发行版进行构建](/wiki/calcite/howto.html#从分发的源代码构建)、[设置用于贡献的 IDE](/wiki/calcite/howto.html#设置-ide-进行贡献)、[运行更多或更少的测试](/wiki/calcite/howto.html#运行测试)以及[运行集成测试](/wiki/calcite/howto.html#运行集成测试)。
 
 
 

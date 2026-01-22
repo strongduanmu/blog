@@ -3,7 +3,7 @@ layout: wiki
 wiki: calcite
 order: 100
 title: 适配器
-date: 2021-12-12 11:15:27
+date: 2026-01-22 08:00:00
 banner: /assets/banner/banner_5.jpg
 ---
 
@@ -11,8 +11,9 @@ banner: /assets/banner/banner_5.jpg
 
 ## 模式适配器
 
-模式适配器允许 `Calcite` 读取特定类型的数据，并将这些数据显示为模式中的表。	
+模式适配器允许 `Calcite` 读取特定类型的数据，并将这些数据显示为模式中的表。
 
+- Arrow 适配器（calcite-arrow）
 - [Cassandra 适配器](https://calcite.apache.org/docs/cassandra_adapter.html)（[calcite-cassandra](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/package-summary.html)）；
 - CSV 适配器（[示例/csv](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/csv/package-summary.html)）；
 - [Druid 适配器](https://calcite.apache.org/docs/druid_adapter.html)（[calcite-druid](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/druid/package-summary.html)）；
@@ -126,7 +127,7 @@ jdbc:calcite:schemaFactory=org.apache.calcite.adapter.cassandra.CassandraSchemaF
 
 Calcite 的核心模块 (`calcite-core`) 支持 SQL 查询 (`SELECT`) 和 DML 操作 (`INSERT`， `UPDATE`， `DELETE`， `MERGE`)，但不支持 `CREATE SCHEMA` 或 `CREATE TABLE` 等 DDL 操作。正如我们将看到的，DDL 使元数据库中的状态模型变得复杂，并使解析器更难以扩展，因此我们将 DDL 排除在核心之外。
 
-服务器模块 (`calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器，[使用与子项目相同的机制](https://calcite.apache.org/docs/adapter.html#extending-the-parser)，添加了一些 DDL 命令：
+服务器模块 (`calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器，[使用与子项目相同的机制](#extending-the-parser)，添加了一些 DDL 命令：
 
 - `CREATE` 和 `DROP SCHEMA`；
 - `CREATE` 和 `DROP FOREIGN SCHEMA`；
@@ -136,7 +137,7 @@ Calcite 的核心模块 (`calcite-core`) 支持 SQL 查询 (`SELECT`) 和 DML �
 - `CREATE` 和 `DROP FUNCTION`；
 - `CREATE` 和 `DROP TYPE`。
 
-[SQL 参考](https://calcite.apache.org/docs/reference.html#ddl-extensions)中描述了这些命令。
+[SQL 参考](/wiki/calcite/reference.html#ddl-extensions)中描述了这些命令。
 
 要启用 Calite 服务器模块，请将 `calcite-server.jar` 包含在你的类路径中，并添加 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。下面是一个使用 `sqlline` shell 的示例。
 
@@ -162,7 +163,7 @@ No rows affected (0.072 seconds)
 
 `calcite-server` 模块是可选的。它的目标之一是使用可以从 SQL 命令行尝试的简单示例，来展示 Calcite 的功能（例如物化视图、外部表和自动生成列）。 `calcite-server` 使用的所有功能都可以通过 `calcite-core` 中的 API 获得。
 
-如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](https://calcite.apache.org/docs/adapter.html#extending-the-parser)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
+如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](#extending-the-parser)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
 
 目前，元数据库尚未持久化。当你执行 DDL 命令时，你正在通过添加和删除可从根 [`Schema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html) 访问的对象，来修改内存元数据库。同一 SQL 会话中的所有命令都将看到这些对象。你可以通过执行相同的 SQL 命令脚本在将来的会话中创建相同的对象。
 
@@ -182,7 +183,7 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html) ）。
 
-如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去 [扩展解析器](https://calcite.apache.org/docs/adapter.html#extending-the-parser)。
+如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去 [扩展解析器](#extending-the-parser)。
 
 测试中有很多好的例子：[`class UdfTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/UdfTest.java) 测试了用户定义函数和用户定义聚合函数。
 
@@ -322,7 +323,7 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 如果你希望将处理逻辑下推到自定义表的源系统，请考虑实现 [`interface FilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/FilterableTable.html) 或 [`interface ProjectableFilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ProjectableFilterableTable.html)。
 
-如果你想要更多的控制，你应该写一个[优化规则](https://calcite.apache.org/docs/adapter.html#planner-rule)。这将允许你下推表达式，并基于代价做出关于是否下推处理的决定，以及下推更复杂的操作，例如：连接、聚合和排序。
+如果你想要更多的控制，你应该写一个[优化规则](#planner-rule)。这将允许你下推表达式，并基于代价做出关于是否下推处理的决定，以及下推更复杂的操作，例如：连接、聚合和排序。
 
 ### 类型系统
 
@@ -336,7 +337,7 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 你可以定义自己的 `RelNode` 子类来添加新运算符，或在特定引擎中添加现有运算符实现。
 
-为了使运算符有用且强大，你需要将[优化器规则](https://calcite.apache.org/docs/adapter.html#planner-rule)与现有运算符相结合（并且还提供元数据，见[下文](https://calcite.apache.org/docs/adapter.html#statistics-and-cost)）。这些是关系代数，它们的效果是组合的：你虽然编写了少量的规则，但它们组合起来能够处理指数数量的查询模式。
+为了使运算符有用且强大，你需要将[优化器规则](#planner-rule)与现有运算符相结合（并且还提供元数据，见[下文](#statistics-and-cost)）。这些是关系代数，它们的效果是组合的：你虽然编写了少量的规则，但它们组合起来能够处理指数数量的查询模式。
 
 如果可能，让你的运算符成为现有运算符的子类；那么你也许就可以重新使用或调整他们对应的规则。更好的是，如果你的运算符是一个可以根据现有运算符重写（再次通过优化器规则）的逻辑运算符，那么你应该这样做。你将无需额外工作即可重复使用这些运算符的规则、元数据和实现。
 

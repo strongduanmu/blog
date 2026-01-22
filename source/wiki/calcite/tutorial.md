@@ -3,7 +3,7 @@ layout: wiki
 wiki: calcite
 order: 1
 title: 教程
-date: 2021-12-05 11:15:27
+date: 2026-01-22 08:00:00
 banner: /assets/banner/banner_10.jpg
 ---
 
@@ -49,34 +49,34 @@ sqlline> !connect jdbc:calcite:model=src/test/resources/model.json admin admin
 
 ```sql
 sqlline> !tables
-+------------+--------------+-------------+---------------+----------+------+
-| TABLE_CAT  | TABLE_SCHEM  | TABLE_NAME  |  TABLE_TYPE   | REMARKS  | TYPE |
-+------------+--------------+-------------+---------------+----------+------+
-| null       | SALES        | DEPTS       | TABLE         | null     | null |
-| null       | SALES        | EMPS        | TABLE         | null     | null |
-| null       | SALES        | HOBBIES     | TABLE         | null     | null |
-| null       | metadata     | COLUMNS     | SYSTEM_TABLE  | null     | null |
-| null       | metadata     | TABLES      | SYSTEM_TABLE  | null     | null |
-+------------+--------------+-------------+---------------+----------+------+
++-----------+-------------+------------+--------------+---------+----------+------------+-----------+---------------------------+----------------+
+| TABLE_CAT | TABLE_SCHEM | TABLE_NAME |  TABLE_TYPE  | REMARKS | TYPE_CAT | TYPE_SCHEM | TYPE_NAME | SELF_REFERENCING_COL_NAME | REF_GENERATION |
++-----------+-------------+------------+--------------+---------+----------+------------+-----------+---------------------------+----------------+
+|           | SALES       | DEPTS      | TABLE        |         |          |            |           |                           |                |
+|           | SALES       | EMPS       | TABLE        |         |          |            |           |                           |                |
+|           | SALES       | SDEPTS     | TABLE        |         |          |            |           |                           |                |
+|           | metadata    | COLUMNS    | SYSTEM TABLE |         |          |            |           |                           |                |
+|           | metadata    | TABLES     | SYSTEM TABLE |         |          |            |           |                           |                |
++-----------+-------------+------------+--------------+---------+----------+------------+-----------+---------------------------+----------------+
 ```
 
 > JDBC 专家们注意：sqlline 的 `!tables` 命令只是在背后执行了 `DatabaseMetaData.getTables()` 方法。它也提供了其他命令，可以用来查询 JDBC 元数据，例如 `!columns` 和 `!describe`。
 
-正如你看见的，系统中有 5 张表： `EMPS`，`DEPTS` 和 `HOBBIES` 表在当前 `SALES` 模式中，`COLUMNS` 和  `TABLES` 表在系统 `metadata` 模式中。系统表始终存在于 Calcite 中，而其他表则由模式的具体实现提供。在这个场景下，`EMPS` 和 `DEPTS` 表是基于 `resources/sales` 目录下的 `EMPS.csv` 和 `DEPTS.csv` 文件。
+正如你看见的，系统中有 5 张表： `EMPS`，`DEPTS` 和 `SDEPTS` 表在当前 `SALES` 模式中，`COLUMNS` 和  `TABLES` 表在系统 `metadata` 模式中。系统表始终存在于 Calcite 中，而其他表则由模式的具体实现提供。在这个场景下，`EMPS`、`DEPTS` 和 `SDEPTS` 表是基于 `resources/sales` 目录下的 `EMPS.csv.gz`、`DEPTS.csv` 和 `SDEPTS.csv` 文件。
 
 让我们对这些表执行一些查询，来展示 Calcite 提供的 SQL 完整实现。首先，进行表扫描：
 
 ```sql
 sqlline> SELECT * FROM emps;
-+--------+--------+---------+---------+----------------+--------+-------+---+
-| EMPNO  |  NAME  | DEPTNO  | GENDER  |      CITY      | EMPID  |  AGE  | S |
-+--------+--------+---------+---------+----------------+--------+-------+---+
-| 100    | Fred   | 10      |         |                | 30     | 25    | t |
-| 110    | Eric   | 20      | M       | San Francisco  | 3      | 80    | n |
-| 110    | John   | 40      | M       | Vancouver      | 2      | null  | f |
-| 120    | Wilma  | 20      | F       |                | 1      | 5     | n |
-| 130    | Alice  | 40      | F       | Vancouver      | 2      | null  | f |
-+--------+--------+---------+---------+----------------+--------+-------+---+
++-------+-------+--------+--------+---------------+-------+------+---------+---------+------------+
+| EMPNO | NAME  | DEPTNO | GENDER |     CITY      | EMPID | AGE  | SLACKER | MANAGER |  JOINEDAT  |
++-------+-------+--------+--------+---------------+-------+------+---------+---------+------------+
+| 100   | Fred  | 10     |        |               | 30    | 25   | true    | false   | 1996-08-03 |
+| 110   | Eric  | 20     | M      | San Francisco | 3     | 80   |         | false   | 2001-01-01 |
+| 110   | John  | 40     | M      | Vancouver     | 2     | null | false   | true    | 2002-05-03 |
+| 120   | Wilma | 20     | F      |               | 1     | 5    |         | true    | 2005-09-07 |
+| 130   | Alice | 40     | F      | Vancouver     | 2     | null | false   | true    | 2007-01-01 |
++-------+-------+--------+--------+---------------+-------+------+---------+---------+------------+
 ```
 
 再进行关联和分组查询：
@@ -138,16 +138,23 @@ Calcite 有许多其他 SQL 特性。我们没有时间在这里介绍它们。�
 模型定义了一个名为 `SALES` 的单模式。这个模式由插件类 `org.apache.calcite.adapter.csv.CsvSchemaFactory` 提供支持，它是 `calcite-example-csv` 项目的一部分，并实现了 Calcite  `SchemaFactory` 接口。它的 `create` 方法，通过从模型文件中传入的 `directory` 参数，实例化了模式：
 
 ```java
-public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
-    String directory = (String) operand.get("directory");
-    String flavorName = (String) operand.get("flavor");
-    CsvTable.Flavor flavor;
-    if (flavorName == null) {
-        flavor = CsvTable.Flavor.SCANNABLE;
-    } else {
-        flavor = CsvTable.Flavor.valueOf(flavorName.toUpperCase());
-    }
-    return new CsvSchema(new File(directory), flavor);
+public Schema create(SchemaPlus parentSchema, String name,
+    Map<String, Object> operand) {
+  final String directory = (String) operand.get("directory");
+  final File base =
+      (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+  File directoryFile = new File(directory);
+  if (base != null && !directoryFile.isAbsolute()) {
+    directoryFile = new File(base, directory);
+  }
+  String flavorName = (String) operand.get("flavor");
+  CsvTable.Flavor flavor;
+  if (flavorName == null) {
+    flavor = CsvTable.Flavor.SCANNABLE;
+  } else {
+    flavor = CsvTable.Flavor.valueOf(flavorName.toUpperCase(Locale.ROOT));
+  }
+  return new CsvSchema(directoryFile, flavor);
 }
 ```
 
@@ -158,53 +165,54 @@ public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> o
 下面是 `CsvSchema` 的相关代码，它重写了 `AbstractSchema` 基类中的 `getTableMap()` 方法。
 
 ```java
-protected Map<String, Table> getTableMap() {
-    // Look for files in the directory ending in ".csv", ".csv.gz", ".json", ".json.gz".
-    File[] files = directoryFile.listFiles(new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-            final String nameSansGz = trim(name, ".gz");
-            return nameSansGz.endsWith(".csv") || nameSansGz.endsWith(".json");
-        }
-    });
-    if (files == null) {
-        System.out.println("directory " + directoryFile + " not found");
-        files = new File[0];
+private Map<String, Table> createTableMap() {
+  // Look for files in the directory ending in ".csv", ".csv.gz", ".json",
+  // ".json.gz".
+  final Source baseSource = Sources.of(directoryFile);
+  File[] files = directoryFile.listFiles((dir, name) -> {
+    final String nameSansGz = trim(name, ".gz");
+    return nameSansGz.endsWith(".csv")
+        || nameSansGz.endsWith(".json");
+  });
+  if (files == null) {
+    System.out.println("directory " + directoryFile + " not found");
+    files = new File[0];
+  }
+  // Build a map from table name to table; each file becomes a table.
+  final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
+  for (File file : files) {
+    Source source = Sources.of(file);
+    Source sourceSansGz = source.trim(".gz");
+    final Source sourceSansJson = sourceSansGz.trimOrNull(".json");
+    if (sourceSansJson != null) {
+      final Table table = new JsonScannableTable(source);
+      builder.put(sourceSansJson.relative(baseSource).path(), table);
     }
-    // Build a map from table name to table; each file becomes a table.
-    final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
-    for (File file : files) {
-        String tableName = trim(file.getName(), ".gz");
-        final String tableNameSansJson = trimOrNull(tableName, ".json");
-        if (tableNameSansJson != null) {
-            JsonTable table = new JsonTable(file);
-            builder.put(tableNameSansJson, table);
-            continue;
-        }
-        tableName = trim(tableName, ".csv");
-        final Table table = createTable(file);
-        builder.put(tableName, table);
+    final Source sourceSansCsv = sourceSansGz.trimOrNull(".csv");
+    if (sourceSansCsv != null) {
+      final Table table = createTable(source);
+      builder.put(sourceSansCsv.relative(baseSource).path(), table);
     }
-    return builder.build();
+  }
+  return builder.build();
 }
 
-/**
- * Creates different sub-type of table based on the "flavor" attribute.
- */
-private Table createTable(File file) {
-    switch (flavor) {
-        case TRANSLATABLE:
-            return new CsvTranslatableTable(file, null);
-        case SCANNABLE:
-            return new CsvScannableTable(file, null);
-        case FILTERABLE:
-            return new CsvFilterableTable(file, null);
-        default:
-            throw new AssertionError("Unknown flavor " + flavor);
-    }
+/** Creates different sub-type of table based on the "flavor" attribute. */
+private Table createTable(Source source) {
+  switch (flavor) {
+  case TRANSLATABLE:
+    return new CsvTranslatableTable(source, null);
+  case SCANNABLE:
+    return new CsvScannableTable(source, null);
+  case FILTERABLE:
+    return new CsvFilterableTable(source, null);
+  default:
+    throw new AssertionError("Unknown flavor " + this.flavor);
+  }
 }
 ```
 
-这个模式扫描目录并查找所有名称以 `.csv` 结尾的文件，并为它们创建表。在这种场景下，目录是 `sales` ，目录下包含了文件 `EMPS.csv` 和 `DEPTS.csv`，这些文件对应表 `EMPS` 和 `DEPTS`。
+这个模式扫描目录并查找所有具有适当扩展名的文件，并为它们创建表。在这种场景下，目录是 `sales` ，目录下包含了文件 `EMPS.csv.gz`、`DEPTS.csv` 和 `SDEPTS.csv`，这些文件对应表 `EMPS`、`DEPTS` 和 `SDEPTS`。
 
 ## 模式中的表和视图
 
@@ -310,11 +318,15 @@ sqlline> SELECT empno, name FROM custom_table.emps;
 这个模式是一个常规模式，包含了一个由 `org.apache.calcite.adapter.csv.CsvTableFactory` 提供支持的自定义表，它实现了 Calcite `TableFactory` 接口。它的 `create` 方法，根据从模型文件中传入的 `file` 参数，实例化了 `CsvScannableTable`：
 
 ```java
-public CsvTable create(SchemaPlus schema, String name, Map<String, Object> map, RelDataType rowType) {
-    String fileName = (String) map.get("file");
-    final File file = new File(fileName);
-    final RelProtoDataType protoRowType = rowType != null ? RelDataTypeImpl.proto(rowType) : null;
-    return new CsvScannableTable(file, protoRowType);
+public CsvTable create(SchemaPlus schema, String name,
+    Map<String, Object> operand, @Nullable RelDataType rowType) {
+  String fileName = (String) operand.get("file");
+  final File base =
+      (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+  final Source source = Sources.file(base, fileName);
+  final RelProtoDataType protoRowType =
+      rowType != null ? RelDataTypeImpl.proto(rowType) : null;
+  return new CsvScannableTable(source, protoRowType);
 }
 ```
 
@@ -357,7 +369,7 @@ sqlline> explain plan for select name from emps;
 +-----------------------------------------------------+
 | PLAN                                                |
 +-----------------------------------------------------+
-| EnumerableCalcRel(expr#0..9=[{inputs}], NAME=[$t1]) |
+| EnumerableCalc(expr#0..9=[{inputs}], NAME=[$t1])    |
 |   EnumerableTableScan(table=[[SALES, EMPS]])        |
 +-----------------------------------------------------+
 sqlline> !connect jdbc:calcite:model=src/test/resources/smart.json admin admin
@@ -365,8 +377,7 @@ sqlline> explain plan for select name from emps;
 +-----------------------------------------------------+
 | PLAN                                                |
 +-----------------------------------------------------+
-| EnumerableCalcRel(expr#0..9=[{inputs}], NAME=[$t1]) |
-|   CsvTableScan(table=[[SALES, EMPS]])               |
+| CsvTableScan(table=[[SALES, EMPS]], fields=[[1]])   |
 +-----------------------------------------------------+
 ```
 
@@ -383,72 +394,65 @@ flavor: "translatable"
 下面是完整的规则实现：
 
 ```java
-public class CsvProjectTableScanRule extends RelRule<CsvProjectTableScanRule.Config> {
-    
-    /**
-     * Creates a CsvProjectTableScanRule.
-     */
-    protected CsvProjectTableScanRule(Config config) {
-        super(config);
+public class CsvProjectTableScanRule
+    extends RelRule<CsvProjectTableScanRule.Config> {
+
+  /** Creates a CsvProjectTableScanRule. */
+  protected CsvProjectTableScanRule(Config config) {
+    super(config);
+  }
+
+  @Override public void onMatch(RelOptRuleCall call) {
+    final LogicalProject project = call.rel(0);
+    final CsvTableScan scan = call.rel(1);
+    int[] fields = getProjectFields(project.getProjects());
+    if (fields == null) {
+      // Project contains expressions more complex than just field references.
+      return;
     }
-    
-    @Override
-    public void onMatch(RelOptRuleCall call) {
-        final LogicalProject project = call.rel(0);
-        final CsvTableScan scan = call.rel(1);
-        int[] fields = getProjectFields(project.getProjects());
-        if (fields == null) {
-            // Project contains expressions more complex than just field references.
-            return;
-        }
-        call.transformTo(new CsvTableScan(scan.getCluster(), scan.getTable(), scan.csvTable, fields));
+    call.transformTo(
+        new CsvTableScan(
+            scan.getCluster(),
+            scan.getTable(),
+            scan.csvTable,
+            fields));
+  }
+
+  private static int[] getProjectFields(List<RexNode> exps) {
+    final int[] fields = new int[exps.size()];
+    for (int i = 0; i < exps.size(); i++) {
+      final RexNode exp = exps.get(i);
+      if (exp instanceof RexInputRef) {
+        fields[i] = ((RexInputRef) exp).getIndex();
+      } else {
+        return null; // not a simple projection
+      }
     }
-    
-    private int[] getProjectFields(List<RexNode> exps) {
-        final int[] fields = new int[exps.size()];
-        for (int i = 0; i < exps.size(); i++) {
-            final RexNode exp = exps.get(i);
-            if (exp instanceof RexInputRef) {
-                fields[i] = ((RexInputRef) exp).getIndex();
-            } else {
-                return null; // not a simple projection
-            }
-        }
-        return fields;
+    return fields;
+  }
+
+  /** Rule configuration. */
+  @Value.Immutable(singleton = false)
+  public interface Config extends RelRule.Config {
+    Config DEFAULT = ImmutableCsvProjectTableScanRule.Config.builder()
+        .withOperandSupplier(b0 ->
+            b0.operand(LogicalProject.class).oneInput(b1 ->
+                b1.operand(CsvTableScan.class).noInputs()))
+        .build();
+
+    @Override default CsvProjectTableScanRule toRule() {
+      return new CsvProjectTableScanRule(this);
     }
-    
-    /**
-     * Rule configuration.
-     */
-    public interface Config extends RelRule.Config {
-        
-        Config DEFAULT = EMPTY.withOperandSupplier(b0 -> b0.operand(LogicalProject.class)
-                .oneInput(b1 -> b1.operand(CsvTableScan.class).noInputs())).as(Config.class);
-        
-        @Override
-        default CsvProjectTableScanRule toRule() {
-            return new CsvProjectTableScanRule(this);
-        }
-    }
+  }
 }
 ```
 
 规则的默认实例驻留在 `CsvRules` 的持有类中：
 
 ```java
-/**
- * Planner rules relating to the CSV adapter.
- */
 public abstract class CsvRules {
-    
-    private CsvRules() {
-    }
-    
-    /**
-     * Rule that matches a {@link org.apache.calcite.rel.core.Project} on
-     * a {@link CsvTableScan} and pushes down projects if possible.
-     */
-    public static final CsvProjectTableScanRule PROJECT_SCAN = CsvProjectTableScanRule.Config.DEFAULT.toRule();
+  public static final CsvProjectTableScanRule PROJECT_SCAN =
+      CsvProjectTableScanRule.Config.DEFAULT.toRule();
 }
 ```
 
@@ -502,7 +506,7 @@ JDBC 适配器将 JDBC 数据源中的模式映射为 Calcite 模式。
 
 > `FoodMart` 数据库，使用过 `Mondrian OLAP` 引擎的人应该比较熟悉，因为它是 `Mondrian` 的主要测试数据集。要加载数据集，请按照 [Mondrian 安装说明](https://mondrian.pentaho.com/documentation/installation.php#2_Set_up_test_data) 进行操作。
 
-**当前限制**：JDBC 适配器当前只下推了表扫描操作，所有其他处理（`过滤`、`连接`、`聚合` 等）都发生在 Calcite 中。我们的目标是将尽可能多的处理下推到源系统，例如：语法转换、数据类型和内置函数，这些都是我们在做的。如果 Calcite 查询是基于单个 JDBC 数据库的表，原则上整个查询应该转到数据库上执行。如果表是来自多个 JDBC 数据源，或者 JDBC 和非 JDBC 的混合数据源，Calcite 将尽可能使用最有效的分布式查询方法。
+JDBC 适配器将尽可能多的处理下推到源系统，包括转换语法、数据类型和内置函数。如果 Calcite 查询是基于单个 JDBC 数据库的表，原则上整个查询应该转到数据库上执行。如果表是来自多个 JDBC 数据源，或者 JDBC 和非 JDBC 的混合数据源，Calcite 将尽可能使用最有效的分布式查询方法。
 
 ## 克隆 JDBC 适配器
 
@@ -566,7 +570,7 @@ JDBC 适配器将 JDBC 数据源中的模式映射为 Calcite 模式。
 
 ## 更多主题
 
-还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](https://calcite.apache.org/docs/adapter.html) 描述了所有涉及到的 `API`。
+还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](/wiki/calcite/adapters.html) 描述了所有涉及到的 `API`。
 
 
 

@@ -3,7 +3,7 @@ layout: wiki
 wiki: calcite
 order: 202
 title: 如何参与
-date: 2023-10-26 09:00:00
+date: 2026-01-22 08:00:00
 banner: /assets/banner/banner_15.jpg
 ---
 
@@ -173,7 +173,7 @@ cd calcite-test-dataset && mvn install
 
 按照安装 IDEA 的标准步骤并设置 Calcite 目前支持的 JDK 版本之一。
 
-首先[从命令行构建 Calcite](https://calcite.apache.org/docs/howto.html#building-from-a-source-distribution)。
+首先[从命令行构建 Calcite](#从分发的源代码构建)。
 
 转到 `文件 > 打开...` 并打开 Calcite 的根 `build.gradle.kts` 文件。当 IntelliJ 询问你是否要将其作为项目或文件打开时，请选择项目。另外，当它询问你是否想要一个新窗口时，请选择是。 IntelliJ 的 Gradle 项目导入器应该处理其余的事情。
 
@@ -227,7 +227,7 @@ Calcite 使用 [Janino](https://janino-compiler.github.io/janino/) 生成 Java �
 
 ## CSV 适配器
 
-请参阅[教程](https://calcite.apache.org/docs/tutorial.html)。
+请参阅[教程](/wiki/calcite/tutorial.html)。
 
 ## MongoDB 适配器
 
