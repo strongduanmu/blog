@@ -23,6 +23,17 @@ tree:
     - stream
     - materialized-views
     - lattice
+  '适配器':
+    - cassandra-adapter
+    - druid-adapter
+    - elasticsearch-adapter
+    - file-adapter
+    - geode-adapter
+    - innodb-adapter
+    - os-adapter
+    - pig-adapter
+    - redis-adapter
+    - kafka-adapter
   '参考指南':
     - reference
     - model

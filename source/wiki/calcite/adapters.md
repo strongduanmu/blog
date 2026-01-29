@@ -13,24 +13,26 @@ banner: /assets/banner/banner_5.jpg
 
 模式适配器允许 `Calcite` 读取特定类型的数据，并将这些数据显示为模式中的表。
 
+### 主要适配器
+
 - Arrow 适配器（calcite-arrow）
-- [Cassandra 适配器](https://calcite.apache.org/docs/cassandra_adapter.html)（[calcite-cassandra](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/package-summary.html)）；
+- [Cassandra 适配器](/wiki/calcite/cassandra-adapter.html)（[calcite-cassandra](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/cassandra/package-summary.html)）；
 - CSV 适配器（[示例/csv](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/csv/package-summary.html)）；
-- [Druid 适配器](https://calcite.apache.org/docs/druid_adapter.html)（[calcite-druid](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/druid/package-summary.html)）；
-- [Elasticsearch 适配器](https://calcite.apache.org/docs/elasticsearch_adapter.html)（[calcite-elasticsearch](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/elasticsearch/package-summary.html)）；
-- [文件适配器](https://calcite.apache.org/docs/file_adapter.html)（[calcite-file](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/file/package-summary.html)）；
-- [Geode 适配器](https://calcite.apache.org/docs/geode_adapter.html)（[calcite-geode](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/geode/package-summary.html)）；
-- [InnoDB 适配器](https://calcite.apache.org/docs/innodb_adapter.html)（[calcite-innodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/innodb/package-summary.html)）；
+- [Druid 适配器](/wiki/calcite/druid-adapter.html)（[calcite-druid](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/druid/package-summary.html)）；
+- [Elasticsearch 适配器](/wiki/calcite/elasticsearch-adapter.html)（[calcite-elasticsearch](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/elasticsearch/package-summary.html)）；
+- [文件适配器](/wiki/calcite/file-adapter.html)（[calcite-file](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/file/package-summary.html)）；
+- [Geode 适配器](/wiki/calcite/geode-adapter.html)（[calcite-geode](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/geode/package-summary.html)）；
+- [InnoDB 适配器](/wiki/calcite/innodb-adapter.html)（[calcite-innodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/innodb/package-summary.html)）；
 - JDBC 适配器（[calcite-core](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/jdbc/package-summary.html) 的一部分）；
-- MongoDB 适配器（[calcite-mongodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/mongodb/package-summary.html)）；
-- [操作系统适配器](https://calcite.apache.org/docs/os_adapter.html)（[calcite-os](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/os/package-summary.html)）；
-- [Pig 适配器](https://calcite.apache.org/docs/pig_adapter.html)（[calcite-pig](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/pig/package-summary.html)）；
-- [Redis 适配器](https://calcite.apache.org/docs/redis_adapter.html)（[calcite-redis](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/redis/package-summary.html)）；
+- [MongoDB 适配器](/wiki/calcite/mongodb-adapter.html)（[calcite-mongodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/mongodb/package-summary.html)）；
+- [操作系统适配器](/wiki/calcite/os-adapter.html)（[calcite-os](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/os/package-summary.html)）；
+- [Pig 适配器](/wiki/calcite/pig-adapter.html)（[calcite-pig](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/pig/package-summary.html)）；
+- [Redis 适配器](/wiki/calcite/redis-adapter.html)（[calcite-redis](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/redis/package-summary.html)）；
 - Solr cloud 适配器（[solr-sql](https://github.com/bluejoe2008/solr-sql)）；
 - Spark 适配器（[calcite-spark](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/spark/package-summary.html)）；
 - Splunk 适配器（[calcite-splunk](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/splunk/package-summary.html)）；
 - Eclipse 内存分析器 (MAT) 适配器（[mat-calcite-plugin](https://github.com/vlsi/mat-calcite-plugin)）；
-- [Apache Kafka 适配器](https://calcite.apache.org/docs/kafka_adapter.html)。
+- [Apache Kafka 适配器](/wiki/calcite/kafka-adapter.html)。
 
 ### 其他语言接口
 
@@ -38,7 +40,7 @@ banner: /assets/banner/banner_5.jpg
 
 ## 引擎
 
-许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询` 和 `物化视图重写`。他们中的一些列在了 [由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html) 页面上。
+许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询` 和 `物化视图重写`。他们中的一些列在了[由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html)页面上。
 
 
 
@@ -127,7 +129,7 @@ jdbc:calcite:schemaFactory=org.apache.calcite.adapter.cassandra.CassandraSchemaF
 
 Calcite 的核心模块 (`calcite-core`) 支持 SQL 查询 (`SELECT`) 和 DML 操作 (`INSERT`， `UPDATE`， `DELETE`， `MERGE`)，但不支持 `CREATE SCHEMA` 或 `CREATE TABLE` 等 DDL 操作。正如我们将看到的，DDL 使元数据库中的状态模型变得复杂，并使解析器更难以扩展，因此我们将 DDL 排除在核心之外。
 
-服务器模块 (`calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器，[使用与子项目相同的机制](#extending-the-parser)，添加了一些 DDL 命令：
+服务器模块 (`calcite-server`) 为 Calcite 添加了 DDL 支持。它扩展了 SQL 解析器，[使用与子项目相同的机制](#扩展解析器)，添加了一些 DDL 命令：
 
 - `CREATE` 和 `DROP SCHEMA`；
 - `CREATE` 和 `DROP FOREIGN SCHEMA`；
@@ -137,7 +139,7 @@ Calcite 的核心模块 (`calcite-core`) 支持 SQL 查询 (`SELECT`) 和 DML �
 - `CREATE` 和 `DROP FUNCTION`；
 - `CREATE` 和 `DROP TYPE`。
 
-[SQL 参考](/wiki/calcite/reference.html#ddl-extensions)中描述了这些命令。
+[SQL 参考](/wiki/calcite/reference.html#ddl-扩展)中描述了这些命令。
 
 要启用 Calite 服务器模块，请将 `calcite-server.jar` 包含在你的类路径中，并添加 `parserFactory=org.apache.calcite.sql.parser.ddl.SqlDdlParserImpl#FACTORY` 到 JDBC 连接字符串（请参阅连接字符串属性 [parserFactory](https://calcite.apache.org/javadocAggregate/org/apache/calcite/config/CalciteConnectionProperty.html#PARSER_FACTORY)）。下面是一个使用 `sqlline` shell 的示例。
 
@@ -163,7 +165,7 @@ No rows affected (0.072 seconds)
 
 `calcite-server` 模块是可选的。它的目标之一是使用可以从 SQL 命令行尝试的简单示例，来展示 Calcite 的功能（例如物化视图、外部表和自动生成列）。 `calcite-server` 使用的所有功能都可以通过 `calcite-core` 中的 API 获得。
 
-如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](#extending-the-parser)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
+如果你是子项目的作者，你的语法扩展不太可能与 `calcite-server` 中的语法扩展匹配，因此我们建议你通过[扩展核心解析器来](#扩展解析器)添加 SQL 语法扩展。如果你需要 DDL 命令，你可以将 `calcite-server` 复制粘贴到你的项目中。
 
 目前，元数据库尚未持久化。当你执行 DDL 命令时，你正在通过添加和删除可从根 [`Schema`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/Schema.html) 访问的对象，来修改内存元数据库。同一 SQL 会话中的所有命令都将看到这些对象。你可以通过执行相同的 SQL 命令脚本在将来的会话中创建相同的对象。
 
@@ -183,7 +185,7 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html) ）。
 
-如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去 [扩展解析器](#extending-the-parser)。
+如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去[扩展解析器](#扩展解析器)。
 
 测试中有很多好的例子：[`class UdfTest`](https://github.com/apache/calcite/blob/master/core/src/test/java/org/apache/calcite/test/UdfTest.java) 测试了用户定义函数和用户定义聚合函数。
 
@@ -323,7 +325,7 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 如果你希望将处理逻辑下推到自定义表的源系统，请考虑实现 [`interface FilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/FilterableTable.html) 或 [`interface ProjectableFilterableTable`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/schema/ProjectableFilterableTable.html)。
 
-如果你想要更多的控制，你应该写一个[优化规则](#planner-rule)。这将允许你下推表达式，并基于代价做出关于是否下推处理的决定，以及下推更复杂的操作，例如：连接、聚合和排序。
+如果你想要更多的控制，你应该写一个[优化规则](#优化规则)。这将允许你下推表达式，并基于代价做出关于是否下推处理的决定，以及下推更复杂的操作，例如：连接、聚合和排序。
 
 ### 类型系统
 
@@ -337,13 +339,13 @@ SELECT * FROM TABLE(Ramp(3, 4))
 
 你可以定义自己的 `RelNode` 子类来添加新运算符，或在特定引擎中添加现有运算符实现。
 
-为了使运算符有用且强大，你需要将[优化器规则](#planner-rule)与现有运算符相结合（并且还提供元数据，见[下文](#statistics-and-cost)）。这些是关系代数，它们的效果是组合的：你虽然编写了少量的规则，但它们组合起来能够处理指数数量的查询模式。
+为了使运算符有用且强大，你需要将[优化器规则](#优化规则)与现有运算符相结合（并且还提供元数据，见[下文](#统计和代价)）。这些是关系代数，它们的效果是组合的：你虽然编写了少量的规则，但它们组合起来能够处理指数数量的查询模式。
 
 如果可能，让你的运算符成为现有运算符的子类；那么你也许就可以重新使用或调整他们对应的规则。更好的是，如果你的运算符是一个可以根据现有运算符重写（再次通过优化器规则）的逻辑运算符，那么你应该这样做。你将无需额外工作即可重复使用这些运算符的规则、元数据和实现。
 
 ### 优化规则
 
-优化器规则 ( [`class RelOptRule`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/RelOptRule.html)) 将关系表达式转换为等效的关系表达式。
+优化器规则 ([`class RelOptRule`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/plan/RelOptRule.html)) 将关系表达式转换为等效的关系表达式。
 
 优化器引擎注册了许多优化器规则，并触发它们从而将输入的查询转换为更有效的查询。因此，优化器规则是优化过程的核心，但令人惊讶的是，每个优化器规则本身并不关心代价。优化器引擎负责按顺序触发规则以产生最佳计划，但每个单独的规则只关心自己的正确性。
 

@@ -48,7 +48,7 @@ Lattice 格是一个大的虚拟连接视图。它没有具体化（由于非规
 - `["发货日期"，"时间 ID"]`；
 - `["订单日期"，"时间 ID"]`。
 
-`Tile` 块是 Lattice 格中的物化表格，具有特定的维度。[Lattice 格 JSON 元素](/wiki/calcite/model.html#lattice) 中的 `tiles` 属性定义了一组要具体化的初始图块。
+`Tile` 块是 Lattice 格中的物化表格，具有特定的维度。[Lattice 格 JSON 元素](/wiki/calcite/model.html#Lattice-格) 中的 `tiles` 属性定义了一组要具体化的初始图块。
 
 ## 示范
 

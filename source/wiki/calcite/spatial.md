@@ -19,8 +19,8 @@ Calcite 的[目标](https://issues.apache.org/jira/browse/CALCITE-1968)是实现
 
 Calcite 对空间数据的支持包括：
 
-- [GEOMETRY](/wiki/calcite/reference.html#data-types) 数据类型和[子类型](/wiki/calcite/reference.html#spatial-types)，包括 `POINT`，`LINESTRING` 和 `POLYGON`；
-- [空间函数](/wiki/calcite/reference.html#spatial-functions)（以 `ST_` 作为前缀。我们已经实现了 OpenGIS 规范中 150 个中的大约 35 个）。
+- [GEOMETRY](/wiki/calcite/reference.html#数据类型) 数据类型和[子类型](/wiki/calcite/reference.html#空间类型)，包括 `POINT`，`LINESTRING` 和 `POLYGON`；
+- [空间函数](/wiki/calcite/reference.html#空间函数)（以 `ST_` 作为前缀。我们已经实现了 OpenGIS 规范中 150 个中的大约 35 个）。
 
 并且在某些时候还包括了查询重写以使用空间索引。
 
