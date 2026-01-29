@@ -48,7 +48,7 @@ Lattice 格是一个大的虚拟连接视图。它没有具体化（由于非规
 - `["发货日期"，"时间 ID"]`；
 - `["订单日期"，"时间 ID"]`。
 
-`Tile` 块是 Lattice 格中的物化表格，具有特定的维度。[Lattice 格 JSON 元素](/wiki/calcite/model.html#Lattice-格) 中的 `tiles` 属性定义了一组要具体化的初始图块。
+`Tile` 块是 Lattice 格中的物化表格，具有特定的维度。[Lattice 格 JSON 元素](/wiki/calcite/model.html#Lattice-格)中的 `tiles` 属性定义了一组要具体化的初始图块。
 
 ## 示范
 
@@ -56,34 +56,40 @@ Lattice 格是一个大的虚拟连接视图。它没有具体化（由于非规
 
 ```json
 {
-  "version": "1.0",
-  "defaultSchema": "foodmart",
-  "schemas": [ {
-    "type": "jdbc",
-    "name": "foodmart",
-    "jdbcUser": "FOODMART",
-    "jdbcPassword": "FOODMART",
-    "jdbcUrl": "jdbc:hsqldb:res:foodmart",
-    "jdbcSchema": "foodmart"
-  },
-  {
-    "name": "adhoc",
-    "lattices": [ {
-      "name": "star",
-      "sql": [
-        "select 1 from \"foodmart\".\"sales_fact_1997\" as \"s\"",
-        "join \"foodmart\".\"product\" as \"p\" using (\"product_id\")",
-        "join \"foodmart\".\"time_by_day\" as \"t\" using (\"time_id\")",
-        "join \"foodmart\".\"product_class\" as \"pc\" on \"p\".\"product_class_id\" = \"pc\".\"product_class_id\""
-      ],
-      "auto": true,
-      "algorithm": true,
-      "rowCountEstimate": 86837,
-      "defaultMeasures": [ {
-        "agg": "count"
-      } ]
-    } ]
-  } ]
+    "version": "1.0",
+    "defaultSchema": "foodmart",
+    "schemas": [
+        {
+            "type": "jdbc",
+            "name": "foodmart",
+            "jdbcUser": "FOODMART",
+            "jdbcPassword": "FOODMART",
+            "jdbcUrl": "jdbc:hsqldb:res:foodmart",
+            "jdbcSchema": "foodmart"
+        },
+        {
+            "name": "adhoc",
+            "lattices": [
+                {
+                    "name": "star",
+                    "sql": [
+                        "select 1 from \"foodmart\".\"sales_fact_1997\" as \"s\"",
+                        "join \"foodmart\".\"product\" as \"p\" using (\"product_id\")",
+                        "join \"foodmart\".\"time_by_day\" as \"t\" using (\"time_id\")",
+                        "join \"foodmart\".\"product_class\" as \"pc\" on \"p\".\"product_class_id\" = \"pc\".\"product_class_id\""
+                    ],
+                    "auto": true,
+                    "algorithm": true,
+                    "rowCountEstimate": 86837,
+                    "defaultMeasures": [
+                        {
+                            "agg": "count"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }
 ```
 
@@ -207,19 +213,22 @@ sqlline> !tables
 
 ```json
 {
-  "version": "1.0",
-  "defaultSchema": "foodmart",
-  "schemas": [ {
-    "type": "jdbc",
-    "name": "foodmart",
-    "jdbcUser": "FOODMART",
-    "jdbcPassword": "FOODMART",
-    "jdbcUrl": "jdbc:hsqldb:res:foodmart",
-    "jdbcSchema": "foodmart"
-  }, {
-    "name": "adhoc",
-    "autoLattice": true
-  } ]
+    "version": "1.0",
+    "defaultSchema": "foodmart",
+    "schemas": [
+        {
+            "type": "jdbc",
+            "name": "foodmart",
+            "jdbcUser": "FOODMART",
+            "jdbcPassword": "FOODMART",
+            "jdbcUrl": "jdbc:hsqldb:res:foodmart",
+            "jdbcSchema": "foodmart"
+        },
+        {
+            "name": "adhoc",
+            "autoLattice": true
+        }
+    ]
 }
 ```
 

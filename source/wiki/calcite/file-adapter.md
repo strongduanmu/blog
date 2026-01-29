@@ -284,3 +284,11 @@ sqlline> select distinct deptno from depts;
 ## 未来改进
 
 我们正在继续增强适配器，并欢迎贡献新的解析能力（例如解析 JSON 文件）和能够动态形成 URL 以将过滤器下推。
+
+
+
+{% quot 写在最后 %}
+
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

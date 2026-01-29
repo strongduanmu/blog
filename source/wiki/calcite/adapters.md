@@ -40,7 +40,7 @@ banner: /assets/banner/banner_5.jpg
 
 ## 引擎
 
-许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询` 和 `物化视图重写`。他们中的一些列在了[由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html)页面上。
+许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询`和`物化视图重写`。他们中的一些列在了[由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html)页面上。
 
 
 
@@ -107,19 +107,19 @@ jdbc:calcite:schemaFactory=org.apache.calcite.adapter.cassandra.CassandraSchemaF
 
 ```json
 {
-  "version": "1.0",
-  "defaultSchema": "foodmart",
-  "schemas": [
-    {
-      type: 'custom',
-      name: 'twissandra',
-      factory: 'org.apache.calcite.adapter.cassandra.CassandraSchemaFactory',
-      operand: {
-        host: 'localhost',
-        keyspace: 'twissandra'
-      }
-    }
-  ]
+    "version": "1.0",
+    "defaultSchema": "foodmart",
+    "schemas": [
+        {
+            "type": "custom",
+            "name": "twissandra",
+            "factory": "org.apache.calcite.adapter.cassandra.CassandraSchemaFactory",
+            "operand": {
+                "host": "localhost",
+                "keyspace": "twissandra"
+            }
+        }
+    ]
 }
 ```
 
@@ -183,7 +183,7 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 用户定义的函数是最简单的（但功能最弱）。它们编写起来很简单（你只需编写一个 Java 类并将其注册到你的模式中），但在参数的数量和类型、解析重载函数或派生的返回类型方面没有提供太多灵活性。
 
-如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html) ）。
+如果你想要这种灵活性，你可能需要编写一个用户定义的运算符（请参考 [`interface SqlOperator`](https://calcite.apache.org/javadocAggregate/org/apache/calcite/sql/SqlOperator.html)）。
 
 如果你的运算符不遵守标准 SQL 函数语法 `f(arg1, arg2, ...)`，那么你需要去[扩展解析器](#扩展解析器)。
 
@@ -202,19 +202,23 @@ Calcite 还可以充当数据虚拟化或联邦查询的服务器：Calcite 管�
 
 ```java
 struct Accumulator {
-  final int sum;
+    final int sum;
 }
+
 Accumulator init() {
-  return new Accumulator(0);
+    return new Accumulator(0);
 }
+
 Accumulator add(Accumulator a, int x) {
-  return new Accumulator(a.sum + x);
+    return new Accumulator(a.sum + x);
 }
+
 Accumulator merge(Accumulator a, Accumulator a2) {
-  return new Accumulator(a.sum + a2.sum);
+    return new Accumulator(a.sum + a2.sum);
 }
+
 int result(Accumulator a) {
-  return a.sum;
+    return a.sum;
 }
 ```
 
@@ -241,7 +245,7 @@ return result(a) # returns 11
 
 ```java
 Accumulator remove(Accumulator a, int x) {
-  return new Accumulator(a.sum - x);
+    return new Accumulator(a.sum - x);
 }
 ```
 

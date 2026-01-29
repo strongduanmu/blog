@@ -67,3 +67,11 @@ t = JOIN t BY tc1, s BY sc0;
 ## 与 Piglet 的关系
 
 Calcite 还有另一个名为 [Piglet](/wiki/calcite/reference.html) 的组件。它允许你用 Pig Latin 的子集编写查询，并使用任何适用的 Calcite 适配器执行它们。因此，Piglet 基本上与 Pig 适配器相反。
+
+
+
+{% quot 写在最后 %}
+
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

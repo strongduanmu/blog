@@ -138,23 +138,21 @@ Calcite 有许多其他 SQL 特性。我们没有时间在这里介绍它们。�
 模型定义了一个名为 `SALES` 的单模式。这个模式由插件类 `org.apache.calcite.adapter.csv.CsvSchemaFactory` 提供支持，它是 `calcite-example-csv` 项目的一部分，并实现了 Calcite  `SchemaFactory` 接口。它的 `create` 方法，通过从模型文件中传入的 `directory` 参数，实例化了模式：
 
 ```java
-public Schema create(SchemaPlus parentSchema, String name,
-    Map<String, Object> operand) {
-  final String directory = (String) operand.get("directory");
-  final File base =
-      (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
-  File directoryFile = new File(directory);
-  if (base != null && !directoryFile.isAbsolute()) {
-    directoryFile = new File(base, directory);
-  }
-  String flavorName = (String) operand.get("flavor");
-  CsvTable.Flavor flavor;
-  if (flavorName == null) {
-    flavor = CsvTable.Flavor.SCANNABLE;
-  } else {
-    flavor = CsvTable.Flavor.valueOf(flavorName.toUpperCase(Locale.ROOT));
-  }
-  return new CsvSchema(directoryFile, flavor);
+public Schema create(SchemaPlus parentSchema, String name, Map<String, Object> operand) {
+    final String directory = (String) operand.get("directory");
+    final File base = (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+    File directoryFile = new File(directory);
+    if (base != null && !directoryFile.isAbsolute()) {
+        directoryFile = new File(base, directory);
+    }
+    String flavorName = (String) operand.get("flavor");
+    CsvTable.Flavor flavor;
+    if (flavorName == null) {
+        flavor = CsvTable.Flavor.SCANNABLE;
+    } else {
+        flavor = CsvTable.Flavor.valueOf(flavorName.toUpperCase(Locale.ROOT));
+    }
+    return new CsvSchema(directoryFile, flavor);
 }
 ```
 
@@ -166,49 +164,50 @@ public Schema create(SchemaPlus parentSchema, String name,
 
 ```java
 private Map<String, Table> createTableMap() {
-  // Look for files in the directory ending in ".csv", ".csv.gz", ".json",
-  // ".json.gz".
-  final Source baseSource = Sources.of(directoryFile);
-  File[] files = directoryFile.listFiles((dir, name) -> {
-    final String nameSansGz = trim(name, ".gz");
-    return nameSansGz.endsWith(".csv")
-        || nameSansGz.endsWith(".json");
-  });
-  if (files == null) {
-    System.out.println("directory " + directoryFile + " not found");
-    files = new File[0];
-  }
-  // Build a map from table name to table; each file becomes a table.
-  final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
-  for (File file : files) {
-    Source source = Sources.of(file);
-    Source sourceSansGz = source.trim(".gz");
-    final Source sourceSansJson = sourceSansGz.trimOrNull(".json");
-    if (sourceSansJson != null) {
-      final Table table = new JsonScannableTable(source);
-      builder.put(sourceSansJson.relative(baseSource).path(), table);
+    // Look for files in the directory ending in ".csv", ".csv.gz", ".json",
+    // ".json.gz".
+    final Source baseSource = Sources.of(directoryFile);
+    File[] files = directoryFile.listFiles((dir, name) -> {
+        final String nameSansGz = trim(name, ".gz");
+        return nameSansGz.endsWith(".csv") || nameSansGz.endsWith(".json");
+    });
+    if (files == null) {
+        System.out.println("directory " + directoryFile + " not found");
+        files = new File[0];
     }
-    final Source sourceSansCsv = sourceSansGz.trimOrNull(".csv");
-    if (sourceSansCsv != null) {
-      final Table table = createTable(source);
-      builder.put(sourceSansCsv.relative(baseSource).path(), table);
+    // Build a map from table name to table; each file becomes a table.
+    final ImmutableMap.Builder<String, Table> builder = ImmutableMap.builder();
+    for (File file : files) {
+        Source source = Sources.of(file);
+        Source sourceSansGz = source.trim(".gz");
+        final Source sourceSansJson = sourceSansGz.trimOrNull(".json");
+        if (sourceSansJson != null) {
+            final Table table = new JsonScannableTable(source);
+            builder.put(sourceSansJson.relative(baseSource).path(), table);
+        }
+        final Source sourceSansCsv = sourceSansGz.trimOrNull(".csv");
+        if (sourceSansCsv != null) {
+            final Table table = createTable(source);
+            builder.put(sourceSansCsv.relative(baseSource).path(), table);
+        }
     }
-  }
-  return builder.build();
+    return builder.build();
 }
 
-/** Creates different sub-type of table based on the "flavor" attribute. */
+/**
+ * Creates different sub-type of table based on the "flavor" attribute.
+ */
 private Table createTable(Source source) {
-  switch (flavor) {
-  case TRANSLATABLE:
-    return new CsvTranslatableTable(source, null);
-  case SCANNABLE:
-    return new CsvScannableTable(source, null);
-  case FILTERABLE:
-    return new CsvFilterableTable(source, null);
-  default:
-    throw new AssertionError("Unknown flavor " + this.flavor);
-  }
+    switch (flavor) {
+        case TRANSLATABLE:
+            return new CsvTranslatableTable(source, null);
+        case SCANNABLE:
+            return new CsvScannableTable(source, null);
+        case FILTERABLE:
+            return new CsvFilterableTable(source, null);
+        default:
+            throw new AssertionError("Unknown flavor " + this.flavor);
+    }
 }
 ```
 
@@ -318,15 +317,12 @@ sqlline> SELECT empno, name FROM custom_table.emps;
 这个模式是一个常规模式，包含了一个由 `org.apache.calcite.adapter.csv.CsvTableFactory` 提供支持的自定义表，它实现了 Calcite `TableFactory` 接口。它的 `create` 方法，根据从模型文件中传入的 `file` 参数，实例化了 `CsvScannableTable`：
 
 ```java
-public CsvTable create(SchemaPlus schema, String name,
-    Map<String, Object> operand, @Nullable RelDataType rowType) {
-  String fileName = (String) operand.get("file");
-  final File base =
-      (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
-  final Source source = Sources.file(base, fileName);
-  final RelProtoDataType protoRowType =
-      rowType != null ? RelDataTypeImpl.proto(rowType) : null;
-  return new CsvScannableTable(source, protoRowType);
+public CsvTable create(SchemaPlus schema, String name, Map<String, Object> operand, @Nullable RelDataType rowType) {
+    String fileName = (String) operand.get("file");
+    final File base = (File) operand.get(ModelHandler.ExtraOperand.BASE_DIRECTORY.camelName);
+    final Source source = Sources.file(base, fileName);
+    final RelProtoDataType protoRowType = rowType != null ? RelDataTypeImpl.proto(rowType) : null;
+    return new CsvScannableTable(source, protoRowType);
 }
 ```
 
@@ -357,7 +353,7 @@ public CsvTable create(SchemaPlus schema, String name,
 
 到目前为止，我们看到的表实现都是可以接受的，只要表不包含大量数据。但是，如果你的客户的表有一百列以及一百万行，你肯定更愿意看到系统在每个查询时，不要检索出所有的数据。你可能希望 Calcite 与适配器协商，并找到一种更有效的数据访问方式。
 
-这种协商就是查询优化的一种简单形式。Calcite 通过添加 `优化器规则` 来支持查询优化。优化器规则在查询解析树中查找模式（例如某种表解析树顶部的投影），并使用一组新的优化节点来替换树中匹配的节点。
+这种协商就是查询优化的一种简单形式。Calcite 通过添加`优化器规则`来支持查询优化。优化器规则在查询解析树中查找模式（例如某种表解析树顶部的投影），并使用一组新的优化节点来替换树中匹配的节点。
 
 优化器规则像模式和表一样，也是可扩展的。因此，如果你有一个想要通过 SQL 访问的数据存储，你可以首先定义自定义表或模式，然后定义一些规则来提高访问的效率。
 
@@ -394,56 +390,52 @@ flavor: "translatable"
 下面是完整的规则实现：
 
 ```java
-public class CsvProjectTableScanRule
-    extends RelRule<CsvProjectTableScanRule.Config> {
-
-  /** Creates a CsvProjectTableScanRule. */
-  protected CsvProjectTableScanRule(Config config) {
-    super(config);
-  }
-
-  @Override public void onMatch(RelOptRuleCall call) {
-    final LogicalProject project = call.rel(0);
-    final CsvTableScan scan = call.rel(1);
-    int[] fields = getProjectFields(project.getProjects());
-    if (fields == null) {
-      // Project contains expressions more complex than just field references.
-      return;
+public class CsvProjectTableScanRule extends RelRule<CsvProjectTableScanRule.Config> {
+    
+    /**
+     * Creates a CsvProjectTableScanRule.
+     */
+    protected CsvProjectTableScanRule(Config config) {
+        super(config);
     }
-    call.transformTo(
-        new CsvTableScan(
-            scan.getCluster(),
-            scan.getTable(),
-            scan.csvTable,
-            fields));
-  }
-
-  private static int[] getProjectFields(List<RexNode> exps) {
-    final int[] fields = new int[exps.size()];
-    for (int i = 0; i < exps.size(); i++) {
-      final RexNode exp = exps.get(i);
-      if (exp instanceof RexInputRef) {
-        fields[i] = ((RexInputRef) exp).getIndex();
-      } else {
-        return null; // not a simple projection
-      }
+    
+    @Override
+    public void onMatch(RelOptRuleCall call) {
+        final LogicalProject project = call.rel(0);
+        final CsvTableScan scan = call.rel(1);
+        int[] fields = getProjectFields(project.getProjects());
+        if (fields == null) {
+            // Project contains expressions more complex than just field references.
+            return;
+        }
+        call.transformTo(new CsvTableScan(scan.getCluster(), scan.getTable(), scan.csvTable, fields));
     }
-    return fields;
-  }
-
-  /** Rule configuration. */
-  @Value.Immutable(singleton = false)
-  public interface Config extends RelRule.Config {
-    Config DEFAULT = ImmutableCsvProjectTableScanRule.Config.builder()
-        .withOperandSupplier(b0 ->
-            b0.operand(LogicalProject.class).oneInput(b1 ->
-                b1.operand(CsvTableScan.class).noInputs()))
-        .build();
-
-    @Override default CsvProjectTableScanRule toRule() {
-      return new CsvProjectTableScanRule(this);
+    
+    private static int[] getProjectFields(List<RexNode> exps) {
+        final int[] fields = new int[exps.size()];
+        for (int i = 0; i < exps.size(); i++) {
+            final RexNode exp = exps.get(i);
+            if (exp instanceof RexInputRef) {
+                fields[i] = ((RexInputRef) exp).getIndex();
+            } else {
+                return null; // not a simple projection
+            }
+        }
+        return fields;
     }
-  }
+    
+    /**
+     * Rule configuration.
+     */
+    @Value.Immutable(singleton = false)
+    public interface Config extends RelRule.Config {
+        Config DEFAULT = ImmutableCsvProjectTableScanRule.Config.builder().withOperandSupplier(b0 -> b0.operand(LogicalProject.class).oneInput(b1 -> b1.operand(CsvTableScan.class).noInputs())).build();
+        
+        @Override
+        default CsvProjectTableScanRule toRule() {
+            return new CsvProjectTableScanRule(this);
+        }
+    }
 }
 ```
 
@@ -451,8 +443,7 @@ public class CsvProjectTableScanRule
 
 ```java
 public abstract class CsvRules {
-  public static final CsvProjectTableScanRule PROJECT_SCAN =
-      CsvProjectTableScanRule.Config.DEFAULT.toRule();
+    public static final CsvProjectTableScanRule PROJECT_SCAN = CsvProjectTableScanRule.Config.DEFAULT.toRule();
 }
 ```
 
@@ -470,9 +461,9 @@ public abstract class CsvRules {
 
 其次，Calcite 基于成本在多个计划中进行选择，但成本模型并不能阻止规则的触发，这个操作在短期内看起来似乎代价更大。
 
-许多优化器都有一个线性优化方案。如上所述，在面对规则 A 和规则 B 这样的选择时，线性优化器需要立即选择。它可能有诸如 `将规则 A 应用于整棵树，然后将规则 B 应用于整棵树` 之类的策略，或者使用基于成本的策略，应用代价最小的规则。
+许多优化器都有一个线性优化方案。如上所述，在面对规则 A 和规则 B 这样的选择时，线性优化器需要立即选择。它可能有诸如`将规则 A 应用于整棵树，然后将规则 B 应用于整棵树`之类的策略，或者使用基于成本的策略，应用代价最小的规则。
 
-Calcite 不需要进行这样的妥协。这使得组合各种规则集合变得简单。如果你想要将 `识别物化视图的规则` 与 `从 CSV 和 JDBC 源系统读取数据的规则` 结合起来，你只要将所有规则的集合提供给 Calcite 并告诉它去执行即可。
+Calcite 不需要进行这样的妥协。这使得组合各种规则集合变得简单。如果你想要将`识别物化视图的规则`与`从 CSV 和 JDBC 源系统读取数据的规则`结合起来，你只要将所有规则的集合提供给 Calcite 并告诉它去执行即可。
 
 Calcite 确实使用了成本模型。成本模型决定最终使用哪个计划，有时会修剪搜索树以防止搜索空间爆炸，但它从不强迫你在规则 A 和规则 B 之间进行选择。这点很重要，因为它避免了陷入在搜索空间中不是全局最佳的局部最小值。
 
@@ -570,7 +561,7 @@ JDBC 适配器将尽可能多的处理下推到源系统，包括转换语法、
 
 ## 更多主题
 
-还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](/wiki/calcite/adapters.html) 描述了所有涉及到的 `API`。
+还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](/wiki/calcite/adapters.html)描述了所有涉及到的 `API`。
 
 
 

@@ -257,3 +257,11 @@ $ ./sqlsh select distinct jps.\`pid\`, jps.\`info\` from jps
 - 更多基于 git 的表，例如分支、标签、每次提交中更改的文件
 - `wc` 函数，例如 `select path, lineCount from git_ls_files cross apply wc(path)`
 - 移动 `sqlsh` 命令，或者至少将其下面的 java 代码移动到 sqlline 中
+
+
+
+{% quot 写在最后 %}
+
+笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
+
+![Calcite 从入门到精通](/assets/blog/blog/202309210909027.png)

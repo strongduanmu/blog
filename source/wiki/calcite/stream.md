@@ -19,7 +19,7 @@ Calcite 扩展了 SQL 和关系代数以支持流式查询。
 
 与表一样，你通常希望使用基于关系代数的高级语言来查询流，根据模式进行验证，并进行优化以利用可用的资源和算法。
 
-Calcite 的 SQL 是标准 SQL 的扩展，而不是另一种 `类 SQL` 语言。这种区别很重要，原因如下：
+Calcite 的 SQL 是标准 SQL 的扩展，而不是另一种`类 SQL` 语言。这种区别很重要，原因如下：
 
 - 对于任何了解常规 SQL 的人来说，流式 SQL 都很容易学习；
 - 语义很清晰，因为我们的目标是在流上产生相同的结果，就像表中存在相同的数据一样；
@@ -198,7 +198,7 @@ ERROR: Streaming aggregation requires at least one monotonic expression in GROUP
 
 单调和准单调列需要在模式中声明。当记录进入流时，单调性被强制执行，并且从该流读取的查询假定了数据具有单调性。我们建议你为每个流提供一个名为 `rowtime` 的时间戳列，但你也可以将其他列声明为单调的，例如 `orderId` 。
 
-我们在[下面](https://strongduanmu.com/wiki/calcite/stream.html#%E6%A0%87%E7%82%B9)讨论标点符号、水印和其他取得进展的方法。
+我们在[下面](#标点符号punctuation)讨论标点符号、水印和其他取得进展的方法。
 
 ## 改进的滚动窗口
 
