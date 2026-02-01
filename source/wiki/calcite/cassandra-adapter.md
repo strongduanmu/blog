@@ -11,9 +11,9 @@ banner: /assets/banner/banner_5.jpg
 
 有关下载和构建 Calcite 的说明，请从[教程](/wiki/calcite/tutorial.html)开始。
 
-一旦你成功编译了项目，就可以返回到这里，并开始使用 Calcite 查询 Cassandra。首先，我们需要一个模型定义。模型为 Calcite 创建 Cassandra 适配器实例提供了必要的参数。请注意，虽然模型可以包含物化视图的定义，但适配器将尝试自动填充 Cassandra 中定义的任何物化视图。
+一旦你成功编译了项目，就可以返回到这里，并开始使用 Calcite 查询 Cassandra。首先，我们需要一个模型定义，模型为 Calcite 创建 Cassandra 适配器实例，提供了必要的参数。需要注意，虽然模型可以包含物化视图的定义，但适配器将尝试自动填充 `Cassandra` 中定义的任何物化视图。
 
-下面给出一个模型文件的基本示例：
+下面是模型文件的基本示例：
 
 ```json
 {
@@ -40,11 +40,11 @@ $ ./sqlline
 sqlline> !connect jdbc:calcite:model=model.json admin admin
 ```
 
-现在 `sqlline` 将接受你访问 CQL 表的 SQL 查询。但是，你不仅限于发出 CQL 支持的查询。Calcite 允许你执行复杂的操作，例如聚合或连接。适配器将尝试通过尽可能在 Cassandra 中直接利用过滤和排序，将查询编译为最有效的 CQL。
+现在 `sqlline` 将会接收你执行的 CQL 表相关的 SQL 查询，你不仅能执行 CQL 表相关的查询，Calcite 也允许你执行复杂的操作，例如聚合或连接。适配器将尽可能尝试在 Cassandra 中直接利用过滤和排序，将查询编译为最有效的 CQL。
 
 例如，在示例数据集中有一个名为 `timeline` 的 CQL 表，其中 `username` 是分区键，`time` 是聚类键。
 
-我们可以通过编写标准 SQL 发出简单查询来获取用户最新的推文 ID：
+我们可以通过编写标准 SQL，发出简单查询来获取用户最新的推文 ID：
 
 ```sql
 sqlline> SELECT "tweet_id"
@@ -58,9 +58,7 @@ sqlline> SELECT "tweet_id"
 +--------------------------------------+
 ```
 
-在执行此查询时，Cassandra 适配器能够识别 `username` 是分区键，可以被 Cassandra 过滤。它还识别聚类键 `time` 并将排序下推到 Cassandra。
-
-下面是给 Cassandra 的最终 CQL 查询：
+在执行此查询时，Cassandra 适配器能够识别 `username` 是分区键，可以被 Cassandra 过滤。它还识别聚类键 `time`，并将排序下推到 Cassandra。下面是下发到 Cassandra 的最终 CQL 查询：
 
 ```sql
 SELECT username, time, tweet_id
@@ -69,7 +67,7 @@ WHERE username = 'JmuhsAaMdw'
 ORDER BY time DESC ALLOW FILTERING;
 ```
 
-在提高适配器的灵活性和性能方面仍有大量工作要做，但如果你正在寻找一种快速方法来获得对存储在 Cassandra 中的数据的额外洞察，Calcite 应该会证明是有用的。
+在提高适配器的灵活性和性能方面，目前仍有大量工作要做，但如果你正在寻找一种快速方法，来获得对存储在 Cassandra 中的数据的额外查询，Calcite 应该会证明自己是有价值的。
 
 
 

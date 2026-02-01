@@ -191,7 +191,7 @@ sqlline> select * from wiki."Cities";
 $ ./sqlline -f file/src/test/resources/webjoin.sql
 ```
 
-（运行 `webjoin.sql` 时，你将看到每个包含连接的查询的一些警告消息。这些是预期的，不会影响查询结果。这些消息将在下一个版本中被抑制。）
+运行 `webjoin.sql` 时，你将看到每个包含连接的查询的一些警告消息。这些是预期的，不会影响查询结果。这些消息将在下一个版本中被抑制。
 
 ## CSV 文件和无模型浏览
 
@@ -283,7 +283,7 @@ sqlline> select distinct deptno from depts;
 
 ## 未来改进
 
-我们正在继续增强适配器，并欢迎贡献新的解析能力（例如解析 JSON 文件）和能够动态形成 URL 以将过滤器下推。
+我们正在继续增强适配器，并欢迎贡献新的解析能力（例如解析 JSON 文件），以及动态生成 URL 以向下推送过滤器的功能。
 
 
 
