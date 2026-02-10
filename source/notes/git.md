@@ -254,3 +254,28 @@ git push
 
 ![大文件 Push 成功](/notes/git/push-pr-with-large-files.png)
 
+## Git WorkTree
+
+`git worktree` 是 Git 提供的一个工具，它允许你**在多个目录中，同时检出同一个 Git 仓库的不同分支**，而不需要多次克隆仓库。相比于 `git checkout`，`git worktree` 切换分支时无需暂存代码，可以在不同的分支上完成不同的开发任务。
+
+下面是常用的 `git worktree` 使用命令：
+
+```bash
+# 创建新的工作目录
+# git worktree add <新目录路径> <分支名>
+git worktree add ../new_feature_dev master
+
+# 查看所有工作目录
+git worktree list
+
+# 进入指定工作目录
+cd ../new_feature_dev
+
+# 删除工作目录
+rm -rf ../new_feature_dev
+git worktree prune
+
+# 移动工作目录
+git worktree move ../new_feature_dev ../new_feature_dev_back
+```
+
