@@ -30,34 +30,34 @@ banner: /assets/banner/banner_4.jpg
 ### 执行试运行
 * 该脚本期望您将 `~/.gnupg` 目录挂载到容器中的 `/.gnupg` 目录。一旦挂载到容器中，脚本将复制内容并将其移动到不同的位置，这样它就不会在构建过程中修改原始 `~/.gnupg` 目录的内容。
 
-{% highlight bash %}
+```bash
 # 在 Linux 上：
 docker compose run -v ~/.gnupg:/.gnupg dry-run
 
 # 在 Windows 上
 docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg dry-run
-{% endhighlight %}
+```
 
 ### 构建发布版本
-{% highlight bash %}
+```bash
 # 在 Linux 上：
 docker compose run -v ~/.gnupg:/.gnupg release
 
 # 在 Windows 上
 docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg release
-{% endhighlight %}
+```
 
 如果构建失败，请执行清理：
 1. 在本地和远程删除 git 标签：
-{% highlight bash %}
+```bash
 git tag -d vX.Y.Z-rcA
 git push origin :refs/tags/vX.Y.Z-rcA
-{% endhighlight %}
+```
 
 2. 清理本地仓库
-{% highlight bash %}
+```bash
 docker compose run clean
-{% endhighlight %}
+```
 
 ### 在上传之前检查发布版本
 发布文件夹的名称必须采用以下格式：`apache-calcite-avatica-go-X.Y.Z-rcN`。如果存在候选发布标识符（如 `-rc0`），则版本必须包含这些标识符。
@@ -88,16 +88,16 @@ tar.gz 必须命名为 `apache-calcite-avatica-go-X.Y.Z-src.tar.gz`。
 #### 使用 docker
 这假设已经构建了一个发布版本，并且构件位于 `dist/` 文件夹中。
 
-{% highlight bash %}
+```bash
 docker compose run publish-release-for-voting
-{% endhighlight %}
+```
 
 该脚本还将生成一封投票邮件发送到 dev 列表。您可以使用此邮件，但请务必检查所有详细信息是否正确。
 
 ### 向 Dev 列表发送电子邮件进行投票：
 
 发送投票电子邮件：
-{% highlight text %} 
+```text 
 To: dev@calcite.apache.org
 Subject: [VOTE] Release apache-calcite-avatica-go-X.Y.Z (release candidate N)
 
@@ -145,10 +145,10 @@ Here is my vote:
 +1 (binding)
 
 Francis
-{% endhighlight %}
+```
 
 投票结束后，发送结果：
-{% highlight text %} 
+```text 
 Subject: [RESULT] [VOTE] Release apache-calcite-avatica-go-X.Y.Z (release candidate N)
 To: dev@calcite.apache.org
 
@@ -171,7 +171,7 @@ Apache Calcite Avatica Go X.Y.Z has passed.
 Thanks everyone. We'll now roll the release out to the mirrors.
 
 Francis
-{% endhighlight %}
+```
 
 ### 投票后提升发布版本
 #### 手动
@@ -189,17 +189,17 @@ Francis
 
 5. 在 git 中标记最终版本并推送：
 
-{% highlight bash %}
+```bash
 git tag vX.Y.Z X.Y.Z-rcN
 git push origin vX.Y.Z
-{% endhighlight %}
+```
 
 #### 使用 docker
 这假设已经标记了一个 rc 版本并将其推送到 git 仓库。
 
-{% highlight bash %}
+```bash
 docker compose run promote-release
-{% endhighlight %}
+```
 
 ### 在 JIRA 中关闭问题并将版本标记为已发布
 在 JIRA 中，搜索[此版本中解决的所有问题](https://issues.apache.org/jira/issues/?jql=project%20%3D%20CALCITE%20AND%20status%20%3D%20Resolved%20AND%20resolution%20%3D%20Fixed%20AND%20fixVersion%20in%20(1.5.0%2C%20avatica-go-5.2.0))，
@@ -213,7 +213,7 @@ docker compose run promote-release
 24 小时后，通过向 [dev 列表](https://mail-archives.apache.org/mod_mbox/calcite-dev/)和 [announce@apache.org](https://mail-archives.apache.org/mod_mbox/www-announce/) 发送公告来宣布发布版本。
 
 公告的示例如下：
-{% highlight text %}
+```text
 Subject: [ANNOUNCE] Apache Calcite Avatica Go X.Y.Z released
 To: dev@calcite.apache.org
 
@@ -246,7 +246,7 @@ report problems, and to get involved, visit the project website at
     https://calcite.apache.org/avatica
 
 Francis Chuang, on behalf of the Apache Calcite Team
-{% endhighlight %}
+```
 
 {% quot 写在最后 %}
 
