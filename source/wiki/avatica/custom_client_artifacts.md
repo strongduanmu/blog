@@ -11,7 +11,7 @@ banner: /assets/banner/banner_7.jpg
 
 从 Apache Calcite Avatica 1.9.0 开始，提供了两个构件（jar），支持通过 JDBC 客户端访问 Avatica 服务器。
 
-{% highlight xml %}
+```xml
 <dependencies>
   <!-- Shaded 构件 -->
   <dependency>
@@ -24,7 +24,7 @@ banner: /assets/banner/banner_7.jpg
     <artifactId>avatica-core</artifactId>
   </dependency>
 </dependencies>
-{% endhighlight %}
+```
 
 为了与以前版本的约定保持一致，`org.apache.calcite.avatica:avatica` 是一个包含 Avatica 客户端代码库所有必要依赖的 JAR。那些可以安全重定位的类都会被重定位，以减少潜在的类路径问题。
 
@@ -34,7 +34,7 @@ Avatica 1.9.0 将引入一个新构件 `org.apache.calcite.avatica:avatica-core`
 
 在某些情况下，提供特定版本的 Avatica 依赖项可能是有益的。以下是一个简短的 `pom.xml`，概述了如何做到这一点。
 
-{% highlight xml %}
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
@@ -108,7 +108,7 @@ Avatica 1.9.0 将引入一个新构件 `org.apache.calcite.avatica:avatica-core`
     </plugins>
   </build>
 </project>
-{% endhighlight %}
+```
 
 
 
