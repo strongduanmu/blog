@@ -88,12 +88,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取数据库中可用的目录名称。
 
-{% highlight json %}
+```json
 {
   "request": "getCatalogs",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -101,12 +101,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于关闭 Avatica 服务器中由给定 ID 标识的连接对象。
 
-{% highlight json %}
+```json
 {
   "request": "closeConnection",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要关闭的连接的标识符。
 
@@ -114,13 +114,13 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于关闭 Avatica 服务器中由给定 ID 标识的语句对象。
 
-{% highlight json %}
+```json
 {
   "request": "closeStatement",
   "connectionId": "000000-0000-0000-00000000",
   "statementId": 12345
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）语句所属的连接的标识符。
 
@@ -130,7 +130,7 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于根据一些可选的过滤条件获取数据库中的列。
 
-{% highlight json %}
+```json
 {
   "request": "getColumns",
   "connectionId": "000000-0000-0000-00000000",
@@ -139,7 +139,7 @@ banner: /assets/banner/banner_4.jpg
   "tableNamePattern": "table_pattern.*",
   "columnNamePattern": "column_pattern.*"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要在其上获取列的连接的标识符。
 
@@ -155,12 +155,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 Avatica 服务器中由给定 ID 标识的连接上发出 `commit` 提交。
 
-{% highlight json %}
+```json
 {
   "request": "commit",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要在其上调用提交的连接的标识符。
 
@@ -168,13 +168,13 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于确保客户端和服务器对数据库属性有一致的视图。
 
-{% highlight json %}
+```json
 {
   "request": "connectionSync",
   "connectionId": "000000-0000-0000-00000000",
   "connProps": ConnectionProperties
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要同步的连接的标识符。
 
@@ -184,12 +184,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 Avatica 服务器中创建新语句。
 
-{% highlight json %}
+```json
 {
   "request": "createStatement",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）用于创建语句的连接的标识符。
 
@@ -197,12 +197,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取所有<a href="#databaseproperty">数据库属性</a>。
 
-{% highlight json %}
+```json
 {
   "request": "databaseProperties",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）获取数据库属性时要使用的连接的标识符。
 
@@ -210,14 +210,14 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 PreparedStatement 上执行批量更新。
 
-{% highlight json %}
+```json
 {
   "request": "executeBatch",
   "connectionId": "000000-0000-0000-00000000",
   "statementId": 12345,
   "parameterValues": [ [ TypedValue, TypedValue, ... ], [ TypedValue, TypedValue, ...], ... ]
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）获取数据库属性时要使用的连接的标识符。
 
@@ -229,14 +229,14 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于执行 PreparedStatement，可选择使用要绑定到语句中参数的值。
 
-{% highlight json %}
+```json
 {
   "request": "execute",
   "statementHandle": StatementHandle,
   "parameterValues": [TypedValue, TypedValue, ... ],
   "maxRowCount": 100
 }
-{% endhighlight %}
+```
 
 `statementHandle`（必需对象）一个 <a href="#statementhandle">StatementHandle</a> 对象。
 
@@ -248,7 +248,7 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于从先前创建的语句中获取一批行。
 
-{% highlight json %}
+```json
 {
   "request": "fetch",
   "connectionId": "000000-0000-0000-00000000",
@@ -256,7 +256,7 @@ banner: /assets/banner/banner_4.jpg
   "offset": 0,
   "fetchMaxRowCount": 100
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -270,13 +270,13 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 Avatica 服务器中打开新连接。
 
-{% highlight json %}
+```json
 {
   "request": "openConnection",
   "connectionId": "000000-0000-0000-00000000",
   "info": {"key":"value", ...}
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要在服务器中打开的连接的标识符。
 
@@ -286,14 +286,14 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用作创建语句并在该语句中执行一批 SQL 命令的简写。
 
-{% highlight json %}
+```json
 {
   "request": "prepareAndExecuteBatch",
   "connectionId": "000000-0000-0000-00000000",
   "statementId": 12345,
   "sqlCommands": [ "SQL Command", "SQL Command", ... ]
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -305,7 +305,7 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用作创建语句并在单个调用中获取第一批结果而无需任何参数替换的简写。
 
-{% highlight json %}
+```json
 {
   "request": "prepareAndExecute",
   "connectionId": "000000-0000-0000-00000000",
@@ -313,7 +313,7 @@ banner: /assets/banner/banner_4.jpg
   "sql": "SELECT * FROM table",
   "maxRowCount": 100,
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -327,14 +327,14 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 Avatica 服务器中使用给定查询创建新语句。
 
-{% highlight json %}
+```json
 {
   "request": "prepare",
   "connectionId": "000000-0000-0000-00000000",
   "sql": "SELECT * FROM table",
   "maxRowCount": 100,
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -346,7 +346,7 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于将 ResultSet 的迭代器重置为 Avatica 服务器中的特定偏移量。
 
-{% highlight json %}
+```json
 {
   "request": "syncResults",
   "connectionId": "000000-0000-0000-00000000",
@@ -354,7 +354,7 @@ banner: /assets/banner/banner_4.jpg
   "state": QueryState,
   "offset": 200
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要使用的连接的标识符。
 
@@ -368,12 +368,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于在 Avatica 服务器中由给定 ID 标识的连接上发出 `rollback` 回滚。
 
-{% highlight json %}
+```json
 {
   "request": "rollback",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId`（必需字符串）要在其上调用回滚的连接的标识符。
 
@@ -381,14 +381,14 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取数据库中与提供的条件匹配的模式。
 
-{% highlight json %}
+```json
 {
   "request": "getSchemas",
   "connectionId": "000000-0000-0000-00000000",
   "catalog": "name",
   "schemaPattern": "pattern.*"
 }
-{% endhighlight %}
+```
 
 `connection_id` 要从中获取模式的连接的标识符。
 
@@ -400,12 +400,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取此数据库中可用的表类型。
 
-{% highlight json %}
+```json
 {
   "request": "getTableTypes",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId` 要从中获取表类型的连接的标识符。
 
@@ -413,7 +413,7 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取此数据库中按提供的条件过滤的可用表。
 
-{% highlight json %}
+```json
 {
   "request": "getTables",
   "connectionId": "000000-0000-0000-00000000",
@@ -422,7 +422,7 @@ banner: /assets/banner/banner_4.jpg
   "tableNamePattern": "table_name_pattern.*",
   "typeList": [ "TABLE", "VIEW", ... ]
 }
-{% endhighlight %}
+```
 
 `catalog`（可选字符串）用于限制获取的表的目录名称。
 
@@ -438,12 +438,12 @@ banner: /assets/banner/banner_4.jpg
 
 此请求用于获取此数据库中可用的类型。
 
-{% highlight json %}
+```json
 {
   "request": "getTypeInfo",
   "connectionId": "000000-0000-0000-00000000"
 }
-{% endhighlight %}
+```
 
 `connectionId` 要从中获取类型的连接的标识符。
 
@@ -455,12 +455,12 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#closeconnectionrequest">CloseConnectionRequest</a> 的响应。
 
-{% highlight json %}
+```json
 {
   "response": "closeConnection",
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `rpcMetadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -468,12 +468,12 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#closestatementrequest">CloseStatementRequest</a> 的响应。
 
-{% highlight json %}
+```json
 {
   "response": "closeStatement",
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `rpcMetadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -481,11 +481,11 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#commitrequest">CommitRequest</a> 的响应。
 
-{% highlight json %}
+```json
 {
   "response": "commit"
 }
-{% endhighlight %}
+```
 
 此响应没有额外的属性。
 
@@ -493,13 +493,13 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#connectionsyncrequest">ConnectionSyncRequest</a> 的响应。响应中包含的属性是 Avatica 服务器中连接的属性。
 
-{% highlight json %}
+```json
 {
   "response": "connectionSync",
   "connProps": ConnectionProperties,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `connProps` 已同步的 <a href="#connectionproperties">ConnectionProperties</a>。
 
@@ -509,14 +509,14 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#createstatementrequest">CreateStatementRequest</a> 的响应。创建的语句的 ID 包含在响应中。客户端将在后续调用中使用此 `statementId`。
 
-{% highlight json %}
+```json
 {
   "response": "createStatement",
   "connectionId": "000000-0000-0000-00000000",
   "statementId": 12345,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `connectionId` 用于创建语句的连接的标识符。
 
@@ -528,13 +528,13 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#databasepropertyrequest">DatabasePropertyRequest</a> 的响应。有关可用属性键的信息，请参阅 <a hred="#databaseproperty">DatabaseProperty</a>。
 
-{% highlight json %}
+```json
 {
   "response": "databaseProperties",
   "map": { DatabaseProperty: Object, DatabaseProperty: Object, ... },
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `map` <a href="#databaseproperty">DatabaseProperty</a> 到该属性值的映射。该值可能是某种基本类型或基本类型的数组。
 
@@ -544,7 +544,7 @@ banner: /assets/banner/banner_4.jpg
 
 执行请求时捕获错误的响应。任何请求都可能返回此响应。
 
-{% highlight json %}
+```json
 {
   "response": "error",
   "exceptions": [ "stacktrace", "stacktrace", ... ],
@@ -554,7 +554,7 @@ banner: /assets/banner/banner_4.jpg
   "severity": AvaticaSeverity,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `exceptions` 字符串化的 Java StackTrace 列表。
 
@@ -572,7 +572,7 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#executebatchrequest">ExecuteBatchRequest</a> 和 <a href="#prepareandexecutebatchrequest">PrepareAndExecuteRequest</a> 的响应，封装了一批更新的更新计数。
 
-{% highlight json %}
+```json
 {
   "response": "executeBatch",
   "connectionId": "000000-0000-0000-00000000",
@@ -581,7 +581,7 @@ banner: /assets/banner/banner_4.jpg
   "missingStatement": false,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `connectionId` 用于创建语句的连接的标识符。
 
@@ -597,14 +597,14 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#executerequest">ExecuteRequest</a> 的响应，包含元数据查询的结果。
 
-{% highlight json %}
+```json
 {
   "response": "executeResults",
   "resultSets": [ ResultSetResponse, ResultSetResponse, ... ],
   "missingStatement": false,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `resultSets` <a href="#resultsetresponse">ResultSetResponse</a> 的数组。
 
@@ -616,7 +616,7 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#fetchrequest">FetchRequest</a> 的响应，包含查询的请求。
 
-{% highlight json %}
+```json
 {
   "response": "fetch",
   "frame": Frame,
@@ -624,7 +624,7 @@ banner: /assets/banner/banner_4.jpg
   "missingResults": false,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `frame` 包含获取结果的 <a href="#frame">Frame</a>。
 
@@ -638,12 +638,12 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#openconnectionrequest">OpenConnectionRequest</a> 的响应。客户端应在后续调用中使用的连接的 ID 由客户端在请求中提供。
 
-{% highlight json %}
+```json
 {
   "response": "openConnection",
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `rpcMetadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -651,13 +651,13 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#preparerequest">PrepareRequest</a> 的响应。此响应包含一个 <a href="#statementhandle">StatementHandle</a>，客户端必须使用它来从语句中获取结果。
 
-{% highlight json %}
+```json
 {
   "response": "prepare",
   "statement": StatementHandle,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `statement` 一个 <a href="#statementhandle">StatementHandle</a> 对象。
 
@@ -667,7 +667,7 @@ banner: /assets/banner/banner_4.jpg
 
 包含查询结果和类型详细信息的响应。
 
-{% highlight json %}
+```json
 {
   "response": "resultSet",
   "connectionId": "000000-0000-0000-00000000",
@@ -678,7 +678,7 @@ banner: /assets/banner/banner_4.jpg
   "updateCount": 10,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `connectionId` 用于生成此响应的连接的标识符。
 
@@ -698,11 +698,11 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#rollbackrequest">RollBackRequest</a> 的响应。
 
-{% highlight json %}
+```json
 {
   "response": "rollback"
 }
-{% endhighlight %}
+```
 
 此响应没有额外的属性。
 
@@ -710,14 +710,14 @@ banner: /assets/banner/banner_4.jpg
 
 对 <a href="#syncresultsrequest">SyncResultsRequest</a> 的响应。当 `moreResults` 为 true 时，应该发出 <a href="#fetchrequest">FetchRequest</a> 以获取下一批记录。当 `missingStatement` 为 true 时，必须使用 <a href="#preparerequest">PrepareRequest</a> 或适当的 DDL 请求（例如 <a href="#catalogsrequest">CatalogsRequest</a> 或 <a href="#schemasrequest">SchemasRequest</a>）重新创建语句。
 
-{% highlight json %}
+```json
 {
   "response": "syncResults",
   "moreResults": true,
   "missingStatement": false,
   "rpcMetadata": RpcMetadata
 }
-{% endhighlight %}
+```
 
 `moreResults` 一个布尔值，表示根据请求"同步"的 ResultSet 是否存在结果。
 
@@ -731,7 +731,7 @@ banner: /assets/banner/banner_4.jpg
 
 此对象描述结果中列的"简单"或标量 JDBC 类型表示。这不包括复杂类型，如数组。
 
-{% highlight json %}
+```json
 {
   "signed": true,
   "precision": 10,
@@ -741,7 +741,7 @@ banner: /assets/banner/banner_4.jpg
   "className": "java.lang.Integer",
   "name": "number"
 }
-{% endhighlight %}
+```
 
 `signed` 一个布尔值，表示列是否为有符号数值。
 
@@ -772,7 +772,7 @@ banner: /assets/banner/banner_4.jpg
 
 此对象描述列的简单或复杂类型。复杂类型将在 `component` 或 `columns` 属性中包含额外信息，描述复杂父类型的嵌套类型。
 
-{% highlight json %}
+```json
 {
   "type": "scalar",
   "id": "identifier",
@@ -781,7 +781,7 @@ banner: /assets/banner/banner_4.jpg
   "columns": [ ColumnMetaData, ColumnMetaData, ... ],
   "component": AvaticaType
 }
-{% endhighlight %}
+```
 
 `type` 取值之一：`scalar`、`array`、`struct`。
 
@@ -799,7 +799,7 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示列的 JDBC ResultSetMetaData。
 
-{% highlight json %}
+```json
 {
   "ordinal": 0,
   "autoIncrement": true,
@@ -822,7 +822,7 @@ banner: /assets/banner/banner_4.jpg
   "definitelyWritable": true,
   "columnClassName": "java.lang.String"
 }
-{% endhighlight %}
+```
 
 `ordinal` 位置偏移编号。
 
@@ -872,7 +872,7 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示给定 JDBC 连接的属性。
 
-{% highlight json %}
+```json
 {
   "connProps": "connPropsImpl",
   "autoCommit": true,
@@ -881,7 +881,7 @@ banner: /assets/banner/banner_4.jpg
   "catalog": "catalog",
   "schema": "schema"
 }
-{% endhighlight %}
+```
 
 `autoCommit`（可选布尔值）一个布尔值，表示事务是否启用了 autoCommit 自动提交。
 
@@ -905,13 +905,13 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示将无类型对象转换为某些结果的必要类型所需的信息。
 
-{% highlight json %}
+```json
 {
   "style": Style,
   "clazz": "java.lang.String",
   "fieldNames": [ "column1", "column2", ... ]
 }
-{% endhighlight %}
+```
 
 `style` 一个字符串，表示包含对象的 <a href="#style">Style</a> 样式。
 
@@ -932,13 +932,13 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示一批结果，跟踪结果中的偏移量以及 Avatica 服务器中是否还有更多结果需要获取。
 
-{% highlight json %}
+```json
 {
   "offset": 100,
   "done": true,
   "rows": [ [ val1, val2, ... ], ... ]
 }
-{% endhighlight %}
+```
 
 `offset` 这些 `rows` 在包含结果集中的起始位置。
 
@@ -950,14 +950,14 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示在 Avatica 服务器中创建 ResultSet 的方式。ResultSet 可以由用户提供的 SQL 或带有该操作参数的 DatabaseMetaData 操作创建。
 
-{% highlight json %}
+```json
 {
   "type": StateType,
   "sql": "SELECT * FROM table",
   "metaDataOperation": MetaDataOperation,
   "operationArgs": ["arg0", "arg1", ... ]
 }
-{% endhighlight %}
+```
 
 `type` 一个 <a href="#statetype">StateType</a> 对象，表示支持此查询的 ResultSet 的操作类型。
 
@@ -1002,11 +1002,11 @@ banner: /assets/banner/banner_4.jpg
 
 此对象包含 Avatica 服务器返回的各种每次调用/上下文元数据。
 
-{% highlight json %}
+```json
 {
   "serverAddress": "localhost:8765"
 }
-{% endhighlight %}
+```
 
 `serverAddress` 创建此对象的服务器的 `host:port`。
 
@@ -1014,7 +1014,7 @@ banner: /assets/banner/banner_4.jpg
 
 此对象表示在 Avatica 服务器中准备语句的结果。
 
-{% highlight json %}
+```json
 {
   "columns": [ ColumnMetaData, ColumnMetaData, ... ],
   "sql": "SELECT * FROM table",
@@ -1022,7 +1022,7 @@ banner: /assets/banner/banner_4.jpg
   "cursorFactory": CursorFactory,
   "statementType": StatementType
 }
-{% endhighlight %}
+```
 
 `columns` 表示结果集模式的 <a href="#columnmetadata">ColumnMetaData</a> 对象的数组。
 
@@ -1047,13 +1047,13 @@ banner: /assets/banner/banner_4.jpg
 
 此对象封装了在 Avatica 服务器中创建的语句的所有信息。
 
-{% highlight json %}
+```json
 {
   "connectionId": "000000-0000-0000-00000000",
   "id": 12345,
   "signature": Signature
 }
-{% endhighlight %}
+```
 
 `connectionId` 此语句所属的连接的标识符。
 
@@ -1097,12 +1097,12 @@ banner: /assets/banner/banner_4.jpg
 
 此对象封装了行中列的类型和值。
 
-{% highlight json %}
+```json
 {
   "type": "type_name",
   "value": object
 }
-{% endhighlight %}
+```
 
 `type` 引用存储在 `value` 中的对象类型的名称。
 
