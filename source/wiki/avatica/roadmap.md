@@ -13,24 +13,24 @@ banner: /assets/banner/banner_1.jpg
 
 ### 已实现
 
-- 创建连接 `create connection`、创建语句 `create statement`、元数据 `metadata`、准备 `prepare`、绑定 `bind`、执行 `execute`、获取 `fetch`；
+- 创建连接、创建语句、元数据查询、准备、绑定、执行、获取；
 - 通过 HTTP 使用 JSON 进行 RPC 调用；
 - 本地实现；
 - 通过现有的 JDBC 驱动程序实现；
 - 复合 RPC 调用（将多个请求组合成一次往返）：
-  - `执行` - `获取`；
+  - 执行 - 获取；
   - 元数据获取（元数据调用，例如 `getTables` 返回所有行）。
 
 ### 未实现
 
-- ODBC
+- ODBC；
 - RPC 调用：
   - CloseStatement；
   - CloseConnection。
 - 复合 RPC 调用：
   - CreateStatement - Prepare；
   - CloseStatement - CloseConnection；
-  - 准备 - 执行 - 获取（`Statement.executeQuery` 应该获取前 N 行）；
+  - Prepare - Execute - Fetch（`Statement.executeQuery` 应该获取前 N 行）；
 - 从语句表中删除语句；
 - DML (INSERT, UPDATE, DELETE)；
 - `Statement.execute` 应用于 SELECT 语句。
