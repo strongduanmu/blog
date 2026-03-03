@@ -16,7 +16,15 @@ tree:
   '概述':
     - background
     - roadmap
-  '参考文档':
+  'Avatica 参考':
     - client_reference
     - json_reference
     - protobuf_reference
+    - howto
+    - security
+    - compatibility
+    - custom_client_artifacts
+    - docker_images
+    - protocol_testing
+  'Avatica 元信息':
+    - history
