@@ -22,11 +22,11 @@ banner: /assets/banner/banner_4.jpg
 
 解压源码分发包的 `.tar.gz` 文件，`cd` 进入解压后的源码根目录，然后使用 Gradle 构建：
 
-{% highlight bash %}
+```bash
 $ tar xvfz apache-calcite-avatica-1.27.0-src.tar.gz
 $ cd apache-calcite-avatica-1.27.0-src
 $ gradle build
-{% endhighlight %}
+```
 
 [运行测试](#running-tests) 描述了如何运行更多或更少的测试（但您应该使用 `gradle` 命令而不是 `./gradlew`）。
 
@@ -36,11 +36,11 @@ $ gradle build
 
 创建 GitHub 仓库的本地副本，`cd` 进入其根目录，然后使用 Gradle 构建：
 
-{% highlight bash %}
+```bash
 $ git clone git@github.com:apache/calcite-avatica.git
 $ cd avatica
 $ ./gradlew build
-{% endhighlight %}
+```
 
 [运行测试](#running-tests) 描述了如何运行更多或更少的测试。
 
@@ -48,13 +48,13 @@ $ ./gradlew build
 
 构建时测试套件会默认运行，除非您指定 `-x test`：
 
-{% highlight bash %}
+```bash
 $ ./gradlew assemble # 构建构件
 $ ./gradlew build -x test # 构建构件，验证代码风格，跳过测试
 $ ./gradlew check # 验证代码风格，执行测试
 $ ./gradlew test # 执行测试
 $ ./gradlew checkstyleMain checkstyleTest # 验证代码风格
-{% endhighlight %}
+```
 
 您可以使用 `./gradlew assemble` 来构建构件并跳过所有测试和验证。
 
@@ -62,9 +62,9 @@ $ ./gradlew checkstyleMain checkstyleTest # 验证代码风格
 
 前提条件是安装了 [Docker](https://docs.docker.com/install/) 和 [Docker Compose](https://docs.docker.com/compose/install/)。
 
-{% highlight bash %}
+```bash
 docker compose run test
-{% endhighlight %}
+```
 
 ## 贡献代码
 
@@ -94,7 +94,7 @@ docker compose run test
 
 这可以通过 Linux 上的 `~/.xsession` 或您选择的 shell 配置脚本（例如 `~/.bashrc` 或 `~/.zshrc`）中的某些脚本自动启动：
 
-{% highlight bash %}
+```bash
 GPG_AGENT=$(which gpg-agent)
 GPG_TTY=`tty`
 export GPG_TTY
@@ -108,7 +108,7 @@ if [[ -f "$GPG_AGENT" ]]; then
   fi
   export GPG_AGENT_INFO  # env 文件不包含 export 语句
 fi
-{% endhighlight %}
+```
 
 此外，确保在 `~/.gnupg/gpg-agent.conf` 中设置 `default-cache-ttl 6000`，以保证您的凭据在构建期间会被缓存。
 
@@ -120,13 +120,13 @@ Gradle 提供了多种[配置项目属性](https://docs.gradle.org/current/userg
 
 使用以下选项：
 
-{% highlight properties %}
+```properties
 asfCommitterId=
 asfNexusUsername=
 asfNexusPassword=
 asfSvnUsername=
 asfSvnPassword=
-{% endhighlight %}
+```
 
 当使用 [asflike-release-environment](https://github.com/vlsi/asflike-release-environment) 时，凭据取自 `asfTest...`（例如 `asfTestNexusUsername=test`）。
 
@@ -139,12 +139,12 @@ asfSvnPassword=
 * 按上述说明设置签名密钥。
 * 确保您使用的是 JDK 8（不是 9 或 10）。
 
-{% highlight bash %}
+```bash
 # 确保沙箱中没有垃圾文件
 git clean -xn
 
 ./gradlew -Pasf publish
-{% endhighlight %}
+```
 
 ## 制作发布候选版本（针对 Calcite 提交者）
 
@@ -170,7 +170,7 @@ git clean -xn
 
 选择一个发布候选索引（从 0 开始），并确保它不会与该版本的先前候选版本冲突。
 
-{% highlight bash %}
+```bash
 # 确保沙箱中没有垃圾文件
 git clean -xn
 
@@ -179,7 +179,7 @@ git clean -xn
 
 # 将发布候选推送到 ASF 服务器
 ./gradlew prepareVote -Prc=0 -Pasf
-{% endhighlight %}
+```
 
 ### 在 Docker 中准备发布候选版本
 
@@ -189,7 +189,7 @@ git clean -xn
 
 * 启动 [asflike-release-environment](https://github.com/vlsi/asflike-release-environment) 为试运行准备暂存环境。
 
-{% highlight bash %}
+```bash
 # 在 Linux 上（试运行）：
 docker compose run -v ~/.gnupg:/.gnupg dry-run
 
@@ -201,7 +201,7 @@ docker compose run -v ~/.gnupg:/.gnupg publish-release-for-voting
 
 # 在 Windows 上（推送到 ASF 服务器）：
 docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg publish-release-for-voting
-{% endhighlight %}
+```
 
 ## 检查构件
 
@@ -231,7 +231,7 @@ docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg publish-re
 
 ## 验证发布
 
-{% highlight bash %}
+```bash
 # 检查签名密钥（例如 2AD3FAE3）是否已推送
 gpg --recv-keys key
 
@@ -259,14 +259,14 @@ function checkHash() {
   done
 }
 checkHash apache-calcite-avatica-X.Y.Z-rcN
-{% endhighlight %}
+```
 
 ## 通过 Apache 投票流程获得发布批准（针对 Calcite 提交者）
 
 在开发邮件列表上进行发布投票。
 注意：投票邮件草稿会作为 `prepareVote` 任务的最后一步打印出来，您可以在 `/build/prepareVote/mail.txt` 中找到草稿。
 
-{% highlight text %}
+```text
 To: dev@calcite.apache.org
 Subject: [VOTE] Release apache-calcite-avatica-X.Y.Z (release candidate N)
 
@@ -310,11 +310,11 @@ Here is my vote:
 +1 (binding)
 
 Julian
-{% endhighlight %}
+```
 
 投票结束后，发送结果：
 
-{% highlight text %}
+```text
 Subject: [RESULT] [VOTE] Release apache-calcite-avatica-X.Y.Z (release candidate N)
 To: dev@calcite.apache.org
 
@@ -341,7 +341,7 @@ thread to discuss.
 
 
 Julian
-{% endhighlight %}
+```
 
 使用 [Apache URL 缩短器](http://s.apache.org) 为投票提案和结果邮件生成缩短的 URL。示例：[s.apache.org/calcite-1.2-vote](http://s.apache.org/calcite-1.2-vote) 和 [s.apache.org/calcite-1.2-result](http://s.apache.org/calcite-1.2-result)。
 
@@ -357,19 +357,19 @@ Julian
 
 ### 直接在您的环境中发布
 
-{% highlight bash %}
+```bash
 # 试运行发布（推送到 asf-like-environment）
 ./gradlew publishDist -Prc=0
 
 # 将发布推送到 ASF 服务器
 ./gradlew publishDist -Prc=0 -Pasf
-{% endhighlight %}
+```
 
 如果 SVN 中有超过 2 个发布版本（参见 https://dist.apache.org/repos/dist/release/calcite），清除最旧的版本：
 
-{% highlight bash %}
+```bash
 svn rm https://dist.apache.org/repos/dist/release/calcite/apache-calcite-avatica-X.Y.Z
-{% endhighlight %}
+```
 
 旧版本仍将在[发布归档](http://archive.apache.org/dist/calcite/)中可用。
 
@@ -377,9 +377,9 @@ svn rm https://dist.apache.org/repos/dist/release/calcite/apache-calcite-avatica
 
 这假设 rc 发布已被标记并推送到 git 仓库。
 
-{% highlight bash %}
+```bash
 docker compose run promote-release
-{% endhighlight %}
+```
 
 ## 添加发布说明并发布公告
 

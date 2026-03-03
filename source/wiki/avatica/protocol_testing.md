@@ -15,7 +15,7 @@ banner: /assets/banner/banner_9.jpg
 
 与 Avatica 服务器交互的一种简单方法是使用 cURL 和 JSON 序列化。以下内容已测试可在 Avatica 1.10.0 中工作：
 
-{% highlight bash %}
+```bash
 #!/usr/bin/env bash
 
 set -u
@@ -62,7 +62,7 @@ echo
 echo "Close connection"
 curl -i -w "\n" "$AVATICA" -H "Content-Type: application/json" --data "{\"request\": \"closeConnection\",\"connectionId\": \"${CONNECTION_ID}\"}"
 echo
-{% endhighlight %}
+```
 
 
 
