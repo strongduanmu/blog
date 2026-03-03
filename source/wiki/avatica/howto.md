@@ -11,8 +11,6 @@ banner: /assets/banner/banner_4.jpg
 
 本文档包含了一些关于使用 Avatica 的杂项说明。
 
-* TOC
-{:toc}
 
 ## 从源码分发包构建
 
