@@ -11,8 +11,6 @@ banner: /assets/banner/banner_4.jpg
 
 这里是一些关于使用 Avatica 的其他文档。
 
-* TOC
-{:toc}
 
 ## 发布
 

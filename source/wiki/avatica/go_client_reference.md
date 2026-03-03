@@ -13,8 +13,6 @@ Avatica Go 客户端是一个用于 Go [database/sql](https://golang.org/pkg/dat
 
 它也可以与 Apache Phoenix 项目的 Phoenix Query Server 一起使用，因为 Phoenix Query Server 底层使用 Avatica。
 
-* TOC
-{:toc}
 
 ## 快速入门
 使用 Go modules 安装：
