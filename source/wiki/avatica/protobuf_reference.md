@@ -94,11 +94,11 @@ banner: /assets/banner/banner_5.jpg
 
 此请求用于获取数据库中可用的目录名称。
 
-{% highlight protobuf %}
+```protobuf
 message CatalogsRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -106,11 +106,11 @@ message CatalogsRequest {
 
 此请求用于关闭 Avatica 服务器中由给定 ID 标识的连接对象。
 
-{% highlight protobuf %}
+```protobuf
 message CloseConnectionRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要关闭的连接的标识符。
 
@@ -118,12 +118,12 @@ message CloseConnectionRequest {
 
 此请求用于关闭 Avatica 服务器中由给定 ID 标识的语句对象。
 
-{% highlight protobuf %}
+```protobuf
 message CloseStatementRequest {
   string connection_id = 1;
   uint32 statement_id = 2;
 }
-{% endhighlight %}
+```
 
 `connection_id` 语句所属的连接的标识符。
 
@@ -133,7 +133,7 @@ message CloseStatementRequest {
 
 此请求用于根据一些可选的过滤条件获取数据库中的列。
 
-{% highlight protobuf %}
+```protobuf
 message ColumnsRequest {
   string catalog = 1;
   string schema_pattern = 2;
@@ -145,7 +145,7 @@ message ColumnsRequest {
   bool   has_table_name_pattern = 8;
   bool   has_column_name_pattern = 9;
 }
-{% endhighlight %}
+```
 
 `catalog` 用于限制返回列的目录名称。
 
@@ -169,11 +169,11 @@ message ColumnsRequest {
 
 此请求用于在 Avatica 服务器中由给定 ID 标识的连接上发出 `commit` 提交。
 
-{% highlight protobuf %}
+```protobuf
 message CommitRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要在其上调用提交的连接的标识符。
 
@@ -181,12 +181,12 @@ message CommitRequest {
 
 此请求用于确保客户端和服务器对数据库属性有一致的视图。
 
-{% highlight protobuf %}
+```protobuf
 message ConnectionSyncRequest {
   string connection_id = 1;
   ConnectionProperties conn_props = 2;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要同步的连接的标识符。
 
@@ -196,11 +196,11 @@ message ConnectionSyncRequest {
 
 此请求用于在 Avatica 服务器中创建新语句。
 
-{% highlight protobuf %}
+```protobuf
 message CreateStatementRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 用于创建语句的连接的标识符。
 
@@ -208,11 +208,11 @@ message CreateStatementRequest {
 
 此请求用于获取所有<a href="#databaseproperty">数据库属性</a>。
 
-{% highlight protobuf %}
+```protobuf
 message DatabasePropertyRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 获取数据库属性时要使用的连接的标识符。
 
@@ -220,13 +220,13 @@ message DatabasePropertyRequest {
 
 此请求用于对 PreparedStatement 执行一批更新。
 
-{% highlight protobuf %}
+```protobuf
 message ExecuteBatchRequest {
   string connection_id = 1;
   uint32 statement_id = 2;
   repeated UpdateBatch updates = 3;
 }
-{% endhighlight %}
+```
 
 `connection_id` 引用连接的字符串。
 
@@ -238,7 +238,7 @@ message ExecuteBatchRequest {
 
 此请求用于执行 PreparedStatement，可选择使用要绑定到语句中参数的值。
 
-{% highlight protobuf %}
+```protobuf
 message ExecuteRequest {
   StatementHandle statementHandle = 1;
   repeated TypedValue parameter_values = 2;
@@ -246,7 +246,7 @@ message ExecuteRequest {
   bool has_parameter_values = 4;
   int32 first_frame_max_size = 5;
 }
-{% endhighlight %}
+```
 
 `statementHandle` 一个 <a href="#statementhandle">StatementHandle</a> 对象。
 
@@ -262,7 +262,7 @@ message ExecuteRequest {
 
 此请求用于从先前创建的语句中获取一批行。
 
-{% highlight protobuf %}
+```protobuf
 message FetchRequest {
   string connection_id = 1;
   uint32 statement_id = 2;
@@ -270,7 +270,7 @@ message FetchRequest {
   uint32 fetch_max_row_count = 4; // Deprecated!
   int32 frame_max_size = 5;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -286,12 +286,12 @@ message FetchRequest {
 
 此请求用于在 Avatica 服务器中打开新连接。
 
-{% highlight protobuf %}
+```protobuf
 message OpenConnectionRequest {
   string connection_id = 1;
   map<string, string> info = 2;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要在服务器中打开的连接的标识符。
 
@@ -301,13 +301,13 @@ message OpenConnectionRequest {
 
 此请求用作创建语句并对该语句执行一批更新的简写。
 
-{% highlight protobuf %}
+```protobuf
 message PrepareAndExecuteBatchRequest {
   string connection_id = 1;
   uint32 statement_id = 2;
   repeated string sql_commands = 3;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -319,7 +319,7 @@ message PrepareAndExecuteBatchRequest {
 
 此请求用作创建语句并在单个调用中获取第一批结果而无需任何参数替换的简写。
 
-{% highlight protobuf %}
+```protobuf
 message PrepareAndExecuteRequest {
   string connection_id = 1;
   uint32 statement_id = 4;
@@ -328,7 +328,7 @@ message PrepareAndExecuteRequest {
   int64 max_rows_total = 5;
   int32 first_frame_max_size = 6;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -346,14 +346,14 @@ message PrepareAndExecuteRequest {
 
 此请求用于在 Avatica 服务器中使用给定查询创建新语句。
 
-{% highlight protobuf %}
+```protobuf
 message PrepareRequest {
   string connection_id = 1;
   string sql = 2;
   uint64 max_row_count = 3; // Deprecated!
   int64 max_rows_total = 4;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -367,14 +367,14 @@ message PrepareRequest {
 
 此请求用于将 ResultSet 的迭代器重置为 Avatica 服务器中的特定偏移量。
 
-{% highlight protobuf %}
+```protobuf
 message SyncResultsRequest {
   string connection_id = 1;
   uint32 statement_id = 2;
   QueryState state = 3;
   uint64 offset = 4;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要使用的连接的标识符。
 
@@ -388,11 +388,11 @@ message SyncResultsRequest {
 
 此请求用于在 Avatica 服务器中由给定 ID 标识的连接上发出 `rollback` 回滚。
 
-{% highlight protobuf %}
+```protobuf
 message RollbackRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要在其上调用回滚的连接的标识符。
 
@@ -400,7 +400,7 @@ message RollbackRequest {
 
 此请求用于获取数据库中与提供的条件匹配的模式。
 
-{% highlight protobuf %}
+```protobuf
 message SchemasRequest {
   string catalog = 1;
   string schema_pattern = 2;
@@ -408,7 +408,7 @@ message SchemasRequest {
   bool   has_catalog = 4;
   bool   has_schema_pattern = 5;
 }
-{% endhighlight %}
+```
 
 `catalog` 要从中获取模式的目录的名称。
 
@@ -424,11 +424,11 @@ message SchemasRequest {
 
 此请求用于获取此数据库中可用的表类型。
 
-{% highlight protobuf %}
+```protobuf
 message TableTypesRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要从中获取表类型的连接的标识符。
 
@@ -436,7 +436,7 @@ message TableTypesRequest {
 
 此请求用于获取此数据库中按提供的条件过滤的可用表。
 
-{% highlight protobuf %}
+```protobuf
 message TablesRequest {
   string catalog = 1;
   string schema_pattern = 2;
@@ -448,7 +448,7 @@ message TablesRequest {
   bool   has_schema_pattern = 9;
   bool   has_table_name_pattern = 10;
 }
-{% endhighlight %}
+```
 
 `catalog` 用于限制获取的表的目录名称。
 
@@ -472,11 +472,11 @@ message TablesRequest {
 
 此请求用于获取此数据库中可用的类型。
 
-{% highlight protobuf %}
+```protobuf
 message TypeInfoRequest {
   string connection_id = 1;
 }
-{% endhighlight %}
+```
 
 `connection_id` 要从中获取类型的连接的标识符。
 
@@ -488,11 +488,11 @@ message TypeInfoRequest {
 
 对 <a href="#closeconnectionrequest">CloseConnectionRequest</a> 的响应。
 
-{% highlight protobuf %}
+```protobuf
 message CloseConnectionResponse {
   RpcMetadata metadata = 1;
 }
-{% endhighlight %}
+```
 
 `metadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -500,11 +500,11 @@ message CloseConnectionResponse {
 
 对 <a href="#closestatementrequest">CloseStatementRequest</a> 的响应。
 
-{% highlight protobuf %}
+```protobuf
 message CloseStatementResponse {
   RpcMetadata metadata = 1;
 }
-{% endhighlight %}
+```
 
 `metadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -512,11 +512,11 @@ message CloseStatementResponse {
 
 对 <a href="#commitrequest">CommitRequest</a> 的响应。
 
-{% highlight protobuf %}
+```protobuf
 message CommitResponse {
 
 }
-{% endhighlight %}
+```
 
 此响应没有属性。
 
@@ -524,12 +524,12 @@ message CommitResponse {
 
 对 <a href="#connectionsyncrequest">ConnectionSyncRequest</a> 的响应。响应中包含的属性是 Avatica 服务器中连接的属性。
 
-{% highlight protobuf %}
+```protobuf
 message ConnectionSyncResponse {
   ConnectionProperties conn_props = 1;
   RpcMetadata metadata = 2;
 }
-{% endhighlight %}
+```
 
 `conn_props` 已同步的 <a href="#connectionproperties">ConnectionProperties</a>。
 
@@ -539,13 +539,13 @@ message ConnectionSyncResponse {
 
 对 <a href="#createstatementrequest">CreateStatementRequest</a> 的响应。创建的语句的 ID 包含在响应中。客户端将在后续调用中使用此 `statement_id`。
 
-{% highlight protobuf %}
+```protobuf
 message CreateStatementResponse {
   string connection_id = 1;
   uint32 statement_id = 2;
   RpcMetadata metadata = 3;
 }
-{% endhighlight %}
+```
 
 `connection_id` 用于创建语句的连接的标识符。
 
@@ -557,12 +557,12 @@ message CreateStatementResponse {
 
 对 <a href="#databasepropertyrequest">DatabasePropertyRequest</a> 的响应。有关可用属性键的信息，请参阅 <a hred="#databaseproperty">DatabaseProperty</a>。
 
-{% highlight protobuf %}
+```protobuf
 message DatabasePropertyResponse {
   repeated DatabasePropertyElement props = 1;
   RpcMetadata metadata = 2;
 }
-{% endhighlight %}
+```
 
 `props` <a href="#databaseproperty">DatabaseProperty</a> 的集合。
 
@@ -572,7 +572,7 @@ message DatabasePropertyResponse {
 
 执行请求时捕获错误的响应。任何请求都可能返回此响应。
 
-{% highlight protobuf %}
+```protobuf
 message ErrorResponse {
   repeated string exceptions = 1;
   bool has_exceptions = 7;
@@ -582,7 +582,7 @@ message ErrorResponse {
   string sql_state = 5;
   RpcMetadata metadata = 6;
 }
-{% endhighlight %}
+```
 
 `exceptions` 字符串化的 Java StackTrace 列表。
 
@@ -602,7 +602,7 @@ message ErrorResponse {
 
 对 <a href="#executebatchrequest">ExecuteBatchRequest</a> 和 <a href="#prepareandexecutebatchrequest">PrepareAndExecuteBatchRequest</a> 的响应。
 
-{% highlight protobuf %}
+```protobuf
 message ExecuteBatchResponse {
   string connection_id = 1;
   uint32 statement_id = 2;
@@ -610,7 +610,7 @@ message ExecuteBatchResponse {
   bool missing_statement = 4;
   RpcMetadata metadata = 5;
 }
-{% endhighlight %}
+```
 
 `connection_id` 引用所使用的连接的 ID。
 
@@ -626,13 +626,13 @@ message ExecuteBatchResponse {
 
 对 <a href="#executerequest">ExecuteRequest</a> 的响应，包含元数据查询的结果。
 
-{% highlight protobuf %}
+```protobuf
 message ExecuteResponse {
   repeated ResultSetResponse results = 1;
   bool missing_statement = 2;
   RpcMetadata metadata = 3;
 }
-{% endhighlight %}
+```
 
 `results` <a href="#resultsetresponse">ResultSetResponse</a> 的数组。
 
@@ -644,14 +644,14 @@ message ExecuteResponse {
 
 对 <a href="#fetchrequest">FetchRequest</a> 的响应，包含查询的请求。
 
-{% highlight protobuf %}
+```protobuf
 message FetchResponse {
   Frame frame = 1;
   bool missing_statement = 2;
   bool missing_results = 3;
   RpcMetadata metadata = 4;
 }
-{% endhighlight %}
+```
 
 `frame` 包含获取结果的 <a href="#frame">Frame</a>。
 
@@ -665,12 +665,12 @@ message FetchResponse {
 
 对 <a href="#openconnectionrequest">OpenConnectionRequest</a> 的响应。客户端应在后续调用中使用的连接的 ID 由客户端在请求中提供。
 
-{% highlight protobuf %}
+```protobuf
 message OpenConnectionResponse {
   RpcMetadata metadata = 1;
 }
 
-{% endhighlight %}
+```
 
 `metadata` <a href="#rpcmetadata">服务器元数据</a>关于此调用的信息。
 
@@ -678,12 +678,12 @@ message OpenConnectionResponse {
 
 对 <a href="#preparerequest">PrepareRequest</a> 的响应。此响应包含一个 <a href="#statementhandle">StatementHandle</a>，客户端必须使用它来从语句中获取结果。
 
-{% highlight protobuf %}
+```protobuf
 message PrepareResponse {
   StatementHandle statement = 1;
   RpcMetadata metadata = 2;
 }
-{% endhighlight %}
+```
 
 `statement` 一个 <a href="#statementhandle">StatementHandle</a> 对象。
 
@@ -693,7 +693,7 @@ message PrepareResponse {
 
 包含查询结果和类型详细信息的响应。
 
-{% highlight protobuf %}
+```protobuf
 message ResultSetResponse {
   string connection_id = 1;
   uint32 statement_id = 2;
@@ -703,7 +703,7 @@ message ResultSetResponse {
   uint64 update_count = 6;
   RpcMetadata metadata = 7;
 }
-{% endhighlight %}
+```
 
 `connection_id` 用于生成此响应的连接的标识符。
 
@@ -723,11 +723,11 @@ message ResultSetResponse {
 
 对 <a href="#rollbackrequest">RollBackRequest</a> 的响应。
 
-{% highlight protobuf %}
+```protobuf
 message RollbackResponse {
 
 }
-{% endhighlight %}
+```
 
 此响应没有属性。
 
@@ -735,13 +735,13 @@ message RollbackResponse {
 
 对 <a href="#syncresultsrequest">SyncResultsRequest</a> 的响应。当 `moreResults` 为 true 时，应该发出 <a href="#fetchrequest">FetchRequest</a> 以获取下一批记录。当 `missingStatement` 为 true 时，必须使用 <a href="#preparerequest">PrepareRequest</a> 或适当的 DDL 请求（例如 <a href="#catalogsrequest">CatalogsRequest</a> 或 <a href="#schemasrequest">SchemasRequest</a>）重新创建语句。
 
-{% highlight protobuf %}
+```protobuf
 message SyncResultsResponse {
   bool missing_statement = 1;
   bool more_results = 2;
   RpcMetadata metadata = 3;
 }
-{% endhighlight %}
+```
 
 `more_results` 表示根据请求"同步"的 ResultSet 是否存在结果的布尔值。
 
@@ -755,7 +755,7 @@ message SyncResultsResponse {
 
 此对象描述结果中列的"简单"或标量 JDBC 类型表示。这不包括复杂类型，如数组。
 
-{% highlight protobuf %}
+```protobuf
 message AvaticaParameter {
   bool signed = 1;
   uint32 precision = 2;
@@ -765,7 +765,7 @@ message AvaticaParameter {
   string class_name = 6;
   string name = 7;
 }
-{% endhighlight %}
+```
 
 `signed` 一个布尔值，表示列是否为有符号数值。
 
@@ -785,20 +785,20 @@ message AvaticaParameter {
 
 此枚举描述 Avatica 服务器中错误的各种关注级别。
 
-{% highlight protobuf %}
+```protobuf
 enum Severity {
   UNKNOWN_SEVERITY = 0;
   FATAL_SEVERITY = 1;
   ERROR_SEVERITY = 2;
   WARNING_SEVERITY = 3;
 }
-{% endhighlight %}
+```
 
 ### AvaticaType
 
 此对象描述列的简单或复杂类型。复杂类型将在 `component` 或 `columns` 属性中包含额外信息，描述复杂父类型的嵌套类型。
 
-{% highlight protobuf %}
+```protobuf
 message AvaticaType {
   uint32 id = 1;
   string name = 2;
@@ -806,7 +806,7 @@ message AvaticaType {
   repeated ColumnMetaData columns = 4;
   AvaticaType component = 5;
 }
-{% endhighlight %}
+```
 
 `type` 取值之一：`scalar`、`array`、`struct`。
 
@@ -824,7 +824,7 @@ message AvaticaType {
 
 此对象表示列的 JDBC ResultSetMetaData。
 
-{% highlight protobuf %}
+```protobuf
 message ColumnMetaData {
   uint32 ordinal = 1;
   bool auto_increment = 2;
@@ -847,7 +847,7 @@ message ColumnMetaData {
   string column_class_name = 19;
   AvaticaType type = 20;
 }
-{% endhighlight %}
+```
 
 `ordinal` 位置偏移编号。
 
@@ -897,7 +897,7 @@ message ColumnMetaData {
 
 此对象表示给定 JDBC 连接的属性。
 
-{% highlight protobuf %}
+```protobuf
 message ConnectionProperties {
   bool is_dirty = 1;
   bool auto_commit = 2;
@@ -908,7 +908,7 @@ message ConnectionProperties {
   string catalog = 5;
   string schema = 6;
 }
-{% endhighlight %}
+```
 
 `is_dirty` 表示属性是否已更改的布尔值。此字段不应存在，因为它从未出现，并将在未来的版本中从协议中移除。
 
@@ -936,7 +936,7 @@ message ConnectionProperties {
 
 此对象表示将无类型对象转换为某些结果的必要类型所需的信息。
 
-{% highlight protobuf %}
+```protobuf
 message CursorFactory {
   enum Style {
     OBJECT = 0;
@@ -951,7 +951,7 @@ message CursorFactory {
   string class_name = 2;
   repeated string field_names = 3;
 }
-{% endhighlight %}
+```
 
 `style` 一个字符串，表示包含对象的 <a href="#style">Style</a> 样式。
 
@@ -961,12 +961,12 @@ message CursorFactory {
 
 此对象表示通过 Avatica 服务器的连接公开的数据库属性。
 
-{% highlight protobuf %}
+```protobuf
 message DatabaseProperty {
   string name = 1;
   repeated string functions = 2;
 }
-{% endhighlight %}
+```
 
 `name` 数据库属性的名称。
 
@@ -976,13 +976,13 @@ message DatabaseProperty {
 
 此对象表示一批结果，跟踪结果中的偏移量以及 Avatica 服务器中是否还有更多结果需要获取。
 
-{% highlight protobuf %}
+```protobuf
 message Frame {
   uint64 offset = 1;
   bool done = 2;
   repeated Row rows = 3;
 }
-{% endhighlight %}
+```
 
 `offset` 这些 `rows` 在包含结果集中的起始位置。
 
@@ -994,24 +994,24 @@ message Frame {
 
 此对象表示关系数据库表中的一行。
 
-{% highlight protobuf %}
+```protobuf
 message Row {
   repeated ColumnValue value = 1;
 }
-{% endhighlight %}
+```
 
 `value` <a href="#columnvalue">ColumnValue</a> 的集合，行中的列。
 
 ### ColumnValue
 
-{% highlight protobuf %}
+```protobuf
 message ColumnValue {
   repeated TypedValue value = 1; // Deprecated!
   repeated ColumnValue array_value = 2;
   boolean has_array_value = 3;
   TypedValue scalar_value = 4;
 }
-{% endhighlight %}
+```
 
 `value` Calcite-1.6 之前序列化 <a href="#typedvalue">TypedValue</a> 的方式。不再使用。
 
@@ -1025,7 +1025,7 @@ message ColumnValue {
 
 此对象表示在 Avatica 服务器中创建 ResultSet 的方式。ResultSet 可以由用户提供的 SQL 或带有该操作参数的 DatabaseMetaData 操作创建。
 
-{% highlight protobuf %}
+```protobuf
 message QueryState {
   StateType type = 1;
   string sql = 2;
@@ -1035,7 +1035,7 @@ message QueryState {
   bool has_sql = 6;
   bool has_op = 7;
 }
-{% endhighlight %}
+```
 
 `type` 一个 <a href="#statetype">StateType</a> 对象，表示支持此查询的 ResultSet 的操作类型。
 
@@ -1055,7 +1055,7 @@ message QueryState {
 
 此枚举表示某个值的具体 Java 类型。
 
-{% highlight protobuf %}
+```protobuf
 enum Rep {
   PRIMITIVE_BOOLEAN = 0;
   PRIMITIVE_BYTE = 1;
@@ -1088,17 +1088,17 @@ enum Rep {
   STRUCT = 28;
   MULTISET = 29;
 }
-{% endhighlight %}
+```
 
 ### RpcMetadata
 
 此对象包含 Avatica 服务器返回的各种每次调用/上下文元数据。
 
-{% highlight protobuf %}
+```protobuf
 message RpcMetadata {
   string server_address = 1;
 }
-{% endhighlight %}
+```
 
 `serverAddress` 创建此对象的服务器的 `host:port`。
 
@@ -1106,7 +1106,7 @@ message RpcMetadata {
 
 此对象表示在 Avatica 服务器中准备语句的结果。
 
-{% highlight protobuf %}
+```protobuf
 message Signature {
   repeated ColumnMetaData columns = 1;
   string sql = 2;
@@ -1114,7 +1114,7 @@ message Signature {
   CursorFactory cursor_factory = 4;
   StatementType statementType = 5;
 }
-{% endhighlight %}
+```
 
 `columns` 表示结果集模式的 <a href="#columnmetadata">ColumnMetaData</a> 对象的数组。
 
@@ -1130,24 +1130,24 @@ message Signature {
 
 此枚举表示是使用用户提供的 SQL 还是 DatabaseMetaData 操作来创建某个 ResultSet。
 
-{% highlight protobuf %}
+```protobuf
 enum StateType {
   SQL = 0;
   METADATA = 1;
 }
-{% endhighlight %}
+```
 
 ### StatementHandle
 
 此对象封装了在 Avatica 服务器中创建的语句的所有信息。
 
-{% highlight protobuf %}
+```protobuf
 message StatementHandle {
   string connection_id = 1;
   uint32 id = 2;
   Signature signature = 3;
 }
-{% endhighlight %}
+```
 
 `connection_id` 此语句所属的连接的标识符。
 
@@ -1159,7 +1159,7 @@ message StatementHandle {
 
 此消息表示语句的类型。
 
-{% highlight protobuf %}
+```protobuf
 enum StatementType {
   SELECT = 0;
   INSERT = 1;
@@ -1174,13 +1174,13 @@ enum StatementType {
   OTHER_DDL = 10;
   CALL = 11;
 }
-{% endhighlight %}
+```
 
 ### Style
 
 此枚举表示值的通用类型"类"。在 <a href="#cursorfactory">CursorFactory</a> 中定义。
 
-{% highlight protobuf %}
+```protobuf
 enum Style {
   OBJECT = 0;
   RECORD = 1;
@@ -1189,13 +1189,13 @@ enum Style {
   LIST = 4;
   MAP = 5;
 }
-{% endhighlight %}
+```
 
 ### TypedValue
 
 此对象封装了行中列的类型和值。
 
-{% highlight protobuf %}
+```protobuf
 message TypedValue {
   Rep type = 1;
   bool bool_value = 2;
@@ -1208,7 +1208,7 @@ message TypedValue {
   Rep component_type = 9;
   bool implicitly_null = 10;
 }
-{% endhighlight %}
+```
 
 `type` 引用哪个属性填充了列值的名称。
 
@@ -1268,11 +1268,11 @@ message TypedValue {
 
 这是一个消息，用作 <a href="#typedvalue">TypedValue</a> 集合的包装器。
 
-{% highlight protobuf %}
+```protobuf
 message UpdateBatch {
   repeated TypedValue parameter_values = 1;
 }
-{% endhighlight %}
+```
 
 `parameter_values` 一个 SQL 命令更新的参数值集合。
 
@@ -1280,12 +1280,12 @@ message UpdateBatch {
 
 此消息包装所有 `Request` 和 `Response`。
 
-{% highlight protobuf %}
+```protobuf
 message WireMessage {
   string name = 1;
   bytes wrapped_message = 2;
 }
-{% endhighlight %}
+```
 
 `name` 包装消息的 Java 类名。
 
