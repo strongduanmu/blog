@@ -280,7 +280,7 @@ openclaw config set channels.feishu.threadSession true
 
 ![定时监控 ShardingSphere Issue 和 PR](openclaw-configuration-and-feishu-integration-guide/analyze-shardingsphere-issue-and-pr.png)
 
-很快「**openClaw 小诸葛**」就反馈已经完成了监控任务的部署，还贴心地问我，要不要立刻进行测试？我们回复继续进行测试，看看内容是否符合预期。如下图所示，返回的动态日报中，对 `Issue` 和 `PR` 进行了统计，还列出了重点待审核的 `PR`，不过很遗憾，没有带上原始链接， 即使笔者想要去 Review，还需要打开浏览器，找到对应的 PR 才行。
+很快「**openClaw 小诸葛**」就反馈已经完成了监控任务的部署，还贴心地问我，要不要立刻进行测试？我们回复继续进行测试，看看内容是否符合预期。如下图所示，返回的动态日报中，对 `Issue` 和 `PR` 进行了统计，还列出了重点待审核的 `PR`，不过很遗憾，没有带上原始链接，即使笔者想要去 Review，还需要打开浏览器，找到对应的 PR 才行。
 
 ![测试定时监控](openclaw-configuration-and-feishu-integration-guide/test-analyze-shardingsphere-issue-and-pr.png)
 
@@ -300,15 +300,17 @@ openclaw config set channels.feishu.threadSession true
 
 ![创建 ShardingSphere 社区监控 Skills](openclaw-configuration-and-feishu-integration-guide/create-openclaw-skills.png)
 
-到这里，我们就完成了 ShardingSphere 社区动态监控功能，感觉是不是很简单，整个过程我们无需编写一行代码，只需要不断地描述你的要求，然后让「**openClaw 小诸葛**」负责去具体实施。在这瞬间，笔者感觉自己 10 多年的开发经验无用武之地，从开发工程师变成了聊天工程师 😂。当然，这也是 `OpenClaw` 这类产品的价值，它能够让更多没有编程背景的人，根据自己的想法、创意，快速地去完成一些工作，甚至是开发出软件产品。
+到这里，我们就完成了 ShardingSphere 社区动态监控功能，感觉是不是很简单，整个过程我们无需编写一行代码，只需要不断地描述你的要求，然后让「**openClaw 小诸葛**」负责去具体实施。
+
+在这瞬间，笔者感觉自己 10 多年的开发经验无用武之地，从开发工程师变成了聊天工程师 😂。当然，这也是 `OpenClaw` 这类产品的价值，它能够让更多没有编程背景的人，根据自己的想法、创意，快速地去完成一些工作，甚至是开发出软件产品。
 
 ## 四、结语
 
-`OpenClaw` 是一个强大且灵活的个人 AI 助手，通过本文的介绍，大家应该了解了 `OpenClaw` 的基础架构和概念，这些能够帮我们更好地理解这个产品内部运行的原理。第二部分，我们详细介绍了 `OpenClaw` 安装和初始化配置的流程，并使用 `Dashboard` 和 `TUI` 进行了初步功能体验，大家可以参考文档进行安装使用。
+`OpenClaw` 是一个强大且灵活的个人 AI 助手，通过本文的介绍，大家应该了解了 `OpenClaw` 的基础架构和概念，这些能够帮我们更好地理解产品内部运行原理。第二部分，我们详细介绍了 `OpenClaw` 安装和初始化配置的流程，并使用 `Dashboard` 和 `TUI` 进行了初步功能体验，大家可以参考文档进行安装使用。
 
 最后一个部分，我们重点介绍了如何将飞书插件集成到 `OpenClaw` 中，并且介绍了飞书插件中比较有特色的一些功能，例如：**1. 一键扫码初始化飞书应用**，**2. 以你的身份创建文档、发送消息，3. 流式输出、多任务并行**等。这些功能在实践中可以让自动化办公，多任务处理更加丝滑，极大地提升我们的工作效率。最后，我们还**成功落地 ShardingSphere 社区动态监控的自动化需求**，整个过程笔者没有编写一行代码，完全由 `OpenClaw` 自动完成。
 
-OpenClaw 的出现，真正降低了 AI 的使用门槛。如果说 `Claude Code`、`Codex` 这样的工具属于程序员，那么 `OpenClaw` 则是真正属于所有人。另外，得益于 `OpenClaw` 的可定制性和扩展性，我们还可以不断扩展使用场景，应用更多的工具，来打造一个真正属于你的 24 小时 AI 助手。如果你有什么想法、创意，但碍于不会编程一直无法实现，那么现在是个好机会，安装 `OpenClaw` 让全世界看到你的产品吧！
+OpenClaw 的出现，真正降低了 AI 的使用门槛。如果说 `Claude Code`、`Codex` 这样的工具属于程序员，那么 `OpenClaw` 则是真正属于所有人。此外，得益于 `OpenClaw` 的可定制性和扩展性，我们还可以不断扩展使用场景，应用更多的工具，来打造一个真正属于你的 24 小时 AI 助手。如果你有什么想法、创意，但碍于不会编程一直无法实现，那么现在是个好机会，安装 `OpenClaw` 让全世界看到你的产品吧！
 
 
 
