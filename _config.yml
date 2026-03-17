@@ -147,6 +147,7 @@ inject:
     - <!-- Chatra {literal} --><script async>(function(d, w, c) {w.ChatraID = 'PHWnu7Bamcwtbnx2d'; var s = d.createElement('script'); w[c] = w[c] || function() {(w[c].q = w[c].q || []).push(arguments);}; s.async = true; s.src = 'https://call.chatra.io/chatra.js'; if (d.head) d.head.appendChild(s);})(document, window, 'Chatra');</script><!-- /Chatra {/literal} -->
     # - <script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
     # - <script defer src="https://busuanzi.strongduanmu.com/js"></script>
+    - <script>(function(){if(document.querySelector('.l_body[layout="post"]')){var el=document.getElementById('post-meta');if(el){var div=document.createElement('div');div.className='flex-row';div.id='post-meta-pv';div.innerHTML='<span class="text created">本文总阅读量 <span id="vercount_value_page_pv"></span> 次</span>';el.parentNode.insertBefore(div,el.nextSibling)}}})();</script>
     - <script defer src="https://cn.vercount.one/js"></script>
     - <link rel="preload" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" as="style" onload="this.onload=null;this.rel='stylesheet'"><noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous"></noscript>
     - <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
@@ -156,7 +157,6 @@ inject:
     - <script>window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };</script>
     - <script defer src="/_vercel/speed-insights/script.js"></script>
     - <script>function change_banner(){$(".banner img.bg").attr("src", "/assets/banner/banner_" + Math.floor((Math.random() * 20 + 1)) + ".jpg")};setTimeout("change_banner()", 250);</script>
-    - <script>function add_page_pv(){$("#post-meta").after('<div class="flex-row" id="post-meta"><span class="text created">本文总阅读量 <span id="vercount_value_page_pv"></span> 次</span></div>')};setTimeout("add_page_pv()", 500);</script>
     - <script>function change_img_alt(){$("article.md-text img:not(.post-cover img):not(.cover img):not(.card-link img):not(.image-bg img):not(.social img):not(.preview img)").each(function(index){$(this).after("<div class='image-meta' style='text-align:center;'><span class='image-caption center' style='display:inline-block;font-size:.8125rem;color:var(--text-p2);line-height:1.5;text-align:justify;'>" + ($(this).attr("title") || $(this).attr("alt")) + "</span></div>")});}setTimeout("change_img_alt()", 1000);</script>
 
 ## Themes: https://hexo.io/themes/
