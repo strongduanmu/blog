@@ -187,6 +187,8 @@ openclaw onboard
 
 ![OpenClaw TUI 聊天](openclaw-configuration-and-feishu-integration-guide/openclaw-tui-chat.png)
 
+{% GoogleAdsense %}
+
 ## OpenClaw 对接飞书实战
 
 前文我们已经完成了 `OpenClaw` 的安装和初始化，并体验了 `Dashboard` 和 `TUI` 2 种交互方式，不过总体上感觉还是不太方便，没有聊天工具交互及时。下面我们来介绍 `OpenClaw` 如何接入飞书，飞书目前应该是国内对 `OpenClaw` 支持最好的 IM 工具，同时集成了飞书文档等众多生产力工具，能够帮我们处理很多日常事项。
