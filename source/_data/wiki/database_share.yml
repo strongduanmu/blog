@@ -1,0 +1,17 @@
+name: Database 分享
+title: Database 技术分享
+subtitle: '数据库技术分享学习笔记'
+tags: Database
+description: Database 相关技术分享的学习笔记和总结，主要来源于各类数据库技术分享视频、官方文档以及个人实践。
+icon: /assets/cover/yugabytedb.png
+cover: /assets/cover/yugabytedb.png
+coverpage: true
+search:
+  filter: /wiki/database_share/
+  placeholder: 在 Database 分享中搜索...
+leftbar:
+  - tree
+base_dir: /wiki/database_share/
+tree:
+  - index
+  - yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner
