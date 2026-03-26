@@ -291,33 +291,48 @@ li>code:not([class]), p>code:not([class]) {
   }
 }
 
-/* 文章底部广告位样式 - 防止移动端图片溢出 */
+/* 文章广告位样式 - 根据广告内容自适应高度 */
 .article-bottom-ad,
-.article-bottom-ad .widget-body {
-  overflow: hidden;
+.article-bottom-ad .widget-body,
+.article-bottom-ad .ad-container,
+.article-inline-ad-wrapper,
+.article-inline-ad-container {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.article-bottom-ad .ad-container,
+.article-inline-ad-container {
+  display: flow-root;
 }
 
 .article-bottom-ad ins,
-.article-bottom-ad iframe,
-.article-bottom-ad img {
+.article-inline-ad-container ins {
+  display: block;
+  width: 100%;
   max-width: 100% !important;
+  margin: 0 auto;
+}
+
+.article-bottom-ad iframe,
+.article-inline-ad-container iframe,
+.article-bottom-ad img,
+.article-inline-ad-container img {
+  display: block;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+.article-bottom-ad img,
+.article-inline-ad-container img {
   height: auto !important;
-  overflow: hidden;
 }
 
 /* 移动端广告位额外限制 */
 @media screen and (max-width: 768px) {
   .article-bottom-ad {
     max-width: 100%;
-    overflow: hidden;
-  }
-
-  .article-bottom-ad ins,
-  .article-bottom-ad iframe,
-  .article-bottom-ad img {
-    max-width: 100% !important;
-    height: auto !important;
-    overflow: hidden;
   }
 }
 
@@ -328,7 +343,6 @@ li>code:not([class]), p>code:not([class]) {
   border-radius: 10px;
   padding: 0.5rem;
   margin: 1.5rem 0;
-  overflow: hidden;
 }
 
 .article-inline-ad-container {
@@ -336,17 +350,12 @@ li>code:not([class]), p>code:not([class]) {
   border-radius: 8px;
   padding: 0.5rem;
   background: var(--card);
-  overflow: hidden;
 }
 
 .article-inline-ad-container ins,
 .article-inline-ad-container iframe,
 .article-inline-ad-container img {
   max-width: 100% !important;
-  height: auto !important;
-  display: block;
-  margin: 0 auto;
-  overflow: hidden;
 }
 
 .article-inline-ad-label {

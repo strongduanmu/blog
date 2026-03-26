@@ -1,7 +1,105 @@
 /**
- * 在文章内容后、评论区前注入 Google AdSense 广告
+ * 在文章内容中同步广告高度，并在评论区前注入 Google AdSense 广告
  */
 (function() {
+  const ARTICLE_AD_SELECTOR = '.article-inline-ad-container, .article-bottom-ad .ad-container';
+
+  function syncAdHeight(container) {
+    if (!container) {
+      return;
+    }
+
+    const adIns = container.querySelector('ins.adsbygoogle');
+    if (!adIns) {
+      return;
+    }
+
+    const iframe = adIns.querySelector('iframe');
+    const iframeHeight = iframe ? Math.ceil(iframe.getBoundingClientRect().height) : 0;
+    const insHeight = Math.ceil(adIns.getBoundingClientRect().height);
+    const measuredHeight = iframeHeight > 0 ? iframeHeight : insHeight;
+
+    if (measuredHeight > 0) {
+      adIns.style.height = measuredHeight + 'px';
+      adIns.style.minHeight = measuredHeight + 'px';
+    } else {
+      adIns.style.removeProperty('height');
+      adIns.style.removeProperty('min-height');
+    }
+  }
+
+  function attachAdaptiveHeight(container) {
+    if (!container || container.dataset.adaptiveHeightReady === 'true') {
+      return;
+    }
+
+    container.dataset.adaptiveHeightReady = 'true';
+
+    const adIns = container.querySelector('ins.adsbygoogle');
+    if (!adIns) {
+      return;
+    }
+
+    const scheduleSync = function() {
+      window.requestAnimationFrame(function() {
+        syncAdHeight(container);
+      });
+    };
+
+    const bindIframeObserver = function() {
+      const iframe = adIns.querySelector('iframe');
+
+      if (!iframe || iframe.dataset.adaptiveHeightReady === 'true') {
+        return;
+      }
+
+      iframe.dataset.adaptiveHeightReady = 'true';
+      iframe.addEventListener('load', scheduleSync);
+
+      if (window.ResizeObserver) {
+        const iframeResizeObserver = new ResizeObserver(scheduleSync);
+        iframeResizeObserver.observe(iframe);
+      }
+
+      scheduleSync();
+    };
+
+    if (window.ResizeObserver) {
+      const resizeObserver = new ResizeObserver(scheduleSync);
+      resizeObserver.observe(container);
+      resizeObserver.observe(adIns);
+    }
+
+    const mutationObserver = new MutationObserver(function() {
+      bindIframeObserver();
+      scheduleSync();
+    });
+
+    mutationObserver.observe(adIns, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'data-ad-status']
+    });
+
+    bindIframeObserver();
+    scheduleSync();
+    setTimeout(scheduleSync, 600);
+    setTimeout(scheduleSync, 1500);
+  }
+
+  function initAdaptiveArticleAds(scope) {
+    const root = scope || document;
+
+    if (root.matches && root.matches(ARTICLE_AD_SELECTOR)) {
+      attachAdaptiveHeight(root);
+    }
+
+    if (root.querySelectorAll) {
+      root.querySelectorAll(ARTICLE_AD_SELECTOR).forEach(attachAdaptiveHeight);
+    }
+  }
+
   // 只在文章页面和 wiki 页面注入广告
   const path = window.location.pathname;
   const isBlogPost = path.includes('/blog/') || path.startsWith('blog/');
@@ -13,6 +111,8 @@
 
   // 等待 DOM 加载完成
   function insertAd() {
+    initAdaptiveArticleAds(document);
+
     // 查找评论区的位置
     const commentsSection = document.querySelector('#comments');
 
@@ -76,6 +176,8 @@
     widgetBody.appendChild(adInnerWrapper);
     widgetBody.appendChild(sponsorLabel);
     adContainer.appendChild(widgetBody);
+
+    initAdaptiveArticleAds(adContainer);
 
     // 在评论区之前插入广告
     commentsSection.parentNode.insertBefore(adContainer, commentsSection);
