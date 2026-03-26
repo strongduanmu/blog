@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展
+description: 本文深入探讨Apache Calcite函数实现原理及UDF扩展方式，介绍ScalarFunction、AggregateFunction、TableFunction等函数类型，帮助开发者灵活注册自定义函数。
 tags: [Calcite]
 categories: [Calcite]
 date: 2024-09-23 08:00:00

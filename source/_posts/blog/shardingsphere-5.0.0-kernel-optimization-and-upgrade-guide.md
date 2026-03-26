@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere 5.0.0 内核优化及升级指南
+description: Apache ShardingSphere 5.0.0 GA 版本内核优化解读，详解可插拔架构、Federation 执行引擎等核心特性，对比 4.1.1 版本差异并提供升级指南。
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2021-11-27 17:18:02

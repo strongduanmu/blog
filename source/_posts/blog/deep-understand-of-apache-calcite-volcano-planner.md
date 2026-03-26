@@ -1,5 +1,6 @@
 ---
 title: 深入理解 Apache Calcite ValcanoPlanner 优化器
+description: 深入剖析 Apache Calcite VolcanoPlanner 基于代价的优化器，详解 Volcano/Cascades 理论基础、核心概念及源码实现细节。
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-12-06 08:17:59

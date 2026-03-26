@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite 在 MyCat2 中的实践探究
+description: 探索 Apache Calcite 在 MyCat2 分布式查询引擎中的实践应用，学习如何基于 Calcite 构建支持跨库跨实例的分布式 SQL 引擎。
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-02-17 08:33:30

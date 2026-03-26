@@ -1,5 +1,6 @@
 ---
 title: 深入理解 Apache Calcite HepPlanner 优化器
+description: 深入剖析 Apache Calcite HepPlanner 启发式优化器的实现原理，包括 HepProgram、HepInstruction 核心概念及 RBO 规则优化机制。
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-11-20 19:32:33

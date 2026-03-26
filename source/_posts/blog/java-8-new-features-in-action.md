@@ -1,5 +1,6 @@
 ---
 title: Java8 新特性实战
+description: Java8 新特性实战教程，详解 Lambda 表达式、Stream API、Optional 和新日期 API 等核心特性，通过代码示例快速掌握函数式编程。
 tags: [Java8]
 categories: [Java]
 date: 2020-01-12 09:00:00

@@ -1,5 +1,6 @@
 ---
 title: 使用 Java 远程调试技术定位系统表加载问题
+description: 使用 Java JDWP 远程调试技术定位 ShardingSphere 打包后系统表加载问题，详解远程调试配置方法，帮助快速排查生产环境中难以复现的 Bug。
 tags: [Java, Remote Debugging]
 categories: [In Action]
 date: 2022-03-30 11:15:27

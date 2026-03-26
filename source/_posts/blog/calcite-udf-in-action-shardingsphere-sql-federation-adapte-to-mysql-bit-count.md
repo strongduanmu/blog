@@ -1,5 +1,6 @@
 ---
 title: Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT
+description: 本文记录ShardingSphere联邦查询升级Calcite至1.38.0版本后BIT_COUNT函数异常问题的排查过程，介绍如何在Calcite中扩展和适配MySQL函数。
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2024-12-13 08:00:00

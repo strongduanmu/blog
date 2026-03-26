@@ -1,5 +1,6 @@
 ---
 title: 关系系统查询优化概述论文学习
+description: 本文翻译自论文 An Overview of Query Optimization in Relational Systems，介绍了自70年代以来查询优化器的研究成果，包括System-R优化框架、执行计划空间、成本估算技术和枚举算法等核心概念。
 tags: [Query Optimization,Paper]
 categories: [Paper]
 date: 2022-01-18 08:39:23

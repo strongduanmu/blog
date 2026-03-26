@@ -1,5 +1,6 @@
 ---
 title: GraalVM 编译动态链接库之 MySQL UDF 实现
+description: 使用 GraalVM 编译动态链接库，结合 @CEntryPoint 注解导出 Java 方法，实现基于 SM4 加解密的 MySQL 用户定义函数。
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-09-07 20:00:00

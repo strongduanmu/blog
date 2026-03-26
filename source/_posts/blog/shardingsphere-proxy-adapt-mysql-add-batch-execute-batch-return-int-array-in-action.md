@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere Proxy 适配 MySQL addBatch/executeBatch 数组结果实战
+description: ShardingSphere Proxy 适配 MySQL JDBC 批量写入功能实战，分析 addBatch/executeBatch 返回值问题，详解 MySQL 协议中批量写入的处理逻辑与适配方案。
 tags: [ShardingSphere, MySQL]
 categories: [ShardingSphere]
 date: 2024-11-22 20:14:04

@@ -1,5 +1,6 @@
 ---
 title: MySQL 5.7.40 安装及初始化配置指南
+description: MySQL 5.7.40 在 CentOS 7 环境下的安装与初始化配置教程，涵盖二进制包下载、解压安装、用户创建、权限配置及服务启动等完整步骤。
 tags: [MySQL]
 categories: [MySQL]
 date: 2022-11-18 09:00:00

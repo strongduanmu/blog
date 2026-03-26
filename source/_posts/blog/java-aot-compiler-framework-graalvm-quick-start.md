@@ -1,5 +1,6 @@
 ---
 title: Java AOT 编译框架 GraalVM 快速入门
+description: GraalVM 快速入门指南，介绍 AOT 提前编译技术原理，讲解如何将 Java 字节码编译为原生可执行文件，解决云原生场景下冷启动和内存开销问题。
 tags: [JVM, GraalVM]
 categories: [GraalVM]
 date: 2024-08-13 08:00:00

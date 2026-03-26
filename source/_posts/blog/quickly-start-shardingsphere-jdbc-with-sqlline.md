@@ -1,5 +1,6 @@
 ---
 title: 基于 SQLLine 快速体验 ShardingSphere JDBC
+description: 使用 SQLLine 命令行工具快速体验 ShardingSphere JDBC 功能，介绍打包部署、连接配置及 SQL 执行等基础操作，轻松上手分布式数据库中间件。
 tags: [SQLLine, ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-8-29 10:55:41

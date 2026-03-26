@@ -1,5 +1,6 @@
 ---
 title: 使用 MySQL Test Framework 测试 ShardingSphere 联邦查询
+description: 使用 MySQL Test Framework 测试框架对 ShardingSphere 联邦查询进行兼容性测试，介绍 MTR 测试工具使用方法及测试用例编写实践。
 tags: [MySQL, ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-10-29 14:20:55

@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere 联邦查询 GROUPING 聚合结果问题分析
+description: 本文记录了ShardingSphere联邦查询中使用GROUPING聚合函数时出现结果异常的问题分析过程，深入探讨GROUPING函数语义及Calcite中的实现原理。
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-11-03 08:52:14

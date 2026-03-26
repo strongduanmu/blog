@@ -1,5 +1,6 @@
 ---
 title: ANTLR 基础入门
+description: ANTLR 基础入门教程，介绍语法分析器生成工具的安装配置、语法定义及实战应用，帮助快速掌握词法分析和语法解析技术。
 tags: [Antlr]
 categories: [Antlr]
 date: 2021-07-31 08:57:21

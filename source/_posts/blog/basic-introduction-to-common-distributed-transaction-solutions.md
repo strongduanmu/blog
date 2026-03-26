@@ -1,5 +1,6 @@
 ---
 title: 初探分布式事务常见方案及实现原理
+description: 本文介绍分布式事务的基本概念和使用场景，详细讲解XA分布式协议的实现原理，包括DTP模型中应用程序、资源管理器和事务管理器的协作机制。
 tags: [Transaction, Distributed Transaction]
 categories: [Transaction]
 date: 2024-04-26 09:26:16

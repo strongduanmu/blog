@@ -1,5 +1,6 @@
 ---
 title: ANTLR 解析性能优化指南
+description: ANTLR 解析器性能优化实用指南，介绍运行时选择、语法优化等技巧，帮助你提升解析器性能并解决性能瓶颈问题。
 tags: [Antlr]
 categories: [Antlr]
 date: 2024-06-26 18:00:00

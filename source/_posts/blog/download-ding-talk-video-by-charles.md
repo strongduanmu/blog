@@ -1,5 +1,6 @@
 ---
 title: Charles 抓包下载钉钉群直播视频
+description: 使用 Charles 抓包获取钉钉群直播视频地址，结合 FFmpeg 工具下载 m3u8 格式视频，实现离线回看技术分享直播。
 date: 2021-06-19 10:46:35
 tags: [Charles, FFmpeg]
 categories: [Tool]

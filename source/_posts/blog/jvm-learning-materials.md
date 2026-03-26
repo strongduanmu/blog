@@ -1,5 +1,6 @@
 ---
 title: JVM 学习资料整理
+description: JVM 虚拟机学习资料汇总，包含经典书籍、字节码技术、内存模型、GC 调优等核心知识点，系统掌握 Java 虚拟机原理与最佳实践。
 tags: [JVM]
 categories: [JVM]
 sticky: 900

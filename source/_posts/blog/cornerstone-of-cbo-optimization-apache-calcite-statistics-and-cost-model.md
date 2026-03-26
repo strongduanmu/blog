@@ -1,5 +1,6 @@
 ---
 title: CBO 优化的基石——Apache Calcite 统计信息和代价模型详解
+description: 深入解析Apache Calcite统计信息和代价模型，介绍基础统计信息、高级统计信息、基数估计等核心概念，帮助理解CBO优化器如何选择最优执行计划。
 tags: [Calcite]
 categories: [Calcite]
 references:

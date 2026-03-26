@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite 学习资料整理
+description: Apache Calcite学习资料汇总整理，包含官方文档、社区资源、源码学习系列文章及项目实战案例，帮助开发者系统学习Calcite SQL解析与优化技术。
 tags: [Calcite, Query Optimization]
 categories: [Calcite]
 sticky: 999

@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere 5.3.1 新特性之动态数据脱敏
+description: Apache ShardingSphere 5.3.1 动态数据脱敏功能介绍，基于可插拔架构实现查询结果实时脱敏，支持 YAML 配置和 DistSQL 动态管理，保障敏感数据安全。
 tags: [ShardingSphere]
 categories: [ShardingSphere]
 date: 2023-01-17 10:27:56

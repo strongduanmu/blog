@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite System Catalog 实现探究
+description: 深入探究 Apache Calcite 系统目录实现，了解 CalciteSchema、Schema、Table 等核心对象在 SQL 校验和优化中的作用。
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-10-30 08:45:38

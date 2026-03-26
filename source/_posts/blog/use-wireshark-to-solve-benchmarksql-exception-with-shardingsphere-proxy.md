@@ -1,5 +1,6 @@
 ---
 title: 使用 Wireshark 解决 BenchmarkSQL 压测 Proxy 异常
+description: 使用 Wireshark 抓包工具分析 BenchmarkSQL 压测 ShardingSphere Proxy 时的 ArrayIndexOutOfBoundsException 异常，详解 MySQL 协议交互与问题定位过程。
 tags: [Wireshark, ShardingSphere, In Action]
 categories: [In Action]
 date: 2023-12-05 11:31:34

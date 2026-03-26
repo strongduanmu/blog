@@ -1,5 +1,6 @@
 ---
 title: PolarDB-X 开发环境搭建笔记
+description: PolarDB-X 云原生分布式数据库开发环境搭建教程，介绍 CN、DN、GMS、CDC 核心组件，详解基于 Docker Compose 的本地环境部署与调试方法。
 tags: [PolarDB-X]
 categories: [PolarDB-X]
 date: 2024-08-28 08:00:00

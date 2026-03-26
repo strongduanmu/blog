@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere Proxy 集成测试代码调试实战
+description: ShardingSphere Proxy 集成测试调试实战，介绍基于 Testcontainers 容器化测试环境搭建，详解 Java 远程调试技术在容器中的应用，高效定位集成测试问题。
 tags: [Java, Remote Debugging, Docker, ShardingSphere]
 categories: [In Action]
 date: 2022-04-22 10:47:24

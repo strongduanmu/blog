@@ -1,5 +1,6 @@
 ---
 title: 使用 SQLancer 测试 ShardingSphere 联邦查询
+description: 使用 SQLancer 自动化测试工具发现 ShardingSphere 联邦查询 SQL 逻辑错误，详解 PQS、NoREC、TLP 测试方法原理，提升 SQL 引擎正确性。
 tags: [SQLancer, ShardingSphere]
 categories: [ShardingSphere]
 date: 2025-12-10 08:24:20

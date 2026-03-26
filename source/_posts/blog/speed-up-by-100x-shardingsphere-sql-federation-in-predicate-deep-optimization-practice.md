@@ -1,5 +1,6 @@
 ---
 title: 百倍提速！ShardingSphere 联邦查询批量 IN 查询深度优化
+description: ShardingSphere 联邦查询 IN 谓词深度优化实践，通过优化 SubQueryRemoveRule 规则和谓词下推，将超长 SQL 查询耗时从 20 分钟缩短至 1 秒，实现百倍性能提升。
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 references:

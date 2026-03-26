@@ -1,5 +1,6 @@
 ---
 title: 以 Calcite 为例探究 Join 算子的常用实现
+description: 以 Apache Calcite 为例深入探究 Join 算子的常用实现方式，分析 Nested Loop Join、Hash Join、Sort Merge Join 等算法原理与适用场景。
 tags: [Calcite]
 categories: [Calcite]
 date: 2025-03-31 08:00:00

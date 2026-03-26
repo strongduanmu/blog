@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite SQL Parser 原理剖析
+description: 深入剖析 Apache Calcite SQL 解析器实现原理，涵盖 JavaCC 语法规范、Parser.jj 解析逻辑及 SqlNode 语法树体系。
 tags: [Calcite, JavaCC]
 categories: [Calcite]
 date: 2023-10-09 08:28:49

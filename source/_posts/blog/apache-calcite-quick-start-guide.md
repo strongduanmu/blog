@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite 快速入门指南
+description: Apache Calcite快速入门教程，介绍Calcite架构设计和核心组件，包括SQL解析、校验、查询优化等功能，并通过CSV案例演示Calcite的基本使用方法。
 tags: [Calcite]
 categories: [Calcite]
 date: 2023-09-24 14:46:43

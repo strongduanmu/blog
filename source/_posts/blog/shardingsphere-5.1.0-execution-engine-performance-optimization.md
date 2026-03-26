@@ -1,5 +1,6 @@
 ---
 title: ShardingSphere 5.1.0 执行引擎性能优化揭秘
+description: Apache ShardingSphere 5.1.0 执行引擎性能优化解析，详解连接模式策略、UNION ALL 改写优化，有效降低数据库连接消耗并提升 OLTP 查询性能。
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2022-03-03 18:18:18

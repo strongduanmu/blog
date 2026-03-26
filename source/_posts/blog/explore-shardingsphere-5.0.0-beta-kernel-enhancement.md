@@ -1,5 +1,6 @@
 ---
 title: 探秘 ShardingSphere 5.0.0 beta 版内核增强
+description: 探秘 Apache ShardingSphere 5.0.0-beta 版内核增强特性，包括 SQL 解析能力增强、路由能力提升及 Federate 分布式查询引擎。
 tags: [ShardingSphere,Kernel]
 categories: [ShardingSphere]
 date: 2021-06-25 15:58:08

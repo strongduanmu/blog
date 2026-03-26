@@ -1,5 +1,6 @@
 ---
 title: 打造 24 小时专属 AI 管家！OpenClaw 基础入门与飞书实战
+description: 本文介绍 OpenClaw 自托管 AI 网关的安装配置与飞书集成实战。从基础架构、安装初始化到飞书插件对接，帮助你打造 24 小时专属 AI 助手，实现自动化办公与社区监控等功能。
 tags: [OpenClaw, AI]
 categories: [AI]
 date: 2026-03-15 8:40:00

@@ -1,5 +1,6 @@
 ---
 title: 无关性的基石之 Java 字节码技术初探
+description: 深入探索 Java 字节码技术，了解 JVM 指令集分类、字节码查看方法及类文件结构，掌握 Java 平台无关性的基石原理。
 tags: [JVM]
 categories: [JVM]
 date: 2024-07-26 07:30:00

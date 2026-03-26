@@ -1,5 +1,6 @@
 ---
 title: MySQL 学习资料整理
+description: MySQL 数据库学习资料汇总，整理官方文档、经典书籍和技术博客，涵盖 InnoDB 存储引擎、高性能优化、事务处理等核心主题。
 tags: [MySQL]
 categories: [MySQL]
 date: 2023-08-11 08:36:28

@@ -1,5 +1,6 @@
 ---
 title: CentOS 开发环境搭建笔记
+description: 使用VirtualBox搭建CentOS开发环境的详细教程，包括虚拟机创建、系统安装、Host-Only和NAT网络配置，实现虚拟机同时连接本机和互联网。
 tags: [Linux, VirtualBox, CentOS]
 categories: [Linux]
 date: 2021-11-07 20:37:44

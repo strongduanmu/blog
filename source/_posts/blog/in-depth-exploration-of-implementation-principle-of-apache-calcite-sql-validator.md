@@ -1,5 +1,6 @@
 ---
 title: 深度探究 Apache Calcite SQL 校验器实现原理
+description: 深入分析 Apache Calcite SQL 校验器的整体设计与实现原理，详解 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 核心类的用途，通过案例展示 SQL 校验流程。
 tags: [Calcite]
 categories: [Calcite]
 references:

@@ -1,5 +1,6 @@
 ---
 title: Apache Calcite Catalog 拾遗之类型系统实现
+description: 本文深入探究Apache Calcite类型系统实现原理，详细介绍SQL校验过程中的类型推导和类型转换机制，包括显式转换和隐式转换的实现方式。
 tags: [Calcite, ShardingSphere]
 categories: [Calcite]
 date: 2025-10-30 08:00:00
