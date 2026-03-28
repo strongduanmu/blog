@@ -61,10 +61,6 @@ static int add(IsolateThread thread, int a, int b) {
 int add(graal_isolatethread_t* thread, int a, int b);
 ```
 
-
-
-{% GoogleAdsense %}
-
 ## MySQL UDF 规范
 
 介绍完 GraalVM 编译动态链接库，我们再来了解下 MySQL UDF 的使用规范。MySQL 8.0 官方文档 [Adding a Loadable Function](https://dev.mysql.com/doc/extending-mysql/8.0/en/adding-loadable-function.html) 详细介绍了如何使用 `C/C++` 编写 MySQL UDF，并将其编译为动态链接库部署到 MySQL `plugin` 目录中，然后通过 `CREATE FUNCTION ... RETURNS ... SONAME 'xxx.so'` 语句创建 UDF 函数。
@@ -487,8 +483,6 @@ mysql> SELECT sm4_decrypt_udf('2e5d924b4e9f26831c5cbcb087bd3439');
 最后一个部分，我们使用 GraalVM 实现了一个基于 SM4 国密算法的加解密 UDF，核心的算法逻辑部分使用 GraalVM 编译，MySQL UDF 部分使用 C 语言实现，并调用 GraalVM 编译的动态链接库，最终我们完美地实现了加密和解密功能。
 
 **GraalVM 为 Java 生态带来了全新的应用场景，如何使用 GraalVM 将 Java 生态连接到原生应用中，这些都需要大家不断地思考和探索，欢迎大家积极留言交流 GraalVM 应用场景**。另外，由于笔者水平有限，本文如有问题，也欢迎留言指正。
-
-
 
 {% quot 欢迎关注 %}
 

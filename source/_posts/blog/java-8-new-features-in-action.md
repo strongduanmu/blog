@@ -307,10 +307,6 @@ Function<String, BigInteger> function = BigInteger::new;
 System.out.println(function.apply("12345678901234567890"));
 ```
 
-
-
-{% GoogleAdsense %}
-
 ## Stream API
 
 ### 什么是 Stream
@@ -930,8 +926,6 @@ try {
 - [Java8 新特性，你应该了解这些](https://juejin.im/post/5ae6bfb66fb9a07a9b35bac1#heading-7)
 - [Guide To Java 8 Optional](https://www.baeldung.com/java-optional)
 - [一文带你玩转 Java8 Stream 流，从此操作集合 So Easy](https://juejin.im/post/5cc124a95188252d891d00f2)
-
-
 
 {% quot 欢迎关注 %}
 

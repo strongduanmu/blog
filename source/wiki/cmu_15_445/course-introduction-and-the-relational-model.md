@@ -33,10 +33,6 @@ banner: /assets/banner/banner_11.jpg
 - Pluggable APIs：可插拔的 API；
 - Currently does not support SQL：目前不支持 SQL。
 
-
-
-{% GoogleAdsense %}
-
 ## 数据库学术研究
 
 - Database Group Meetings：https://db.cs.cmu.edu

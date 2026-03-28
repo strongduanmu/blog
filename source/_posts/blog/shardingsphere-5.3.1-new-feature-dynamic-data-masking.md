@@ -208,10 +208,6 @@ public interface MaskAlgorithm<I, O> {
 
 脱敏算法目前还在不断完善中，更多关于算法参数的说明，请参考[脱敏算法文档](https://shardingsphere.apache.org/document/5.3.1/cn/user-manual/common-config/builtin-algorithm/mask/#哈希脱敏算法)，也欢迎大家积极参与贡献，一起完善脱敏算法。
 
-
-
-{% GoogleAdsense %}
-
 ## 脱敏实战
 
 在最后一个部分，我们通过一个实战来具体了解下数据脱敏功能。通常对于企业内部的敏感数据，我们会选择数据脱敏和数据加密配合使用，Database 层存储数据时采用数据加密进行保护，避免数据丢失造成安全问题。在数据查询阶段，则会根据规则进行数据解密和数据脱敏，避免敏感数据直接展示。因此，本文实战部分选择了数据脱敏和数据加密叠加使用的场景，通过 DistSQL 进行动态更新，向大家展示下数据脱敏功能的实际效果。
@@ -435,8 +431,6 @@ mysql> SELECT * FROM t_user WHERE user_id = 10;
 ## 结语
 
 Apache ShardingSphere 5.3.1 新增的动态数据脱敏功能，是对 ShardingSphere 数据安全方案的进一步补充和完善，未来数据脱敏将会尝试和用户权限、SQL 审计等功能进行结合，根据企业内部的角色划分，进行不同维度的数据脱敏处理。欢迎社区的同学积极参与进来，共同提升 Apache ShardingSphere 的脱敏功能，为社区提供更好的使用体验。
-
-
 
 {% quot 欢迎关注 %}
 

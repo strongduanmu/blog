@@ -106,10 +106,6 @@ sqlline> VALUES CHAR_LENGTH('Hello, ' || 'world!');
 
 Calcite 有许多其他 SQL 特性。我们没有时间在这里介绍它们。你可以再写一些查询来进行实验。
 
-
-
-{% GoogleAdsense %}
-
 ## 模式发现
 
 那么，Calcite 是如何发现这些表的呢？记住，Calcite 内核对 CSV 文件一无所知（作为一个没有存储层的数据库，Calcite 不了解任何文件格式）。Calcite 知道这些表，完全是因为我们告诉它去执行 `calcite-example-csv` 项目中的代码。
@@ -562,8 +558,6 @@ JDBC 适配器将尽可能多的处理下推到源系统，包括转换语法、
 ## 更多主题
 
 还有很多其他方法来扩展 Calcite，但是这些在教程中没有涉及。[适配器规范](/wiki/calcite/adapters.html)描述了所有涉及到的 `API`。
-
-
 
 {% quot 写在最后 %}
 

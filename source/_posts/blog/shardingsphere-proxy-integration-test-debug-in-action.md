@@ -78,10 +78,6 @@ public DataSource getTargetDataSource(final String serverLists) {
 
 ![IDEA Debug 配置](/assets/blog/2022/07/21/1658404492.png)
 
-
-
-{% GoogleAdsense %}
-
 ## 问题解决
 
 我们以下面的查询作为示例，使用远程调试技术来定位下问题，从异常提示来看 `content` 别名的使用方式在 PostgreSQL 下有语法异常，我们将 SQL 拷贝到原生 PostgreSQL 数据库执行，出现了同样的异常提示。
@@ -127,8 +123,6 @@ protected final void assertResultSet(final ResultSet actualResultSet, final Resu
 修改完测试 SQL 后再次测试，集成测试能正常通过，结果如下。这个问题也提醒大家在编写 SQL 测试用例时，需要关注测试用例的有序性，默认的排序规则通常是不稳定的，需要通过显示地声明排序规则来避免意料之外的问题。
 
 ![修复后 E2E 测试](/assets/blog/2022/07/22/1658452827.png)
-
-
 
 {% quot 欢迎关注 %}
 

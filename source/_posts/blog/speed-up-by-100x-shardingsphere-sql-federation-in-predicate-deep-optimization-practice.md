@@ -142,8 +142,6 @@ Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
 
 如上图所示，`IN` 子查询会被改写为 `JOIN` 关联查询。这就是本案例查询慢的根本原因，对于 `IN` 常量集合，无需进行改写，只需要将 `IN` 条件完整地下推到底层数据库，就可以提前过滤掉大部分数据，从而提升查询性能。
 
-{% GoogleAdsense %}
-
 ## 问题解决
 
 研究清楚问题的根本原因后，我们的目标就很明确了——重写 `SubQueryRemoveRule` 规则，`IN` 常量集合子查询不改写为 `JOIN`，保留原始的 `Filter`，并将 `Filter` 下推到 `DBPlusEngineScan` 中。
@@ -205,9 +203,6 @@ Config FILTER = ImmutableSubQueryRemoveRule.Config.builder()
 在优化的过程中，笔者也发现了很多联邦查询引擎和底层 Calcite 框架的不足，对于一些复杂的业务场景，还需要进行扩展和增强，才能完美地适配业务需求。后续规划中，联邦查询引擎将继续加强测试，尤其是结合业务场景和数据进行测试，尽可能多地发现问题，并进行深度优化，保证业务 SQL 准确、高性能地查询出结果。
 
 本文整理的优化方案，对于其他使用 Calcite 框架的项目同样有借鉴意义，大家如有需要，可以参考进行优化。由于笔者水平经验有限，如果文章中有错误或者不足之处，欢迎大家留言指正。
-
-
-
 
 {% quot 写在最后 %}
 

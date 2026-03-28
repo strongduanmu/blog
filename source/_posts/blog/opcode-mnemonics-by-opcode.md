@@ -42,10 +42,6 @@ references:
 | 19               | 0x13               | ldc_w       | 将 int，float 或 String 型常量值从常量池中推至栈顶（宽索引） |
 | 20               | 0x14               | ldc2_w      | 将 long 或 double 型常量值从常量池中推至栈顶（宽索引）       |
 
-
-
-{% GoogleAdsense %}
-
 ## 加载 Loads
 
 | 字节码（十进制） | 字节码（十六进制） | 助记符  | 指令含义                                      |
@@ -279,8 +275,6 @@ references:
 | 202              | 0xca               | breakpoint | 调试断点                       |
 | 254              | 0xfe               | impdep1    | 用于在特定硬件中使用的语言后门 |
 | 255              | 0xff               | impdep2    | 用于在特定硬件中使用的语言后门 |
-
-
 
 {% quot 欢迎关注 %}
 

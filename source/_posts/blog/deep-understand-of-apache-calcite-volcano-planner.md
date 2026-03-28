@@ -77,10 +77,6 @@ Cascades Optimizer 的搜索算法与 Volcano Optimizer 有所不同，Volcano O
 
 Volcano/Cascades Optimzier 都使用了 `Branch-And-Bound` 方法对搜索空间进行剪枝。由于两者都采用了自顶向下的搜索，在搜索的过程中可以为算子设置其 `Cost Upper Bound`，如果在向下搜索的过程中还没有搜索到叶子节点就超过了预设的 Cost Upper Bound，就可以对这个搜索分支预先进行剪枝。
 
-
-
-{% GoogleAdsense %}
-
 ## VolcanoPlanner 基础介绍
 
 前面部分我们介绍了 Volcano/Cascades 优化器的理论基础，想必大家已经对优化器的原理有了一些基础的认识。为了避免陷入代码细节，我们学习 VolcanoPlanner 之前，先来了解下 VolcanoPlanner 中涉及到的核心概念，理解这些概念会让我们阅读源码更加轻松。然后我们会从整体角度，再来学习下 VolcanoPlanner 的处理流程，看看 Calcite 逻辑计划是如何优化并转换为物理执行计划的。
@@ -1164,8 +1160,6 @@ EnumerableFilter(condition=[=($1, 'Alice')])
 然后介绍了 VolcanoPlanner 中的一些基础概念——RelNode、RelSet 和 RelSubset，理解了这些概念对学习 VolcanoPlanner 原理非常有帮助。同时，我们参考了 Julain 分享的 [Cost-based Query Optimization in Apache Phoenix using Apache Calcite](https://calcite.apache.org/community/#cost-based-query-optimization-in-apache-phoenix-using-apache-calcite)，提前了解了 VolcanoPlanner 的处理流程，整体上对优化流程有了一些了解。最后，本文结合一个简单的案例，深入 Calcite 源码细节，带领大家一起探究了整个流程。
 
 限于文章的篇幅以及案例的选择，VolcanoPlanner 优化器的一些细节本文无法全面覆盖，还请各位读者多多包涵。下一篇文章，我们将关注 **VolcanoPlanner 中的统计信息和代价模型，并会通过一个多表关联查询的案例，一起探究下 VolcanoPlanner 优化器是如何使用统计信息和代价模型进行代价计算，在多表关联查询 SQL 中，VolcanoPlanner 又会使用哪些优化方式得到最优执行计划**。欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
-
-
 
 {% quot 写在最后 %}
 

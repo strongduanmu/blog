@@ -175,3 +175,6 @@ hexo_google_adsense:
   log_msg: true
   tag_name: 'GoogleAdsense'
   file_path: 'source/ads/google/article_ads.html'
+  auto_insert:
+    enable: true
+    after_paragraph: 2

@@ -97,10 +97,6 @@ Transaction isolation level TRANSACTION_REPEATABLE_READ is not supported. Defaul
 
 看到这里大家不禁会问，Calcite 是如何基于 CSV 格式的数据存储，来提供完善的 SQL 查询能力呢？下面我们将结合 Calcite 源码，针对一些典型的 SQL 查询语句，初步学习下 Calcite 内部的实现原理。
 
-
-
-{% GoogleAdsense %}
-
 ## Calcite 元数据定义
 
 在 Caclite 集成 CSV 示例中，我们主要关注三个部分：一是 Calcite 元数据的定义，二是优化规则的管理，三是最优计划的执行。这三个部分是 Calcite 执行流程的核心，元数据主要用于对 SqlNode 语法树进行校验，并为 CBO 优化中代价的计算提供统计信息。优化规则被 Calcite 优化器使用，用来对逻辑计划进行改写，并生成最优的执行计划。最终，执行器会基于最优的执行计划，在不同的存储引擎上进行执行。
@@ -551,8 +547,6 @@ public interface Bindable<T> {
 ```
 
 以上就是 Calcite 最优计划执行的大致流程，后面的文章中我将深入分析 Calcite 执行器代码生成的逻辑和 Enumerable 接口的具体实现。此外，我还将和大家一起探究 Presto、Drill、PolarDB-X 等框架的执行引擎逻辑，看看生产级别的执行引擎是如何高效实现的。
-
-
 
 {% quot 写在最后 %}
 

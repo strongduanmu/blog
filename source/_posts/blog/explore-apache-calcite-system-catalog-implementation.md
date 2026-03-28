@@ -33,10 +33,6 @@ topic: calcite
 
 Calcite 作为流行的查询引擎，也提供了系统目录的支持，但是 Calcite 不直接存储系统目录中的元数据信息，用户需要通过 API 将元数据注册到 Calcite 中，才可以使用系统目录提供的能力。下面让我们一起来深入了解下 `Calcite System Catalog` 体系及其内部实现。
 
-
-
-{% GoogleAdsense %}
-
 ## Calcite System Catalog 体系
 
 在 Caclite 中，Catalog 主要用来定义 SQL 查询过程中所需要的`元数据`和`命名空间`，具体实现是抽象类 `CalciteSchema`（如下所示），CalciteSchema 有 `CachingCalciteSchema` 和 `SimpleCalciteSchema` 两个子类，他们的区别主要是是否缓存表、函数和子模式。CalciteSchema 类中包含了 `Schema`、`Table`、`RelDataType`、`Function` 等核心对象，下面我们将针对这些对象进行逐一的介绍，了解他们在 Calcite System Catalog 体系中的具体作用。
@@ -522,8 +518,6 @@ private static SqlValidator createSqlValidator(Context context, CalciteCatalogRe
 本文主要介绍了 System Catalog 的概念和用途，以及 Calcite System Catalog 体系中包含了哪些关键的类，他们各自有什么样的作用。然后我们结合 Calcite CsvTest 中的单测程序，具体了解了 System Catalog 初始化的逻辑。初始化时我们发现 **Calcite 元数据都是通过 CalciteCatalogReader 对外提供访问方法**，并介绍了主要的 `getTable` 和 `lookupOperatorOverloads` 方法，让大家对表和运算符元数据的使用有了一定的了解。
 
 了解了 Caclite System Catalog 后，下一篇文章我们将关注 Calcite SqlValidator 的实现逻辑，**一起探究下 Calcite 校验器具体校验了哪些 SQL 对象，在校验过程中它又进行了哪些处理，这些处理在后续生成关系代数表达式时有什么作用**？欢迎感兴趣的朋友持续关注。
-
-
 
 {% quot 写在最后 %}
 

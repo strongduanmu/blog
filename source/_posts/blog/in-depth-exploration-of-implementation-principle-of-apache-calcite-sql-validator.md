@@ -134,10 +134,6 @@ Calcite 会从查询语句中提取出 4 个命名空间，分别如下所示，
 * `(SELECT expr2 FROM t3) AS q3`：子查询所代表的关系；
 * `(SELECT expr3 FROM t4)`：子查询所代表的关系。
 
-
-
-{% GoogleAdsense %}
-
 ## SQL 校验器执行流程
 
 前文我们对 Caclite 校验器中核心的 SqlValidator、SqlValidatorScope 和 SqlValidatorNamespace 类进行了介绍，想必大家对校验器有了一些基础的认识。本节我们通过如下所示的 `CsvTest#testPushDownProjectAggregateNested` 单测，来跟踪下 SQL 校验器的执行流程，该示例 SQL 中包含了常用的子查询、聚合查询以及 `MAX` 和 `COUNT` 聚合函数，可以帮助大家了解这些核心类在校验流程中是如何使用的。
@@ -778,8 +774,6 @@ private void validateAccess(SqlNode node, @Nullable SqlValidatorTable table, Sql
 本文介绍了 Caclite 校验器的整体设计，带大家一起了解了校验器中核心的 `SqlValidator`、`SqlValidatorScope`、`SqlValidatorNamespace` 类，并通过一个简单的单测，和大家一起跟踪了 SQL 校验器的执行流程，经过校验器处理，Caclite SqlNode 最终包含了展开的全限定名，以及经过解析的函数对象。
 
 SQL 校验的目的是为了将 SqlNode 进行标准化，并分析出 SQL 上下文的语义关系，以方便后续将 SqlNode 对象转换为 RelNode 关系代数对象。下一篇，我们将继续探究 Calcite SqlNode 转换 RelNode 的实现原理，看看 Calcite 如何表示关系代数，以及 SqlNode AST 如何转换为 SqlNode 关系代数？在转换过程中，Calcite 又包含了哪些隐藏的优化方式？欢迎大家持续关注后续文章，如果有感兴趣的问题，也欢迎大家留言交流。
-
-
 
 {% quot 写在最后 %}
 

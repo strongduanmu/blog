@@ -79,7 +79,6 @@ materializations:
 
   - `jdbc` 用于配置 [JDBC 模式](https://strongduanmu.com/wiki/calcite/model.html#jdbc-%E6%A8%A1%E5%BC%8F)。
 
-
 * `path`：可选列表，用于解析此模式中使用函数的 SQL 路径。如果指定，它必须是一个列表，并且列表的每个元素必须是字符串或字符串列表。例如，
 
 **JSON：**
@@ -108,10 +107,6 @@ path:
 然而，这也导致了缓存陈旧的问题。特定模式实现可以重写 `Schema.contentsHaveChangedSince` 方法，来告诉 Calcite 何时应考虑缓存过期。
 
 在模式中显式创建的表、函数、类型和子模式不受此缓存机制的影响。它们总是立即出现在模式中，并且永远不会被刷新。
-
-
-
-{% GoogleAdsense %}
 
 ## Map 模式
 
@@ -286,7 +281,6 @@ columns:
   - `custom` 用于[自定义表](https://strongduanmu.com/wiki/calcite/model.html#%E8%87%AA%E5%AE%9A%E4%B9%89%E8%A1%A8)；
 
   - `view` 用于[视图](https://strongduanmu.com/wiki/calcite/model.html#%E8%A7%86%E5%9B%BE)。
-
 
 * `columns`（[Column](https://strongduanmu.com/wiki/calcite/model.html#%E5%88%97) 元素列表，对于某些类型的表是必需的，对于其他类型的表是可选的，例如 View）。
 
@@ -656,8 +650,6 @@ args: unit_sales
 - 列表：多个参数，每个参数一个列标签。
 
 与点阵维度不同，度量不能以限定格式 `{@code [“table”, “column”]}` 指定。定义晶格时，请确保要用作度量的每一列在晶格内都有唯一的标签（如有必要，请使用 `“{@code AS label}”`），并在想要传递该列时使用该标签作为衡量参数。
-
-
 
 {% quot 写在最后 %}
 

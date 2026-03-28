@@ -34,10 +34,6 @@ banner: /assets/banner/banner_12.jpg
 
 使用 SQLancer 测试工具，可以快速发现 SQL 逻辑问题，帮助提升 SQL 引擎的正确性，下面我们将分别介绍 SQLancer 常用的几种测试方法，看看这些方法是如何检测 SQL 逻辑问题。
 
-
-
-{% GoogleAdsense %}
-
 ## PQS 测试方法
 
 PQS 全称为 `Pivoted Query Synthesis（枢轴查询合成）`，该方法详细的介绍可以参考论文——[Testing Database Engines via
@@ -452,8 +448,6 @@ java -jar sqlancer-*.jar \
 ```
 
 SQLancer 测试工具功能强大，目前已经测试出一批 ShardingSphere 联邦查询不支持的 Case，由于篇幅限制，本文就不一一介绍了，笔者会根据这些异常信息，逐个进行分析和修复，不断提升 ShardingSphere 联邦查询的 SQL 支持度。大家如果有 SQL 引擎的测试需求，不妨也尝试下 SQLancer，相信它一定能够发现更多潜在的问题，帮助大家提升 SQL 引擎的稳定性。由于笔者也是初次探索和使用 SQLancer，如果文章有错误之处，或者其他 SQLancer 使用技巧，欢迎大家留言指导。
-
-
 
 {% quot 欢迎关注 %}
 

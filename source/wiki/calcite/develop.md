@@ -33,10 +33,6 @@ $ ./gradlew build
 
 HOWTO 描述了如何[从源代码发行版进行构建](/wiki/calcite/howto.html#从分发的源代码构建)、[设置用于贡献的 IDE](/wiki/calcite/howto.html#设置-ide-进行贡献)、[运行更多或更少的测试](/wiki/calcite/howto.html#运行测试)以及[运行集成测试](/wiki/calcite/howto.html#运行集成测试)。
 
-
-
-{% GoogleAdsense %}
-
 ## JIRA 帐户
 
 Calcite 使用 [JIRA](https://issues.apache.org/jira/browse/CALCITE) 进行问题/案例管理。你必须拥有 JIRA 帐户才能记录案例和问题。
@@ -263,8 +259,6 @@ Calcite 是一个社区，因此加入该项目的第一步是自我介绍。加
 我们重视所有有助于建立充满活力的社区的贡献，而不仅仅是代码。你可以通过测试代码、帮助验证版本、编写文档、改进网站或仅回答列表中的问题来做出贡献。
 
 在你做出一些有用的贡献后，我们可能会邀请你成为[提交者](https://community.apache.org/contributors/)。
-
-
 
 {% quot 写在最后 %}
 

@@ -195,10 +195,6 @@ sqlline> !tables
 +-------------+-------------------------------+--------------+
 ```
 
-
-
-{% GoogleAdsense %}
-
 ## 统计信息
 
 选择要具体化 Lattice 格的哪些 Tile 块的算法取决于大量统计信息。它需要知道它正在考虑实现的每个列组合 (`a, b, c`) 的 `select count(distinct a, b, c) from star` 。因此，该算法在具有许多行和列的模式上需要很长时间。
@@ -248,8 +244,6 @@ sqlline> !tables
 - Lattice 格建议器根据传入查询添加 Lattice 格，将 Tile 块从现有 Lattice 格转移到新 Lattice 格，并删除不再使用的 Lattice 格；
 - Tile 盖覆表水平拆分，重写算法可以通过将多个 Tile 块拼接在一起，并使用原始数据来填补漏洞来返回查询；
 - 当底层数据发生更改时，用于使 Tile 块或 Tile 块水平分片失效的 API。
-
-
 
 {% quot 写在最后 %}
 

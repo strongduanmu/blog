@@ -42,10 +42,6 @@ banner: /assets/banner/banner_5.jpg
 
 许多项目和产品使用 `Apache Calcite` 进行 `SQL 解析`、`查询优化`、`数据虚拟化/联邦查询`和`物化视图重写`。他们中的一些列在了[由 Calcite 提供支持](https://calcite.apache.org/docs/powered_by.html)页面上。
 
-
-
-{% GoogleAdsense %}
-
 ## 驱动
 
 驱动允许你从应用程序连接到 Calcite。
@@ -378,8 +374,6 @@ Calcite 有一个元数据系统，允许你定义有关关系运算符的代价
 有许多种内置的元数据，包括：[排序规则](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdCollation.html)、 [列来源](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnOrigins.html)、 [列唯一性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdColumnUniqueness.html)、 [唯一行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistinctRowCount.html)、 [分布](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdDistribution.html)、 [执行计划可见性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExplainVisibility.html)、 [表达式血缘](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdExpressionLineage.html)、 [最大行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdMaxRowCount.html)、 [节点类型](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdNodeTypes.html)、 [并行度](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdParallelism.html)、 [原始行百分比](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPercentageOriginalRows.html)、 [总体大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPopulationSize.html)、 [谓词](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdPredicates.html)、 [行数](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdRowCount.html)、 [选择性](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSelectivity.html)、 [大小](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdSize.html)、 [表引用](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdTableReferences.html) 和 [唯一键](https://calcite.apache.org/javadocAggregate/org/apache/calcite/rel/metadata/RelMdUniqueKeys.html)。你也可以定义自己的元数据。
 
 然后，你可以提供一个**元数据提供**程序，为 `RelNode` 的特定子类计算此类元数据。元数据提供程序可以处理内置和扩展元数据类型，以及内置和扩展 `RelNode` 类型。在准备查询时，Calcite 结合了所有适用的元数据提供者并维护一个缓存，以便给定的元数据（例如特定 `Filter` 运算符中条件 `x > 10` 的选择性）仅计算一次。
-
-
 
 {% quot 写在最后 %}
 

@@ -20,10 +20,6 @@ banner: /assets/banner/banner_10.jpg
 
 从结果可以看出，ShardingSphere 加载系统表所使用的配置文件都存在，并未出现配置文件丢失的情况。为了进一步定位打包程序的问题，我们需要使用远程调试技术，了解打包程序内部运行的逻辑。
 
-
-
-{% GoogleAdsense %}
-
 ## 远程调试
 
 Java 远程调试技术主要是基于 `JDWP（Java Debug Wire Protocol）` 协议，而 `JDWP` 协议是 Java 语言中用于调试程序和被调试程序之间进行通信的协议。调试程序和被调试程序可以位于同一台机器上，也可以位于不同的机器上。要使用 JDWP 进行远程调试，首先需要在被调试程序中配置如下参数：
@@ -147,8 +143,6 @@ private static ShardingSphereSchema createSchema(final Collection<InputStream> s
 * [学习 Java 的调试技术](https://www.aneasystone.com/archives/2017/09/java-debugging.html)
 * [Java Application Remote Debugging](https://www.baeldung.com/java-application-remote-debugging)
 * [SpringBoot 打包为 JAR 包后访问不到 Resources 下的文件问题](https://homxuwang.github.io/2019/12/26/SpringBoot%E6%89%93%E5%8C%85%E4%B8%BAJAR%E5%8C%85%E5%90%8E%E8%AE%BF%E9%97%AE%E4%B8%8D%E5%88%B0Resources%E4%B8%8B%E7%9A%84%E6%96%87%E4%BB%B6%E9%97%AE%E9%A2%98/)
-
-
 
 {% quot 欢迎关注 %}
 

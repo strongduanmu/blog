@@ -43,10 +43,6 @@ references:
 
 日志节点提供完全兼容 `MySQL Binlog` 格式和协议的增量订阅能力，提供兼容 `MySQL Replication` 协议的主从复制能力。
 
-
-
-{% GoogleAdsense %}
-
 ## PolarDB-X 开发环境搭建
 
 ### 源码下载编译
@@ -730,15 +726,11 @@ private ResultCursor executeQuery(ByteString sql, ExecutionContext executionCont
 
 最后，以关联查询 SQL 为例，简单探索了下 PolarDB-X 的调用流程，流程中最核心的逻辑是：**执行计划生成（优化器）和执行计划执行（执行器）**。优化器和执行器的实现逻辑非常复杂，本文没有展开介绍，我们会在后续的文章中继续分享，欢迎感兴趣的朋友持续关注。
 
-
-
 {% quot 写在最后 %}
 
 笔者因为工作原因接触到 Calcite，前期学习过程中，深感 Calcite 学习资料之匮乏，因此创建了 [Calcite 从入门到精通知识星球](https://wx.zsxq.com/dweb2/index/group/51128414222814)，希望能够将学习过程中的资料和经验沉淀下来，为更多想要学习 Calcite 的朋友提供一些帮助。
 
 ![Calcite 从入门到精通](/assets/xingqiu/calcite_xingqiu.png)
-
-
 
 {% quot 欢迎关注 %}
 

@@ -112,10 +112,6 @@ Caused by: org.apache.calcite.runtime.CalciteContextException: At line 0, column
 	at org.apache.shardingsphere.driver.jdbc.core.statement.ShardingSpherePreparedStatement.executeQuery(ShardingSpherePreparedStatement.java:180)
 ```
 
-
-
-{% GoogleAdsense %}
-
 ## MySQL BIT_COUNT 调研
 
 初步分析了 ShardingSphere 联邦查询中的 BIT_COUNT 函数异常后，我们再来调研下 MySQL BIT_COUNT 函数，看下该函数的实际作用，以及它支持的参数类型。
@@ -582,8 +578,6 @@ define(BIT_COUNT_MYSQL, new BitCountMySQLImplementor());
 本文介绍了笔者在升级 Calcite 版本过程中，遇到的 `BIT_COUNT` 函数不支持 Case，经过一步步地调研探索，以及与 Calcite 社区大佬交流，最终解决了 MySQL `BIT_COUNT` 函数支持不完善的问题。在探索过程中，加深了笔者对于 Calcite 生成可执行代码的理解，也对 Calcite 时间、日期类型的实现有了更深入的认识。
 
 笔者本地打包 `Calcite 1.39.0-SNAPSHOT`，使用 ShardingSphere 联邦查询 E2E 重新进行了测试，之前不支持的 Boolean，字符串以及日期、时间等类型都可以正确执行，目前还遗留了一个 `MySQL UNSIGNED` 类型不支持问题，笔者将继续探索 Calcite 支持 `UNSIGNED` 类型的方案，争取让 ShardingSphere 联邦查询更完美地适配各种数据类型，欢迎大家持续关注。
-
-
 
 {% quot 写在最后 %}
 

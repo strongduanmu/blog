@@ -136,10 +136,6 @@ DBPlusEngineHashAggregateExecutor: LTB-2023-001, CN1, SPDT001, PS001, Marketing 
 
 `MAX` 函数没什么特别，`GROUPING` 具体是用来做什么的呢？从网上查阅了一些资料，`GROUPING` 函数是用于在 `GROUPING SETS` 多维度分组中标识哪些列被聚合（即不在当前分组中），`GROUPING` 函数返回一个位掩码，其中每位对应了一个分组列，若该列被聚合（即不在当前分组中），则位值为 1，否则为 0。按照 `GROUPING` 函数的定义，当前分组为 `group=[{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}]`，所有列都在分组中，应当全部为 0，而数据行中返回的则是 1023，显然是 `GROUPING` 函数的计算逻辑出错了。
 
-
-
-{% GoogleAdsense %}
-
 ## 问题解决
 
 搞清楚问题后，我们尝试修改 `GroupingAggregateFunctionEvaluator` 计算逻辑，如下图所示，左侧逻辑是之前参考 Calcite 内置的 `GroupingImplementor` 执行逻辑实现的，该逻辑似乎和 `GROUPING` 函数的语义相反，如果当前列不被聚合（即在当前分组中），则位值为 1，否则为 0。我们暂且先不深究 Calcite 的实现逻辑，按照 `GROUPING` 函数语义，笔者对函数逻辑进行了修改，严格按照函数语义实现，只有当该列被聚合（即不在当前分组中），才将当前位赋值为 1。
@@ -234,8 +230,6 @@ EnumerableSort(sort0=[$2], sort1=[$3], sort2=[$4], sort3=[$5], sort4=[$6], sort5
 本文结合真实的客户案例，为大家详细介绍了联邦查询中 `GROUPING` 函数的问题，笔者从问题复现开始，一步步深入探究问题的根本原因，最终通过对 Calcite 生成代码的深入分析，正确理解了 `GROUPING` 函数的语义和执行逻辑，从而完善了联邦查询功能对 `GROUPING` 函数的支持。未来，在 `GROUPING` 函数的基础上，联邦查询引擎还可以进一步支持 `GROUP BY WITH ROLLUP` 等高级 SQL 用法。
 
 另外，通过这个问题的调查，笔者再次感受到了 SQL 引擎开发的难度，开发者需要**对 SQL 执行的每个细节都深入分析，做到刨根问底，一丝不苟，不能留有任何的疑问**。除了开发者主观上的重视外，还需要引入更多的测试工具，对 SQL 语义进行持续测试，在 SQL 引擎测试领域，SQLacner 是一个不错的工具，笔者后续将探索使用 SQLacner 测试 ShardingSphere 联邦查询，不断提升联邦查询的 SQL 兼容度。
-
-
 
 {% quot 写在最后 %}
 

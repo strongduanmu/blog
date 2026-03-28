@@ -336,10 +336,6 @@ public static int calculateHandshakeCapabilityFlagsUpper() {
 
 修改完成后，再次使用 Demo 程序测试，发现已经能够返回正确的结果，通过 JDBC 可以正常执行 `addBatch/executeBatch` 并返回 `int[]` 数组。
 
-
-
-{% GoogleAdsense %}
-
 ## 功能测试
 
 最后，我们使用全局索引功能 E2E 再次进行测试，原先断言失败的 Case 现在终于可以通过，大家终于可以放心使用商业版全局索引功能。在此，也真心向大家推荐 SphereEx 的 DBPlusEngine，相比开源的 ShardingSphere，它具有更完善的企业级功能，不仅能够进行海量数据的分片管理，还可以用于数据安全加密和数据库替换等场景，更多信息可以查看 [SphereEx 官网](https://www.sphere-ex.cn/)。
@@ -349,8 +345,6 @@ public static int calculateHandshakeCapabilityFlagsUpper() {
 ## 结语
 
 本文介绍了 E2E 测试 Proxy 发现批量写入返回结果错误后，如何一步步梳理 Proxy 代码，使用 Wireshark 抓包对比分析，以及排查 MySQL 驱动源码，最终完美解决了问题。提升 Proxy 对 MySQL 协议的兼容度，很直接的方法就是同测试用例比对，通过强大的 Wireshark 工具，我们可以很清晰地观测到请求过程中的差异，进而快速找到解决问题的方案。本案例的排查思路也适合其他 Proxy 接入端的问题，希望对大家有用，由于本人对 Wireshark 使用经验有限，如果问题也欢迎指正。
-
-
 
 {% quot 欢迎关注 %}
 

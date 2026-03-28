@@ -188,8 +188,6 @@ openclaw onboard
 
 ![OpenClaw TUI 聊天](openclaw-configuration-and-feishu-integration-guide/openclaw-tui-chat.png)
 
-{% GoogleAdsense %}
-
 ## OpenClaw 对接飞书实战
 
 前文我们已经完成了 `OpenClaw` 的安装和初始化，并体验了 `Dashboard` 和 `TUI` 2 种交互方式，不过总体上感觉还是不太方便，没有聊天工具交互及时。下面我们来介绍 `OpenClaw` 如何接入飞书，飞书目前应该是国内对 `OpenClaw` 支持最好的 IM 工具，同时集成了飞书文档等众多生产力工具，能够帮我们处理很多日常事项。
@@ -314,8 +312,6 @@ openclaw config set channels.feishu.threadSession true
 最后一个部分，我们重点介绍了如何将飞书插件集成到 `OpenClaw` 中，并且介绍了飞书插件中比较有特色的一些功能，例如：**1. 一键扫码初始化飞书应用**，**2. 以你的身份创建文档、发送消息，3. 流式输出、多任务并行**等。这些功能在实践中可以让自动化办公，多任务处理更加丝滑，极大地提升我们的工作效率。最后，我们还**成功落地 ShardingSphere 社区动态监控的自动化需求**，整个过程笔者没有编写一行代码，完全由 `OpenClaw` 自动完成。
 
 OpenClaw 的出现，真正降低了 AI 的使用门槛。如果说 `Claude Code`、`Codex` 这样的工具属于程序员，那么 `OpenClaw` 则是真正属于所有人。此外，得益于 `OpenClaw` 的可定制性和扩展性，我们还可以不断扩展使用场景，应用更多的工具，来打造一个真正属于你的 24 小时 AI 助手。如果你有什么想法、创意，但碍于不会编程一直无法实现，那么现在是个好机会，安装 `OpenClaw` 让全世界看到你的产品吧！
-
-
 
 {% quot 欢迎关注 %}
 
