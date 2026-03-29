@@ -15,3 +15,4 @@ base_dir: /wiki/database_share/
 tree:
   - index
   - yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner
+  - yugabytedb-modern-distributed-postgresql-architecture-and-evolution
