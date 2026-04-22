@@ -14,3 +14,21 @@ leftbar:
 base_dir: /wiki/jdbc/
 tree:
   - preface
+  - introduction
+  - goals
+  - summary-of-new-features
+  - overview
+  - classes-and-interfaces
+  - compliance
+  - database-metadata
+  - exceptions
+  - connections
+  - transactions
+  - connection-pooling
+  - distributed-transactions
+  - statements
+  - batch-updates
+  - result-sets
+  - advanced-data-types
+  - customized-type-mapping
+  - relationship-to-connectors
