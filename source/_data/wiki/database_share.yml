@@ -14,5 +14,6 @@ leftbar:
 base_dir: /wiki/database_share/
 tree:
   - index
+  - calcite-beyond-sql-query-optimization-to-data-optimization
   - yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner
   - yugabytedb-modern-distributed-postgresql-architecture-and-evolution

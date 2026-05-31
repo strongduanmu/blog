@@ -9,6 +9,10 @@ banner: /assets/banner/banner_3.jpg
 
 Database 相关技术分享的学习笔记和总结，主要来源于各类数据库技术分享视频、官方文档以及个人实践。
 
+## Calcite
+
+- [Calcite：跳出SQL查询优化，转向数据优化](/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html)
+
 ## YugabyteDB
 
 - [YugabyteDB：集 Aurora 与 Spanner 之长，打造新一代分布式 SQL](/wiki/database_share/yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner.html)
