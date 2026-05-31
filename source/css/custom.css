@@ -336,6 +336,18 @@ li>code:not([class]), p>code:not([class]) {
   }
 }
 
+/* Mermaid 图表居中显示 */
+.md-text .mermaid {
+  display: flex;
+  justify-content: center;
+  margin: 1.5rem 0;
+}
+
+.md-text .mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
 /* 文章中间广告位样式 - 参考底部广告位 */
 .article-inline-ad-wrapper {
   position: relative;

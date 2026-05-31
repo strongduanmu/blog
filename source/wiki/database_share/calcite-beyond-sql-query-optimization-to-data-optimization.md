@@ -1,3 +1,12 @@
+---
+layout: wiki
+wiki: database_share
+title: Calcite：跳出 SQL 查询优化，转向数据优化
+date: 2026-05-31 10:00:00
+mermaid: true
+banner: /assets/banner/banner_7.jpg
+---
+
 # Calcite：跳出 SQL 查询优化，转向数据优化
 
 ## 引言：从查询微调到数据架构的演进
@@ -38,11 +47,11 @@
 
 ```mermaid
 flowchart LR
-    A[原始明细表<br/>100 GB] --> B[全表扫描]
+    A[原始明细表<br>100 GB] --> B[全表扫描]
     B --> C[运行时聚合]
     C --> D[返回结果]
     A --> E[后台预计算]
-    E --> F[物化视图<br/>8 Bytes 或小型汇总]
+    E --> F[物化视图<br>8 Bytes 或小型汇总]
     F --> G[查询重写]
     G --> D
 ```
@@ -171,11 +180,11 @@ SELECT DISTINCT deptno FROM Emp WHERE deptno BETWEEN 20 AND 40;
 
 ```mermaid
 flowchart TD
-    Q[查询历史] --> P[数据画像<br/>基数与依赖关系]
-    P --> L[Lattice Suggester<br/>推断连接路径]
-    L --> T[Tile 推荐<br/>选择高收益汇总]
-    T --> M[Materialize<br/>创建 / 刷新 / 淘汰]
-    M --> R[Query Rewrite<br/>透明命中物化视图]
+    Q[查询历史] --> P[数据画像<br>基数与依赖关系]
+    P --> L[Lattice Suggester<br>推断连接路径]
+    L --> T[Tile 推荐<br>选择高收益汇总]
+    T --> M[Materialize<br>创建 / 刷新 / 淘汰]
+    M --> R[Query Rewrite<br>透明命中物化视图]
     R --> Q
 ```
 
