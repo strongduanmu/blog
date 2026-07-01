@@ -12,6 +12,7 @@ Database 相关技术分享的学习笔记和总结，主要来源于各类数�
 ## Calcite
 
 - [Calcite：跳出SQL查询优化，转向数据优化](/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html)
+- [Calcite：战术数据工程：数据优先理念的工程落地](/wiki/database_share/calcite-tactical-data-engineering-data-first-engineering-implementation.html)
 
 ## YugabyteDB
 

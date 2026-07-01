@@ -15,3 +15,25 @@ base_dir: /wiki/cmu_15_799/
 tree:
   - index
   - intro_to_query_optimization
+  - ibm_system_r
+  - ibm_starburst
+  - volcano
+  - cascades
+  - transformations
+  - join_ordering_bottom_up
+  - join_ordering_top_down
+  - parallelization_bottom_up
+  - parallelization_top_down
+  - unnesting_queries
+  - cost_models_statistics
+  - cost_models_cardinality_estimation
+  - cost_models_more_cardinality_estimation
+  - cost_models_learned_approaches
+  - parametric_query_optimization
+  - adaptivity_feedback
+  - adaptivity_runtime_processing
+  - user_defined_function_optimizations
+  - implementation_apache_calcite
+  - implementation_orca
+  - implementation_mongodb
+  - implementation_microsoft_fabric
