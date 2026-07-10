@@ -12,6 +12,8 @@ banner: /assets/banner/banner_2.jpg
 <div class="bilibili-video" style="position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 1rem 0;">
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836364458518&bvid=BV1QwKo6fEgx&cid=39519454871&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
+
+
 ## 课程目标
 
 `15-799` 课程主要介绍数据库查询优化器的**现代实践**，以及查询优化器相关的**系统编程**。通过课程的学习，可以掌握如下 3 部分内容：
@@ -25,7 +27,7 @@ banner: /assets/banner/banner_2.jpg
 本课程包含了如下 2 个实战项目，项目 1 需要独立完成，项目 2 则需要团队合作：
 
 * [Project #1 - Query Optimizer Evaluation](https://15799.courses.cs.cmu.edu/spring2025/project1.html)：动手体验流行的查询优化器，项目中你将使用 Apache Calcite 来优化 SQL 查询，然后在 Calcite（通过枚举适配器）和 DuckDB 上执行 SQL 查询；
-* [Project #2 - Final Project](https://15799.courses.cs.cmu.edu/spring2025/project2.html)：根据示例项目，选择一个能够团队参与的项目。
+* [Project #2 - Final Project](https://15799.courses.cs.cmu.edu/spring2025/project2.html)：根据示例项目，选择一个能够团队参与的项目，自行设计和完成项目。
 
 ## 诞生的背景
 
@@ -128,6 +130,8 @@ WHERE D.dname = 'Toy'
 
 ### 自上而下 VS 自下而上
 
+![TopDown VS BottomUp](/wiki/cmu_15_799/intro_to_query_optimization/top-down-vs-bottom-up.png)
+
 **自上而下优化：**
 
 * 从查询所需的结果开始，然后沿着树向下查找能够实现该目标的最佳计划；
@@ -138,10 +142,48 @@ WHERE D.dname = 'Toy'
 * 从零开始，然后制定计划，以实现你想要的结果。自下而上优化是边进行，边构建所需的运算符；
 * 例如：`System R`、`Starburst`。
 
+### 优化对象
+
+数据库优化器在优化一条查询时，优化的目标很多，主要如下：
+
+* 降低 SQL 响应时长；
+* 降低资源消耗；
+* 降低硬件成本；
+* 提升吞吐量；
+
+数据库管理系统使用代价模型（**Cost Model**）来预测执行计划在数据库中的表现，注意：**代价（Cost）是数据库内部的值，用来比较不同执行计划的优劣**，我们不能拿 Cost 值去和其他系统的 Cost 值去进行对比，也不能拿 Cost 值和 SQL 中的数值进行对比，它们可能完全不同。一些数据库管理系统，会记录最优执行计划，和次优执行计划，然后内部执行进行对比验证，用来检查执行计划是否准确可靠。
+
+### 优化粒度
+
+优化粒度是**指查询优化器做优化时，以多大的范围作为优化单元**。
+
+* **单查询优化**（主流传统数据库 MySQL、PostgreSQL、Oracle，这些都默认采用了单查询优化，每条 SQL 单独解析、单独生成执行计划，互相隔离，互不感知）：
+  * 搜索空间小得多；
+  * 数据库管理系统通常无法跨查询复用计算结果；
+  * 若要考量资源争抢，代价模型必须感知当前正在执行的任务；
+* **多查询联合优化**（多查询联合优化，会一次性接收一批查询，全局统筹规划执行，提取公共表扫描、公共子表达式、中间结果缓存复用，目前还仅限于研究，没有大规模使用）：
+  * 存在大量相似查询时，优化效率更高；
+  * 整体搜索空间会大幅膨胀；
+  * 支持数据、中间计算结果复用共享；
+
+### 结语
+
+查询优化实现难度极高，是数据库管理系统中最难完善实现的模块（该问题已被证明属于 NP 完全问题）。同一条查询会存在多种备选执行计划，各计划的运行时性能表现差异极大。
+
+> NP-Complete：NP 完全问题，属于计算复杂性理论，不存在多项式时间的最优求解算法。
+
+没有任何一款优化器能真正生成理论上的`最优`执行计划。依靠统计估算手段预测各执行计划的实际开销。
+
+- 对应技术：基数估算、统计信息采样、选择性预估等，估算值和真实数据存在偏差。
+
+采用启发式规则缩小计划搜索空间。
+
+- 对应技术：连接顺序剪枝、谓词下推、限制连接表数量等，牺牲全局最优换取优化速度。
+
 ## 参考资料
 
 * [EQOP Book ](https://www.microsoft.com/en-us/research/publication/extensible-query-optimizers-in-practice/) (Chapter 1)
-* [An Overview of Query Optimization in Relational Systems](https://15799.courses.cs.cmu.edu/spring2025/papers/01-background/chaudhuri-pods1998.pdf) (S. Chaudhuri, PODS 1998) *(Optional)*
+* [An Overview of Query Optimization in Relational Systems](https://15799.courses.cs.cmu.edu/spring2025/papers/01-background/chaudhuri-pods1998.pdf) (S. Chaudhuri, PODS 1998) (Optional)
 
 * [课程 Slides](https://15799.courses.cs.cmu.edu/spring2025/slides/01-background.pdf)
 * [课程 Video](https://www.youtube.com/watch?v=YWtH10gfcY0&list=PLSE8ODhjZXjYCZfIbmEWH7f6MnYqyPwCE&index=1)
