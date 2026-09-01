@@ -13,27 +13,16 @@ banner: /assets/banner/banner_3.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836381234765&bvid=BV1XcKo68Egm&cid=39519522023&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：02 - Lecture 02 - IBM System R](https://www.bilibili.com/video/BV1XcKo68Egm)
 
-## 学习重点
+## 背景
 
-本讲对应官网 Lecture #02：IBM System R。学习时重点关注：
+![关系模型的开端](/wiki/cmu_15_799/ibm_system_r/dawn-of-relational-model.png)
 
-- System R 如何把访问路径选择建模为基于代价的搜索问题。
-- 动态规划如何枚举 Join 顺序，并利用 interesting orders 保留后续可能有价值的排序结果。
-- 选择率、基数估计和代价模型如何共同影响最终物理计划。
+在关系模型出现以前的 20 世纪 60 时代，早期的 `DBMS` 要求开发者编写如上图所示的存储过程，来实现各种查询需求。开发者需要基于当前的数据内容，自己选择数据访问路径，以及执行的顺序，当 `DBMS` 发生变化时，这些存储过程代码必须重写，开发成本巨大。
 
-## 核心问题
+![关系模型](/wiki/cmu_15_799/ibm_system_r/relational-model.png)
 
-- 这个主题解决了查询优化器中的哪一类搜索、估计或工程实现问题？
-- 它依赖哪些输入信息，例如统计信息、代价模型、物理属性或历史反馈？
-- 它如何影响最终生成的物理执行计划，以及失败时会造成什么性能问题？
-
-## 学习记录
-
-- [ ] 看完课程视频或完成对应阅读。
-- [ ] 整理本讲涉及的关键算法、数据结构和系统实现。
-- [ ] 记录和现有数据库系统相关的实现例子。
+基于这样的背景，关系模型应运而生。关系模型具有 3 个原则：1. 数据物理层和逻辑层之间的独立性；2. 完整性约束，确保用户不会插入错误数据，或者破坏数据；3. 声明式数据操作，即 SQL 语言，以便更好地查询数据。
 
 ## 参考资料
 
