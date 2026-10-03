@@ -7,9 +7,7 @@ date: 2026-09-10 08:00:00
 banner: /assets/banner/banner_1.jpg
 ---
 
-`CMU 11-768: AI Agents` 是卡内基梅隆大学语言技术研究所 2026 年秋季开设的研究生课程，由 [Graham Neubig](https://www.phontron.com/) 与 [Daniel Fried](https://dpfried.github.io/) 联合授课。课程把 LLM 智能体视为一个需要构建、评测、训练和保障安全的完整系统，兼顾理论、工程实践与开放研究。
-
-这套笔记按官网课表建立初始结构。课程资料仍在学期中持续更新，讲义、视频和作业状态以官网为准。
+`CMU 11-768: AI Agents` 是卡内基梅隆大学，语言技术研究所 2026 年秋季开设的研究生课程，由 [Graham Neubig](https://www.phontron.com/) 与 [Daniel Fried](https://dpfried.github.io/) 联合授课。课程把 LLM 智能体视为一个需要构建、评测、训练和保障安全的完整系统，兼顾理论、工程实践与开放研究。适合对 AI Agents 感兴趣的朋友学习，课程笔记如有错误，欢迎大家留言指正。
 
 ## 官方资料
 
@@ -22,11 +20,11 @@ banner: /assets/banner/banner_1.jpg
 
 ## 网络资料
 
-- [CMU AI Agents 2026 B 站收藏夹](https://space.bilibili.com/103778182/favlist?fid=4033440582&ftype=create)
+- [CMU AI Agents 2026 中英字幕](https://space.bilibili.com/103778182/favlist?fid=4033440582&ftype=create)
 
 ## 参考导读
 
-- [meng shao：CMU 秋季新课 AI Agents](https://x.com/shao__meng/status/2097496946877636655)
+- [CMU 秋季新课 AI Agents 概览](https://x.com/shao__meng/status/2097496946877636655)
 
 ## 学习路线
 

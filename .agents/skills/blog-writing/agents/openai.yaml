@@ -1,0 +1,4 @@
+interface:
+  display_name: "端小强的博客写作"
+  short_description: "结合本仓库文章风格，按题材撰写、改写技术博客与课程笔记，保留各篇文章的叙事节奏"
+  default_prompt: "使用 $blog-writing，参考仓库中同类型文章的叙事方式，撰写或润色当前文档。"

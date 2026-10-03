@@ -13,38 +13,31 @@ leftbar:
   - tree
 base_dir: /wiki/cmu_11_768/
 tree:
-  课程资料:
-    - index
-  智能体能力:
-    - course_overview_what_is_an_agent
-    - tool_use
-    - context_management_for_long_context_agents
-    - skills_and_memory
-    - planning_task_decomposition_and_multi_agent_coordination
-  应用领域:
-    - coding_agents
-    - gui_agents
-    - deep_research_agents
-  训练方法:
-    - supervised_fine_tuning
-    - reinforcement_learning_basics
-    - advanced_reinforcement_learning_algorithms
-    - reinforcement_learning_systems
-  安全与框架:
-    - sandboxing_and_credential_management
-    - openhands
-    - langgraph
-    - observability_and_monitoring
-  交互、搜索与进阶:
-    - agents_and_the_future_of_work
-    - multi_agent_interaction
-    - human_agent_interaction
-    - reranking_and_critic_models
-    - tree_search
-    - guest_lecture_karthik_narasimhan
-    - guest_lecture_sasha_rush
-  实践项目:
-    - assignment_1_harness
-    - assignment_2_eval
-    - assignment_3_training
-    - research_project
+  - index
+  - course_overview_what_is_an_agent
+  - tool_use
+  - context_management_for_long_context_agents
+  - skills_and_memory
+  - planning_task_decomposition_and_multi_agent_coordination
+  - coding_agents
+  - gui_agents
+  - supervised_fine_tuning
+  - reinforcement_learning_basics
+  - deep_research_agents
+  - advanced_reinforcement_learning_algorithms
+  - reinforcement_learning_systems
+  - sandboxing_and_credential_management
+  - openhands
+  - langgraph
+  - observability_and_monitoring
+  - agents_and_the_future_of_work
+  - multi_agent_interaction
+  - human_agent_interaction
+  - reranking_and_critic_models
+  - tree_search
+  - guest_lecture_karthik_narasimhan
+  - guest_lecture_sasha_rush
+  - assignment_1_harness
+  - assignment_2_eval
+  - assignment_3_training
+  - research_project
