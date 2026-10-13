@@ -17,7 +17,7 @@ mermaid: true
 
 ## 当前智能体的能力与边界
 
-本讲是 `CMU 11-768: AI Agents` 的第 1 讲，由 Daniel Fried 和 Graham Neubig 于 2026-08-25 授课。Daniel 先介绍智能体的定义、工具接口和执行循环，Graham 接着讨论智能体能力、系统工程及课程安排。下面按原视频的讲授顺序整理，结合[官方 slide](https://www.cmu-agents.com/slides/lecture-01-agents.pdf)补充概念与图示。
+本文是 `CMU 11-768: AI Agents` 的第 1 讲，由 Daniel Fried 和 Graham Neubig 于 2026-08-25 授课。Daniel 首先介绍智能体的定义、工具接口和执行循环，Graham 接着讨论了智能体能力、系统工程及课程安排。本文按照原视频的讲授顺序整理，结合[官方 slide](https://www.cmu-agents.com/slides/lecture-01-agents.pdf) 补充了概念与图示，如有错误，欢迎指正。
 
 ### 能完成复杂任务，也会丢失重要要求
 
@@ -27,17 +27,13 @@ Daniel 开场介绍了一个多智能体编程实验：16 个智能体在两周�
 
 ![OpenClaw 删除邮件的课堂案例](/assets/images/cmu_11_768/lecture_01_03m20s_openclaw_context.png)
 
-*原视频 [03:20](https://www.bilibili.com/video/BV1hQYT64E2e/?t=200)，slide 第 3 页。*
-
 Daniel 推测，这次失控可能与上下文压缩（context compaction）有关：系统为了容纳更多交互，将过去的历史压缩成摘要，却丢失了“删除前需要批准”的要求。这个例子同时引出了课程关心的两个问题：怎样提高智能体的能力，以及怎样让它在长任务中保持约束、可靠地执行操作。
 
 ### 哪些任务适合自主执行
 
-接下来，老师通过六个任务让学生举手选择：完全自主执行（Autonomous）、先询问用户（Ask first），或者交给人来处理（Never）。视频中的 slide 会随讨论结果更新分类。
+接下来，Daniel 通过六个任务让学生举手选择：完全自主执行（`Autonomous`）、先询问用户（`Ask first`），或者交给人来处理（`Never`）。
 
 ![六类任务的自主执行讨论](/assets/images/cmu_11_768/lecture_01_06m50s_autonomy_discussion.png)
-
-*原视频 [06:50](https://www.bilibili.com/video/BV1hQYT64E2e/?t=410)，slide 第 4 页。*
 
 | 任务 | 课堂讨论的大致倾向 |
 | --- | --- |
