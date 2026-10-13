@@ -39,7 +39,7 @@ banner: /assets/banner/banner_1.jpg
 
 | 编号 | 日期 | 课程 | 笔记 | 资料 |
 | --- | --- | --- | --- | --- |
-| 01 | 08-25 | Course Overview: What Is an Agent? | [课程概览：什么是智能体](/wiki/cmu_11_768/course_overview_what_is_an_agent.html) | [Slides](https://www.cmu-agents.com/slides/lecture-01-agents.pdf) · [YouTube](https://www.youtube.com/watch?v=UwfjzyLnvMg) · [B 站](https://www.bilibili.com/video/BV1hQYT64E2e) |
+| 01 | 08-25 | What Are Agents & How Do They Work? | [什么是智能体 & 他们如何工作](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html) | [Slides](https://www.cmu-agents.com/slides/lecture-01-agents.pdf) · [YouTube](https://www.youtube.com/watch?v=UwfjzyLnvMg) · [B 站](https://www.bilibili.com/video/BV1hQYT64E2e) |
 | 02 | 08-27 | Agent Capabilities 1: Tool Use | [工具调用](/wiki/cmu_11_768/tool_use.html) | [Slides](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf) · [YouTube](https://www.youtube.com/watch?v=jXChFB4JSyw) · [B 站](https://www.bilibili.com/video/BV13QYT64Eyq) |
 | 03 | 09-01 | Agent Capabilities 2: Context Management for Long-Context Agents | [长上下文智能体的上下文管理](/wiki/cmu_11_768/context_management_for_long_context_agents.html) | [Slides](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf) · [YouTube](https://www.youtube.com/watch?v=AiwCCvFW1uE) · [B 站](https://www.bilibili.com/video/BV1hQYT64EXQ) |
 | 04 | 09-03 | Agent Capabilities 3: Skills and Memory | [技能与记忆](/wiki/cmu_11_768/skills_and_memory.html) | [Slides](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf) · [YouTube](https://www.youtube.com/watch?v=6zigF2a-2Pw) · [B 站](https://www.bilibili.com/video/BV1GSYT6ZEb4) |

@@ -14,7 +14,7 @@ leftbar:
 base_dir: /wiki/cmu_11_768/
 tree:
   - index
-  - course_overview_what_is_an_agent
+  - what_are_agents_and_how_do_they_work
   - tool_use
   - context_management_for_long_context_agents
   - skills_and_memory
