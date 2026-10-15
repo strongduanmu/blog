@@ -25,7 +25,7 @@ Daniel 开场介绍了一个多智能体编程实验：16 个智能体在两周�
 
 随后，课堂展示了另一个案例。用户让 OpenClaw 整理收件箱，并要求删除邮件前先得到批准；智能体却开始批量删除邮件，用户的干预也未能及时阻止它。
 
-![OpenClaw 删除邮件的课堂案例](/assets/images/cmu_11_768/lecture_01_03m20s_openclaw_context.png)
+![OpenClaw 删除邮件的课堂案例](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_03m20s_openclaw_context.png)
 
 Daniel 推测，这次失控可能与上下文压缩（context compaction）有关：系统为了容纳更多交互，将过去的历史压缩成摘要，却丢失了“删除前需要批准”的要求。这个例子同时引出了课程关心的两个问题：怎样提高智能体的能力，以及怎样让它在长任务中保持约束、可靠地执行操作。
 
@@ -33,7 +33,7 @@ Daniel 推测，这次失控可能与上下文压缩（context compaction）有�
 
 接下来，Daniel 通过六个任务让学生举手选择：完全自主执行（`Autonomous`）、先询问用户（`Ask first`），或者交给人来处理（`Never`）。
 
-![六类任务的自主执行讨论](/assets/images/cmu_11_768/lecture_01_06m50s_autonomy_discussion.png)
+![六类任务的自主执行讨论](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_06m50s_autonomy_discussion.png)
 
 | 任务 | 课堂讨论的大致倾向 |
 | --- | --- |
@@ -52,9 +52,7 @@ Daniel 推测，这次失控可能与上下文压缩（context compaction）有�
 
 Daniel 展示了 Jing Yu Koh 制作的 GUI 智能体演示。任务是在匹兹堡寻找一家好的泰国餐厅，要求至少有 200 条评价、评分不低于 4.3，并在满足条件的餐厅中选择评分最高的一家。
 
-![GUI 智能体在 Yelp 搜索并浏览餐厅页面](/assets/images/cmu_11_768/lecture_01_08m13s_gui_restaurant_demo.png)
-
-*原视频 [08:13](https://www.bilibili.com/video/BV1hQYT64E2e/?t=493)，slide 第 5 页中的演示。*
+![GUI 智能体在 Yelp 搜索并浏览餐厅页面](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_08m13s_gui_restaurant_demo.png)
 
 画面左侧是浏览器，右侧是模型交互记录。智能体在 Yelp 中输入查询、查看搜索结果，再导航到餐厅页面，演示最终打开了 Pusadee’s Garden。这里的行动包括输入文字和操作网页，观察则来自浏览器中的页面内容。
 
@@ -62,23 +60,21 @@ Daniel 展示了 Jing Yu Koh 制作的 GUI 智能体演示。任务是在匹兹�
 
 第二个演示来自 OpenHands。智能体接到开发待办事项应用的任务后，创建应用文件、模板、静态资源、依赖文件和 README，随后启动服务，并通过浏览器测试功能。
 
-![OpenHands 在浏览器中测试待办事项应用](/assets/images/cmu_11_768/lecture_01_10m56s_openhands_visual_debugging.png)
-
-*原视频 [10:56](https://www.bilibili.com/video/BV1hQYT64E2e/?t=656)，slide 第 6 页中的演示。*
+![OpenHands 在浏览器中测试待办事项应用](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_10m56s_openhands_visual_debugging.png)
 
 运行过程中，智能体从日志发现端口已被占用，继续处理启动问题；页面打开后，它输入待办事项、点击添加按钮，再检查删除功能。这个过程把代码编辑、终端执行和 GUI 操作连接了起来。老师借此说明，智能体能读取执行结果、发现问题，并继续采取行动。后续课程还会介绍 OpenHands 及其 SDK。
 
 ## 课程团队与算力支持
 
-演示之后，课堂介绍了课程团队。两位授课老师分别是 Daniel Fried 和 Graham Neubig，助教包括 Aditya Soni、Andy Liu、Apurva Gandhi、Demi Wang、Jiarui Liu、Saujas Vaduguru、Weiwei Sun 和 Yueqi Song。团队的研究方向涉及智能体训练、奖励设计、多智能体协作以及人与智能体的交互，老师鼓励学生在研究项目阶段利用助教的经验。
-
-课程还获得了 Fireworks AI、Modal、Prime Intellect 和 Sail 的算力支持，用于作业与研究项目。对应内容见 slide 第 7–8 页。
+演示之后，课堂介绍了课程团队。两位授课老师分别是 `Daniel Fried` 和 `Graham Neubig`，助教包括 Aditya Soni、Andy Liu、Apurva Gandhi、Demi Wang、Jiarui Liu、Saujas Vaduguru、Weiwei Sun 和 Yueqi Song。团队的研究方向涉及智能体训练、奖励设计、多智能体协作以及人与智能体的交互，老师鼓励学生在研究项目阶段利用助教的经验。课程还获得了 `Fireworks AI`、`Modal`、`Prime Intellect` 和 `Sail` 的算力支持，用于作业与研究项目。
 
 ## 什么是智能体
 
-从[视频 15:22](https://www.bilibili.com/video/BV1hQYT64E2e/?t=922)开始，Daniel 介绍智能体的基础概念。Russell 与 Norvig 在《Artificial Intelligence: A Modern Approach》中将智能体定义为：通过传感器感知环境，并通过执行器作用于环境的对象。这个概念已有较长的研究历史，搜索、强化学习等方法也能用于今天的语言模型智能体。
+介绍完团队和算力支持后，Daniel 介绍了智能体的基础概念。Russell 与 Norvig 在《[Artificial Intelligence: A Modern Approach](https://aima.cs.berkeley.edu/)》中将智能体定义为：**通过传感器感知环境，并通过执行器作用于环境的对象**。这个概念已有较长的研究历史，搜索、强化学习等方法也能用于今天的语言模型智能体。
 
-将这个定义放到软件任务中，slide 第 9 页给出了如下对应关系：
+![什么是 Agent](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/what_is_an_agent.png)
+
+将这个定义对应到具体的软件任务中，我们可以得到如下对应关系：
 
 | 概念 | 软件智能体中的含义 | 例子 |
 | --- | --- | --- |
@@ -90,11 +86,13 @@ Daniel 展示了 Jing Yu Koh 制作的 GUI 智能体演示。任务是在匹兹�
 
 这里需要区分状态和观察。仓库中全部文件、依赖及运行进程共同构成环境状态，模型读取 `test.py` 后得到的观察，只是其中一个文件的内容。它还需要通过其他工具调用获取更多信息。行动会作用于环境，例如修改文件改变仓库内容，执行命令产生新的输出。
 
-Daniel 用测试结果解释奖励：代码通过测试时可以记为 `1`，未通过时记为 `0`。有些任务很难通过程序直接判定成功与否，这时可能使用语言模型作为评判者（LLM-as-a-judge），或收集用户反馈。**观察提供下一步决策所需的信息，奖励则用于评价行为或结果。** 同一份测试输出可以同时为这两种用途提供依据。
+Daniel 用测试结果解释奖励：代码通过测试时可以记为 `1`，未通过时记为 `0`。有些任务很难通过程序直接判定成功与否，这时可能使用语言模型作为评判者（`LLM-as-a-judge`），或收集用户反馈。**观察提供下一步决策所需的信息，奖励则用于评价行为或结果。** 同一份测试输出可以同时为这两种用途提供依据。
 
 ## 从语言模型到工具调用
 
 ### 下一 token 预测与思维链
+
+TODO
 
 介绍工具之前，老师先回顾语言模型的生成过程：模型根据当前上下文预测下一个 token 的概率分布，选择一个 token，将它追加到上下文，再重复预测。生成回答和生成工具调用，都建立在这个过程之上。
 
@@ -139,7 +137,7 @@ Harness → 模型：工具结果 [tool_call_id: call_7]，内容为文件文本
 
 ### 行动也是模型生成的 token 序列
 
-![语言模型生成工具调用，Harness 执行并返回观察](/assets/images/cmu_11_768/lecture_01_23m50s_actions_as_tokens.png)
+![语言模型生成工具调用，Harness 执行并返回观察](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_23m50s_actions_as_tokens.png)
 
 *原视频 [23:50](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1430)，slide 第 13 页。*
 
@@ -155,13 +153,13 @@ slide 第 14 页用“a model in a loop”解释智能体，并引用了 [ReAct]
 
 一次模型请求的上下文包含任务要求、可用工具，以及过去的行动和观察。课件继续使用读取 `test.py` 的例子：模型生成 `read_file("test.py")`，环境执行读取，返回 `add(a, b)` 的文件内容，并将结果加入历史。
 
-![读取文件并将结果写入历史的智能体循环](/assets/images/cmu_11_768/lecture_01_25m50s_agent_loop.png)
+![读取文件并将结果写入历史的智能体循环](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_25m50s_agent_loop.png)
 
 *原视频 [25:50](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1550)，slide 第 14 页的中间动画状态。*
 
 下一轮请求使用更新后的历史，模型据此选择新的行动。对于这个短任务，它已经掌握文件内容，于是通过 `send_message` 向用户回复，并结束任务。
 
-![模型根据文件内容回复用户并结束任务](/assets/images/cmu_11_768/lecture_01_26m12s_agent_loop_completion.png)
+![模型根据文件内容回复用户并结束任务](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_26m12s_agent_loop_completion.png)
 
 *原视频 [26:12](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1572)，slide 第 14 页的结束状态。*
 
@@ -226,13 +224,13 @@ Harness → 模型：tests/test.py、src/example.py
 
 课堂现场打开的是 GPT-OSS 的一条 Django 任务：当 `APPEND_SLASH=True` 时，`AdminSite.catch_all_view()` 的重定向丢失了查询参数。例如，请求 `/admin/auth/foo?id=123`，期望跳转到 `/admin/auth/foo/?id=123`，实际跳转结果却缺少 `?id=123`。
 
-![Django 重定向问题的用户任务描述](/assets/images/cmu_11_768/lecture_01_29m10s_trajectory_task.png)
+![Django 重定向问题的用户任务描述](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m10s_trajectory_task.png)
 
 *原视频 [29:10](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1750)，slide 第 16 页之后的现场演示。*
 
 模型先收到可与 shell 交互的系统说明，再读取具体任务。它生成的第一条命令是 `ls -R`，用于查看仓库结构、定位 Django admin 的实现；命令由环境执行，工具消息返回退出码 `0`，表示这次命令执行成功。
 
-![轨迹中的第一条 bash 调用及工具结果](/assets/images/cmu_11_768/lecture_01_29m45s_trajectory_action.png)
+![轨迹中的第一条 bash 调用及工具结果](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m45s_trajectory_action.png)
 
 *原视频 [29:45](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1785)。*
 
@@ -261,7 +259,7 @@ Graham 特别提醒，准确调用工具的能力需要通过训练或系统设�
 
 介绍六类能力之后，老师讨论怎样实现这些能力。slide 第 18 页将改进途径分为模型训练和 Harness 工程。
 
-![通过模型训练与 Harness 工程改进智能体](/assets/images/cmu_11_768/lecture_01_37m20s_training_and_harness.png)
+![通过模型训练与 Harness 工程改进智能体](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_37m20s_training_and_harness.png)
 
 *原视频 [37:20](https://www.bilibili.com/video/BV1hQYT64E2e/?t=2240)，slide 第 18 页。*
 
@@ -282,7 +280,7 @@ Graham 认为两者都重要。实际工作中，经常先在 Harness 中解决�
 
 slide 第 19 页将训练过程概括为预训练（pretraining）、中期训练（mid-training）/ 监督微调（supervised fine-tuning，SFT），以及强化学习（reinforcement learning，RL）。
 
-![智能体行为的三个训练阶段](/assets/images/cmu_11_768/lecture_01_42m32s_agent_training_stages.png)
+![智能体行为的三个训练阶段](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_42m32s_agent_training_stages.png)
 
 *原视频 [42:32](https://www.bilibili.com/video/BV1hQYT64E2e/?t=2552)，slide 第 19 页。*
 
@@ -338,7 +336,7 @@ slide 第 25 页列出工具沙箱、凭证访问限制、轨迹监控，以及�
 
 从[视频 51:51](https://www.bilibili.com/video/BV1hQYT64E2e/?t=3111)开始，Graham 介绍系统组成。slide 第 26 页展示了模型、推理服务、Harness、沙箱、监控和训练之间的关系。
 
-![智能体系统中的模型、Harness、沙箱、推理、监控与训练](/assets/images/cmu_11_768/lecture_01_53m15s_agent_system_components.png)
+![智能体系统中的模型、Harness、沙箱、推理、监控与训练](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_53m15s_agent_system_components.png)
 
 *原视频 [53:15](https://www.bilibili.com/video/BV1hQYT64E2e/?t=3195)，slide 第 26 页。*
 
