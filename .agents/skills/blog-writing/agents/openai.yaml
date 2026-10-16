@@ -1,4 +1,4 @@
 interface:
-  display_name: "端小强的博客写作"
-  short_description: "结合本仓库文章风格，按题材撰写、改写技术博客与课程笔记，保留各篇文章的叙事节奏"
-  default_prompt: "使用 $blog-writing，参考仓库中同类型文章的叙事方式，撰写或润色当前文档。"
+  display_name: "端小强的博客与 Wiki 写作"
+  short_description: "博客参考作者叙事风格；wiki 沿原视频顺序记录课堂重点与 slide，补充关键截图和 Mermaid"
+  default_prompt: "使用 $blog-writing，按文档类型选择写法：博客参考作者叙事，wiki 学习笔记沿原始视频顺序整理课堂重点、slide 与图示。"
