@@ -131,15 +131,13 @@ Harness → 模型：工具结果 [tool_call_id: call_7]，内容为文件文本
 
 调用消息中的角色是 `assistant`，工具结果的角色是 `tool`。聊天模板还会把它们转换成 `<tool_call>`、`<tool_response>` 等文本表示。上述标记与消息结构是课程中的接口示意，实际接入需要遵循所用模型和 API 的格式。
 
-老师在[视频 21:54](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1314)提出了一个问题：除了 JSON，还能怎样让模型调用工具？学生给出的答案是直接生成代码，例如 bash 命令，或者用 Python 语法调用函数。Daniel 说明，这种方式在一些场景中很有效，课程会进一步讨论不同表示方式的取舍。
+Daniel 在[视频 21:54](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1314)提出了一个问题：除了 JSON，还能怎样让模型调用工具？学生给出的答案是直接生成代码，例如 bash 命令，或者用 Python 语法调用函数。Daniel 说明，这种方式在一些场景中很有效，课程会进一步讨论不同表示方式的取舍。
 
 ### 行动也是模型生成的 token 序列
 
 ![语言模型生成工具调用，Harness 执行并返回观察](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_23m50s_actions_as_tokens.png)
 
-*原视频 [23:50](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1430)，slide 第 13 页。*
-
-图中，语言模型生成一段包含工具名与参数的 token 序列，Harness 负责解析、校验并执行调用，再把结果交回模型。Harness 是模型外部的执行框架，承担模型与环境之间的协调工作。多模态模型还可能读取图像等输入，工具执行的职责仍由外部系统承担。
+上图中，语言模型生成一段包含工具名与参数的 token 序列，Harness 负责解析、校验并执行调用，再把结果交回模型。Harness 是模型外部的执行框架，承担模型与环境之间的协调工作。多模态模型还可能读取图像等输入，工具执行的职责仍由外部系统承担。
 
 老师在这里提到了 [Toolformer](https://arxiv.org/abs/2302.04761)：它展示了训练模型使用工具，并根据工具结果继续生成内容的一种方法。下一步，把这样的调用与反馈放入循环，就能形成多步的智能体执行过程。
 
