@@ -113,8 +113,8 @@ test('unfilled ads collapse only outside the viewport', () => {
 });
 
 test('the live ad tag records load and failure before deferred detection, and skips local requests', () => {
-  const config = require('js-yaml').load(fs.readFileSync(path.join(__dirname, '../_config.stellar.yml'), 'utf8'));
-  const bootstrap = config.inject.head.match(/<script>([\s\S]*?)<\/script>/)[1];
+  const config = fs.readFileSync(path.join(__dirname, '../_config.stellar.yml'), 'utf8');
+  const bootstrap = config.match(/<script>([\s\S]*?)<\/script>/)[1];
   for (const hostname of ['localhost', 'strongduanmu.com', 'www.strongduanmu.com']) {
     const scripts = [];
     vm.runInNewContext(bootstrap, { location: { hostname }, document: {
