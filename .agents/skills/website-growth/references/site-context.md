@@ -56,6 +56,7 @@ AdSense 的 `push({})` 按 DOM 顺序处理未初始化的 `.adsbygoogle`。现�
 - 人工优化的标题与摘要集中在 `source/_data/seo.yml`，按规范 URL 路径维护。目录键使用 `/wiki/c/`，不是 `/wiki/c/index.html`。标题可能同时用于页面标题及搜索标题，修改前核对实际效果。
 - `_config.yml` 中 `pretty_urls.trailing_index: false`，保留普通文章的 `.html`；站点描述作为兜底，不代替核心页面的独立描述。
 - 本地生成器覆盖 `sitemap`、`baidusitemap`，两者均包含正式 Wiki 与文章，排除 noindex、草稿、静态资源及显式关闭 sitemap 的条目；不要恢复旧百度生成器“仅有分类的文章”条件。
+- Vercel 博客项目域名设置：`https://vercel.com/strongduanmu-blog/blog/settings/domains`。当前 www 已在域名层配置为 308 → `strongduanmu.com`，保留路径与参数；主域继续连接 Production。迁移项目时同时检查这项设置，不能只依赖仓库内 host 条件。
 - `source/vercel.json` 会复制到生成站点根目录，负责 www → 裸域名、目录尾斜杠以及已核对的旧路径重定向。根据 Vercel 文档，带文件扩展名的文章不会被 `trailingSlash: true` 改成目录。修改后必须验证线上状态码、Location、目标页面与不存在重定向循环。
 - `layout/index*.ejs` 和 `_partial/list_heading.ejs` 由 SEO 脚本通过 Hexo `theme.setView` 显式注册，提供目录页可见 H1；根目录 `layout/` 不会被 Hexo 自动载入，不要只编辑未注册模板就认为已生效。
 - 未完成的 Join 算子与 BenchmarkSQL 笔记也暂时 noindex；补全正文后再评估恢复。
