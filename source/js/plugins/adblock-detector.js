@@ -1,4 +1,4 @@
-/** Optional, dismissible support notice. Never lock the page or require ad clicks. */
+/** Dismissible ad-support dialog. Never require allowlisting or ad clicks. */
 (function() {
   'use strict';
   const dismissalKey = 'ad-support-dismissed-at';
@@ -10,43 +10,73 @@
 
   let dismissed = false;
   function showNotice(cssBlocked = false) {
-    const article = document.querySelector('article.md-text.content');
-    if (dismissed || !article || document.querySelector('.ad-support-notice')) return;
-    // The theme styles every <aside> as a sticky sidebar; use a normal section.
-    const notice = document.createElement('section');
+    if (dismissed || !document.querySelector('.l_main') || document.querySelector('.ad-support-notice')) return;
+    const notice = document.createElement('dialog');
     notice.className = 'ad-support-notice';
-    notice.setAttribute('aria-label', '本站广告说明');
-    const content = document.createElement('div');
+    notice.setAttribute('aria-labelledby', 'ad-support-title');
+    notice.setAttribute('aria-describedby', 'ad-support-message');
+    const header = document.createElement('div');
+    header.className = 'ad-support-header';
+    const title = document.createElement('h2');
+    title.id = 'ad-support-title';
+    title.textContent = '支持本站，允许展示广告';
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">' +
+      '<path d="M6 6L18 18M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    close.setAttribute('aria-label', '关闭广告提示');
+    header.append(title, close);
     const message = document.createElement('p');
+    message.id = 'ad-support-message';
     message.textContent = cssBlocked
-      ? '广告可能被浏览器隐藏。本站通过广告支持内容维护，如愿意支持，可仅为本站放行广告。'
-      : '广告暂未加载。如果你使用了广告拦截工具，欢迎仅为本站放行，支持内容维护。';
+      ? '广告可能被浏览器隐藏。如果这些内容对您有帮助，欢迎仅为本站放行广告，支持博客持续更新。'
+      : '本站广告暂未加载。如果您使用了广告拦截工具，欢迎仅为本站放行，支持博客持续更新。';
     const help = document.createElement('details');
     const summary = document.createElement('summary');
-    summary.textContent = '如何仅为本站放行';
+    summary.textContent = '查看放行方法';
     const steps = document.createElement('ol');
     [
       '打开浏览器工具栏中的广告拦截扩展，或地址栏旁的隐私保护设置。',
       '选择“在此网站停用”“信任此网站”或“允许此网站的广告”，只对 strongduanmu.com 生效即可。',
-      '手动刷新页面。你也可以关闭这条提示，继续阅读。'
+      '放行后，点击下方按钮刷新页面。不方便放行也可以继续阅读。'
     ].forEach(function(text) {
       const item = document.createElement('li');
       item.textContent = text;
       steps.append(item);
     });
     help.append(summary, steps);
-    content.append(message, help);
-    const close = document.createElement('button');
-    close.type = 'button';
-    close.textContent = '继续阅读';
-    close.setAttribute('aria-label', '关闭广告说明，继续阅读');
-    close.addEventListener('click', function() {
+    const actions = document.createElement('div');
+    actions.className = 'ad-support-actions';
+    const continueReading = document.createElement('button');
+    continueReading.type = 'button';
+    continueReading.textContent = '继续阅读';
+    continueReading.setAttribute('autofocus', '');
+    const refresh = document.createElement('button');
+    refresh.type = 'button';
+    refresh.className = 'ad-support-refresh';
+    refresh.textContent = '已放行，刷新页面';
+    refresh.addEventListener('click', function() { location.reload(); });
+    actions.append(continueReading, refresh);
+    const hint = document.createElement('p');
+    hint.className = 'ad-support-hint';
+    hint.textContent = '可以直接关闭，关闭后 7 天内不再提示。';
+    function dismiss() {
+      if (dismissed) return;
       dismissed = true;
       try { localStorage.setItem(dismissalKey, String(Date.now())); } catch (error) { /* Optional. */ }
+      if (notice.open && typeof notice.close === 'function') notice.close();
       notice.remove();
-    });
-    notice.append(content, close);
-    article.append(notice);
+    }
+    close.addEventListener('click', dismiss);
+    continueReading.addEventListener('click', dismiss);
+    notice.addEventListener('cancel', function(event) { event.preventDefault(); dismiss(); });
+    notice.addEventListener('close', dismiss);
+    notice.append(header, message, help, actions, hint);
+    document.body.append(notice);
+    // Native dialog provides a focus trap, Escape dismissal and focus restoration.
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog
+    if (typeof notice.showModal === 'function') notice.showModal();
+    else notice.setAttribute('open', '');
   }
 
   setTimeout(function() {

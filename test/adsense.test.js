@@ -25,6 +25,8 @@ class Element {
   appendChild(item) { this.append(item); }
   prepend(item) { this.children.unshift(item); }
   remove() { this.removed = true; }
+  showModal() { this.open = true; this.modalShown = true; }
+  close() { this.open = false; this.events.close?.(); }
   addEventListener(name, fn) { this.events[name] = fn; }
 }
 
@@ -136,62 +138,85 @@ function noticeHarness({ hostname = 'strongduanmu.com', search = '', state = 'lo
   const script = new Element();
   script.setAttribute('data-load-state', state);
   const events = {};
+  let reloads = 0;
   const window = { addEventListener: (name, fn) => { events[name] = fn; } };
   const navigator = { onLine: online };
   const context = {
     document: { body,
-      querySelector: selector => selector === 'article.md-text.content' ? article :
-        article.children.find(item => item.className === 'ad-support-notice' && !item.removed),
+      querySelector: selector => selector === '.l_main' ? article :
+        body.children.find(item => item.className === 'ad-support-notice' && !item.removed),
       getElementById: () => script,
       createElement: () => { const element = new Element(); element.offsetHeight = blocked ? 0 : 10; return element; } },
     localStorage: { getItem: key => stored.get(key), setItem: (key, value) => stored.set(key, value) },
-    location: { hostname, search }, URLSearchParams, window, navigator,
+    location: { hostname, search, reload: () => { reloads++; } }, URLSearchParams, window, navigator,
     getComputedStyle: () => ({ display: blocked ? 'none' : 'block' }),
     setTimeout: callback => callback(), Date
   };
   vm.runInNewContext(fs.readFileSync(path.join(__dirname, '../source/js/plugins/adblock-detector.js'), 'utf8'), context);
-  return { article, body, script, navigator, events, stored };
+  return { article, body, script, navigator, events, stored,
+    get notices() { return body.children.filter(item => item.className === 'ad-support-notice'); },
+    get reloads() { return reloads; } };
 }
 
 test('normal, slow, offline and local ad loading do not produce false blocking notices', () => {
   for (const options of [{}, { state: 'loading' }, { online: false, state: 'error' },
     { hostname: 'localhost', state: 'error' }, { hostname: 'preview.example', blocked: true }]) {
-    assert.equal(noticeHarness(options).article.children.length, 0, JSON.stringify(options));
+    assert.equal(noticeHarness(options).notices.length, 0, JSON.stringify(options));
   }
 });
 
 test('CSS blocking and script errors before or after detection show a single optional notice', () => {
-  assert.equal(noticeHarness({ blocked: true }).article.children.length, 1);
+  assert.equal(noticeHarness({ blocked: true }).notices.length, 1);
   const early = noticeHarness({ state: 'error' });
-  assert.equal(early.article.children.length, 1, 'remember errors fired before deferred detection');
-  assert.match(early.article.children[0].children[0].children[0].textContent, /如果你使用/);
+  assert.equal(early.notices.length, 1, 'remember errors fired before deferred detection');
+  assert.match(early.notices[0].children[1].textContent, /如果您使用/);
   const late = noticeHarness({ state: 'loading' });
   late.script.setAttribute('data-load-state', 'error');
   late.script.events.error();
   late.script.events.error();
-  assert.equal(late.article.children.length, 1);
+  assert.equal(late.notices.length, 1);
   const offline = noticeHarness({ online: false, state: 'error' });
   offline.navigator.onLine = true;
   offline.events.online();
-  assert.equal(offline.article.children.length, 1);
+  assert.equal(offline.notices.length, 1);
 });
 
-test('the support notice offers instructions, never locks scrolling, and respects seven-day dismissal', () => {
+test('the dialog opens on the page, offers instructions and respects seven-day dismissal', () => {
   const h = noticeHarness({ hostname: 'localhost', search: '?test-adblock=1' });
-  assert.equal(h.article.children.length, 1);
+  assert.equal(h.notices.length, 1);
   assert.equal(h.body.style.overflow, undefined);
-  const notice = h.article.children[0];
-  const instructions = notice.children[0].children[1];
+  const notice = h.notices[0];
+  assert.equal(notice.modalShown, true);
+  const instructions = notice.children[2];
   assert.equal(instructions.children[1].children.length, 3);
-  notice.children[1].events.click();
+  notice.children[3].children[0].events.click();
   assert.equal(notice.removed, true);
-  assert.equal(noticeHarness({ state: 'error', stored: h.stored }).article.children.length, 0);
+  assert.equal(noticeHarness({ state: 'error', stored: h.stored }).notices.length, 0);
   h.stored.set('ad-support-dismissed-at', String(Date.now() - 8 * 24 * 60 * 60 * 1000));
-  assert.equal(noticeHarness({ state: 'error', stored: h.stored }).article.children.length, 1);
+  assert.equal(noticeHarness({ state: 'error', stored: h.stored }).notices.length, 1);
   const live = noticeHarness({ state: 'error' });
-  live.article.children[0].children[1].events.click();
+  live.notices[0].children[3].children[0].events.click();
   live.events.online();
-  assert.equal(live.article.children.length, 1, 'later events must not recreate a dismissed notice');
+  assert.equal(live.notices.length, 1, 'later events must not recreate a dismissed notice');
+});
+
+test('Escape and the close button dismiss the dialog; refresh requires an explicit click', () => {
+  for (const mode of ['escape', 'close-button']) {
+    const h = noticeHarness({ state: 'error' });
+    const notice = h.notices[0];
+    let prevented = false;
+    if (mode === 'escape') notice.events.cancel({ preventDefault() { prevented = true; } });
+    else notice.children[0].children[1].events.click();
+    assert.equal(notice.open, false);
+    assert.equal(notice.removed, true);
+    assert.ok(h.stored.has('ad-support-dismissed-at'));
+    if (mode === 'escape') assert.equal(prevented, true);
+    assert.equal(h.reloads, 0);
+  }
+  const h = noticeHarness({ state: 'error' });
+  assert.equal(h.reloads, 0);
+  h.notices[0].children[3].children[1].events.click();
+  assert.equal(h.reloads, 1);
 });
 
 test('in-article placement preserves the first section, skips nested headings and never duplicates', () => {

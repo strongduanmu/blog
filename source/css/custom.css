@@ -343,40 +343,63 @@ li>code:not([class]), p>code:not([class]) {
 @media (max-width: 1180px) {
   .l_right .adsense-widget { display: none; }
 }
-.ad-support-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  margin: 1rem 0;
+dialog.ad-support-notice {
+  box-sizing: border-box;
+  position: fixed;
+  inset: 0;
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100vh - 32px);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--card, #fff);
+  color: var(--text-p1, #222);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.22);
+}
+.ad-support-notice::backdrop { background: rgba(0, 0, 0, 0.35); }
+.ad-support-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
+.ad-support-header h2 { flex: 1; margin: 0; font-size: 1.125rem; line-height: 1.5; }
+.ad-support-notice p { margin: 0; }
+.ad-support-notice details { margin-top: 0.75rem; }
+.ad-support-notice summary { cursor: pointer; padding: 0.5rem 0; color: var(--theme-link); }
+.ad-support-notice ol { margin: 0.5rem 0 0; padding-left: 1.5rem; }
+.ad-support-notice li + li { margin-top: 0.5rem; }
+.ad-support-notice button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border);
   border-radius: 8px;
   background: var(--block);
-  color: var(--text-p1);
-  font-size: 0.875rem;
-}
-.ad-support-notice > div { flex: 1; min-width: 0; }
-.ad-support-notice p { margin: 0; }
-.ad-support-notice details { margin-top: 0.5rem; }
-.ad-support-notice summary { cursor: pointer; padding: 0.5rem 0; }
-.ad-support-notice ol { margin-bottom: 0; padding-left: 1.5rem; }
-.ad-support-notice button {
-  flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.5rem;
-  border: 1px solid var(--color-border);
-  border-radius: 6px;
-  background: var(--card);
-  color: var(--text-p1);
+  color: inherit;
   font: inherit;
   cursor: pointer;
 }
-.ad-support-notice button:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+.ad-support-header button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  line-height: 1;
+}
+.ad-support-header button svg { display: block; width: 20px; height: 20px; flex-shrink: 0; }
+.ad-support-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem; }
+.ad-support-actions .ad-support-refresh { background: var(--theme-color); color: #fff; }
+.ad-support-notice .ad-support-hint { margin-top: 0.75rem; font-size: 0.8125rem; color: var(--text-p2); }
+.ad-support-notice button:focus-visible,
 .ad-support-notice summary:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
 @media (max-width: 480px) {
-  .ad-support-notice { flex-direction: column; align-items: stretch; }
-  .ad-support-notice button { align-self: flex-end; }
+  dialog.ad-support-notice { padding: 1rem; }
+  .ad-support-actions > button { flex: 1; }
 }
 
 /* Mermaid 图表居中显示 */
