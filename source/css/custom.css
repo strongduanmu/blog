@@ -291,50 +291,84 @@ li>code:not([class]), p>code:not([class]) {
   }
 }
 
-/* 文章广告位样式 - 根据广告内容自适应高度 */
-.article-bottom-ad,
-.article-bottom-ad .widget-body,
-.article-bottom-ad .ad-container,
+/* Reserve publisher space without resizing or clipping Google's creative. */
 .article-inline-ad-wrapper,
-.article-inline-ad-container {
-  height: auto;
-  min-height: 0;
-  overflow: visible;
+.article-bottom-ad {
+  margin: 2rem 0;
+  padding: 0;
+  clear: both;
 }
-
+.article-inline-ad-container,
 .article-bottom-ad .ad-container,
-.article-inline-ad-container {
-  display: flow-root;
-}
-
-.article-bottom-ad ins,
-.article-inline-ad-container ins {
-  display: block;
+.adsense-sidebar {
+  min-height: 250px;
   width: 100%;
-  max-width: 100% !important;
-  margin: 0 auto;
 }
-
-.article-bottom-ad iframe,
-.article-inline-ad-container iframe,
-.article-bottom-ad img,
-.article-inline-ad-container img {
+.publisher-ad[hidden] { display: none !important; }
+.ad-label,
+.article-inline-ad-label {
   display: block;
-  max-width: 100% !important;
-  margin: 0 auto;
+  color: var(--text-p2);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  text-align: center;
+  margin: 0.5rem 0;
 }
-
-.article-bottom-ad img,
-.article-inline-ad-container img {
-  height: auto !important;
+.adsense-widget .widget-body,
+.adsense-widget .widget-body p { margin: 0; padding: 0; background: transparent; }
+.ad-preview ins {
+  display: block;
+  min-height: 250px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  background: var(--block);
 }
-
-/* 移动端广告位额外限制 */
-@media screen and (max-width: 768px) {
-  .article-bottom-ad {
-    max-width: 100%;
+.ad-preview ins::before {
+  content: '广告位预览';
+  display: block;
+  padding-top: 100px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--text-p2);
+}
+@media (min-width: 1181px) {
+  .l_body .l_right {
+    align-self: start;
+    top: 16px;
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    scrollbar-width: thin;
   }
 }
+@media (max-width: 1180px) {
+  .l_right .adsense-widget { display: none; }
+}
+.ad-support-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--block);
+  color: var(--text-p1);
+  font-size: 0.875rem;
+}
+.ad-support-notice p { margin: 0; flex: 1; }
+.ad-support-notice button {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text-p1);
+  font: inherit;
+  cursor: pointer;
+}
+.ad-support-notice button:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
 
 /* Mermaid 图表居中显示 */
 .md-text .mermaid {
@@ -346,36 +380,4 @@ li>code:not([class]), p>code:not([class]) {
 .md-text .mermaid svg {
   max-width: 100%;
   height: auto;
-}
-
-/* 文章中间广告位样式 - 参考底部广告位 */
-.article-inline-ad-wrapper {
-  position: relative;
-  background: var(--block);
-  border-radius: 10px;
-  padding: 0.5rem;
-  margin: 1.5rem 0;
-}
-
-.article-inline-ad-container {
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 0.5rem;
-  background: var(--card);
-}
-
-.article-inline-ad-container ins,
-.article-inline-ad-container iframe,
-.article-inline-ad-container img {
-  max-width: 100% !important;
-}
-
-.article-inline-ad-label {
-  display: inline-block;
-  font-size: .8125rem;
-  color: var(--text-p2);
-  line-height: 1.5;
-  text-align: center;
-  margin-top: 0.5rem;
-  width: 100%;
 }

@@ -174,7 +174,7 @@ hexo_google_adsense:
   enable: true
   log_msg: true
   tag_name: 'GoogleAdsense'
-  file_path: 'source/ads/google/article_ads.html'
+  file_path: 'layout/_partial/adsense-inline.html'
   auto_insert:
     enable: true
     after_paragraph: 2

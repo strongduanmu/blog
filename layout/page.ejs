@@ -90,7 +90,7 @@ function findInsertionOffsetAfterTopLevelParagraph(content, paragraphIndex) {
   return -1
 }
 
-function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
+function findInsertionOffsetAfterFirstTopLevelH2Section(content) {
   if (typeof content !== 'string') {
     return -1
   }
@@ -99,7 +99,6 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
   const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
   const stack = []
   let h2Count = 0
-  let secondH2Seen = false
   let match
 
   while ((match = tagPattern.exec(content)) !== null) {
@@ -115,8 +114,6 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
       if (isTopLevel && tagName === 'h2') {
         h2Count += 1
         if (h2Count === 2) {
-          secondH2Seen = true
-        } else if (h2Count === 3 && secondH2Seen) {
           return match.index
         }
       }
@@ -135,27 +132,20 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
     }
   }
 
-  if (secondH2Seen) {
-    return content.length
-  }
-
   return -1
 }
 
 function getInlineAdHtml() {
   var adHtml = '<div class="article-inline-ad-wrapper">'
   adHtml += '<div class="article-inline-ad-container">'
-  adHtml += '<ins class="adsbygoogle"'
+  adHtml += '<ins class="publisher-ad-unit"'
   adHtml += ' style="display:block; text-align:center;"'
   adHtml += ' data-ad-layout="in-article"'
   adHtml += ' data-ad-format="fluid"'
   adHtml += ' data-ad-client="ca-pub-9880881761323734"'
   adHtml += ' data-ad-slot="7617691942"></ins>'
-  adHtml += '<script>'
-  adHtml += '(adsbygoogle = window.adsbygoogle || []).push({});'
-  adHtml += '</script>'
   adHtml += '</div>'
-  adHtml += '<div class="article-inline-ad-label">赞助商</div>'
+  adHtml += '<div class="article-inline-ad-label">广告</div>'
   adHtml += '</div>'
   return adHtml
 }
@@ -174,7 +164,7 @@ function insertInlineAd(content) {
     return content
   }
 
-  let insertOffset = findInsertionOffsetAfterSecondTopLevelH2Section(content)
+  let insertOffset = findInsertionOffsetAfterFirstTopLevelH2Section(content)
   if (insertOffset === -1) {
     insertOffset = findInsertionOffsetAfterTopLevelParagraph(content, paragraphIndex)
   }
@@ -193,15 +183,12 @@ function getBottomAdHtml() {
   var adHtml = '<div class="article-bottom-ad">'
   adHtml += '<div class="ad-container">'
   adHtml += '<!-- Google AdSense - 网站底部广告位 -->'
-  adHtml += '<ins class="adsbygoogle"'
+  adHtml += '<ins class="publisher-ad-unit"'
   adHtml += ' style="display:block"'
   adHtml += ' data-ad-client="ca-pub-9880881761323734"'
   adHtml += ' data-ad-slot="6799117067"'
   adHtml += ' data-ad-format="auto"'
   adHtml += ' data-full-width-responsive="true"></ins>'
-  adHtml += '<script>'
-  adHtml += '(adsbygoogle = window.adsbygoogle || []).push({});'
-  adHtml += '</script>'
   adHtml += '</div></div>'
   return adHtml
 }

@@ -1,14 +1,5 @@
 User-agent: *
 Allow: /
-Allow: /blog/
-Allow: /wiki/
-Allow: /archives/
-Allow: /categories/
-Allow: /tags/
-Allow: /about/
-Allow: /notes/
-Disallow: /vendors/
-Disallow: /css/
-Disallow: /fancybox/
-Allow: Sitemap: /sitemap.xml
-Allow: Sitemap: /baidusitemap.xml
+
+Sitemap: https://strongduanmu.com/sitemap.xml
+Sitemap: https://strongduanmu.com/baidusitemap.xml

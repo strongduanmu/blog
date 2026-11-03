@@ -12,7 +12,7 @@ if (!config || !config.enable) {
 }
 
 const tag_name = config.tag_name || 'GoogleAdsense';
-const file_path = config.file_path || 'source/ads/google/article_ads.html';
+const file_path = config.file_path || 'layout/_partial/adsense-inline.html';
 const log_msg = config.log_msg || false;
 const auto_insert = config.auto_insert || {};
 
@@ -92,7 +92,7 @@ function findInsertionOffsetAfterTopLevelParagraph(content, paragraphIndex) {
   return -1;
 }
 
-function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
+function findInsertionOffsetAfterFirstTopLevelH2Section(content) {
   if (typeof content !== 'string') {
     return -1;
   }
@@ -101,7 +101,6 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
   const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr']);
   const stack = [];
   let h2Count = 0;
-  let secondH2Seen = false;
   let match;
 
   while ((match = tagPattern.exec(content)) !== null) {
@@ -117,8 +116,6 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
       if (isTopLevel && tagName === 'h2') {
         h2Count += 1;
         if (h2Count === 2) {
-          secondH2Seen = true;
-        } else if (h2Count === 3 && secondH2Seen) {
           return match.index;
         }
       }
@@ -137,15 +134,11 @@ function findInsertionOffsetAfterSecondTopLevelH2Section(content) {
     }
   }
 
-  if (secondH2Seen) {
-    return content.length;
-  }
-
   return -1;
 }
 
 function insertInlineAd(content, adHtml, paragraphIndex) {
-  let insertOffset = findInsertionOffsetAfterSecondTopLevelH2Section(content);
+  let insertOffset = findInsertionOffsetAfterFirstTopLevelH2Section(content);
   if (insertOffset === -1) {
     insertOffset = findInsertionOffsetAfterTopLevelParagraph(content, paragraphIndex);
   }
@@ -171,7 +164,8 @@ hexo.extend.filter.register('after_post_render', function(data) {
     return data;
   }
 
-  if (data.disable_inline_ads === true || data.disable_ads === true) {
+  if (data.disable_inline_ads === true || data.disable_ads === true ||
+      data.content.replace(/<[^>]*>/g, '').trim().length < 1000) {
     return data;
   }
 
