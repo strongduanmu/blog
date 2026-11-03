@@ -355,7 +355,11 @@ li>code:not([class]), p>code:not([class]) {
   color: var(--text-p1);
   font-size: 0.875rem;
 }
-.ad-support-notice p { margin: 0; flex: 1; }
+.ad-support-notice > div { flex: 1; min-width: 0; }
+.ad-support-notice p { margin: 0; }
+.ad-support-notice details { margin-top: 0.5rem; }
+.ad-support-notice summary { cursor: pointer; padding: 0.5rem 0; }
+.ad-support-notice ol { margin-bottom: 0; padding-left: 1.5rem; }
 .ad-support-notice button {
   flex-shrink: 0;
   min-width: 44px;
@@ -369,6 +373,11 @@ li>code:not([class]), p>code:not([class]) {
   cursor: pointer;
 }
 .ad-support-notice button:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+.ad-support-notice summary:focus-visible { outline: 2px solid var(--theme-color); outline-offset: 2px; }
+@media (max-width: 480px) {
+  .ad-support-notice { flex-direction: column; align-items: stretch; }
+  .ad-support-notice button { align-self: flex-end; }
+}
 
 /* Mermaid 图表居中显示 */
 .md-text .mermaid {

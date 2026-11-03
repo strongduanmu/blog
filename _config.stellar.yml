@@ -14,6 +14,10 @@ inject:
     <script>
       if (['strongduanmu.com', 'www.strongduanmu.com'].includes(location.hostname)) {
         const adScript = document.createElement('script');
+        adScript.id = 'publisher-ads-script';
+        adScript.setAttribute('data-load-state', 'loading');
+        adScript.addEventListener('load', function() { adScript.setAttribute('data-load-state', 'loaded'); });
+        adScript.addEventListener('error', function() { adScript.setAttribute('data-load-state', 'error'); });
         adScript.async = true;
         adScript.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9880881761323734';
         adScript.crossOrigin = 'anonymous';
