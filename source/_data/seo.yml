@@ -179,3 +179,31 @@ pages:
     description: 记录使用 BenchmarkSQL 准备 ShardingSphere-JDBC 测试环境的命令，包括 JDBC 与 ZooKeeper 模块依赖下载、扩展库目录配置和依赖整理。当前为未完成的操作笔记，测试模型介绍与结果分析尚待补充。
   /blog/using-calcite-as-an-example-to-explore-the-common-implementation-of-join-operators.html:
     description: 预留 Calcite Join 算子学习笔记，收集执行器、连接顺序调整与 CMU Join Algorithms 的参考入口。正文分析尚未完成，当前仅用于保存后续阅读线索。
+  /wiki/cmu_11_768/human_agent_interaction.html:
+    description: CMU 11-768《人机交互》预习提纲，关注委派、澄清、接管与反馈的协作循环，以及信任校准和交互中的控制感。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/guest_lecture_karthik_narasimhan.html:
+    description: CMU 11-768《客座讲座：Karthik Narasimhan》预习提纲，关注规划、搜索与环境交互相关的研究问题，预留方法、实验结论和项目启发的整理位置。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/openhands.html:
+    description: CMU 11-768《OpenHands》预习提纲，关注智能体、工具、事件流、运行时与工作区的职责，以及编程任务中的观察与行动循环。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/agents_and_the_future_of_work.html:
+    description: CMU 11-768《智能体与工作的未来》预习提纲，关注智能体对任务、职业和组织流程的影响，以及能力评测与实际生产力之间的差距。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/reranking_and_critic_models.html:
+    description: CMU 11-768《重排序与评论模型》预习提纲，关注候选采样、评论模型与验证器的重排序方法，以及推理计算量和任务成功率的关系。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/sandboxing_and_credential_management.html:
+    description: CMU 11-768《沙箱与凭证管理》预习提纲，关注执行隔离、资源与网络限制、文件权限，以及短期凭证和分级授权机制。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/deep_research_agents.html:
+    description: CMU 11-768《深度研究智能体》预习提纲，关注查询规划、网页检索、来源筛选、证据整合与引用生成，以及研究任务的停止标准。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/langgraph.html:
+    description: CMU 11-768《LangGraph》预习提纲，关注用状态图表示节点、分支与循环，以及工作流持久化、暂停恢复和人类介入。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/reinforcement_learning_systems.html:
+    description: CMU 11-768《强化学习系统》预习提纲，关注rollout、环境执行、推理服务和参数更新，以及异步采样、吞吐与训练故障恢复。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/observability_and_monitoring.html:
+    description: CMU 11-768《可观测性与监控》预习提纲，关注提示、工具轨迹、成本、延迟与错误的观测，以及离线评测、在线监控和异常响应。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/tree_search.html:
+    description: CMU 11-768《树搜索》预习提纲，关注搜索树的扩展、评估、剪枝、回溯和终止策略，以及环境反馈与评论模型的作用。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/advanced_reinforcement_learning_algorithms.html:
+    description: CMU 11-768《高级强化学习算法》预习提纲，关注智能体强化学习算法、离策略数据与重要性修正，以及过程奖励和结果奖励的组合。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/guest_lecture_sasha_rush.html:
+    description: CMU 11-768《客座讲座：Sasha Rush》预习提纲，关注推理系统与智能体训练相关的研究问题，预留方法、实验结论和项目启发的整理位置。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+  /wiki/cmu_11_768/multi_agent_interaction.html:
+    description: CMU 11-768《多智能体交互》预习提纲，关注角色分工、通信协议与共享状态，以及协作、竞争、共识和冲突处理的成本。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。

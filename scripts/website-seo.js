@@ -23,7 +23,7 @@ function descriptionFromContent(content) {
   const $ = cheerio.load(content || '');
   $('script, style, iframe, pre, table, .article-inline-ad-wrapper, .article-bottom-ad').remove();
   const paragraphs = $('p').toArray().map(node => $(node).text().replace(/\s+/g, ' ').trim())
-    .filter(text => text && !/^(原文链接|注意[：:]|B\s*站|官方录像|本页截图取自)/.test(text));
+    .filter(text => text && !/^(原文链接|注意[：:]|B\s*站|官方录像|本页截图取自|截至.{0,50}(?:视频|收藏夹))/.test(text));
   let text = '';
   for (const paragraph of paragraphs) {
     text += (text ? ' ' : '') + paragraph;
@@ -43,7 +43,11 @@ hexo.extend.filter.register('template_locals', function(locals) {
   const route = new URL(canonical).pathname;
   const entry = (seo.pages || {})[route] || {};
   if (entry.title) page.title = entry.title;
-  if (/^\/page\/\d+\/$/.test(route)) page.title = `技术博客 · 第 ${page.current} 页`;
+  if (/^\/page\/\d+\/$/.test(route)) {
+    page.title = `技术博客 · 第 ${page.current} 页`;
+    page.description = `端小强技术博客第 ${page.current} 页，继续浏览数据库内核、Apache Calcite 查询优化、ShardingSphere 联邦查询和 Java 开发相关文章，按发布时间查找过往的源码分析、问题排查与工程实践记录。`;
+  }
+  if (route === '/404.html') page.robots = 'noindex,follow';
   if (/^\/wiki\/tags\//.test(route)) {
     page.title = `${page.tagName || page.title} 专题文档`;
     page.robots = 'noindex,follow';

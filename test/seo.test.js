@@ -37,6 +37,7 @@ test('automatic descriptions exclude attribution URLs, code, tables and injected
   const h = harness();
   const locals = { path: 'wiki/topic.html', site: { data: {} }, page: { content:
     '<blockquote><p>原文链接：https://example.com/</p></blockquote><pre><p>SECRET_CODE</p></pre>' +
+    '<p>截至 2026 年 10 月 2 日，所给 B 站收藏夹未提供本讲视频链接。</p>' +
     '<div class="article-inline-ad-wrapper"><p>广告</p></div><p>Useful explanation about the actual topic.</p>' } };
   h.filters.template_locals(locals);
   assert.equal(locals.page.description, 'Useful explanation about the actual topic.');
