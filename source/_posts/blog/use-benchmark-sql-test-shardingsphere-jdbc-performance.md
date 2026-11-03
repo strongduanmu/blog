@@ -1,4 +1,8 @@
 ---
+robots: noindex,follow
+sitemap: false
+baidusitemap: false
+disable_ads: true
 title: BenchmarkSQL & ShardingSphere-JDBC 性能测试实战
 description: 使用 BenchmarkSQL 工具对 ShardingSphere-JDBC 进行 TPC-C 基准性能测试，介绍测试模型、环境搭建及性能指标分析方法，评估分布式数据库中间件性能表现。
 date: 2024-02-20 18:07:01

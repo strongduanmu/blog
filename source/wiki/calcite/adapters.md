@@ -24,7 +24,7 @@ banner: /assets/banner/banner_5.jpg
 - [Geode 适配器](/wiki/calcite/geode-adapter.html)（[calcite-geode](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/geode/package-summary.html)）；
 - [InnoDB 适配器](/wiki/calcite/innodb-adapter.html)（[calcite-innodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/innodb/package-summary.html)）；
 - JDBC 适配器（[calcite-core](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/jdbc/package-summary.html) 的一部分）；
-- [MongoDB 适配器](/wiki/calcite/mongodb-adapter.html)（[calcite-mongodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/mongodb/package-summary.html)）；
+- [MongoDB 适配器源码](https://github.com/apache/calcite/tree/main/mongodb)（[calcite-mongodb](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/mongodb/package-summary.html)）；
 - [操作系统适配器](/wiki/calcite/os-adapter.html)（[calcite-os](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/os/package-summary.html)）；
 - [Pig 适配器](/wiki/calcite/pig-adapter.html)（[calcite-pig](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/pig/package-summary.html)）；
 - [Redis 适配器](/wiki/calcite/redis-adapter.html)（[calcite-redis](https://calcite.apache.org/javadocAggregate/org/apache/calcite/adapter/redis/package-summary.html)）；

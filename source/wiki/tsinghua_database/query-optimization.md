@@ -1,5 +1,9 @@
 ---
 layout: wiki
+robots: noindex,follow
+sitemap: false
+baidusitemap: false
+disable_ads: true
 wiki: tsinghua_database
 order: 012
 title: 查询优化

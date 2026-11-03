@@ -1,0 +1,181 @@
+# Titles and descriptions summarize existing content; URLs remain unchanged.
+pages:
+  /:
+    title: 数据库内核、查询优化与 AI Agents 学习实践
+    description: 记录 Apache Calcite 查询优化、ShardingSphere 联邦查询、Java 与数据库内核开发实践，整理 CMU 数据库及 AI Agents 课程笔记，分享代码分析、问题排查过程和学习资料。
+  /wiki/:
+    title: 技术文档与课程笔记：Calcite、数据库和 AI Agents
+    description: 汇集 Apache Calcite、Avatica 中文文档与 CMU 数据库、查询优化、AI Agents 课程笔记，按专题整理原始课程、代码示例和学习资料，方便从文档目录进入具体章节并对照原课复习。
+  /topic/:
+    title: 技术博客专栏：Calcite 查询优化与数据库开发
+    description: 按主题浏览端小强博客的技术专栏，阅读 Calcite SQL 解析与查询优化、数据库内核开发及相关工程实践文章，通过同一专题下的源码分析和案例继续学习。
+  /more/:
+    title: 关于博主：数据库内核开发与开源技术分享
+    description: 了解端小强的数据库内核与开源项目经历，查看 Apache ShardingSphere、Calcite 相关技术分享、演讲资料及联系方式，交流查询优化、联邦查询和数据库工程实践。
+  /more/news/:
+    title: 博客动态与近况记录
+    description: 记录端小强博客的个人近况与日常动态。技术文章和课程笔记可从博客、文档入口继续浏览，博主介绍、开源经历、技术演讲及联系方式见关于页面。
+  /notes/:
+    title: 技术资源导航：数据库、开发工具与常用网站
+    description: 整理日常学习与开发使用的数据库课程、SQL 参考资料、技术论坛和开发工具入口，包括诊断、性能分析及常用网站，方便按用途快速查找资料并继续阅读相关命令便笺。
+  /notes/docker.html:
+    title: Docker 数据库容器命令与 MySQL 环境配置
+    description: 整理使用 Docker 搭建数据库环境时常查的命令，包含 MySQL 镜像查找与拉取、容器启动、端口和目录映射等操作，结合命令注释说明参数含义，方便配置开发测试环境时查阅。
+  /notes/git.html:
+    title: Git 常用命令：远程仓库、分支管理与提交排查
+    description: 整理日常 Git 操作与问题处理方法，包含远程仓库配置、分支和提交管理，以及推送代码时遇到的问题，保留具体命令与操作示例，方便在开源协作和本地开发过程中查阅。
+  /notes/shell.html:
+    title: Shell 命令便笺：scp 文件传输与批量重命名
+    description: 整理开发中常用的 Shell 命令，记录 scp 在本机与服务器之间传输文件的写法、端口参数和目录用法，以及 rename 批量重命名示例，方便处理文件和远程开发环境时查阅。
+  /notes/idea.html:
+    title: IntelliJ IDEA 大文件限制与 Maven 文件显示问题
+    description: 记录 IntelliJ IDEA 使用中的具体问题与处理方法，包含大文件超过默认大小限制时的配置，以及 Maven pom 文件变灰的排查，方便根据实际现象查找对应的设置位置和参数。
+  /notes/mac.html:
+    title: macOS 开发环境便笺：应用异常与本地 HTTP 服务
+    description: 整理 Mac 开发环境中的常见操作与问题处理记录，包括应用无法打开时的历史排查方法和本地 HTTP 服务启停命令。涉及系统权限与安全设置的操作，使用前需结合当前系统版本判断。
+  /notes/virtual_box.html:
+    title: VirtualBox 排障：Mac 内核驱动未安装问题
+    description: 记录在 Mac 上使用 VirtualBox 安装虚拟机时遇到的 Kernel driver not installed 与 rc=-1908 异常，保留错误信息和处理步骤，方便对照虚拟机启动现象排查环境问题。
+  /notes/wireshark.html:
+    title: Wireshark 排障：Mac 抓包权限与设备访问问题
+    description: 记录 Mac 上 Wireshark 因设备访问权限不足而无法抓包的现象及历史处理命令，便于对照错误排查抓包环境。调整设备权限前应核对当前安装方式和系统配置，避免扩大无关权限。
+  /wiki/c/:
+    title: C 语言学习资料与程序运行原理参考
+    description: 整理 C 语言学习过程中参考的教程与程序运行原理资料，从课程目录进入 C 语言入门笔记，继续了解基础语法、开发环境、编译运行流程和指针等内容。
+  /wiki/c/introduction.html:
+    title: C 语言入门：开发环境、编译运行与基础语法
+  /wiki/tsinghua_database/:
+    title: 课程资料与 HuaDB 数据库实验入口
+    description: 整理清华大学数据库管理系统课程的学习入口，包括课程主页、B 站教学视频和 HuaDB 数据库内核实验文档，方便结合课堂讲解与课程实验学习数据库系统的基本原理和实现方法。
+  /wiki/calcite/background.html:
+    title: Apache Calcite 框架背景、组件职责与适配器
+  /wiki/calcite/tutorial.html:
+    title: CSV 教程：构建 Calcite、连接模型与执行 SQL
+  /wiki/calcite/algebra.html:
+    title: 关系代数与 RelBuilder 查询计划构建
+  /wiki/calcite/adapters.html:
+    title: 数据源适配器、驱动与 JDBC 连接参数
+  /wiki/calcite/spatial.html:
+    title: 空间 SQL、几何数据与空间查询支持
+  /wiki/calcite/stream.html:
+    title: 流式 SQL 查询、窗口与流表关联
+  /wiki/calcite/materialized-views.html:
+    title: 物化视图与基于视图的查询重写
+  /wiki/calcite/lattice.html:
+    title: Lattice 格模型、统计信息与聚合优化
+  /wiki/calcite/reference.html:
+    title: SQL 语法参考：关键字、数据类型与函数
+  /wiki/calcite/model.html:
+    title: JSON 与 YAML 模型配置：模式、表和物化视图
+  /wiki/calcite/howto.html:
+    title: 源码构建、Gradle 配置与测试运行指南
+  /wiki/calcite/develop.html:
+    title: 源码开发、贡献流程与代码提交指南
+  /wiki/calcite/file-adapter.html:
+    title: 文件适配器：文件映射、CSV 与表定义
+  /wiki/calcite/os-adapter.html:
+    title: 操作系统适配器与 sqlsh 命令行查询
+  /wiki/calcite/pig-adapter.html:
+    title: Pig 适配器：使用 SQL 编写并执行查询
+  /wiki/avatica/background.html:
+    title: Avatica 框架背景与 JDBC、ODBC、HTTP 组件
+  /wiki/avatica/client_reference.html:
+    title: Java JDBC 客户端连接参数与配置参考
+  /wiki/avatica/compatibility.html:
+    title: 客户端与服务端版本兼容性及 TCK 测试
+  /wiki/avatica/howto.html:
+    title: 源码构建、测试运行与代码贡献指南
+  /wiki/avatica/json_reference.html:
+    title: JSON 协议请求、响应与消息结构参考
+  /wiki/avatica/protocol_testing.html:
+    title: HTTP 协议测试与 cURL 请求示例
+  /wiki/avatica/roadmap.html:
+    title: Avatica 功能状态、已实现能力与路线图
+  /wiki/avatica/security.html:
+    title: 身份验证与安全配置：Basic、Digest 和 Kerberos
+  /blog/introduction-to-antlr.html:
+    title: ANTLR 基础入门：安装配置、语法定义与 Java 示例
+    description: 从 ANTLR 安装与 Hello World 语法文件开始，介绍词法分析、语法分析和语法树遍历的基本流程，结合 Java 示例理解语法规则、监听器与访问器在实际解析任务中的用法。
+
+  /blog/improving-the-performance-of-an-antlr-parser.html:
+    title: ANTLR 解析性能优化：运行时选择与语法调整
+    description: 整理 ANTLR 解析性能优化的经验，比较不同语言运行时的实现差异与示例测试结果，讨论语法和运行环境对解析速度的影响，为定位解析器性能问题提供参考。
+
+  /blog/java-8-new-features-in-action.html:
+    title: Java 8 新特性实战：Lambda、Stream 与日期 API
+    description: 通过代码示例学习 Java 8 的语法和类库变化，介绍 Lambda、函数式接口、方法引用与 Stream 操作，并整理 Optional 和日期时间 API 的使用方式，方便对照旧写法理解新特性。
+
+  /blog/jvm-learning-materials.html:
+    title: JVM 学习资料：字节码、内存模型与 GC 调优
+    description: 按经典书籍、综合介绍、字节码和 GraalVM 等主题整理 JVM 学习资料，汇集虚拟机原理、Class 文件结构、内存模型和 GC 调优的参考入口，方便围绕具体问题继续查阅和学习。
+
+  /blog/mysql-learning-materials.html:
+    title: MySQL 学习资料：官方文档、InnoDB 与性能优化
+    description: 整理 MySQL 官方文档、经典书籍与技术文章入口，围绕 InnoDB 存储引擎、事务处理和性能优化等主题收集学习资源，方便按原理、开发实践或排障问题选择后续阅读材料。
+
+  /blog/centos-dev-environment-setup-note.html:
+    title: CentOS 开发环境搭建：VirtualBox 安装与网络配置
+    description: 记录在 Mac 上使用 VirtualBox 搭建 CentOS 开发环境的过程，包含虚拟机创建、系统安装、虚拟网卡和 IP 设置，通过 Host-Only 与 NAT 网络配置实现主机互通和互联网访问。
+
+  /blog/analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function.html:
+    description: 记录 ShardingSphere 联邦查询中 GROUPING 聚合函数结果异常的排查过程，从问题 SQL 和函数语义进入 Calcite 的实现，比较预期与实际结果，说明异常原因及对应的修复思路。
+  /blog/apache-calcite-catalog-type-system-implementation.html:
+    description: 结合 Apache Calcite 源码梳理 SQL 校验中的类型推导与类型转换，分析表达式类型如何确定、显式转换与隐式转换怎样处理，并说明类型系统在校验过程中的作用。
+  /blog/apache-calcite-learning-materials.html:
+    description: 按官方文档、基础介绍、优化器和执行器等主题整理 Apache Calcite 学习资料，收集源码分析文章与工程实践入口，方便从 SQL 解析、校验和查询计划继续深入学习。
+  /blog/apache-calcite-quick-start-guide.html:
+    description: 通过 CSV 示例了解 Apache Calcite 的架构和查询执行流程，从连接 SQLLine、注册 Schema 与 Table 元数据，到规则注册、计划优化和生成可执行代码，逐步跟踪一次 SQL 查询。
+  /blog/basic-introduction-to-common-distributed-transaction-solutions.html:
+    description: 从跨服务和跨数据库操作中的一致性问题介绍分布式事务，梳理 XA 协议及 DTP 模型中的应用程序、资源管理器和事务管理器，说明各组件的职责与协作方式。
+  /blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html:
+    description: 记录 ShardingSphere 联邦查询升级 Calcite 1.38.0 后 BIT_COUNT 函数异常的排查过程，分析类型转换与函数校验问题，对照 MySQL 行为梳理兼容需求，并介绍 Calcite UDF 的适配方法。
+  /blog/cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model.html:
+    description: 围绕 Calcite 基于代价的查询优化，梳理统计信息、基数估计与代价模型之间的关系，跟踪 RelMetadataQuery 获取元数据的过程，并分析优化器怎样计算和比较执行计划的代价。
+  /blog/cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology.html:
+    description: 从 Java 平台无关性的实现方式进入字节码学习，使用 javap 和 jclasslib 查看 Class 文件，结合常量池、方法字节码和指令分类，理解源码编译后的结构与执行过程。
+  /blog/deep-understand-of-apache-calcite-hep-planner.html:
+    description: 从 RBO 规则优化出发，介绍 Apache Calcite HepPlanner 中的 HepProgram、HepInstruction 等概念，结合源码跟踪规则匹配与执行过程，理解启发式优化器怎样改写关系表达式。
+  /blog/deep-understand-of-apache-calcite-volcano-planner.html:
+    description: 结合 Volcano 与 Cascades 优化器的论文概念，分析 Apache Calcite VolcanoPlanner 的核心对象和执行流程，从初始化、setRoot 到 findBestExp 跟踪基于代价的查询计划搜索。
+  /blog/download-ding-talk-video-by-charles.html:
+    description: 记录 Charles 抓包与 FFmpeg 工具的使用过程，包括代理配置、请求定位和 m3u8 视频下载，结合具体操作说明怎样为技术分享直播准备离线回看资源。
+  /blog/explore-apache-calcite-system-catalog-implementation.html:
+    description: 梳理 Apache Calcite System Catalog 的对象体系，介绍 Schema、Table、RelDataType 和 Function 等元数据的职责，结合源码分析目录初始化过程及其在 SQL 校验与优化中的使用。
+  /blog/explore-shardingsphere-5.0.0-beta-kernel-enhancement.html:
+    description: 围绕 Apache ShardingSphere 5.0.0-beta 的内核变化，介绍 SQL 基础解析、标准路由和分布式查询能力的增强，结合内核处理流程说明这些功能解决的问题及实现方式。
+  /blog/explore-the-practice-of-apache-calcite-in-mycat2.html:
+    description: 从 MyCat2 的原型库、业务库和测试数据配置开始，跟踪 Calcite 在分布式查询引擎中的执行过程，分析 SQL 转换为查询计划、执行代码生成及其与 MyCat2 的集成方式。
+  /blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html:
+    description: 通过 SM4 加解密示例研究 GraalVM 编译动态链接库的方法，对照 MySQL UDF 的初始化、执行和释放接口，说明 Java 原生函数导出、动态库编译及 C 层调用的实现过程。
+  /blog/implementation-principle-of-apache-calcite-sql-parser.html:
+    description: 从 JavaCC 的语法描述与解析器生成过程进入 Apache Calcite SQL Parser 源码，分析 Parser.jj、解析器扩展与 SqlNode 体系，并说明解析后的语法树如何用于 SQL 生成。
+  /blog/java-aot-compiler-framework-graalvm-quick-start.html:
+    description: 结合云原生应用的启动与内存开销问题介绍 GraalVM AOT 编译，比较提前编译的优势和限制，通过 SDK 安装、Maven Native Image 构建与 Tracing Agent 演示实际使用过程。
+  /blog/mysql-5.7.40-install-and-initial-config-guide.html:
+    description: 记录 CentOS 7 环境安装 MySQL 5.7.40 的完整操作，从二进制包下载与解压，到用户创建、目录权限、初始化配置和服务启动，结合命令说明部署时需要检查的环境设置。
+  /blog/opcode-mnemonics-by-opcode.html:
+    description: 整理 Java 虚拟机操作码与助记符对照表，按常量、加载、存储、栈操作、运算、类型转换、比较、控制转移及引用等类别查阅指令，便于配合 Class 文件和字节码分析使用。
+  /blog/polardb-x-dev-environment-setup-note.html:
+    description: 介绍 PolarDB-X 的 CN、DN、GMS 与 CDC 组件，记录源码下载编译、DN 和 GMS 初始化以及 IDEA 启动 TddlLauncher 的步骤，通过分片表和测试数据跟踪查询调用与调试过程。
+  /blog/quickly-start-shardingsphere-jdbc-with-sqlline.html:
+    description: 使用 SQLLine 命令行工具体验 ShardingSphere JDBC，从项目打包与驱动准备，到连接参数配置和 SQL 执行，结合操作示例说明如何直接测试数据库中间件的查询能力。
+  /blog/shardingsphere-5.1.0-execution-engine-performance-optimization.html:
+    description: 分析 Apache ShardingSphere 5.1.0 执行引擎的连接模式与处理流程，介绍 UNION ALL 改写等优化方案，结合性能测试讨论数据库连接消耗、执行效率与不同查询场景之间的取舍。
+  /blog/use-java-remote-debugging-to-locate-system-table-loading-bug.html:
+    description: 记录 ShardingSphere 打包后系统表加载异常的排查过程，说明 Java JDWP 远程调试参数与连接配置，结合断点跟踪定位运行环境中的实际执行路径，并分析对应的优化方法。
+  /blog/use-mysql-test-framework-test-shardingsphere-sql-federation.html:
+    description: 介绍 MySQL Test Framework 与 MTR 测试工具的基本用法，结合 ShardingSphere 联邦查询说明测试环境、用例编写与执行过程，为检验 SQL 行为和兼容性提供实践参考。
+  /blog/use-sqlancer-to-test-shardingsphere-sql-federation.html:
+    description: 介绍 SQLancer 中 PQS、NoREC、TLP 与 DQE 等测试方法的思路，结合 ShardingSphere 联邦查询的适配与测试实践，说明怎样自动生成查询并发现 SQL 引擎的结果错误。
+  /blog/openclaw-configuration-and-feishu-integration-guide.html:
+    description: 以 OpenClaw 2026.3.13 为例介绍自托管 AI 网关，从 Gateway、Agent Runtime 和工具调用的关系讲起，记录安装初始化、飞书插件与应用配置，并通过消息交互和社区动态监控展示使用过程。
+  /blog/shardingsphere-5.3.1-new-feature-dynamic-data-masking.html:
+    description: 介绍 Apache ShardingSphere 5.3.1 动态数据脱敏的实现，从结果归并引擎扩展点与模块分工，到 YAML、DistSQL 规则配置及内置算法，结合查询示例说明脱敏与分片、加密功能的组合方式。
+  /blog/shardingsphere-5.0.0-kernel-optimization-and-upgrade-guide.html:
+    description: 对照 ShardingSphere 4.1.1 与 5.0.0 GA，梳理可插拔内核、Federation 执行引擎及功能 API 的变化，结合分片、读写分离和加解密配置说明版本升级时需要调整的内容。
+  /blog/shardingsphere-proxy-integration-test-debug-in-action.html:
+    description: 结合 ShardingSphere SQL Federation 集成测试异常，记录本地构建 Proxy 镜像、配置 Testcontainers 测试环境和复现问题的过程，说明怎样连接容器中的 Java 进程开展远程调试并定位执行逻辑。
+  /blog/use-benchmark-sql-test-shardingsphere-jdbc-performance.html:
+    description: 记录使用 BenchmarkSQL 准备 ShardingSphere-JDBC 测试环境的命令，包括 JDBC 与 ZooKeeper 模块依赖下载、扩展库目录配置和依赖整理。当前为未完成的操作笔记，测试模型介绍与结果分析尚待补充。
+  /blog/using-calcite-as-an-example-to-explore-the-common-implementation-of-join-operators.html:
+    description: 预留 Calcite Join 算子学习笔记，收集执行器、连接顺序调整与 CMU Join Algorithms 的参考入口。正文分析尚未完成，当前仅用于保存后续阅读线索。

@@ -1,5 +1,9 @@
 ---
 layout: wiki
+robots: noindex,follow
+sitemap: false
+baidusitemap: false
+disable_ads: true
 wiki: cmu_15_721
 order: 001
 title: 课程资料

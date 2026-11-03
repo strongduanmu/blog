@@ -11,7 +11,7 @@ banner: /assets/banner/banner_4.jpg
 
 由于 Avatica 使用 JSON 来序列化通过 HTTP 传输发送的消息，因此 RPC 层与客户端使用的语言无关。虽然 Avatica 服务器是用 Java 编写的，但这使得客户端可以使用任何语言与服务器交互，而不限于 Java。
 
-下面记录了 JSON 请求和响应对象的规范。这些 JSON 对象的程序化绑定仅在 Java 中可用。对于 Java 之外的支持，请参阅 Protocol Buffer [绑定](../avatica_protobuf_reference.html)
+下面记录了 JSON 请求和响应对象的规范。这些 JSON 对象的程序化绑定仅在 Java 中可用。对于 Java 之外的支持，请参阅 Protocol Buffer [绑定](/wiki/avatica/protobuf_reference.html)
 
 ## 索引
 

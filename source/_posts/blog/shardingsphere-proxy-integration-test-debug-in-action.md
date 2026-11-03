@@ -14,7 +14,7 @@ banner: /assets/banner/banner_8.jpg
 
 ## 前言
 
-在[使用 Java 远程调试技术定位系统表加载问题](https://strongduanmu.com/blog/use-java-remote-debugging-to-locate-system-table-loading-bug/)一文中，我们了解了 Java 远程调试技术，以及如何使用远程调试来定位打包后的程序问题。最近，笔者在开发 ShardingSphere 过程中，又遇到了 ShardingSphere 集成测试相关的问题。ShardingSphere 集成测试使用了基于容器技术的 TestContainer，通过 TestContainer 能够快速地部署集成测试所依赖的容器，使得不同环境的测试变得简单。但是使用容器也使得代码调试变得更加困难，下面笔者将结合一个实际的社区 issue，来介绍下如何在容器中使用远程调试。
+在[使用 Java 远程调试技术定位系统表加载问题](https://strongduanmu.com/blog/use-java-remote-debugging-to-locate-system-table-loading-bug.html)一文中，我们了解了 Java 远程调试技术，以及如何使用远程调试来定位打包后的程序问题。最近，笔者在开发 ShardingSphere 过程中，又遇到了 ShardingSphere 集成测试相关的问题。ShardingSphere 集成测试使用了基于容器技术的 TestContainer，通过 TestContainer 能够快速地部署集成测试所依赖的容器，使得不同环境的测试变得简单。但是使用容器也使得代码调试变得更加困难，下面笔者将结合一个实际的社区 issue，来介绍下如何在容器中使用远程调试。
 
 ## 问题分析
 

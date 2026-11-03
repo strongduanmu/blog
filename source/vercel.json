@@ -1,0 +1,52 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.strongduanmu.com"
+        }
+      ],
+      "destination": "https://strongduanmu.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/about/",
+      "destination": "/more/",
+      "permanent": true
+    },
+    {
+      "source": "/wiki/cmu_11_768/course_overview_what_is_an_agent.html",
+      "destination": "/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html",
+      "permanent": true
+    },
+    {
+      "source": "/wiki/avatica_protobuf_reference.html",
+      "destination": "/wiki/avatica/protobuf_reference.html",
+      "permanent": true
+    },
+    {
+      "source": "/blog/use-java-remote-debugging-to-locate-system-table-loading-bug/",
+      "destination": "/blog/use-java-remote-debugging-to-locate-system-table-loading-bug.html",
+      "permanent": true
+    },
+    {
+      "source": "/wiki/calcite/site/_posts/2016-10-12-release-1.10.0.md",
+      "destination": "https://github.com/apache/calcite/blob/main/site/_posts/2016-10-12-release-1.10.0.md",
+      "permanent": true
+    },
+    {
+      "source": "/wiki/calcite/mongodb-adapter.html",
+      "destination": "https://github.com/apache/calcite/tree/main/mongodb",
+      "permanent": true
+    },
+    {
+      "source": "/blog/centos-dev-environment-setup-note/",
+      "destination": "/blog/centos-dev-environment-setup-note.html",
+      "permanent": true
+    }
+  ]
+}

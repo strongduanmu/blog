@@ -1,0 +1,4 @@
+interface:
+  display_name: "网站推广增长"
+  short_description: "通过 Chrome 巡检搜索引擎和广告后台，跟踪博客收录、搜索流量与收入增长"
+  default_prompt: "使用 $website-growth 检查 strongduanmu.com 的搜索收录、流量和广告表现，给出有证据的优化优先级。"

@@ -1,4 +1,8 @@
 ---
+robots: noindex,follow
+sitemap: false
+baidusitemap: false
+disable_ads: true
 layout: page
 breadcrumb: false
 menu_id: news
