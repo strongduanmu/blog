@@ -26,7 +26,7 @@ Apache Calcite 是一个优秀的动态数据管理框架，提供了如：SQL �
 * Calcite 源码学习第 3 弹：[Apache Calcite System Catalog 实现探究](https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html)
 * Calcite 源码学习第 4 弹：[深度探究 Apache Calcite SQL 校验器实现原理](https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html)
 * Calcite 源码学习第 5 弹：TODO
-* Calcite 源码学习第 6 弹：[深入理解 Apache Calcite HepPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-hep-planner.html)
+* Calcite 源码学习第 6 弹：深入理解 Apache Calcite HepPlanner 优化器
 * Calcite 源码学习第 7 弹：[深入理解 Apache Calcite ValcanoPlanner 优化器](https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html)
 * Calcite 源码学习第 8 弹：[CBO 优化的基石——Apache Calcite 统计信息和代价模型详解](https://strongduanmu.com/blog/cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model.html)
 * Calcite 源码学习第 8 弹：TODO
