@@ -72,21 +72,21 @@ docker compose run test
 
 请参阅[开发者指南]({{ site.baseurl }}/develop/#getting-started)。
 
-## 开发者进阶主题
+# 开发者进阶主题
 
 如果您正在为代码库的特定部分添加功能，以下章节可能会对您有所帮助。如果您只是从源码构建和运行测试，则不需要了解这些主题。
 
-## 提交者进阶主题
+# 提交者进阶主题
 
 以下章节对 Calcite 提交者，特别是发布经理有帮助。
 
-### 设置 PGP 签名密钥（针对 Calcite 提交者）
+## 设置 PGP 签名密钥（针对 Calcite 提交者）
 
 按照[这里](http://www.apache.org/dev/release-signing)的说明创建密钥对。（在 Mac OS X 上，我执行了 `brew install gpg` 和 `gpg --gen-key`。）
 
 按照 `KEYS` 文件中的说明，将您的公钥添加到 [`KEYS`](https://dist.apache.org/repos/dist/release/calcite/KEYS) 文件中。（`KEYS` 文件不存在于 git 仓库或发布 tar 包中，因为那样会[冗余](https://issues.apache.org/jira/browse/CALCITE-1746)。）
 
-### 运行 GPG 代理
+## 运行 GPG 代理
 
 默认情况下，需要您解锁 GPG 私钥的 Gradle 插件会在终端中提示您。为了避免多次输入密码，强烈建议安装并运行 `gpg-agent`。
 
@@ -110,7 +110,7 @@ fi
 
 此外，确保在 `~/.gnupg/gpg-agent.conf` 中设置 `default-cache-ttl 6000`，以保证您的凭据在构建期间会被缓存。
 
-### 设置 Nexus 仓库凭据（针对 Calcite 提交者）
+## 设置 Nexus 仓库凭据（针对 Calcite 提交者）
 
 Gradle 提供了多种[配置项目属性](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)的方法。例如，您可以更新 `$HOME/.gradle/gradle.properties`。
 
@@ -130,7 +130,7 @@ asfSvnPassword=
 
 注意：如果您想使用 `gpg-agent`，需要传递 `useGpgCmd` 属性，并通过 `signing.gnupg.keyName` 指定密钥 ID。
 
-### 制作快照（针对 Calcite 提交者）
+## 制作快照（针对 Calcite 提交者）
 
 开始之前：
 
@@ -144,7 +144,7 @@ git clean -xn
 ./gradlew -Pasf publish
 ```
 
-### 制作发布候选版本（针对 Calcite 提交者）
+## 制作发布候选版本（针对 Calcite 提交者）
 
 开始之前：
 
@@ -164,7 +164,7 @@ git clean -xn
 
 如果任何步骤失败，请修复问题，然后从头开始。
 
-#### 直接在您的环境中准备发布候选版本
+### 直接在您的环境中准备发布候选版本
 
 选择一个发布候选索引（从 0 开始），并确保它不会与该版本的先前候选版本冲突。
 
@@ -179,7 +179,7 @@ git clean -xn
 ./gradlew prepareVote -Prc=0 -Pasf
 ```
 
-#### 在 Docker 中准备发布候选版本
+### 在 Docker 中准备发布候选版本
 
 * 您需要安装 [Docker](https://docs.docker.com/install/) 和 [Docker Compose](https://docs.docker.com/compose/install/)。
 
@@ -201,7 +201,7 @@ docker compose run -v ~/.gnupg:/.gnupg publish-release-for-voting
 docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg publish-release-for-voting
 ```
 
-### 检查构件
+## 检查构件
 
 * 在 `release/build/distributions` 目录中应该有以下 3 个文件（以及其他文件）：
   * apache-calcite-avatica-X.Y.Z-src.tar.gz
@@ -223,11 +223,11 @@ docker compose run -v /c/Users/username/AppData/Roaming/gnupg:/.gnupg publish-re
 * 在 `Staging Repositories` 标签页中，应该有一行配置文件为 `org.apache.calcite`
 * 浏览构件树并确保 .jar、.pom、.asc 文件都存在
 
-### 发布尝试失败后清理（针对 Calcite 提交者）
+## 发布尝试失败后清理（针对 Calcite 提交者）
 
 如果有什么不正确，您可以修复它，提交它，并准备下一个候选版本。发布候选标签可以保留一段时间。
 
-### 验证发布
+## 验证发布
 
 ```bash
 # 检查签名密钥（例如 2AD3FAE3）是否已推送
@@ -259,7 +259,7 @@ function checkHash() {
 checkHash apache-calcite-avatica-X.Y.Z-rcN
 ```
 
-### 通过 Apache 投票流程获得发布批准（针对 Calcite 提交者）
+## 通过 Apache 投票流程获得发布批准（针对 Calcite 提交者）
 
 在开发邮件列表上进行发布投票。
 注意：投票邮件草稿会作为 `prepareVote` 任务的最后一步打印出来，您可以在 `/build/prepareVote/mail.txt` 中找到草稿。
@@ -343,7 +343,7 @@ Julian
 
 使用 [Apache URL 缩短器](http://s.apache.org) 为投票提案和结果邮件生成缩短的 URL。示例：[s.apache.org/calcite-1.2-vote](http://s.apache.org/calcite-1.2-vote) 和 [s.apache.org/calcite-1.2-result](http://s.apache.org/calcite-1.2-result)。
 
-### 发布版本（针对 Calcite 提交者）
+## 发布版本（针对 Calcite 提交者）
 
 发布投票成功后，我们需要将发布推送到镜像，以及执行其他任务。
 
@@ -353,7 +353,7 @@ Julian
 
 提示：仅在暂存的 nexus 构件在仓库中提升后才推送 git 标签。这是因为推送标签会触发 Docker Hub 立即开始构建 docker 镜像，而构建将拉入提升的构件。如果构件尚不可用，Docker Hub 上的构建将失败。在确认 nexus 构件已正确提升后，最好继续以下步骤。
 
-#### 直接在您的环境中发布
+### 直接在您的环境中发布
 
 ```bash
 # 试运行发布（推送到 asf-like-environment）
@@ -371,7 +371,7 @@ svn rm https://dist.apache.org/repos/dist/release/calcite/apache-calcite-avatica
 
 旧版本仍将在[发布归档](http://archive.apache.org/dist/calcite/)中可用。
 
-#### 使用 Docker 发布版本
+### 使用 Docker 发布版本
 
 这假设 rc 发布已被标记并推送到 git 仓库。
 
@@ -379,13 +379,13 @@ svn rm https://dist.apache.org/repos/dist/release/calcite/apache-calcite-avatica
 docker compose run promote-release
 ```
 
-### 添加发布说明并发布公告
+## 添加发布说明并发布公告
 
 通过复制 [site/_posts/2016-11-01-release-1.9.0.md]({{ site.sourceRoot }}/site/_posts/2016-11-01-release-1.9.0.md) 添加发布说明，更新 `gradle.properties` 中的版本号，生成 javadoc 并复制到 `site/target/avatica/javadocAggregate`，[发布网站](#publish-the-web-site)，并检查它是否出现在[新闻](http://localhost:4000/news/)目录中。
 
 24 小时后，通过向 [announce@apache.org](https://mail-archives.apache.org/mod_mbox/www-announce/) 发送邮件来发布公告。您可以使用 [1.8.0 公告](https://mail-archives.apache.org/mod_mbox/www-announce/201606.mbox/%3C57559CC7.1000402@apache.org%3E)作为模板。务必包含项目的简要描述。
 
-### 发布网站（针对 Calcite 提交者）
+## 发布网站（针对 Calcite 提交者）
 {: #publish-the-web-site}
 
 请参阅 [site/README.md]({{ site.sourceRoot }}/site/README.md) 中的说明。

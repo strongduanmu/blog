@@ -8,7 +8,7 @@ const { escapeHTML } = require('hexo-util');
 // Register repository-owned views explicitly: Hexo does not load a root layout/ directory.
 // https://hexo.io/api/themes
 hexo.extend.filter.register('before_generate', function() {
-  for (const view of ['index.ejs', 'index_wiki.ejs', 'index_topic.ejs', '_partial/list_heading.ejs']) {
+  for (const view of ['_partial/head.ejs']) {
     this.theme.setView(view, fs.readFileSync(path.join(this.base_dir, 'layout', view), 'utf8'));
   }
 });
@@ -42,17 +42,17 @@ hexo.extend.filter.register('template_locals', function(locals) {
   const canonical = canonicalUrl(locals.path);
   const route = new URL(canonical).pathname;
   const entry = (seo.pages || {})[route] || {};
-  if (entry.title) page.title = entry.title;
+  page.seo_title = entry.title || page.title;
   if (/^\/page\/\d+\/$/.test(route)) {
-    page.title = `技术博客 · 第 ${page.current} 页`;
-    page.description = `端小强技术博客第 ${page.current} 页，继续浏览数据库内核、Apache Calcite 查询优化、ShardingSphere 联邦查询和 Java 开发相关文章，按发布时间查找过往的源码分析、问题排查与工程实践记录。`;
+    page.seo_title = `技术博客 · 第 ${page.current} 页`;
+    page.seo_description = `端小强技术博客第 ${page.current} 页，继续浏览数据库内核、Apache Calcite 查询优化、ShardingSphere 联邦查询和 Java 开发相关文章，按发布时间查找过往的源码分析、问题排查与工程实践记录。`;
   }
   if (route === '/404.html') page.robots = 'noindex,follow';
   if (/^\/wiki\/tags\//.test(route)) {
-    page.title = `${page.tagName || page.title} 专题文档`;
+    page.seo_title = `${page.tagName || page.title} 专题文档`;
     page.robots = 'noindex,follow';
   }
-  page.description = entry.description || page.description || descriptionFromContent(page.content) || hexo.config.description;
+  page.seo_description = entry.description || page.seo_description || page.description || descriptionFromContent(page.content) || hexo.config.description;
   // Keep existing per-page injections; normalize directory aliases to one URL.
   // https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
   const oldHead = page.inject && page.inject.head;

@@ -47,7 +47,7 @@ ghuser:
 
 adsense:
   layout: markdown
-  title: 广告
+  title: 赞助商
   content: |
     <div class="adsense-sidebar">
       <ins class="publisher-ad-unit"

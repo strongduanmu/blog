@@ -1,6 +1,6 @@
 # strongduanmu.com 实现与验收
 
-以下是 2026-11-03 的站点实现。执行前核对仓库当前状态，不把历史路径或实现当成永远不变。
+以下是截至 2026-11-04 的站点实现。执行前核对仓库当前状态，不把历史路径或实现当成永远不变。
 
 ## 仓库与发布
 
@@ -52,13 +52,13 @@ AdSense 的 `push({})` 按 DOM 顺序处理未初始化的 `.adsbygoogle`。现�
 
 ## 搜索基础信息（2026-11-03 增补）
 
-- `scripts/website-seo.js` 使用 Hexo `template_locals` 补充独立标题、描述及唯一 canonical；已有正文、侧栏和页面注入均保留。自动摘要排除原文链接、代码、表格和广告片段。
-- 人工优化的标题与摘要集中在 `source/_data/seo.yml`，按规范 URL 路径维护。目录键使用 `/wiki/c/`，不是 `/wiki/c/index.html`。标题可能同时用于页面标题及搜索标题，修改前核对实际效果。
+- `scripts/website-seo.js` 使用 Hexo `template_locals` 生成独立 `seo_title`、`seo_description` 及唯一 canonical；不改写正文使用的 `page.title`、`page.description`。自动摘要排除原文链接、代码、表格和广告片段。
+- 人工优化的标题与摘要集中在 `source/_data/seo.yml`，按规范 URL 路径维护。目录键使用 `/wiki/c/`，不是 `/wiki/c/index.html`。这些标题与摘要只供 `layout/_partial/head.ejs` 输出浏览器标题、description、Open Graph 等元信息，不得用于可见正文、面包屑或导航。
 - `_config.yml` 中 `pretty_urls.trailing_index: false`，保留普通文章的 `.html`；站点描述作为兜底，不代替核心页面的独立描述。
 - 本地生成器覆盖 `sitemap`、`baidusitemap`，两者均包含正式 Wiki 与文章，排除 noindex、草稿、静态资源及显式关闭 sitemap 的条目；不要恢复旧百度生成器“仅有分类的文章”条件。
 - Vercel 博客项目域名设置：`https://vercel.com/strongduanmu-blog/blog/settings/domains`。当前 www 已在域名层配置为 308 → `strongduanmu.com`，保留路径与参数；主域继续连接 Production。迁移项目时同时检查这项设置，不能只依赖仓库内 host 条件。
 - `source/vercel.json` 会复制到生成站点根目录，负责 www → 裸域名、目录尾斜杠以及已核对的旧路径重定向。根据 Vercel 文档，带文件扩展名的文章不会被 `trailingSlash: true` 改成目录。修改后必须验证线上状态码、Location、目标页面与不存在重定向循环。
-- `layout/index*.ejs` 和 `_partial/list_heading.ejs` 由 SEO 脚本通过 Hexo `theme.setView` 显式注册，提供目录页可见 H1；根目录 `layout/` 不会被 Hexo 自动载入，不要只编辑未注册模板就认为已生效。
+- `layout/_partial/head.ejs` 由 SEO 脚本通过 Hexo `theme.setView` 显式注册。此前新增的目录页 H1 与样式已撤回，使用主题原有列表布局；不为消除 H1 告警改变可见展示。侧栏与内文广告标签恢复“赞助商”，文末广告恢复原先无额外标签的展示。
 - 未完成的 Join 算子与 BenchmarkSQL 笔记也暂时 noindex；补全正文后再评估恢复。
 - 只有 TODO 的 CMU 15-721 资料页、清华查询优化占位页，以及内容很少的个人动态页，保留访问但设置 noindex、退出两份地图。将来补全内容后再评估恢复，不批量取消全站的 noindex。
 - 搜索检查增加 `test/seo.test.js`，并检查实际生成页面与两份 XML 的 canonical 一致性。不要只凭单元检查就宣布线上重定向已经生效。

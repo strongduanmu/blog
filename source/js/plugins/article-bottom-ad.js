@@ -19,7 +19,7 @@
     const bottom = document.createElement('section');
     bottom.className = 'article-bottom-ad';
     bottom.setAttribute('aria-label', '广告');
-    bottom.innerHTML = '<div class="ad-label">广告</div><div class="ad-container">' +
+    bottom.innerHTML = '<div class="ad-container">' +
       '<ins class="publisher-ad-unit" style="display:block" ' +
       'data-ad-client="ca-pub-9880881761323734" data-ad-slot="6799117067" ' +
       'data-ad-format="auto" data-full-width-responsive="true"></ins></div>';

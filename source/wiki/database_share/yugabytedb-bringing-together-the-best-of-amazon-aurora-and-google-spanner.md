@@ -16,7 +16,7 @@ references:
   - '[Evolving Clock Sync for Distributed Databases (HLC vs TrueTime)](https://www.yugabyte.com/blog/evolving-clock-sync-for-distributed-databases/)'
 ---
 
-![YugabyteDB 技术分享：结合 Amazon Aurora 与 Google Spanner 的设计](/wiki/database_share/yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner/yogabytedb-share.png)
+![](/wiki/database_share/yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner/yogabytedb-share.png)
 
 在现代分布式数据库的演进过程中，如何在保留关系型数据库（`RDBMS`）完整 `SQL` 生态与严格 `ACID` 事务语义的同时，实现云原生场景下的水平扩展与全局高可用，始终是数据库内核研发的核心挑战。传统单机关系型数据库（如原生 `PostgreSQL`、`MySQL`）受制于单节点计算与存储上限；早期 `NoSQL` 系统（如 `Cassandra`、`HBase`）虽解决了扩展性问题，却往往以牺牲强一致性与关系模型为代价。
 

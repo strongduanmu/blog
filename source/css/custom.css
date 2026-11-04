@@ -305,7 +305,6 @@ li>code:not([class]), p>code:not([class]) {
   width: 100%;
 }
 .publisher-ad[hidden] { display: none !important; }
-.ad-label,
 .article-inline-ad-label {
   display: block;
   color: var(--text-p2);
@@ -413,7 +412,3 @@ dialog.ad-support-notice {
   max-width: 100%;
   height: auto;
 }
-
-/* One visible main heading for article and documentation indexes. */
-.list-heading { margin: 1rem; }
-.list-heading h1 { margin: 0; font-size: 1.35rem; line-height: 1.5; color: var(--text-p1); }

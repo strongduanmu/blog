@@ -339,11 +339,11 @@ public class AdapterContextTest {
 }
 ```
 
-## 面向开发者的高级主题
+# 面向开发者的高级主题
 
 如果你要向代码库的特定部分添加功能，则可能会对以下部分感兴趣。如果你只是从源代码构建并运行测试，则不需要了解这些主题。
 
-### Java 类型工厂
+## Java 类型工厂
 
 当 Calcite 比较类型（ `RelDataType` 的实例）时，它要求它们是同一对象。如果有两个不同的类型实例引用相同的 Java 类型，Calcite 可能无法识别它们是否匹配。建议：
 
@@ -351,7 +351,7 @@ public class AdapterContextTest {
 
 - 存储类型，以便始终为相同类型返回相同的对象。
 
-### 重建生成的 Protocol Buffer 代码
+## 重建生成的 Protocol Buffer 代码
 
 Calcite 的 Avatica Server 组件支持使用 [Protocol Buffers](https://developers.google.com/protocol-buffers/) 的 RPC 序列化。在 Avatica 的上下文中，Protocol Buffers 可以生成由模式定义的消息集合。该库本身可以使用新模式解析旧的序列化消息。在不保证客户端和服务器具有相同版本的对象的环境中，这是非常需要的。
 
@@ -374,7 +374,7 @@ $ cd avatica/core
 $ ./src/main/scripts/generate-protobuf.sh
 ```
 
-### 创建优化器规则
+## 创建优化器规则
 
 创建一个扩展 `RelRule` 的类（或者偶尔是一个子类）。
 
@@ -434,11 +434,11 @@ public class CoreRules {
 
 如果规则是使用多种操作数模式实例化的（例如，使用相同 RelNode 基类的不同子类，或者使用不同的谓词），则配置可能包含一个方法 `withOperandFor` 以使其更容易构建常见的操作数模式（参见 `FilterAggregateTransposeRule` 示例）。 
 
-## 提交者的高级主题
+# 提交者的高级主题
 
 以下部分是 Calcite 提交者，特别是发布经理感兴趣的。
 
-### 通过 GitHub 管理 Calcite 仓库
+## 通过 GitHub 管理 Calcite 仓库
 
 提交者拥有对 Calcite 的 [ASF git 存储库](https://gitbox.apache.org/repos/asf#calcite)的写入权限，该存储库托管项目的源代码以及网站。
 
@@ -455,7 +455,7 @@ GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访�
 - 至少等待 30 分钟，你将收到邀请你加入 Apache GitHub 组织的电子邮件；
 - 接受邀请并验证你是[团队成员](https://github.com/orgs/apache/teams/calcite-committers/members)。
 
-### 合并拉取请求
+## 合并拉取请求
 
 这些是针对 Calcite 提交者的说明，他已审查了贡献者的拉取请求，发现它令人满意，并将其合并到 main。通常贡献者不是提交者（否则，在你在审查中批准后，他们会自己提交）。
 
@@ -472,7 +472,7 @@ GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访�
 - 在`修复版本`字段中标记适当的版本（例如 1.20.0）；
 - 添加评论（例如，`已修复……`），其中包含指向解决问题的提交的超链接（在 GitHub 或 GitBox 中），并感谢贡献者的贡献（如果贡献者是已经是提交者了）。提供的超链接应该是相对于主分支的。你应该能够通过浏览来识别提交——https://github.com/apache/calcite/commits/main/。
 
-### 设置 PGP 签名密钥
+## 设置 PGP 签名密钥
 
 按照[此处](https://www.apache.org/dev/release-signing)的说明创建密钥对（在 macOS 上，我执行了 `brew install gpg` 和 `gpg --full-generate-key`）。
 
@@ -480,7 +480,7 @@ GitBox 上的所有存储库都可以在 GitHub 上使用，并启用写入访�
 
 为了能够制作候选版本，请确保将密钥上传到 https://keyserver.ubuntu.com 和/或 http://pool.sks-keyservers.net:11371（Nexus 使用的密钥服务器）。
 
-### 设置 Nexus 存储库凭据
+## 设置 Nexus 存储库凭据
 
 Gradle 提供了多种[配置项目属性](https://docs.gradle.org/current/userguide/build_environment.html#sec:gradle_configuration_properties)的方法。例如，你可以更新 `$HOME/.gradle/gradle.properties`。
 
@@ -515,7 +515,7 @@ signing.gnupg.keyName=
 signing.gnupg.useLegacyGpg=
 ```
 
-### 制作快照
+## 制作快照
 
 在你开始之前：
 
@@ -529,7 +529,7 @@ git clean -xn
 ./gradlew clean publish -Pasf
 ```
 
-### 制作候选版本
+## 制作候选版本
 
 注意：发布构建（`dist.apache.org` 和 `repository.apache.org`）通过 [stage-vote-release-plugin](https://github.com/vlsi/vlsi-release-plugins/tree/master/plugins/stage-vote-release-plugin) 进行管理。
 
@@ -591,7 +591,7 @@ SELECT NVL(ST_Is3D(ST_PointFromText('POINT(-71.064544 42.28787)')), TRUE);
 
 如果任何步骤失败，请解决问题，然后从头开始。
 
-#### 开始候选版本构建
+### 开始候选版本构建
 
 选择一个候选版本索引并确保它不会干扰该版本之前的候选版本。
 
@@ -610,14 +610,14 @@ git clean -xn
 ./gradlew prepareVote -Prc=0 -Pasf -Pasf.git.pushRepositoryProvider=GITBOX
 ```
 
-#### 故障排除
+### 故障排除
 
 - `net.rubygrapefruit.platform.NativeException: Could not start 'svnmucc'` ：确保你的计算机中安装了 `svnmucc` 命令；
 - `Execution failed for task ':closeRepository' ... Possible staging rules violation. Check repository status using Nexus UI` ：登录 Nexus UI 查看实际错误。如果是 `Failed: Signature Validation. No public key: Key with id: ... was not able to be located` ，请确保你已将密钥上传到 Nexus 使用的密钥服务器，请参阅上文；
 - [[CALCITE-5573]](https://issues.apache.org/jira/browse/CALCITE-5573) 签署构建时 GradleprepareVote 失败；
 - [[VLSI-RELEASE-PLUGINS-64]](https://github.com/vlsi/vlsi-release-plugins/issues/64) 由于缺少 `nexus.txt`，任务 `:releaseRepository` 执行失败。
 
-#### 检查构建
+### 检查构建
 
 - `release/build/distributions` 目录中应包含以下 3 个文件，其中包括：
   - `apache-calcite-X.Y.Z-src.tar.gz`；
@@ -641,11 +641,11 @@ git clean -xn
 - 在 `Staging Repositories` 选项卡中应该有一行包含配置文件 `org.apache.calcite` 和状态 `closed`；
 - 浏览工件树并确保 .jar、.pom、.asc 文件存在。
 
-### 尝试发布失败后进行清理
+## 尝试发布失败后进行清理
 
 如果某些内容不正确，你可以修复它，提交它，并为下一个候选人做好准备。候选版本标签可能会保留一段时间。
 
-### 验证发布
+## 验证发布
 
 ```bash
 # Check that the signing key (e.g. DDB6E9812AD3FAE3) is pushed
@@ -677,7 +677,7 @@ function checkHash() {
 checkHash apache-calcite-X.Y.Z-rcN
 ```
 
-### 通过 Apache 投票流程获得发布批准
+## 通过 Apache 投票流程获得发布批准
 
 通过向开发者列表发送电子邮件来开始投票。如果成功完成，Gradle `prepareVote` 任务会在最后打印草稿邮件。你可以在 `/build/prepareVote/mail.txt` 中找到草稿。
 
@@ -711,7 +711,7 @@ thread to discuss.
 Julian
 ```
 
-### 发布版本
+## 发布版本
 
 成功发布投票后，我们需要将版本推送到镜像和其他任务。
 
@@ -767,17 +767,17 @@ svn ci
 
 通过使用 `@apache.org` 地址向 announce@apache.org 发送电子邮件来宣布发布。你可以使用[1.20.0 公告](https://mail-archives.apache.org/mod_mbox/www-announce/201906.mbox/%3CCA%2BEpF8tcJcZ41rVuwJODJmyRy-qAxZUQm9OxKsoDi07c2SKs_A%40mail.gmail.com%3E)作为模板。请务必包含项目的简短描述。
 
-### 发布网站
+## 发布网站
 
 请参阅 [site/README.md](https://github.com/apache/calcite/blob/main/site/README.md) 中的说明 。
 
-## PMC 成员的高级主题
+# PMC 成员的高级主题
 
-### 处理 JIRA 帐户请求
+## 处理 JIRA 帐户请求
 
 以下是一些在处理添加 JIRA 帐户作为贡献者的请求时可以使用的电子邮件模板。
 
-#### 帐户已添加到贡献者列表
+### 帐户已添加到贡献者列表
 
 ```
 Hello [INSERT NAME HERE],
@@ -793,7 +793,7 @@ Best regards,
 [INSERT YOUR NAME HERE]
 ```
 
-#### 找不到帐户
+### 找不到帐户
 
 ```
 Hello [INSERT NAME HERE],

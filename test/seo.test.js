@@ -20,10 +20,12 @@ test('SEO metadata uses one canonical directory URL and preserves page injection
   const h = harness();
   const locals = { path: 'wiki/index.html', site: { data: { seo: { pages: { '/wiki/': {
     title: 'Documentation', description: 'A specific documentation directory summary.' } } } } },
-    page: { inject: { head: ['<script src="/keep.js"></script>'] } } };
+    page: { title: 'Original documentation', description: 'Original summary', inject: { head: ['<script src="/keep.js"></script>'] } } };
   h.filters.template_locals(locals);
-  assert.equal(locals.page.title, 'Documentation');
-  assert.equal(locals.page.description, 'A specific documentation directory summary.');
+  assert.equal(locals.page.title, 'Original documentation');
+  assert.equal(locals.page.seo_title, 'Documentation');
+  assert.equal(locals.page.description, 'Original summary');
+  assert.equal(locals.page.seo_description, 'A specific documentation directory summary.');
   assert.equal(cheerio.load(locals.page.inject.head.join(''))('link[rel="canonical"]').attr('href'), 'https://strongduanmu.com/wiki/');
   assert.match(locals.page.inject.head.join(''), /keep.js/);
   h.filters.template_locals(locals);
@@ -40,7 +42,8 @@ test('automatic descriptions exclude attribution URLs, code, tables and injected
     '<p>截至 2026 年 10 月 2 日，所给 B 站收藏夹未提供本讲视频链接。</p>' +
     '<div class="article-inline-ad-wrapper"><p>广告</p></div><p>Useful explanation about the actual topic.</p>' } };
   h.filters.template_locals(locals);
-  assert.equal(locals.page.description, 'Useful explanation about the actual topic.');
+  assert.equal(locals.page.seo_description, 'Useful explanation about the actual topic.');
+  assert.equal(locals.page.description, undefined);
 });
 
 test('both sitemaps include wiki and portal URLs, deduplicate aliases and exclude drafts and noindex pages', () => {
@@ -59,5 +62,19 @@ test('both sitemaps include wiki and portal URLs, deduplicate aliases and exclud
     assert.match(result.data, /<lastmod>2026-10-01<\/lastmod>/);
     assert.doesNotMatch(result.data, /draft|todo|hidden|README|categories/);
     assert.equal(result.data.includes('only-google.html'), name === 'sitemap');
+  }
+});
+
+
+test('SEO changes preserve visible titles, body content and author summaries across page types', () => {
+  const h = harness();
+  for (const route of ['/', '/wiki/', '/topic/', '/more/', '/more/news/', '/notes/git.html', '/blog/example.html', '/page/2/']) {
+    const original = { title: route.includes('git') ? 'Git' : undefined, h1: 'Author heading',
+      content: '<h2>Original content</h2>', description: 'Author summary', current: 2 };
+    const locals = {path: route, site:{data:{seo:{pages:{[route]:{title:'Search title',description:'Search summary'}}}}}, page:{...original}};
+    h.filters.template_locals(locals);
+    for (const key of ['title','h1','content','description']) assert.equal(locals.page[key], original[key], route + ': ' + key);
+    assert.ok(locals.page.seo_title);
+    assert.equal(locals.page.seo_description, 'Search summary');
   }
 });
