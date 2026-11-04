@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "site": "https://strongduanmu.com/",
+  "platform": "baidu",
+  "mode": "on_user_triggered_seo_review",
+  "updated_at": "2026-11-04",
+  "last_observed_batch_max": 20,
+  "daily_remaining": null,
+  "day_ledger": [
+    {
+      "date": "2026-11-04",
+      "attempted_count": 12,
+      "confirmed_accepted_count": 0,
+      "result": "daily_limit",
+      "verification": "completed_by_user",
+      "note": "No success receipt; keep all candidates pending. Recheck actual quota on a later date."
+    }
+  ],
+  "items": [
+    {
+      "url": "https://strongduanmu.com/blog/centos-dev-environment-setup-note.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/c/introduction.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/supervised_fine_tuning.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/calcite-tactical-data-engineering-data-first-engineering-implementation.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/advanced-data-types.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/compliance.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/connection-pooling.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/goals.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/overview.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/statements.html",
+      "status": "pending",
+      "last_attempt_date": "2026-11-04",
+      "last_result": "daily_limit",
+      "not_before": "2026-11-05",
+      "submitted_at": null
+    }
+  ]
+}
