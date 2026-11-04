@@ -59,6 +59,6 @@ AdSense 的 `push({})` 按 DOM 顺序处理未初始化的 `.adsbygoogle`。现�
 - Vercel 博客项目域名设置：`https://vercel.com/strongduanmu-blog/blog/settings/domains`。当前 www 已在域名层配置为 308 → `strongduanmu.com`，保留路径与参数；主域继续连接 Production。迁移项目时同时检查这项设置，不能只依赖仓库内 host 条件。
 - `source/vercel.json` 会复制到生成站点根目录，负责 www → 裸域名、目录尾斜杠以及已核对的旧路径重定向。根据 Vercel 文档，带文件扩展名的文章不会被 `trailingSlash: true` 改成目录。修改后必须验证线上状态码、Location、目标页面与不存在重定向循环。
 - `layout/_partial/head.ejs` 由 SEO 脚本通过 Hexo `theme.setView` 显式注册。此前新增的目录页 H1 与样式已撤回，使用主题原有列表布局；不为消除 H1 告警改变可见展示。侧栏与内文广告标签恢复“赞助商”，文末广告恢复原先无额外标签的展示。
-- 未完成的 Join 算子与 BenchmarkSQL 笔记也暂时 noindex；补全正文后再评估恢复。
+- 2026-11-04 经用户确认，9 篇未完成博客移入 `source/_drafts/blog/`，正文和 7 张配图原样保留。已发布博客由 43 篇减为 34 篇，两份地图各含 163 个规范地址；原地址不再公开，不能当作新出现的错误恢复或重定向到首页。具体文章见同日巡检记录，补全并经用户确认后再发布。
 - 只有 TODO 的 CMU 15-721 资料页、清华查询优化占位页，以及内容很少的个人动态页，保留访问但设置 noindex、退出两份地图。将来补全内容后再评估恢复，不批量取消全站的 noindex。
 - 搜索检查增加 `test/seo.test.js`，并检查实际生成页面与两份 XML 的 canonical 一致性。不要只凭单元检查就宣布线上重定向已经生效。

@@ -132,6 +132,7 @@ pages:
   /blog/cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model.html:
     description: 围绕 Calcite 基于代价的查询优化，梳理统计信息、基数估计与代价模型之间的关系，跟踪 RelMetadataQuery 获取元数据的过程，并分析优化器怎样计算和比较执行计划的代价。
   /blog/cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology.html:
+    title: Java 字节码入门：Class 文件、javap 与指令执行
     description: 从 Java 平台无关性的实现方式进入字节码学习，使用 javap 和 jclasslib 查看 Class 文件，结合常量池、方法字节码和指令分类，理解源码编译后的结构与执行过程。
   /blog/deep-understand-of-apache-calcite-hep-planner.html:
     description: 从 RBO 规则优化出发，介绍 Apache Calcite HepPlanner 中的 HepProgram、HepInstruction 等概念，结合源码跟踪规则匹配与执行过程，理解启发式优化器怎样改写关系表达式。
