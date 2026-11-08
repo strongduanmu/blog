@@ -208,3 +208,34 @@ pages:
     description: CMU 11-768《客座讲座：Sasha Rush》预习提纲，关注推理系统与智能体训练相关的研究问题，预留方法、实验结论和项目启发的整理位置。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
   /wiki/cmu_11_768/multi_agent_interaction.html:
     description: CMU 11-768《多智能体交互》预习提纲，关注角色分工、通信协议与共享状态，以及协作、竞争、共识和冲突处理的成本。当前包含课程信息、学习重点和待整理问题，详细课堂笔记尚待补充。
+
+  /wiki/cs329/:
+    title: Stanford 自我改进 AI 智能体学习笔记与课程目录
+    description: 按 Stanford CS329A 的 9 段公开录像整理自我改进 AI 智能体学习笔记，提供中英文字幕视频、课程截图和论文入口，涵盖推理时扩展、验证器、工具反馈、规划、强化学习、深度研究与评测。
+  /wiki/cs329/course_overview.html:
+    title: 课程概览：LLM、思维链与智能体反馈循环
+    description: 梳理 Stanford CS329 自我改进 AI 智能体课程的预训练、指令微调、RLHF、思维链、重复采样与反馈循环，结合课程视频截图理解智能体工作流和研究项目要求。
+  /wiki/cs329/test_time_compute_scaling.html:
+    title: 推理时计算扩展：重复采样、PRM 与 Archon
+    description: 沿 Stanford CS329 课程讲解重复采样、pass@k、生成与验证差距、PRM 引导搜索和计算预算分配，再介绍 Archon 推理架构搜索，配有原课实验曲线与流程截图。
+  /wiki/cs329/robust_verification.html:
+    title: 鲁棒验证：ORM、PRM、Math-Shepherd 与 Weaver
+    description: 整理 Stanford CS329 鲁棒验证课程，比较 GSM8K 验证器、ORM 与 PRM、Math-Shepherd 自动过程标注和 Weaver 弱验证器集成，解释验证标签、评分与计算成本。
+  /wiki/cs329/learning_from_feedback_with_tools_and_code.html:
+    title: 工具与代码反馈：ReAct、RLEF 与 Constitutional AI
+    description: 结合 Stanford CS329 课程截图学习 ReAct 推理与行动、RLEF 代码执行反馈和 Constitutional AI，区分任务内修订与参数训练，分析测试划分和 AI 评价的局限。
+  /wiki/cs329/planning_and_multi_step_reasoning.html:
+    title: 规划与多步推理：LATS、SPRINT 与 SWiRL
+    description: 按 Stanford CS329 课堂顺序整理 LATS 树搜索、UCT 节点评价、SPRINT 规划与并行执行，以及 SWiRL 多步工具轨迹和逐步强化学习，配有算法与训练流程截图。
+  /wiki/cs329/train_time_scaling_and_reinforcement_learning.html:
+    title: 训练时扩展：STaR、GRPO 与 DAPO
+    description: 整理 Stanford CS329 的 STaR 推理自举、DeepSeekMath 领域数据与 GRPO 组相对优势，再介绍 DAPO 裁剪、动态采样和 token 级损失，区分训练信号与评测指标。
+  /wiki/cs329/self_improvement_and_deep_research_agents.html:
+    title: Stanford 自我改进与深度研究：AlphaCode 与 Search-o1
+    description: 介绍 Stanford CS329 的 AlphaCode 和 AlphaCode 2 程序采样、执行过滤、聚类与重排序，再梳理 Search-o1 动态检索和 Reason-in-Documents，配有原课架构截图。
+  /wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html:
+    title: 智能体评估：METR、GDPval 与长时程任务
+    description: 结合 Stanford CS329 原课截图比较 METR 时间跨度、GDPval 专业工作评价与 DeepScholar-Bench 研究综合，解释成功率阈值、上下文、证据覆盖和真实工作的差异。
+  /wiki/cs329/future_research_areas.html:
+    title: 未来研究：元验证、自我出题与推理效率
+    description: 整理 Stanford CS329 未来研究课程中的多智能体微调、DeepSeekMath-V2 元验证、Absolute Zero 自我出题与 intelligence-per-watt，讨论持续学习和推理效率的研究边界。

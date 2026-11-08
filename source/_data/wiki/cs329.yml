@@ -1,0 +1,25 @@
+name: CS329
+title: 'CS329: 自我改进 AI 智能体学习笔记'
+subtitle: 'Stanford CS329A | 从生成、验证到规划、训练与评测'
+tags: AI
+description: 整理 Stanford CS329A 2025 年秋季 Self-Improving AI Agents 的 9 段公开课程录像，覆盖推理时计算扩展、鲁棒验证、工具与代码反馈、多步规划、强化学习、深度研究和智能体评测，配有中英文字幕视频、原课截图与论文资料。
+icon: /assets/wiki/cs329/cover.webp
+cover: /assets/wiki/cs329/cover.webp
+coverpage: true
+search:
+  filter: /wiki/cs329/
+  placeholder: 在 CS329 中搜索...
+leftbar:
+  - tree
+base_dir: /wiki/cs329/
+tree:
+  - index
+  - course_overview
+  - test_time_compute_scaling
+  - robust_verification
+  - learning_from_feedback_with_tools_and_code
+  - planning_and_multi_step_reasoning
+  - train_time_scaling_and_reinforcement_learning
+  - self_improvement_and_deep_research_agents
+  - agentic_evaluations_and_long_horizon_tasks
+  - future_research_areas
