@@ -5,7 +5,7 @@
 # Site
 title: 端小强的博客
 description: 记录 Apache Calcite 查询优化、ShardingSphere 联邦查询、Java 与数据库内核开发实践，整理 CMU 数据库及 AI Agents 课程笔记，分享可复查的代码分析、排障过程和学习资料。
-avatar: /assets/placeholder/avatar.png
+avatar: /assets/placeholder/avatar-144/avatar.png
 favicon: /assets/placeholder/favicon.ico
 keywords: [ShardingSphere, Calcite]
 author: 端小强
