@@ -2,7 +2,7 @@
 layout: wiki
 wiki: cmu_11_768
 order: 022
-title: 第 21 讲：树搜索
+title: 树搜索
 date: 2026-11-17 08:00:00
 banner: /assets/banner/banner_2.jpg
 ---

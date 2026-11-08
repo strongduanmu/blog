@@ -2,7 +2,7 @@
 layout: wiki
 wiki: cmu_11_768
 order: 017
-title: 第 16 讲：可观测性与监控
+title: 可观测性与监控
 date: 2026-10-22 08:00:00
 banner: /assets/banner/banner_17.jpg
 ---

@@ -2,7 +2,7 @@
 layout: wiki
 wiki: cmu_11_768
 order: 020
-title: 第 19 讲：人机交互
+title: 人机交互
 date: 2026-11-10 08:00:00
 banner: /assets/banner/banner_20.jpg
 ---

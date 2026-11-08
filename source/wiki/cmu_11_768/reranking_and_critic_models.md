@@ -2,7 +2,7 @@
 layout: wiki
 wiki: cmu_11_768
 order: 021
-title: 第 20 讲：重排序与 Critic 模型
+title: 重排序与 Critic 模型
 date: 2026-11-12 08:00:00
 banner: /assets/banner/banner_21.jpg
 ---
