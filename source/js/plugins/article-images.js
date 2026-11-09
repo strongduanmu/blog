@@ -2,8 +2,10 @@
 (function() {
   'use strict';
   const banner = '/assets/banner/banner_' + (Math.floor(Math.random() * 20) + 1) + '.jpg';
-  document.querySelectorAll('.banner img.bg').forEach(function(image) {
+  document.querySelectorAll('.banner img.bg[data-random-banner]').forEach(function(image) {
+    image.removeAttribute('data-src');
     image.setAttribute('src', banner);
+    image.removeAttribute('data-random-banner');
   });
 
   const selector = 'article.md-text img:not(.post-cover img):not(.cover img):not(.card-link img):not(.image-bg img):not(.social img):not(.preview img)';
