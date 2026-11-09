@@ -4,8 +4,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const path = require('node:path');
+const { createRequire } = require('node:module');
 const cheerio = require('cheerio');
-const ejs = require('ejs');
+// cnpm keeps transitive dependencies beside their owning package.
+const ejs = createRequire(require.resolve('hexo-renderer-ejs'))('ejs');
 
 const root = path.join(__dirname, '..');
 function harness() {
