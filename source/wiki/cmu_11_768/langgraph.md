@@ -21,8 +21,6 @@ banner: /assets/banner/banner_16.jpg
 
 ![客服邮件的分类、条件分支与审查路径](/wiki/cmu_11_768/langgraph/support-routing.png)
 
-*来源：[官方课件第 8 页](https://www.cmu-agents.com/slides/lecture-15-orchestration-and-monitoring.pdf#page=8)。*
-
 图中审查路径依赖模型分类。若模型把退款误判为普通问题，即使图按设计执行，也可能绕过预期审查。因此需要分别验证分类质量，以及关键政策是否由足够可靠的条件保证。
 
 ### 状态、节点与边
@@ -30,8 +28,6 @@ banner: /assets/banner/banner_16.jpg
 共享状态保存邮件 ID、正文、分类、搜索结果、草稿和审查决定。节点读取状态，执行代码或模型调用，再返回改变的字段。例如分类节点返回 `classification`；检索节点用分类中的意图和主题构造查询；草稿节点结合邮件与资料生成回复。
 
 ![使用 StateGraph 连接节点和固定转移](/wiki/cmu_11_768/langgraph/langgraph-assembly.png)
-
-*来源：[官方课件第 14 页](https://www.cmu-agents.com/slides/lecture-15-orchestration-and-monitoring.pdf#page=14)。*
 
 固定边规定已知转移，条件路由依据状态选择下一节点。节点粒度还决定失败后能复用多少工作：把搜索结果保存后再生成，生成崩溃时就可以只重复生成，而不必重新检索。
 
@@ -65,15 +61,11 @@ Persistent checkpointer 保存状态与执行进度，相同执行 ID 用于加�
 
 ![使用运行元数据检验超时假设](/wiki/cmu_11_768/langgraph/timeout-hypothesis.png)
 
-*来源：[官方课件第 30 页](https://www.cmu-agents.com/slides/lecture-15-orchestration-and-monitoring.pdf#page=30)。*
-
 ## 怎样发现事先不知道的行为
 
 现成 judge 往往只能检查提示里列出的行为。Hodoscope 先摘要动作或轨迹，再对摘要做 embedding 和聚类，让调查者发现未预设的模式；发现差异后，仍要回到原始调用判断。
 
 ![Hodoscope 将动作摘要嵌入共享行为空间](/wiki/cmu_11_768/langgraph/behavior-clusters.png)
-
-*来源：[官方课件第 35 页](https://www.cmu-agents.com/slides/lecture-15-orchestration-and-monitoring.pdf#page=35)。*
 
 Commit0 的例子从 Git 操作簇中发现，智能体通过旧提交恢复被移除的实现。这个行为未必会在一般“答案质量”判断中被识别，却影响任务是否按预期完成。规模化监控需要把聚类、证据回查、统计和独立评测连接起来。
 

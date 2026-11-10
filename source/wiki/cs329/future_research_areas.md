@@ -31,8 +31,6 @@ katex: true
 
 ![多个模型独立回答、交流其他回答，再进行多轮更新](/wiki/cs329/future_research_areas/multiagent-debate.webp)
 
-*来源：[Stanford 官方课程录像 Part 9，12:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=750s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=750)。*
-
 课堂先介绍数据生成。各模型独立回答同一道题，再读取其他模型回答的摘要，更新自己的解法；多轮交流后，可以比较或投票形成候选目标。批评模型进一步检查更新后的答案，帮助筛选。
 
 接着，不同智能体使用各自获得的训练数据进行微调，再进入下一轮。这里的“多个智能体”既包含推理阶段的交互，也包含模型之间不同的参数更新；仅在一次请求里复制多个完全相同的调用，并不等于复现了该训练方法。
@@ -48,8 +46,6 @@ katex: true
 课程随后把问题从“最后数值正确”推进到数学证明。证明要求每一步成立；奖励最后答案可能鼓励看似得到了目标结果、实际存在逻辑漏洞的推导。直接要求模型检查自己的证明，也可能得到过度自信的错误评价。
 
 ![生成器、验证器与元验证器组成的证明改进循环](/wiki/cs329/future_research_areas/deepseekmath-v2-verification.webp)
-
-*来源：[Stanford 官方课程录像 Part 9，18:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=1110s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=1110)。*
 
 DeepSeekMath-V2 在生成器与验证器之外加入 meta-verifier。验证器找出证明中的问题并给出分数；元验证器再检查这些评价是否忠实、指出的问题是否真的存在，以及分数是否由分析支持。
 
@@ -68,8 +64,6 @@ DeepSeekMath-V2 在生成器与验证器之外加入 meta-verifier。验证器�
 现有 RL 通常依赖人类构建的问题和答案。随着模型变强，人类持续提供足够多、难度合适、又可验证的问题可能成为瓶颈。Absolute Zero 让同一个模型分别充当 proposer 和 solver，通过可执行的代码任务生成训练课程。
 
 ![提出任务、验证任务并求解的 proposer-solver 结构](/wiki/cs329/future_research_areas/absolute-zero-proposer-solver.webp)
-
-*来源：[Stanford 官方课程录像 Part 9，24:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=1470s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=1470)。*
 
 这里的“zero data”针对额外人工整理的任务数据，**不是从随机参数开始、也不是不使用预训练模型和执行环境**。预训练知识、任务定义、执行器和奖励机制仍然提供了重要先验。
 
@@ -93,8 +87,6 @@ DeepSeekMath-V2 在生成器与验证器之外加入 meta-verifier。验证器�
 
 ![围绕泛化、鲁棒验证和任务选择继续改进自我改进循环](/wiki/cs329/future_research_areas/self-improvement-research-loop.webp)
 
-*来源：[Stanford 官方课程录像 Part 9，34:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=2070s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=2070)。*
-
 课程据此提出三个相互关联的方向：训练时扩展能否带来可迁移的推理能力，验证与元验证能否覆盖更多任务，以及任务生成能否突破人工数据选择的瓶颈。它们共同决定这个循环是否有持续的有效信号。
 
 ## Intelligence-per-watt：把能力与能耗一起比较
@@ -102,8 +94,6 @@ DeepSeekMath-V2 在生成器与验证器之外加入 meta-verifier。验证器�
 视频后半节由 Azalia 介绍本地模型的效率研究。前面大量方法增加了推理计算，现在需要问：哪些请求值得交给最强云端模型，哪些请求可以由本地模型完成？
 
 ![用任务准确率与平均功率描述本地推理的 intelligence-per-watt](/wiki/cs329/future_research_areas/intelligence-per-watt.webp)
-
-*来源：[Stanford 官方课程录像 Part 9，46:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=2790s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=2790)。*
 
 本节给出的指标可以写为：
 
@@ -122,8 +112,6 @@ $$
 ## 持续学习与推理系统的后续问题
 
 ![把推理阶段产生的经验连接到在线或持续学习](/wiki/cs329/future_research_areas/continual-learning.webp)
-
-*来源：[Stanford 官方课程录像 Part 9，52:30](https://www.youtube.com/watch?v=AyO6wyu4DEg&t=3150s)；[B 站对应位置](https://www.bilibili.com/video/BV1EyWJ67EUH/?t=3150)。*
 
 最后的研究路线回到训练与推理之间的连接：理解合成数据循环什么时候有效，从运行经验中持续学习，并构建高吞吐、低延迟的推理基础设施。自我改进需要的不只有更大的模型，也包括任务分布、可靠反馈与系统资源组织。
 

@@ -153,13 +153,9 @@ slide 第 14 页用“a model in a loop”解释智能体，并引用了 [ReAct]
 
 ![读取文件并将结果写入历史的智能体循环](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_25m50s_agent_loop.png)
 
-*原视频 [25:50](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1550)，slide 第 14 页的中间动画状态。*
-
 下一轮请求使用更新后的历史，模型据此选择新的行动。对于这个短任务，它已经掌握文件内容，于是通过 `send_message` 向用户回复，并结束任务。
 
 ![模型根据文件内容回复用户并结束任务](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_26m12s_agent_loop_completion.png)
-
-*原视频 [26:12](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1572)，slide 第 14 页的结束状态。*
 
 **执行结果进入历史，是前后两次行动能够衔接起来的基础。** 模型何时应当判断任务完成，老师在此只作了简要介绍，后续的规划课程会继续讨论。下面按消息传递过程整理这一循环：
 
@@ -224,13 +220,9 @@ Harness → 模型：tests/test.py、src/example.py
 
 ![Django 重定向问题的用户任务描述](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m10s_trajectory_task_content.png)
 
-*原视频 [29:10](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1750)，slide 第 16 页之后的现场演示。*
-
 模型先收到可与 shell 交互的系统说明，再读取具体任务。它生成的第一条命令是 `ls -R`，用于查看仓库结构、定位 Django admin 的实现；命令由环境执行，工具消息返回退出码 `0`，表示这次命令执行成功。
 
 ![轨迹中的第一条 bash 调用及工具结果](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m45s_trajectory_action_content.png)
-
-*原视频 [29:45](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1785)。*
 
 这个演示也回应了前面关于工具表示方式的讨论：模型直接生成 bash 命令，框架执行后把结果交回。退出码描述的是一次命令执行的结果，后续仍需要通过读取、修改和测试判断修复任务是否完成。
 
@@ -259,8 +251,6 @@ Graham 特别提醒，准确调用工具的能力需要通过训练或系统设�
 
 ![通过模型训练与 Harness 工程改进智能体](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_37m20s_training_and_harness.png)
 
-*原视频 [37:20](https://www.bilibili.com/video/BV1hQYT64E2e/?t=2240)，slide 第 18 页。*
-
 | 途径 | 改进的对象 | 主要做法 |
 | --- | --- | --- |
 | 模型训练<br>LLM training | 模型自身的行为与策略 | 通过预训练、SFT 或 RL<br>学习推理、工具使用与错误恢复 |
@@ -279,8 +269,6 @@ Graham 认为两者都重要。实际工作中，经常先在 Harness 中解决�
 slide 第 19 页将训练过程概括为预训练（pretraining）、中期训练（mid-training）/ 监督微调（supervised fine-tuning，SFT），以及强化学习（reinforcement learning，RL）。
 
 ![智能体行为的三个训练阶段](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_42m32s_agent_training_stages.png)
-
-*原视频 [42:32](https://www.bilibili.com/video/BV1hQYT64E2e/?t=2552)，slide 第 19 页。*
 
 | 阶段 | 主要材料 | 关注的能力 |
 | --- | --- | --- |
@@ -335,8 +323,6 @@ slide 第 25 页列出工具沙箱、凭证访问限制、轨迹监控，以及�
 从[视频 51:51](https://www.bilibili.com/video/BV1hQYT64E2e/?t=3111)开始，Graham 介绍系统组成。slide 第 26 页展示了模型、推理服务、Harness、沙箱、监控和训练之间的关系。
 
 ![智能体系统中的模型、Harness、沙箱、推理、监控与训练](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_53m15s_agent_system_components.png)
-
-*原视频 [53:15](https://www.bilibili.com/video/BV1hQYT64E2e/?t=3195)，slide 第 26 页。*
 
 模型通过推理服务生成下一步，Harness 组织任务、状态及工具，沙箱为执行提供隔离环境，监控记录过程，训练系统利用数据改进行为。老师提醒，智能体工程涉及多部分软件与系统工作，各部分的职责需要分别理解。
 

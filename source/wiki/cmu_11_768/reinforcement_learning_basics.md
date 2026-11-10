@@ -37,8 +37,6 @@ $$
 
 ![轨迹概率由策略动作与环境反馈共同组成](/wiki/cmu_11_768/reinforcement_learning_basics/trajectory-probability.png)
 
-*来源：[官方课件第 12 页](https://www.cmu-agents.com/slides/lecture-09-rl-basics.pdf#page=12)。*
-
 轨迹概率可分解为策略概率与环境转移概率的乘积。即使不知道环境转移公式，也可以通过交互采样。训练目标是提高期望奖励：
 
 $$
@@ -73,8 +71,6 @@ $$
 动作由多个 token 组成，动作对数概率又可按生成 token 求和。实现上仍使用类似 SFT 的 token 对数概率和掩码，只是用采样得到的奖励加权。
 
 ![策略采样的 token 参与梯度，工具观察只作为上下文](/wiki/cmu_11_768/reinforcement_learning_basics/policy-gradient-token-mask.png)
-
-*来源：[官方课件第 22 页](https://www.cmu-agents.com/slides/lecture-09-rl-basics.pdf#page=22)。*
 
 提示和工具观察不是策略选出的动作，不直接计入策略损失；模型生成的结束标记也属于动作。一个轨迹的所有生成 token 可以共享终局奖励。二元奖励下，朴素 REINFORCE 的失败样本权重为零，形式上接近对成功轨迹做 SFT，但数据积累、批次和更新方式仍可能不同。
 
@@ -123,8 +119,6 @@ $$
 $$
 
 ![同任务采样组内的均值、标准差与优势](/wiki/cmu_11_768/reinforcement_learning_basics/group-relative-advantages.png)
-
-*来源：[官方课件第 37 页](https://www.cmu-agents.com/slides/lecture-09-rl-basics.pdf#page=37)。*
 
 每个任务实例分别归一化，不能把不同隐藏数字的轨迹随意混为一组。课上先用这些权重说明策略梯度；完整 GRPO 的概率比、裁剪和参考模型项留到第 11 讲，本节简式并非完整算法。
 

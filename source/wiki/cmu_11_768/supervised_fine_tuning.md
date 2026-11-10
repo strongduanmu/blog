@@ -31,8 +31,6 @@ Chat template 将消息角色、推理、调用和观察渲染成一个序列，
 
 ![模型生成部分参与损失，观察作为条件上下文](/wiki/cmu_11_768/supervised_fine_tuning/assistant-loss-mask.png)
 
-*来源：[官方课件第 12 页](https://www.cmu-agents.com/slides/lecture-08-sft.pdf#page=12)。*
-
 常见做法只对 assistant 生成的 token 计算交叉熵：
 
 $$
@@ -61,8 +59,6 @@ SWE-Gym 用较强教师得到 491 条通过仓库测试的轨迹，微调 32B �
 
 ![成功轨迹仍可能包含反复无效动作或调试残留](/wiki/cmu_11_768/supervised_fine_tuning/successful-rollout-quality.png)
 
-*来源：[官方课件第 24 页](https://www.cmu-agents.com/slides/lecture-08-sft.pdf#page=24)。*
-
 成功执行中可能包含长时间编辑—测试循环、无效重复，或者最终补丁里的调试打印。SFT 会提高其中每个被监督动作的概率，因此只过滤终局失败还不够。
 
 OpenThoughts-Agent 的实验比较了轨迹形状、教师和任务来源。一个简单最少轮数过滤器在其设置下有帮助，却也会丢掉四轮完成的干净修复、保留四十轮的混乱过程。最强教师的独立榜单成绩，也未必产生最好的学生。应直接比较学生部署后的表现。
@@ -75,8 +71,6 @@ OpenThoughts-Agent 的实验比较了轨迹形状、教师和任务来源。一�
 
 ![用统一轨迹表示连接多种数据集与 Harness](/wiki/cmu_11_768/supervised_fine_tuning/agent-data-protocol.png)
 
-*来源：[官方课件第 32 页](https://www.cmu-agents.com/slides/lecture-08-sft.pdf#page=32)。*
-
 统一表示应保留原始信息，例如同一页面的 HTML 与可访问性树；最终仍要适配目标 Harness 的动作、系统提示、上下文策略和结束方式。转换完需验证调用可解析、观察与调用对应，以及历史结束合法。
 
 课件中的跨任务实验显示，多领域混合可能超过对应的单领域数据，但收益依赖数据组合和设置。统一格式降低工程成本，并不自动使所有混合都有益。
@@ -88,8 +82,6 @@ OpenThoughts-Agent 的实验比较了轨迹形状、教师和任务来源。一�
 Packing 将多个完整会话放进固定长度序列，减少 padding。课件中的策略不拆分和截断会话，还避免把相同提示放在同一个 pack。相互独立的会话需要正确的边界与注意力处理，不能因为拼接后更满就引入串扰。
 
 ![完整会话的装箱与剩余空间](/wiki/cmu_11_768/supervised_fine_tuning/conversation-packing.png)
-
-*来源：[官方课件第 38 页](https://www.cmu-agents.com/slides/lecture-08-sft.pdf#page=38)。*
 
 模板漂移是另一类隐蔽问题。向历史追加工具消息后，条件模板可能改变前面 assistant 的推理块，导致训练看到的序列与采样时不同。模板、空白、特殊标记和停止条件都需要一致；可以将同一历史在不同阶段渲染后逐 token 对照。
 

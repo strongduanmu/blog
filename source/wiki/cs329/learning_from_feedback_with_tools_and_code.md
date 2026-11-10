@@ -31,8 +31,6 @@ ReAct 将 reasoning 与 acting 交替组织。模型先形成当前想法，选�
 
 ![Reason Only、Act Only 与 ReAct 的执行结构比较](/wiki/cs329/learning_from_feedback_with_tools_and_code/react-reason-and-act.webp)
 
-*来源：[Stanford 官方课程录像 Part 4，06:30](https://www.youtube.com/watch?v=Lxh9RF5S-K0&t=390s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LE7y/?t=390)。*
-
 ### Apple Remote 的多跳问题
 
 课堂例子询问：除了 Apple Remote，还有什么设备能控制它原先配套的软件？单纯依赖记忆可能把问题误解成“还有哪些苹果遥控设备”，从而给出 iPhone 等看似相关的名称。
@@ -65,8 +63,6 @@ ReAct 的语言轨迹便于人观察和纠正，也增加了多轮生成成本�
 
 ![RLEF 的推理阶段执行循环与训练阶段策略更新](/wiki/cs329/learning_from_feedback_with_tools_and_code/rlef-feedback-loop.webp)
 
-*来源：[Stanford 官方课程录像 Part 4，30:30](https://www.youtube.com/watch?v=Lxh9RF5S-K0&t=1830s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LE7y/?t=1830)。*
-
 课堂用检测回文子串的程序举例：第一次代码在公开测试上超时，模型读到执行反馈后优化实现，再次运行测试。代码通过公开测试或达到轮数上限后，系统进入最终评价，并用奖励更新策略。
 
 ### 公开测试与私有测试承担不同职责
@@ -83,8 +79,6 @@ ReAct 的语言轨迹便于人观察和纠正，也增加了多轮生成成本�
 
 ![基础模型与 RLEF 模型在单轮和多轮代码生成中的表现](/wiki/cs329/learning_from_feedback_with_tools_and_code/rlef-multiturn-results.webp)
 
-*来源：[Stanford 官方课程录像 Part 4，36:30](https://www.youtube.com/watch?v=Lxh9RF5S-K0&t=2190s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LE7y/?t=2190)。*
-
 实验比较 CodeContests、HumanEval+ 和 MBPP+。基础模型拥有多轮反馈后未必自然变好，训练后模型更能利用反馈修订；在 CodeContests 上训练后，也观察到其他代码基准上的改善。比较时需要固定采样预算和轮数，不能把更多调用带来的收益全部算到训练方法上。
 
 讨论还延伸到整个代码仓库：仓库超出上下文时，系统必须先搜索、定位相关文件，或构造摘要，才能判断修改范围。测试反馈解决的是“这次修改表现怎样”，它不能代替获取正确上下文。
@@ -97,8 +91,6 @@ ReAct 的语言轨迹便于人观察和纠正，也增加了多轮生成成本�
 
 ![Constitutional AI 使用 AI 反馈替代部分人工偏好评价](/wiki/cs329/learning_from_feedback_with_tools_and_code/constitutional-ai-feedback.webp)
 
-*来源：[Stanford 官方课程录像 Part 4，54:30](https://www.youtube.com/watch?v=Lxh9RF5S-K0&t=3270s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LE7y/?t=3270)。*
-
 ### 监督阶段与强化学习阶段
 
 监督阶段先让模型回答具有挑战性的提示，再依据原则自我批评和修订，用修订后的回答进行微调。强化学习阶段则比较不同回答，让 AI 根据原则给出偏好，训练偏好模型，再用该模型提供奖励，这通常称为 RLAIF。
@@ -106,8 +98,6 @@ ReAct 的语言轨迹便于人观察和纠正，也增加了多轮生成成本�
 人类仍然决定原则、选择任务和评价标准；模型生成了反馈，并不表示价值判断已经脱离人的选择。自我评价还可能继承模型原有盲点，写出一段批评也不能证明修改后一定符合原则。
 
 ![课件比较不同训练阶段在 helpfulness 与 harmlessness 上的取舍](/wiki/cs329/learning_from_feedback_with_tools_and_code/helpfulness-harmlessness.webp)
-
-*来源：[Stanford 官方课程录像 Part 4，58:30](https://www.youtube.com/watch?v=Lxh9RF5S-K0&t=3510s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LE7y/?t=3510)。*
 
 图中把帮助程度和无害性分成两个坐标。只沿无害性反复修订，可能降低回答的具体帮助；课程介绍的是如何改善二者的取舍，并非单一分数越高就对所有人越好。
 

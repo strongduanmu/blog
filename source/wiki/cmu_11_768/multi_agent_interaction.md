@@ -25,8 +25,6 @@ ChatDev 等系统把人类组织中的角色映射成不同提示与工具，按
 
 ![按需创建子任务及递归委派](/wiki/cmu_11_768/multi_agent_interaction/recursive-delegation.png)
 
-*来源：[官方课件第 11 页](https://www.cmu-agents.com/slides/lecture-18-multi-agent-systems.pdf#page=11)。*
-
 RAO 把启动子 agent 作为动作，允许递归分解。实现可以用异步启动、并行 gather 与 `await` 表达依赖。MACU 则由管理器维护任务图，派发就绪工作，检查结果并重规划；这些设计都需要规定结果与证据如何回到上层。
 
 ### 异步协调与共享状态
@@ -35,8 +33,6 @@ CAID 用 DAG、结构化 JSON 消息和 Git 协调并行代码工作。Blackboar
 
 ![去中心化任务队列与追加式消息板](/wiki/cmu_11_768/multi_agent_interaction/decentralized-task-board.png)
 
-*来源：[官方课件第 21 页](https://www.cmu-agents.com/slides/lecture-18-multi-agent-systems.pdf#page=21)。*
-
 去中心化减少了对单一管理器的依赖，但认领、冲突、消息有效性和结果核验仍需要机制。工具类似人类协作工具，并不意味着所有人类组织方式都适合直接照搬。
 
 ### 通信是否优于独立尝试
@@ -44,8 +40,6 @@ CAID 用 DAG、结构化 JSON 消息和 Git 协调并行代码工作。Blackboar
 课件在 Terminal-Bench 2.0 的一组结果中比较：单 agent `pass@1` 平均为 `52.53%`，独立 `pass@2` 为 `62.36%`，通信 `team@2` 为 `60.67%`。在这组设置下，通信没有超过独立尝试。
 
 ![通信团队与独立 pass@2 的结果比较](/wiki/cmu_11_768/multi_agent_interaction/communication-versus-independent.png)
-
-*来源：[官方课件第 24 页](https://www.cmu-agents.com/slides/lecture-18-multi-agent-systems.pdf#page=24)。*
 
 其他任务中通信可以有益，尤其是共享经过验证的进展。需要区分通信本身、更多采样预算、模型能力和任务并行度的影响；把一组结果推广成“多 agent 总是更好”或“通信没用”都超出证据。
 
@@ -62,8 +56,6 @@ CAID 用 DAG、结构化 JSON 消息和 Git 协调并行代码工作。Blackboar
 最后一部分讨论不确定性与监督。协作信息搜索游戏让 agent 比较参数记忆答对概率、搜索后答对概率与搜索成本，从奖励结构中学习何时求助、何时保留判断。表达自信的文字和真实校准，需要通过结果分开验证。
 
 ![信息搜索游戏中的成功概率与搜索成本](/wiki/cmu_11_768/multi_agent_interaction/information-seeking-game.png)
-
-*来源：[官方课件第 41 页](https://www.cmu-agents.com/slides/lecture-18-multi-agent-systems.pdf#page=41)。*
 
 Debate 让不同执行体提出论据，帮助较弱 judge 判断。课件展示更有说服力模型与判断正确性的实验，但是否可靠仍取决于任务、证据可核验程度及裁判能力。多智能体既能增加计算，也能作为训练和监督环境；三个用途需要各自设计合适的比较与验收。
 

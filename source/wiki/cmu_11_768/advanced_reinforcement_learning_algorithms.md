@@ -46,8 +46,6 @@ $$
 
 ![GAE 用后续 TD 误差估计当前动作优势](/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms/generalized-advantage-estimation.png)
 
-*来源：[官方课件第 16 页](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf#page=16)。*
-
 一般折扣设置还包含 `γ`，递推可写为 `Â_t=δ_t+γλÂ_{t+1}`。课件此处令折扣为一，方便展示。PRM 则通过步骤正确性标注提供过程信号，它是价值的替代监督，不能直接等同于真实未来回报。
 
 ## 异步采样为什么带来旧策略数据
@@ -64,8 +62,6 @@ $$
 
 ![当前动作比相同，历史到达概率仍可能不同](/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms/history-distribution-mismatch.png)
 
-*来源：[官方课件第 26 页](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf#page=26)。*
-
 仅在同一历史比较下一动作，还没有修正“到达这个历史”的概率。课件据此比较当前 token 比、截至当前的累计比、完整轨迹比及长度归一化序列比。它们控制方差与偏差的方式不同，不能把局部比值当作完整轨迹修正。
 
 ## 裁剪、KL 与探索
@@ -81,8 +77,6 @@ $$
 
 ![REINFORCE、PPO、GRPO、CISPO、GSPO 与 DAPO 的比较](/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms/rl-algorithm-comparison.png)
 
-*来源：[官方课件第 35 页](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf#page=35)。*
-
 CISPO 把裁剪后的比值当作停止梯度的固定权重，乘在对数概率上；GSPO 使用长度归一化序列比；DAPO 调整上界等机制。比较算法时，应分别看优势来源、是否需要 critic、比值范围和裁剪规则。
 
 参考模型 `π_ref` 与采样策略 `μ` 有不同职责：前者作为相对固定的锚点，用 KL 惩罚限制偏移；后者产生训练批次并提供概率比分母。熵奖励可以鼓励分布保持宽度，但随机行动变多并不必然带来有效探索。
@@ -94,8 +88,6 @@ CISPO 把裁剪后的比值当作停止梯度的固定权重，乘在对数概�
 验证器可能出现两种错误。假阴性拒绝行为正确但写法不同的实现，例如强制出现某段源码；假阳性则奖励错误实现，例如只检查 `retries=0`，让恒定返回零也得一分。网络、未来 Git 提交、其他模型 API 或可修改的测试，还可能提供偏离任务的捷径。
 
 ![只测试零值会把恒定返回零误判为成功](/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms/verifier-false-positive.png)
-
-*来源：[官方课件第 41 页](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf#page=41)。*
 
 训练奖励必须与独立任务、回归和行为检查一起看。历史基准审计中的平台期数字，也只反映对应版本的任务及验证器，不能当作模型能力的理论上限。
 

@@ -26,8 +26,6 @@ Computer Use Agent（CUA）直接观察渲染后的图形界面，并通过点�
 
 ![蓝色杯子任务中的观察、行动与结果](/wiki/cmu_11_768/gui_agents/computer-use-loop.png)
 
-*来源：[官方课件第 8 页](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf#page=8)。*
-
 课程随后回顾从 MiniWoB 的简化网页，到 WebShop、WebArena、VisualWebArena、OSWorld，再到带个人历史的 MyPCBench 和专业软件任务的发展。环境越真实，隐藏状态、跨应用依赖和结果验证就越重要。
 
 ## 先决定评测什么能力
@@ -44,8 +42,6 @@ WebArena 通过自托管网站和程序化检查验证环境状态。VisualWebAr
 
 ![购物车任务的程序化状态检查](/wiki/cmu_11_768/gui_agents/programmatic-state-evaluation.png)
 
-*来源：[官方课件第 25 页](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf#page=25)。*
-
 检查程序也有覆盖边界。课件展示 WebArena 创建空仓库的例子：简化验证器确认目标 URL 中出现仓库名，却没有检查“空”这个条件。得到奖励不能反过来证明所有自然语言要求都被覆盖。
 
 WebVoyager 和 Online-Mind2Web 使用真实网站及模型评判，灵活性更高，但页面变化降低可复现性，评判器与人类的一致性也成为成绩的一部分。截图中看不见购买行为，并不等于购买从未发生；证据不足或存在分歧时，需要结合轨迹和人工复核。
@@ -56,8 +52,6 @@ WindowsAgentArena 用并行虚拟机缩短评测时间。Odysseys、OSWorld 2.0 
 
 ![Odysseys 行程任务中的部分进度与完整完成](/wiki/cmu_11_768/gui_agents/odysseys-rubric.png)
 
-*来源：[官方课件第 41 页](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf#page=41)。*
-
 行程例子满足 8 项要求中的 7 项，平均检查点分数是 `0.875`，但完整完成指标仍为 `0`。另一个 CAD 例子说明，文件已经导出，也可能不满足参考图的尺寸和结构。长任务应检查交付物内容和必要过程，避免只以“存在一个文件”或“最后一屏看起来合理”判定成功。
 
 ## 视觉历史怎样进入模型
@@ -65,8 +59,6 @@ WindowsAgentArena 用并行虚拟机缩短评测时间。Odysseys、OSWorld 2.0 
 课程接着逐页展开模型输入：任务目标与截图 0 产生动作 0；动作加入历史，执行后获得截图 1；之后继续追加截图与动作。VLM 在当前历史条件下输出点击、输入、工具调用或停止。
 
 ![任务、截图和动作交错组成模型上下文](/wiki/cmu_11_768/gui_agents/visual-action-history.png)
-
-*来源：[官方课件第 55 页](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf#page=55)。*
 
 Grounding 将“点击蓝色杯子”这样的意图落到具体位置或元素。截图缩放、屏幕分辨率、滚动和界面更新都会影响坐标。某些系统还使用 HTML 或可访问性树辅助表示页面，但不同观察形式与动作空间不能混为同一项能力。
 
@@ -81,8 +73,6 @@ OpenCUA、AgentNet、MolmoWeb 等数据和系统覆盖不同软件及观察形�
 课堂以叫车任务说明真实世界探索的代价：重复尝试可能产生多笔付费订单，影响司机和其他人，取消也不能恢复已经花费的时间。训练环境因此需要可注入初始状态、检查终态并隔离重置。
 
 ![CUA-Gym 的可重置应用与状态验证](/wiki/cmu_11_768/gui_agents/cua-gym-resettable-apps.png)
-
-*来源：[官方课件第 66 页](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf#page=66)。*
 
 CUA-Gym 共同构造任务、初始状态和奖励，再验证它们是否一致。Gym-Anything 在真实安装的软件中创建任务环境，由独立审计检查证据，并扩大任务、筛选轨迹。训练规模必须连同验证质量一起看：软件数量或生成任务数不能直接等同于有效训练数据量。
 

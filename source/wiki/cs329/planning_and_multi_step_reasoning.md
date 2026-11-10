@@ -37,8 +37,6 @@ katex: true
 
 ![迷宫例子中，利用语言模型评分和行动采样频率评价新节点](/wiki/cs329/planning_and_multi_step_reasoning/lats-node-evaluation.webp)
 
-*来源：[Stanford 官方课程录像 Part 5，10:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=630s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=630)。*
-
 评价结合两个信号：语言模型判断该状态是否有希望完成任务，以及自一致性信号。课堂中的自一致性来自同类行动被采样的频率；它不是事实正确性的独立证明。例如，一条行动的模型评分为 `0.8`、采样频率为 `0.75`，等权组合得到 `0.775`，这个数值只用于演示节点评价。
 
 模拟从候选状态继续执行，直到成功、失败或预算耗尽。得到结果后，将回报沿搜索路径传回，更新访问次数和价值估计。这里的回传更新的是搜索统计量，不是对语言模型参数做梯度反向传播。
@@ -59,8 +57,6 @@ $$
 
 ![WebShop 实验同时比较平均属性得分与完整任务成功率](/wiki/cs329/planning_and_multi_step_reasoning/lats-webshop-results.webp)
 
-*来源：[Stanford 官方课程录像 Part 5，18:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=1110s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=1110)。*
-
 WebShop 的平均分衡量满足了多少属性，成功率要求全部条件满足。课件里，LATS 相比 ReAct 提高了这两个指标，但与专家仍有差距；不同训练方式的系统也不能只凭一个数字判断优劣。搜索预算、工具调用量和环境可重置性都是比较条件。
 
 ## SPRINT：把规划和执行交错起来
@@ -71,8 +67,6 @@ SPRINT 将模型组织为 planner 与多个 executor。规划器描述待执行�
 
 ![SPRINT 中的规划器与并发执行器](/wiki/cs329/planning_and_multi_step_reasoning/sprint-planner-executors.webp)
 
-*来源：[Stanford 官方课程录像 Part 5，26:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=1590s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=1590)。*
-
 ### 训练数据怎样重排
 
 课程介绍从 DeepSeek-R1 推理轨迹出发，使用模型把轨迹拆为多个步骤，再把每一步区分成规划部分和执行部分。之后分析依赖关系，重排能够并行的执行块，构造用于微调的数据。
@@ -80,8 +74,6 @@ SPRINT 将模型组织为 planner 与多个 executor。规划器描述待执行�
 这需要模型学习一种不同于长串独立自言自语的生成方式：计划应足够清楚，能够交给执行器；执行结果返回后，又要能继续整合。
 
 ![顺序推理、重排训练轨迹与交错执行的区别](/wiki/cs329/planning_and_multi_step_reasoning/sprint-overlapping-execution.webp)
-
-*来源：[Stanford 官方课程录像 Part 5，32:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=1950s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=1950)。*
 
 图里，传统顺序过程是 `Plan 1 → Exec 1 → Plan 2 → Exec 2`。如果第二项执行不依赖第一项结果，就可以提前规划并重叠执行。存在依赖的步骤仍然要等待前序结果，不能简单地把全部步骤同时发出。
 
@@ -99,15 +91,11 @@ SPRINT 将模型组织为 planner 与多个 executor。规划器描述待执行�
 
 ![生成多步推理与工具轨迹，再收集环境观察和过程评价](/wiki/cs329/planning_and_multi_step_reasoning/swirl-synthetic-trajectories.webp)
 
-*来源：[Stanford 官方课程录像 Part 5，56:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=3390s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=3390)。*
-
 可以依据每一步的质量筛选，也可以只按最终答案是否正确筛选。两种方式保留的数据不同：最终正确的轨迹可能有多余或不恰当步骤，过程良好的轨迹也可能最后算错。
 
 ### 第二阶段：根据历史训练下一行动
 
 ![在预先收集的历史上下文中，对新生成的下一行动做逐步强化学习](/wiki/cs329/planning_and_multi_step_reasoning/swirl-stepwise-rl.webp)
-
-*来源：[Stanford 官方课程录像 Part 5，58:30](https://www.youtube.com/watch?v=Ml_fp9XkB8Y&t=3510s)；[B 站对应位置](https://www.bilibili.com/video/BV1qUWJ6yEgL/?t=3510)。*
 
 课堂用比较两个人年龄的任务说明。模型先搜索第一个人的年龄，再搜索第二个人，最后比较并回答。对下一次搜索查询，评判者可以先判断“这个查询是否有助于解决当前任务”，不必先知道搜索结果。
 

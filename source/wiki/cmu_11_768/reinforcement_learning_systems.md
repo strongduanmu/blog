@@ -23,8 +23,6 @@ banner: /assets/banner/banner_13.jpg
 
 ![训练端与推理端交换轨迹和权重](/wiki/cmu_11_768/reinforcement_learning_systems/train-inference-engines.png)
 
-*来源：[官方课件第 7 页](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf#page=7)。*
-
 推理端主要进行顺序 decode，无须梯度，重点是 KV、前缀缓存和连续批处理；训练端同时处理已有序列，执行 autograd，重点是参数分片、激活内存、序列装箱和前缀共享。vLLM、SGLang 与 Megatron、FSDP 等分别服务于这些需求，二者之间还需交换权重与轨迹。
 
 ## 推理端如何减少重复工作
@@ -41,8 +39,6 @@ Activation checkpointing 只保留必要输入，反向传播时重新计算中�
 
 ![训练时共享提示与历史前缀](/wiki/cmu_11_768/reinforcement_learning_systems/training-prefix-sharing.png)
 
-*来源：[官方课件第 14 页](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf#page=14)。*
-
 训练前缀共享与推理缓存的目标相似，但必须正确累积各分支梯度。树状注意力掩码阻止不同分支互相看到，位置 ID 保持与独立序列一致。课件引用的加速来自特定长提示和多轮设置，应同时看重复比例与真实端到端时间。
 
 张量、流水线、专家、数据和上下文并行分别拆分不同对象。训练与推理的并行布局可能不同，同步权重时需要重新分片。Delta weight sync 可以只传变化部分，但其收益依赖参数表示精度和实际变化比例。
@@ -56,8 +52,6 @@ MoE 还可能因数值细微差异选择不同 expert。R3 记录采样时的路
 若新一轮输入是上一轮提示与输出的精确扩展，可以把整条轨迹拼成一个训练样本，只在模型生成处计算损失。若每两轮压缩历史，新的摘要会改变前缀，后续片段通常必须成为另一个样本，重复计算部分上下文。
 
 ![连续历史与压缩历史对应不同训练样本](/wiki/cmu_11_768/reinforcement_learning_systems/sequence-extension-batches.png)
-
-*来源：[官方课件第 20 页](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf#page=20)。*
 
 重复任务 token 即使没有直接损失，仍有上下文计算成本。聊天模板若移除旧推理块，也可能破坏 extension；需要检查实际 token 前缀，而非仅比较消息列表长度。
 
@@ -76,8 +70,6 @@ MoE 还可能因数值细微差异选择不同 expert。R3 记录采样时的路
 一个方案是为每个 Harness 重写 rollout；另一种是在中间提供兼容推理 API 的代理，记录 token、概率和路由信息，让现有 Harness 通过代理采样。后者减少重复适配，但仍需要保证 API 语义与轨迹信息完整。
 
 ![控制器协调推理、智能体、训练、奖励与权重服务](/wiki/cmu_11_768/reinforcement_learning_systems/rl-services.png)
-
-*来源：[官方课件第 32 页](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf#page=32)。*
 
 SPMD 用同一个程序控制各 GPU rank，边界直接但部署较紧。服务化架构将推理、训练、环境、奖励和权重同步拆开，由轻量控制器编排，便于替换实现、弹性扩容、跨集群及异构硬件。服务边界也增加通信、版本和故障恢复成本。
 

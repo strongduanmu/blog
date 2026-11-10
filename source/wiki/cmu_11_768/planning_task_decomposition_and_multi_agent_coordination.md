@@ -24,8 +24,6 @@ mermaid: true
 
 ![工作站采购中的并行搜索、依赖与重规划](/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination/workstation-task-graph.png)
 
-*来源：[官方课件第 3 页](https://www.cmu-agents.com/slides/lecture-05-planning.pdf#page=3)。*
-
 供应商搜索可以独立进行，兼容性检查依赖规格和内部要求，提交申请则具有外部影响。若四家都不合适，系统还需要增加第五家。计划需要表达这些关系，并允许根据新信息修改。
 
 **计划是对未来预期行为的显式表示**，包含动作或子目标，以及它们的顺序、依赖。它面向当前任务，技能则提供跨任务指导。计划是可检查和修改的提议，是否可行仍要通过环境验证。
@@ -47,8 +45,6 @@ Least-to-Most 把过程拆成两阶段：先生成子问题，再逐个求解，
 经典规划把状态写成谓词集合，把动作写成前置条件与效果。积木世界中，`pick-up(x)` 要求积木在桌上、上方无遮挡且机械手为空；执行后，状态变为持有积木、积木不再位于桌上、手不再为空。搜索算法寻找满足各步前置条件、最终到达目标的动作序列。
 
 ![积木世界中的状态、前置条件、效果与计划](/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination/classical-planning.png)
-
-*来源：[官方课件第 13 页](https://www.cmu-agents.com/slides/lecture-05-planning.pdf#page=13)。*
 
 语言模型能很容易写出看似合理的计划，难处转向它隐含的世界模型是否正确。形式计划便于校验，但需要明确环境表示；自然语言计划覆盖面广，缺乏通用验证器；程序计划处于两者之间，可以调用感知和控制 API，同时接受程序结构的限制。Code as Policies、ProgPrompt 和 Binder 展示了这条路线。
 
@@ -87,8 +83,6 @@ Vending-Bench 让智能体长期经营自动售货机。课件中的失败把“
 最后，Daniel 用 Odysseys 中寻找 ACL 外科医生的长任务引入 Multi-Agent Computer Use（MACU）。Manager 建立子任务图，Worker 在各自环境执行已就绪节点，完成后回传结果；Manager 检查证据，必要时重试或修改图，再派发下一批。
 
 ![MACU 用依赖图组织执行与重规划](/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination/macu-architecture.png)
-
-*来源：[官方课件第 38 页](https://www.cmu-agents.com/slides/lecture-05-planning.pdf#page=38)。*
 
 下面根据课件整理执行关系：
 

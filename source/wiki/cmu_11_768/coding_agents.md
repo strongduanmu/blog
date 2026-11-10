@@ -52,8 +52,6 @@ def is_positive(x: int) -> ____:
 
 ![用负数、零和正数检查 is_positive](/wiki/cmu_11_768/coding_agents/functional-evaluation.png)
 
-*来源：[官方课件第 23 页](https://www.cmu-agents.com/slides/lecture-06-coding-agents.pdf#page=23)。*
-
 执行检查能接受不同的正确实现，但有限测试可能漏掉错误，需要可信测试、依赖、隔离环境和资源限制。HumanEval 评测函数补全，CodeContests 评测完整程序，`pass@k` 表达抽样 `k` 个候选中至少一个通过测试的概率。
 
 当从 `n` 个样本中观察到 `c` 个通过时，常用估计为：
@@ -87,8 +85,6 @@ Shell-only 工具集可以通过 `rg`、文件读取、脚本和测试完成任�
 
 ![统一 diff 与按文件操作的补丁格式](/wiki/cmu_11_768/coding_agents/editing-formats.png)
 
-*来源：[官方课件第 42 页](https://www.cmu-agents.com/slides/lecture-06-coding-agents.pdf#page=42)。*
-
 课件引用 Aider 的历史重构实验，同一模型在不同编辑格式下成绩相差明显。这反映接口的重要性，数字只适用于对应的 89 项 Python 重构任务。LocAgent 等方法还利用依赖图检索关联文件，但相关代码最终仍需要执行验证。
 
 ## 编程智能体的评测与训练任务
@@ -96,8 +92,6 @@ Shell-only 工具集可以通过 `rg`、文件读取、脚本和测试完成任�
 SWE-bench 把 issue、起始仓库、候选补丁和测试结合起来：`fail-to-pass` 检查所需修复，`pass-to-pass` 检查原行为保持。环境能否安装、基线能否运行，必须在收集训练轨迹前确认。
 
 ![SWE-bench 中的修复与回归检查](/wiki/cmu_11_768/coding_agents/swe-bench-evaluation.png)
-
-*来源：[官方课件第 47 页](https://www.cmu-agents.com/slides/lecture-06-coding-agents.pdf#page=47)。*
 
 SWE-Gym 和 R2E-Gym 提供可运行环境，终局测试奖励可用于 SFT 或 RL；失败奖励却未必能指出最早错在哪一步。SWE-smith 从正常代码注入缺陷，保留引起新测试失败的变异，再确认恢复原实现后测试通过，从而构造可验证任务。
 

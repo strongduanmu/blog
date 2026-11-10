@@ -23,8 +23,6 @@ O*NET 将职业描述为任务集合。GDPval 请有行业经验的专业人员�
 
 ![GDPval 中的职业覆盖与专家任务标注](/wiki/cmu_11_768/agents_and_the_future_of_work/expert-work-tasks.png)
 
-*来源：[官方课件第 19 页](https://www.cmu-agents.com/slides/2026-10-27-zora-wang.pdf#page=19)。*
-
 收集人的操作轨迹可以还原真实活动，但不一定直接揭示意图，还涉及隐私。通过 agent 探索环境自动合成任务能扩大训练数据，却需要检查生成任务是否仍与真实工作相关。课件也提醒，一些基准没有包含现实中的限制，容易高估可部署能力。
 
 ### 环境需要软件，也需要数据
@@ -33,8 +31,6 @@ TheAgentCompany 用可复现的开源软件模拟企业工作；Gym-Anything 自
 
 ![向环境装载真实或合成数据时的目标](/wiki/cmu_11_768/agents_and_the_future_of_work/work-environment-data.png)
 
-*来源：[官方课件第 29 页](https://www.cmu-agents.com/slides/2026-10-27-zora-wang.pdf#page=29)。*
-
 真实软件访问、授权和真实数据往往受限，开源替代与合成数据各有分布差异。构造环境时应明确保留了哪些职业特征、简化了哪些流程，不能只按应用数量判断覆盖面。
 
 ## 开放工作怎样评价
@@ -42,8 +38,6 @@ TheAgentCompany 用可复现的开源软件模拟企业工作；Gym-Anything 自
 从修复 GitHub issue、数据清理，到室内设计，工作位于“可执行验证—开放判断”的连续谱上。规则检查适合确定输出，却难以完整评价语义、审美和领域要求。
 
 ![用专家 rubric 评价开放工作产物](/wiki/cmu_11_768/agents_and_the_future_of_work/expert-rubric-evaluation.png)
-
-*来源：[官方课件第 38 页](https://www.cmu-agents.com/slides/2026-10-27-zora-wang.pdf#page=38)。*
 
 专家 rubric 将目标拆成具体要求，再由人或模型判定。模型生成 rubric 可以扩展规模；根据轨迹对比或人机交互修订规则，又能持续提供反馈。但模型 judge 存在偏好、随机性和视觉判断局限，rubric 也可能依赖用户和模型，无法一次写到完美。
 
@@ -54,8 +48,6 @@ TheAgentCompany 用可复现的开源软件模拟企业工作；Gym-Anything 自
 课件随后从自主能力转向协作。人可能在不同任务中选择让系统自动完成、共同执行或只提供辅助；CowPilot 等系统允许执行中接管和纠正，也有研究训练 agent 识别人机交互模式与自主程度。
 
 ![执行过程中保留人的控制与引导](/wiki/cmu_11_768/agents_and_the_future_of_work/human-agent-collaboration.png)
-
-*来源：[官方课件第 48 页](https://www.cmu-agents.com/slides/2026-10-27-zora-wang.pdf#page=48)。*
 
 独立完成的评测遗漏了澄清、理解新要求和适应工作流的能力。效率也不能只看“有人替我执行”：冗余调用、多 agent 通信、等待和结果复核仍消耗资源与注意力。
 

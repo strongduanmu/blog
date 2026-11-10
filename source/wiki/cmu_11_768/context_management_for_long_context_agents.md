@@ -27,8 +27,6 @@ Graham 分析了 1,500 次 OpenHands 会话：每个会话平均使用 77,922 to
 
 ![OpenHands 会话中不同内容的 token 占比](/wiki/cmu_11_768/context_management_for_long_context_agents/agent-context-composition.png)
 
-*来源：[官方课件第 4 页](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf#page=4)。*
-
 长上下文有两个问题：容量（capacity）关心模型能否利用远处的证据，效率（efficiency）关心系统能否承担计算、显存和等待时间。标称支持 1M token，不代表所有位置的信息都能被稳定使用。
 
 ## Prefill、Decode 与注意力
@@ -80,8 +78,6 @@ Gated DeltaNet 在写入前对旧状态施加标量衰减，使远处信息逐�
 
 ![KDA 的按通道衰减与状态更新](/wiki/cmu_11_768/context_management_for_long_context_agents/kimi-delta-attention.png)
 
-*来源：[官方课件第 23 页](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf#page=23)。*
-
 ### 稀疏访问与 KV 压缩
 
 稀疏注意力保留部分历史位置。固定模式容易预测计算量，内容相关的选择器则可先用便宜的评分选出 Top-K，再对这些位置计算注意力。后者能适应当前查询，但选漏了证据，后续注意力就无法使用它。
@@ -104,8 +100,6 @@ RoPE 模型从长度 `L` 扩到 `L′=sL` 时，可用位置插值把 `R(t)` 换
 
 ![智能体多轮调用中不断增长的可缓存前缀](/wiki/cmu_11_768/context_management_for_long_context_agents/agent-prefix-cache.png)
 
-*来源：[官方课件第 38 页](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf#page=38)。*
-
 缓存没有删除模型可见的历史，也没有解决“模型忽略旧约束”的问题。它主要减少重复计算。物理计算成本与 API 报价也不同，课件第 40 页价格表只是 2026-08-30 的记录，不宜当成实时价格。
 
 接下来介绍三个服务端机制：PagedAttention 用块表管理非连续 KV 内存；RadixAttention 用前缀树共享相同提示；缓存感知路由在前缀命中与队列负载之间取舍。应用侧可以稳定系统指令、工具顺序和示例，把变化内容追加在后面，避免不断修改前缀造成失效，同时观察缓存 token、TTFT 和淘汰情况。
@@ -115,8 +109,6 @@ RoPE 模型从长度 `L` 扩到 `L′=sL` 时，可用位置插值把 `R(t)` 换
 课程最后讨论 compaction。课件例子中，CI 超时的原始历史包含 24K 行日志、多次操作和一次成功运行。压缩后的工作状态保留：目标是修复超时；原因是端口冲突；`--workers=1` 已通过验证；证据位于 `/tmp/ci.log`；下一步是提交相应修改。
 
 ![压缩时保留锚点、进度与近期交互，外置原始证据](/wiki/cmu_11_768/context_management_for_long_context_agents/compaction-state.png)
-
-*来源：[官方课件第 48 页](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf#page=48)。*
 
 可以把压缩理解为状态估计：用预算有限的表示保留未来行动所需的信息。目标、约束和精确标识需要原样保存；进度、已作决策和验证结果整理成检查点；近期操作保留上下文；长日志外置并保留可检索路径；重复和已被取代的尝试才适合丢弃。
 

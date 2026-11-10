@@ -35,8 +35,6 @@ katex: true
 
 ![先训练生成器，再批量生成解答、构造标签并训练验证器](/wiki/cs329/robust_verification/verifier-training.webp)
 
-*来源：[Stanford 官方课程录像 Part 3，04:30](https://www.youtube.com/watch?v=p7TdPUcPoik&t=270s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LEHt/?t=270)。*
-
 模型使用语言模型骨干与输出标量分数的预测头。训练既包含正确性预测，也包含语言建模目标。课件区分了整段解答结束后做一次预测，以及在解答 token 位置上形成预测的变体。**token 位置上有预测，不等于拥有人工提供的逐步正确性标签**；这与后面的过程监督要分开理解。
 
 推理时，对同一道测试题生成多个解答，再用验证器评分选出结果。实验里增加候选数量先带来提升，之后收益减小甚至出现下降；验证器也会受到分布外候选和看似合理的错误解影响。候选数量不是越多越安全。
@@ -50,8 +48,6 @@ katex: true
 Outcome Reward Model（ORM）主要判断完整输出；Process Reward Model（PRM）判断逐步推理。课堂以数学解题说明，一步不成立就可能导致后续全部偏离，过程监督可以更早定位问题。
 
 ![ORM 对完整解答打分，PRM 对各步骤分别给出正确概率](/wiki/cs329/robust_verification/outcome-and-process-rewards.webp)
-
-*来源：[Stanford 官方课程录像 Part 3，28:30](https://www.youtube.com/watch?v=p7TdPUcPoik&t=1710s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LEHt/?t=1710)。*
 
 《Let's Verify Step by Step》让标注者给推理步骤标记正、负或中性，PRM800K 数据集提供约 80 万个步骤标签。课堂还介绍主动学习：优先选择“当前 PRM 认为很好，但最终答案错误”的候选，让人工标注更有辨别价值的难例。课件报告这种选择方式比随机选样更节省标注数据。
 
@@ -73,8 +69,6 @@ $$
 
 ![从中间步骤采样多条后续路径，形成 hard 与 soft 过程标签](/wiki/cs329/robust_verification/automatic-process-labels.webp)
 
-*来源：[Stanford 官方课程录像 Part 3，40:30](https://www.youtube.com/watch?v=p7TdPUcPoik&t=2430s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LEHt/?t=2430)。*
-
 图中从同一个前缀继续生成 3 条路径，其中 2 条到达正确答案。Soft Estimation 可以用成功比例 `2/3` 表示，Hard Estimation 则在至少一条成功时给出正标签。这里评估的是“当前策略从这个前缀继续，能否解出来”。
 
 这带来一个重要限制：**有限次续写没有答对，不能严格证明前缀在逻辑上错误。** 也可能是后续生成器能力不足。相反，后续模型可能修正先前错误，最后答案正确也不必然证明此前每个论证都成立。
@@ -87,8 +81,6 @@ $$
 
 ![Weaver 的评分、估计可靠性与加权选择流程](/wiki/cs329/robust_verification/weaver-score-weight-select.webp)
 
-*来源：[Stanford 官方课程录像 Part 3，56:30](https://www.youtube.com/watch?v=p7TdPUcPoik&t=3390s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LEHt/?t=3390)。*
-
 首先收集多个验证器的分数，统一尺度并过滤低质量来源；然后利用少量标注与弱监督估计各来源的可靠性；最后组合分数，选择置信度更高的候选。课件以约 1% 标注量说明弱监督设置，具体预算与结果仍应按论文实验条件比较。
 
 弱监督的想法受到 Snorkel 等方法启发：把多个有噪声的来源作为标签信号，建模其准确性以及可能的相关性。课件中的概率推导采用条件独立假设来解释聚合。现实中，使用相似训练数据的验证器很可能犯同类错误，因此“多几个模型”本身不保证增加独立证据。
@@ -98,8 +90,6 @@ $$
 更多算力可以分给生成候选、更大的模型、更多验证器，或更昂贵的评分过程。课堂进一步介绍蒸馏：让大型验证器集成产生监督，再训练较小的模型承担验证工作。
 
 ![验证器集成、蒸馏与准确率和推理计算量的取舍](/wiki/cs329/robust_verification/verification-compute.webp)
-
-*来源：[Stanford 官方课程录像 Part 3，66:30](https://www.youtube.com/watch?v=p7TdPUcPoik&t=3990s)；[B 站对应位置](https://www.bilibili.com/video/BV17mWJ6LEHt/?t=3990)。*
 
 这样能减少部署时反复调用大型集成的开销，但需要考虑蒸馏数据覆盖、教师错误以及换任务后的分布变化。课件的计算节省来自特定模型与基准，不能直接视为任意工作负载的固定降本比例。
 

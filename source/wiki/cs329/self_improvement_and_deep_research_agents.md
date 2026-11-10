@@ -32,8 +32,6 @@ mermaid: true
 
 ![AlphaCode 的数据、学习、大规模采样及筛选管线](/wiki/cs329/self_improvement_and_deep_research_agents/alphacode-pipeline.webp)
 
-*来源：[Stanford 官方课程录像 Part 7，04:00](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=240s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=240)。*
-
 课程先回顾 GitHub 代码与 CodeContests 题解数据，再介绍微调中的条件信息和目标设计。题目可能有多个正确程序，算法、实现方式和语言都不同，训练与采样必须考虑这种多解性。
 
 大量采样提供探索，公开样例执行过滤明显错误；但通过少量样例不意味着通过全部隐藏测试。将行为相似的程序聚为一类，可以减少最后提交十份几乎相同解法的风险，保留不同候选思路。
@@ -41,8 +39,6 @@ mermaid: true
 ### `pass@k` 与 `10@k` 不是同一个指标
 
 ![全部候选的覆盖率与筛选后十次提交的成功率](/wiki/cs329/self_improvement_and_deep_research_agents/coverage-and-submission-metrics.webp)
-
-*来源：[Stanford 官方课程录像 Part 7，10:30](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=630s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=630)。*
 
 `pass@k` 衡量采样 `k` 个程序后，只要其中任何一个通过隐藏测试，该题就算成功。它主要观察搜索是否覆盖了正确程序。`10@k` 则从这 `k` 个候选中只提交 10 个，考察筛选和选择后还能解决多少题。
 
@@ -62,13 +58,9 @@ AlphaCode 2 使用 Gemini 系列模型进一步微调，构成多个模型的家
 
 ![多个代码生成模型与程序正确性评分模型](/wiki/cs329/self_improvement_and_deep_research_agents/alphacode2-model-family.webp)
 
-*来源：[Stanford 官方课程录像 Part 7，28:30](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=1710s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=1710)。*
-
 模型家族不是简单把完全相同的模型调用很多遍。不同微调阶段和配置提供不同候选分布，采样温度及元信息也参与多样化。评分器则利用题目和程序，估计候选的质量。
 
 ![AlphaCode 2 从采样、执行过滤到聚类和重排序的流程](/wiki/cs329/self_improvement_and_deep_research_agents/alphacode2-sampling-filtering.webp)
-
-*来源：[Stanford 官方课程录像 Part 7，34:30](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=2070s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=2070)。*
 
 流程依次执行大规模采样、编译与样例测试、行为聚类、组内评分及提交。执行先去掉大量明显不满足条件的程序，之后再用评分器处理无法仅靠公开测试分辨的候选。
 
@@ -84,8 +76,6 @@ AlphaCode 2 使用 Gemini 系列模型进一步微调，构成多个模型的家
 
 ![Search-o1 的动态检索与独立文档分析两个组成部分](/wiki/cs329/self_improvement_and_deep_research_agents/search-o1-dynamic-retrieval.webp)
 
-*来源：[Stanford 官方课程录像 Part 7，50:30](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=3030s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=3030)。*
-
 Search-o1 允许模型在推理中发现知识缺口时生成搜索查询，获得资料，再接回原有推理。课堂用多步化学反应问题说明：如果不知道中间物质的结构，直接猜测原子数会污染后续计算；此时应该先获取必要知识。
 
 ### 为什么还需要 Reason-in-Documents
@@ -93,8 +83,6 @@ Search-o1 允许模型在推理中发现知识缺口时生成搜索查询，获�
 直接把长篇搜索结果插进推理链，会带入重复、无关内容，甚至使模型丢失原问题。Reason-in-Documents 模块单独处理当前查询、既有推理与检索文档，提炼与当前步骤相关的信息，再交回主推理过程。
 
 ![单独分析检索文档，再把相关信息整合回原推理链](/wiki/cs329/self_improvement_and_deep_research_agents/reason-in-documents.webp)
-
-*来源：[Stanford 官方课程录像 Part 7，56:30](https://www.youtube.com/watch?v=Uni9dqyuuDM&t=3390s)；[B 站对应位置](https://www.bilibili.com/video/BV1jUWJ6yEUP/?t=3390)。*
 
 这相当于把“找到文档”与“从文档里取得所需证据”分开。模块输出仍需能追溯来源，摘要遗漏或误读也可能成为新的错误入口。扩大检索 `top-k` 只能增加可用材料，并不保证模型有效利用它们。
 

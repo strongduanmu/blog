@@ -33,8 +33,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 
 ![从任务集、人类完成时间与智能体成功率估计 time horizon](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/metr-task-time-horizon.webp)
 
-*来源：[Stanford 官方课程录像 Part 8，06:30](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=390s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=390)。*
-
 这里的 time horizon 是**AI 能以给定成功概率完成、且人类通常需要多长时间的任务**。它不是智能体持续运行的墙钟时间，也不是上下文窗口能保存多少 token。
 
 课件区分了较短的单步任务、分钟到小时级的 HCAST 任务，以及更长的 RE-Bench 研究工程任务。寻找脚本可能只有几秒，修复模拟输入文件中的错误需要更久，开发并优化 CUDA 工具可能需要数小时。用同一个数字概括这些任务，首先要有明确的任务采样范围。
@@ -50,8 +48,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 以较低成功率作为阈值，可以得到更长的时间跨度；要求稳定完成时，跨度会明显缩短。
 
 ![50% 与 80% 成功率条件下的时间跨度比较](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/success-rate-thresholds.webp)
-
-*来源：[Stanford 官方课程录像 Part 8，22:10](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=1330s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=1330)。*
 
 课件以 Claude 3.7 的一组历史结果举例：50% 条件约为 59 分钟，80% 条件约为 15 分钟。这是所研究任务集中的估计，并不表示模型每运行 59 分钟就会失败，也不是当前所有智能体的统一能力上限。
 
@@ -69,8 +65,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 
 ![GDPval 按经济部门、职业和具体工作任务构建评测](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/gdpval-task-construction.webp)
 
-*来源：[Stanford 官方课程录像 Part 8，34:30](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=2070s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=2070)。*
-
 课件介绍 9 个经济部门、44 个职业与 1,320 个任务，公开 gold 子集包含 220 个任务。任务来自需要专业背景的工作场景，并提供说明和必要文件。专业人士的产出用于比较，评审再判断模型结果与人类结果谁更好。
 
 这样的胜率不是“已经自动化了多少比例的岗位”。一个职业由很多相互依赖的任务、协作和责任构成，而基准主要观察给定说明后的一次产出。
@@ -85,8 +79,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 
 ![缩减任务上下文后，模型胜率下降的实验](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/gdpval-context-experiment.webp)
 
-*来源：[Stanford 官方课程录像 Part 8，45:50](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=2750s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=2750)。*
-
 课件中的实验有意删除部分上下文，提示 token 平均减少约 42%，对应胜率从 `47.7%` 降到 `44.3%`。这个实验说明，较完整的任务说明有帮助，但不能把变化推广为任意提示“少写 42% 就固定下降多少”。
 
 真实工作里，人们还需要发现该做什么、理解隐含背景、向相关人员确认要求。基准中写得很明确的一次任务，不包含所有这些过程。
@@ -96,8 +88,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 课程最后讨论生成论文 related work 一类任务。系统需要寻找文献、理解内容，再组织有依据的综合分析。写得连贯只是其中一个维度。
 
 ![知识综合、检索质量与可验证性构成的研究评估](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/research-synthesis-metrics.webp)
-
-*来源：[Stanford 官方课程录像 Part 8，54:30](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=3270s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=3270)。*
 
 | 维度 | 需要检查的问题 |
 | --- | --- |
@@ -118,8 +108,6 @@ METR 收集软件工程、网络安全、推理和机器学习任务，请具备
 ## 把三种评测放回真实工作
 
 ![METR、GDPval 与研究综合任务各自没有充分覆盖的真实工作条件](/wiki/cs329/agentic_evaluations_and_long_horizon_tasks/evaluation-external-validity.webp)
-
-*来源：[Stanford 官方课程录像 Part 8，64:30](https://www.youtube.com/watch?v=8JAqLnTaZu4&t=3870s)；[B 站对应位置](https://www.bilibili.com/video/BV1fyWJ67E9K/?t=3870)。*
 
 METR 的任务评分、资源约束和交互方式，GDPval 的明确说明与一次性交付，以及研究综合中的来源范围，都与真实工作有差别。实际系统可能面对任务要求变化、多个协作者、隐性知识和不能轻易重试的错误。
 

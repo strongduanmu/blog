@@ -31,8 +31,6 @@ Large Language Monkeys 将同一道题多次交给模型，统计至少一个候
 
 ![不同模型的候选覆盖率随采样数量变化](/wiki/cs329/test_time_compute_scaling/sampling-coverage.webp)
 
-*来源：[Stanford 官方课程录像 Part 2，02:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=150s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=150)。*
-
 对单道题 `i`，若一次独立采样的成功概率为 `p_i`，那么 `k` 次中至少成功一次的概率为：
 
 $$
@@ -47,8 +45,6 @@ $$
 
 ![单题成功概率与跨题目平均覆盖率的区别](/wiki/cs329/test_time_compute_scaling/power-law-explanation.webp)
 
-*来源：[Stanford 官方课程录像 Part 2，08:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=510s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=510)。*
-
 《How Do Large Language Monkeys Get Their Power (Laws)?》分析了低成功概率区域的分布。课程把它解释为困难题的长尾：容易题很快被覆盖，后续算力主要用于那些很少生成正确答案的题。不能把单题公式直接当作全体题目的同一条曲线，也不能从观察区间外推无限收益。
 
 ### 有候选，不一定选得出来
@@ -58,8 +54,6 @@ $$
 真实任务通常没有标准答案可查。多数投票（majority voting）根据候选出现频率选择答案，但正确候选可能十分稀少，错误解法也可能反复出现。
 
 ![不同题目中的正确候选比例，以及多数投票成功与失败的分布](/wiki/cs329/test_time_compute_scaling/rare-correct-answers.webp)
-
-*来源：[Stanford 官方课程录像 Part 2，18:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=1110s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=1110)。*
 
 因此，覆盖率与最终选择准确率之间存在 generation-verification gap。更多候选能提高找到正确解的机会，也可能带来更多会迷惑验证器的错误答案。测试覆盖不足同样会把错误程序当成正确程序。
 
@@ -77,8 +71,6 @@ $$
 
 ![利用过程奖励筛选中间步骤的 beam search](/wiki/cs329/test_time_compute_scaling/prm-beam-search.webp)
 
-*来源：[Stanford 官方课程录像 Part 2，30:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=1830s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=1830)。*
-
 图中的空心节点表示中间步骤，实心节点表示完整解。绿色分支被保留，红色分支被拒绝。这里的“步骤”是有意义的推理片段，不能直接理解为每生成一个 token 都要调用一次验证器。
 
 ## 给不同难度的问题分配预算
@@ -86,8 +78,6 @@ $$
 实验按基础模型的成功率把问题分成不同难度组，比较不同的并行与顺序计算比例。较容易的问题可以从顺序修订中获益；困难问题更需要探索多条路径，而最优组合并不固定。
 
 ![在匹配计算量的条件下比较推理时扩展与预训练扩展](/wiki/cs329/test_time_compute_scaling/compute-allocation.webp)
-
-*来源：[Stanford 官方课程录像 Part 2，38:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=2310s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=2310)。*
 
 课上对实验的解读是：在所研究的模型、任务与计算预算下，简单和中等难度问题常能从额外推理计算中获得较好收益；最难题目仍可能更依赖更强的基础模型。这个结果不能推广成“已经不需要预训练”，因为每次请求的预算、总调用量和部署方式都会影响比较。
 
@@ -98,8 +88,6 @@ $$
 最后一部分介绍 Archon。前面的工作选择“采样多少次”，Archon 进一步选择由哪些操作、哪些模型以及怎样的前后依赖组成推理流程。
 
 ![Archon 中可组合的生成、融合、批评、排序与验证操作](/wiki/cs329/test_time_compute_scaling/archon-operations.webp)
-
-*来源：[Stanford 官方课程录像 Part 2，48:30](https://www.youtube.com/watch?v=-Ggc37xLj_Y&t=2910s)；[B 站对应位置](https://www.bilibili.com/video/BV1ZmWJ6LEb1/?t=2910)。*
 
 各操作的输入和输出决定了它们怎样连接：
 

@@ -34,8 +34,6 @@ mermaid: true
 
 ![标准提示与包含中间推导的思维链提示](/wiki/cs329/course_overview/chain-of-thought.webp)
 
-*来源：[Stanford 官方课程录像 Part 1，08:30](https://www.youtube.com/watch?v=6YnLB0XbTnI&t=510s)；[B 站对应位置](https://www.bilibili.com/video/BV1saWJ6xEhm/?t=510)。*
-
 老师强调，早期观察到的思维链收益与模型规模有关，小模型未必能从同一套示例中受益。今天专门训练的推理模型又加入了针对推理行为的后训练，不能把它们的全部能力都解释为早期提示实验中的“涌现”。
 
 ## 怎样把基础模型变成可用的助手
@@ -52,8 +50,6 @@ mermaid: true
 
 ![人类偏好数据、奖励模型与语言模型策略之间的关系](/wiki/cs329/course_overview/human-preferences.webp)
 
-*来源：[Stanford 官方课程录像 Part 1，18:30](https://www.youtube.com/watch?v=6YnLB0XbTnI&t=1110s)；[B 站对应位置](https://www.bilibili.com/video/BV1saWJ6xEhm/?t=1110)。*
-
 因此，指令微调与 RLHF 使用的信息并不相同：前者示范怎样回答，后者提供回答之间的偏好或质量信号。奖励模型只是人类偏好的近似，优化其分数也不保证满足全部真实需求。
 
 ## 推理阶段还能继续增加计算吗
@@ -63,8 +59,6 @@ mermaid: true
 课程接着介绍 Large Language Monkeys。对于同一道题，让模型以具有随机性的方式重复生成候选，再通过验证器挑选结果。代码题可以执行测试，形式化证明可以交给证明检查器；普通数学问答则需要另外考虑怎样验证。
 
 ![重复生成候选解，再由验证器选出最终答案](/wiki/cs329/course_overview/generate-and-verify.webp)
-
-*来源：[Stanford 官方课程录像 Part 1，20:30](https://www.youtube.com/watch?v=6YnLB0XbTnI&t=1230s)；[B 站对应位置](https://www.bilibili.com/video/BV1saWJ6xEhm/?t=1230)。*
 
 这个过程拆出了两个问题：**能否生成至少一个正确答案，以及能否把它选出来。** 前者对应覆盖率或 `pass@k`，后者决定系统最后交付的准确率。知道标准答案的 oracle verifier 可以帮助研究候选覆盖，但不能直接拿到未知答案的线上任务中使用。
 
@@ -98,8 +92,6 @@ flowchart LR
 
 ![模型围绕目标采取行动，从环境获取反馈，再决定继续或停止](/wiki/cs329/course_overview/agent-feedback-loop.webp)
 
-*来源：[Stanford 官方课程录像 Part 1，42:30](https://www.youtube.com/watch?v=6YnLB0XbTnI&t=2550s)；[B 站对应位置](https://www.bilibili.com/video/BV1saWJ6xEhm/?t=2550)。*
-
 智能体根据目标选择下一步操作，与环境交互，并用新观察修正后续行为。要持续完成任务，还需要保留目标、已完成工作和失败尝试等信息。开放循环中，模型动态决定下一步；预定义的 agentic workflow 则把大部分执行结构预先写好。
 
 课堂依次列出提示链、路由、并行化、协调器、评判器和验证器等组织方式。它们可以组合使用：例如先并行调查若干来源，再由模型综合；也可以先生成一个方案，再由评判器指出问题，交回生成器修订。
@@ -113,8 +105,6 @@ flowchart LR
 课程最后介绍三次作业与课程项目。作业帮助理解自我改进、多步推理和工具使用；项目要求提出可以验证的问题，并通过实验分析。
 
 ![课程项目接受的研究方向、反例与项目里程碑](/wiki/cs329/course_overview/course-project.webp)
-
-*来源：[Stanford 官方课程录像 Part 1，64:10](https://www.youtube.com/watch?v=6YnLB0XbTnI&t=3850s)；[B 站对应位置](https://www.bilibili.com/video/BV1saWJ6xEhm/?t=3850)。*
 
 可接受的方向包括构建评测数据集、分析智能体可靠性、改进现有基准表现，或检验课堂论文中的某个设计。纯综述以及没有明确评测标准的应用演示，不能替代研究项目。项目提案、中期展示、最终报告和海报展示共同要求学生逐步拿出实验结果。
 

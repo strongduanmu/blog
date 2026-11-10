@@ -23,8 +23,6 @@ banner: /assets/banner/banner_14.jpg
 
 ![不可信 issue 经共享缓存影响发布流程的案例](/wiki/cmu_11_768/sandboxing_and_credential_management/supply-chain-shared-cache.png)
 
-*来源：[官方课件第 6 页](https://www.cmu-agents.com/slides/lecture-13-agent-safety.pdf#page=6)。*
-
 案例共同提示：危险可能跨越多次运行。处理 issue 的工作结束后，被污染的共享缓存仍可能进入后续发布流程；单次智能体退出，并不意味着它产生的状态也已消失。
 
 ## 区分四类威胁
@@ -50,8 +48,6 @@ SFT 用恰当拒绝和合法协助示例训练；RL 则奖励抵御攻击，同�
 
 ![智能体在沙箱内与工具在沙箱内的两种边界](/wiki/cmu_11_768/sandboxing_and_credential_management/sandbox-boundaries.png)
 
-*来源：[官方课件第 21 页](https://www.cmu-agents.com/slides/lecture-13-agent-safety.pdf#page=21)。*
-
 容器与虚拟机隔离层次不同：Docker 和 Apptainer 共享宿主内核，QEMU 可运行独立 guest 内核。实际边界还取决于挂载、特权、网络和宿主服务。快速创建、强隔离、冻结恢复和可检查生命周期，是频繁 agent 运行中的共同要求。
 
 共享卷、缓存和快照也需要纳入策略。干净的新进程若读取旧的污染状态，仍然可能把前一次攻击带入新任务。
@@ -64,8 +60,6 @@ SFT 用恰当拒绝和合法协助示例训练；RL 则奖励抵御攻击，同�
 
 ![代理按运行身份检查权限，再使用上游密钥请求](/wiki/cmu_11_768/sandboxing_and_credential_management/credential-broker.png)
 
-*来源：[官方课件第 29 页](https://www.cmu-agents.com/slides/lecture-13-agent-safety.pdf#page=29)。*
-
 第 2 讲中的 MCP 凭证隔离可作为这类部署的一种形式。是否安全，仍由代理的授权规则、可调用接口和日志决定。
 
 ## 监控怎样连接到干预
@@ -75,8 +69,6 @@ SFT 用恰当拒绝和合法协助示例训练；RL 则奖励抵御攻击，同�
 CoT 监控有时能揭示计划绕过测试的意图，但推理文字并不是可信执行记录。课件讨论强监控压力可能促使模型隐藏作弊，因此仍需独立检查动作与结果。
 
 ![执行前检查才能阻止危险调用](/wiki/cmu_11_768/sandboxing_and_credential_management/monitor-before-execution.png)
-
-*来源：[官方课件第 36 页](https://www.cmu-agents.com/slides/lecture-13-agent-safety.pdf#page=36)。*
 
 要阻止危险动作，检查必须在执行前完成，并能真正暂停或拒绝。事后日志主要帮助调查和改进；检查器、日志和停止控制也应位于 agent 无法修改的位置。
 

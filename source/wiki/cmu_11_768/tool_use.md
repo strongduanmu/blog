@@ -48,8 +48,6 @@ Graham 先让学生列举 ChatGPT 能做的事情，再把它们对应到接口�
 
 ![CodeAct 用代码组合查询、转换与比较](/wiki/cmu_11_768/tool_use/codeact-composition.png)
 
-*来源：[官方课件第 15 页](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf#page=15)。*
-
 课件展示的子集中，代码动作在 8 个模型上均取得最高成功率，其中 7 个模型使用的轮数最少；完整 17 个模型中，两项统计分别都是 12 个。这里比较的是论文中的特定任务与设置，不能推成任意任务上代码都最好。
 
 表达能力也带来约束难度。课堂讨论了无限循环、依赖版本、被污染的第三方库，以及文件、网络、CPU 和内存访问的影响。窄函数接口便于检查参数；任意代码的行为需要结合沙箱、资源限制、权限和日志来控制。
@@ -68,8 +66,6 @@ Graham 先让学生列举 ChatGPT 能做的事情，再把它们对应到接口�
 
 ![OpenHands 工具初始化与运行时分发](/wiki/cmu_11_768/tool_use/tool-dispatch.png)
 
-*来源：[官方课件第 24 页](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf#page=24)。*
-
 OpenHands 的示意图分成两个阶段。初始化时，`resolve_tool(spec, state)` 把工具声明连接到当前环境，建立 `tools_map[name]`，保存 Schema、Action 和 executor。运行时先解析名称与参数，查找工具定义，用 `action_from_arguments(args)` 校验并构造 Action，再执行并返回 Observation。
 
 `call_id` 把结果与原调用对应起来。例如请求 `call_123`，工具结果就携带 `tool_call_id="call_123"`。并发执行时，完成顺序可能不同，仍要保持这种关联。模型获得工具返回的观察后，才能继续判断下一步。
@@ -81,8 +77,6 @@ OpenHands 的示意图分成两个阶段。初始化时，`resolve_tool(spec, st
 课程接着从语法讲到下推自动机（pushdown automaton，PDA）。有限状态记录当前处于语法规则的什么位置，栈记录嵌套对象或数组应该返回哪里。只有状态而没有栈，难以处理任意深度的嵌套。
 
 ![XGrammar 在字节层检查候选 token](/wiki/cmu_11_768/tool_use/grammar-token-boundaries.png)
-
-*来源：[官方课件第 32 页](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf#page=32)。*
 
 这里有一个容易忽略的细节：**token 边界和语法终结符边界不同**。一个 token 可能包含字符串末尾和右括号，也可能只覆盖某个字符串的一部分。因此，XGrammar 将候选 token 解码为字节，再判断这些字节能否使当前自动机继续走在合法路径上。
 
@@ -105,8 +99,6 @@ MCP（Model Context Protocol）为 AI 应用提供另一种能力接口。Host �
 Graham 解释，自己最初也会问：“既然能调用 REST，为什么还需要一层服务器？”课堂重点讨论的收益是凭证隔离。MCP 服务器可以保存上游 GitHub Token，智能体进程只持有访问 MCP 的凭证。模型不必直接获得上游密钥，服务器还能限制可访问的功能。
 
 ![MCP 服务隔离客户端凭证与上游凭证](/wiki/cmu_11_768/tool_use/mcp-credential-broker.png)
-
-*来源：[官方课件第 45 页](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf#page=45)。*
 
 这种隔离取决于具体部署，并非使用 MCP 后自动安全。MCP 凭证泄露也需要撤销和处置；两套凭证及服务器权限应分别管理。课件中的静态 Token 用于教学或开发，生产部署需采用合适的验证和授权方式。
 

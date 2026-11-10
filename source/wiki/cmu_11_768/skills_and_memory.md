@@ -40,8 +40,6 @@ Daniel 先用 Python 代码审查说明技能的用处。用户每次都重复 B
 
 ![技能目录及渐进加载的三个层次](/wiki/cmu_11_768/skills_and_memory/authored-skill-package.png)
 
-*来源：[官方课件第 9 页](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf#page=9)。*
-
 课件中的技能由 `SKILL.md`、脚本、参考文档和资源文件组成。渐进披露（progressive disclosure）先加载名称和描述，命中任务后读取正文，需要时再读取参考文件或执行脚本。脚本执行时通常只把结果放回上下文，无须把整个脚本源码都塞给模型。
 
 课件以 Hermes 的技能索引及查看工具说明这一过程，并联系作业 1 的 `invoke_skill`。技能能否被选中，依赖描述是否准确、索引是否可见；加载正文后，还需要把步骤落实到实际工具操作。
@@ -68,8 +66,6 @@ ExpeL、Agent S、Synapse 和 ICAL 等工作还会保存完整轨迹，用 embed
 
 ![技能学习、使用和维护的生命周期](/wiki/cmu_11_768/skills_and_memory/skill-lifecycle.png)
 
-*来源：[官方课件第 25 页](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf#page=25)。*
-
 Agent Workflow Memory（AWM）从任务和动作中提取文本工作流。课件例子是搜索包含某个词的评论：先进入评论页面，输入关键词，再提交搜索。归纳时把具体词语替换成 `{term}`，保留可复用子过程，而不是复制整个任务。
 
 ### 文本技能与代码技能
@@ -77,8 +73,6 @@ Agent Workflow Memory（AWM）从任务和动作中提取文本工作流。课�
 文本技能是供模型理解和调整的指导。页面变了，模型仍可重新寻找搜索框；代价是每次仍需发出底层动作。代码技能则可以将多步操作压缩为一次函数调用，支持层次组合和运行前测试，但如果把旧页面 ID 写死，也会稳定地执行错误操作。
 
 ![文本工作流和代码技能的表达差异](/wiki/cmu_11_768/skills_and_memory/text-and-code-skills.png)
-
-*来源：[官方课件第 29 页](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf#page=29)。*
 
 ASI 在归纳代码技能后加入测试与准入：任务结果是否正确，这次执行是否真正使用了候选技能？只有通过检查，才加入记忆。SkillWeaver 的例子展示了更具体的检查：函数声明 `color` 参数却没有使用，静态检查和试运行可以发现问题，再修改实现。
 

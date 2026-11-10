@@ -31,8 +31,6 @@ banner: /assets/banner/banner_11.jpg
 
 ![BrowseComp 用多个线索限定同一个人物](/wiki/cmu_11_768/deep_research_agents/browsecomp-clues.png)
 
-*来源：[官方课件第 23 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=23)。*
-
 课堂例子需要同时满足打破第四面墙、背景、幽默性格、播出年代及集数等线索，参考答案是 Plastic Man。只命中其中一条并不够。BrowseComp-Plus 则固定文档集合，人工核验支持线索的片段，再加入相关却缺少关键条件的困难负例，便于在相同语料上比较搜索方法。
 
 领域评测进一步加入专业知识。FinSearchComp 从金融工作和可核验表格出题，再由其他专家独立求解；MedBrowseComp、ScholarSearch 和 AutoResearchBench 分别覆盖医学和文献搜索。搜索复杂度、领域能力与回答质量需要分别检查。
@@ -45,8 +43,6 @@ ScholarQABench 使用专家 rubric，将回答拆成可检查要求并加权。�
 
 ![专家 rubric 对证据覆盖与结论范围分别评分](/wiki/cmu_11_768/deep_research_agents/research-rubric.png)
 
-*来源：[官方课件第 41 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=41)。*
-
 模型评判需要与人工对照。ResearchQA 用综述挖掘问题和 rubric，扩大了规模，但专家审计也发现空泛、错误或不清楚的条目。评价答案之前，先检查评分规则本身是否有来源、相关且可验证。
 
 ### 引用存在不代表支持结论
@@ -54,8 +50,6 @@ ScholarQABench 使用专家 rubric，将回答拆成可检查要求并加权。�
 DeepResearch Bench 的 FACT 从回答中提取“主张—URL”对，读取引用页面，再判断是否支持主张。“论文比较过专家答案”与“所有领域都超过专家”可以指向同一篇论文，却只有前者获得支持。
 
 ![对每个主张与引用来源分别核验支持关系](/wiki/cmu_11_768/deep_research_agents/citation-support.png)
-
-*来源：[官方课件第 49 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=49)。*
 
 课件例子两个引用对中一个受支持，引用准确率为 `50%`。引用数量、有效引用数量与引用准确率是不同口径；一个网页真实存在，也不能证明它支持旁边的句子。
 
@@ -77,8 +71,6 @@ WebSailor-V2 等方法可以从事实和关系反向构造问题。课堂例子�
 
 ![DR Tulu 使用演化 rubric 评价报告并更新策略](/wiki/cmu_11_768/deep_research_agents/dr-tulu-evolving-rubrics.png)
 
-*来源：[官方课件第 88 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=88)。*
-
 课件对比无 SFT、较少 SFT 和完整 SFT 的 RL 起点，以及初始 rubric 与演化 rubric 的训练效果。这里的评分来自指定基准，奖励随训练上升不等于所有研究场景都改善。动态 rubric 同样需要审计，避免把错误或偏好固化进奖励。
 
 ## 检索器是否理解当前研究步骤
@@ -89,15 +81,11 @@ WebSailor-V2 等方法可以从事实和关系反向构造问题。课堂例子�
 
 ![AgentIR 将当前推理与查询共同交给检索器](/wiki/cmu_11_768/deep_research_agents/agentir-reasoning-query.png)
 
-*来源：[官方课件第 106 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=106)。*
-
 AgentIR 同时使用当前推理和查询，并通过 DR-Synth 构造中间搜索步骤的相关性标签。全局问题的相关文档，不一定正好帮助当前步骤，因此需要局部训练信号。
 
 课件消融将输入与训练数据分开：只加推理、只换 DR-Synth，以及两者结合。以 Tongyi-DR 设置为例，准确率从查询基线的 `48.7%`，变为加推理的 `55.5%`、换数据的 `59.4%`，组合后为 `66.3%`。这些是该固定评测下的结果。
 
 ![推理输入与检索训练数据的消融对照](/wiki/cmu_11_768/deep_research_agents/agentir-ablation.png)
-
-*来源：[官方课件第 118 页](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf#page=118)。*
 
 继续加入全部旧文档并不一定更好，课件中的当前推理输入反而更有用。检索输入需要表达此刻的信息缺口，而非单纯复制更多历史。
 
