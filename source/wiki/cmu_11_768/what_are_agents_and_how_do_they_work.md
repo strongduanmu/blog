@@ -222,13 +222,13 @@ Harness → 模型：tests/test.py、src/example.py
 
 课堂现场打开的是 GPT-OSS 的一条 Django 任务：当 `APPEND_SLASH=True` 时，`AdminSite.catch_all_view()` 的重定向丢失了查询参数。例如，请求 `/admin/auth/foo?id=123`，期望跳转到 `/admin/auth/foo/?id=123`，实际跳转结果却缺少 `?id=123`。
 
-![Django 重定向问题的用户任务描述](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m10s_trajectory_task.png)
+![Django 重定向问题的用户任务描述](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m10s_trajectory_task_content.png)
 
 *原视频 [29:10](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1750)，slide 第 16 页之后的现场演示。*
 
 模型先收到可与 shell 交互的系统说明，再读取具体任务。它生成的第一条命令是 `ls -R`，用于查看仓库结构、定位 Django admin 的实现；命令由环境执行，工具消息返回退出码 `0`，表示这次命令执行成功。
 
-![轨迹中的第一条 bash 调用及工具结果](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m45s_trajectory_action.png)
+![轨迹中的第一条 bash 调用及工具结果](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_29m45s_trajectory_action_content.png)
 
 *原视频 [29:45](https://www.bilibili.com/video/BV1hQYT64E2e/?t=1785)。*
 
