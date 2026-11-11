@@ -305,6 +305,15 @@ li>code:not([class]), p>code:not([class]) {
   width: 100%;
 }
 .publisher-ad[hidden] { display: none !important; }
+/* Keep the ad's inline wrapper aligned with its reserved height. */
+.article-inline-ad-container {
+  font-size: 0;
+  line-height: 0;
+}
+/* Article iframe spacing must not extend the ad over its sponsor label. */
+.md-text .article-inline-ad-container iframe {
+  margin: 0;
+}
 .article-inline-ad-label {
   display: block;
   color: var(--text-p2);
