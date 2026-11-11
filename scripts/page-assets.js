@@ -20,9 +20,10 @@ hexo.extend.helper.register('needs_mermaid', function(content) {
 
 // Let the banner script choose one URL before the theme's lazy loader starts.
 // The original URL remains a no-JavaScript fallback, never a second live request.
+// Keep the live image adjacent to .content for the theme's banner styles.
 hexo.extend.filter.register('after_render:html', function(html) {
   return html.replace(/<div class="article banner top">\s*<img class="bg" src="([^"]+)"\s*\/?>/g, (match, url) =>
-    match.replace(/<img[\s\S]+$/, `<img class="bg" no-lazy src="${placeholder}" data-random-banner data-src="${url}"><noscript><img class="bg" no-lazy src="${url}"></noscript>`));
+    match.replace(/<img[\s\S]+$/, `<noscript><img class="bg" no-lazy src="${url}"></noscript><img class="bg" no-lazy src="${placeholder}" data-random-banner data-src="${url}">`));
 }, 9);
 
 // Inspect final markup so excerpts and pages without front matter are covered.

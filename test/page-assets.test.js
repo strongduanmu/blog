@@ -52,7 +52,7 @@ test('built formulas need matching CSS only, while raw math retains one auto-ren
 
 test('banner has one live owner and a real image fallback when JavaScript is disabled', () => {
   const h = harness(), url = '/assets/banner/banner_4.jpg';
-  const html = h.render(documentHtml(`<div class="article banner top"><img class="bg" src="${url}"><div>Original heading</div></div>`));
+  const html = h.render(documentHtml(`<div class="article banner top"><img class="bg" src="${url}"><div class="content">Original heading</div></div>`));
   const lazy = require('../node_modules/hexo-theme-stellar/scripts/filters/lib/img_lazyload');
   const $ = cheerio.load(lazy.processSite.call({ theme: { config: { plugins: { lazyload: { enable: true } } } } }, html));
   const image = $('.banner > img');
@@ -60,6 +60,7 @@ test('banner has one live owner and a real image fallback when JavaScript is dis
   assert.match(image.attr('src'), /^data:image/);
   assert.equal(image.attr('data-src'), url);
   assert.equal($('noscript img').attr('src'), url);
+  assert.equal($('.banner > img.bg + .content').length, 1);
   assert.equal($('.banner div').text(), 'Original heading');
 });
 
