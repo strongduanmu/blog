@@ -1,6 +1,6 @@
 name: CMU 15-445
 title: CMU 15-445 学习笔记
-subtitle: '热门的数据库基础课程 | 网红教授 Andy 亲自授课教学'
+subtitle: 'Andy Pavlo · Fall 2025 | 数据库系统设计与实现'
 tags: Database
 description: CMU 15-445 是卡内基梅隆大学 Andy Pavlo 教授推出的基础数据库课程，主要介绍数据库管理系统的设计和实现，具体包括：数据模型、存储模型、查询语言、索引、事务处理等数据库核心内容。此外，课程中还安排了多个编码实验，可以有效提升工程实践能力。
 icon: /assets/wiki/cmu_15_799/icon.png
@@ -15,3 +15,27 @@ base_dir: /wiki/cmu_15_445/
 tree:
   - index
   - course-introduction-and-the-relational-model
+  - modern-sql
+  - database-storage-1
+  - memory-management
+  - database-storage-2
+  - storage-models-and-compression
+  - hash-tables
+  - indexes-and-filters-1
+  - indexes-and-filters-2
+  - index-concurrency-control
+  - sorting-and-aggregation-algorithms
+  - joins-algorithms
+  - query-execution-1
+  - query-execution-2
+  - query-planning-and-optimization-1
+  - query-planning-and-optimization-2
+  - concurrency-control-theory
+  - two-phase-locking
+  - timestamp-ordering
+  - multi-version-concurrency-control
+  - database-logging
+  - database-recovery
+  - distributed-database-systems-1
+  - distributed-database-systems-2
+  - final-review-and-systems-potpourri
