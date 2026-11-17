@@ -13,8 +13,6 @@ banner: /assets/banner/banner_14.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117476348139093&bvid=BV1gNni6MEaS&cid=42912714391&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 13 讲](https://www.bilibili.com/video/BV1gNni6MEaS) · [官方课件](https://www.cmu-agents.com/slides/lecture-13-agent-safety.pdf)
-
 ## 智能体安全从哪些事故开始
 
 第 13 讲于 2026-10-06 授课，官方主题已更新为 **Agent Safety**。本文保留原页面链接，按视频的事故、威胁模型、训练防护、沙箱、凭证、监控和评测顺序整理。沙箱与凭证管理是其中两部分。

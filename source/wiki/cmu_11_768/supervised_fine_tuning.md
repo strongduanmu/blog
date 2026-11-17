@@ -15,8 +15,6 @@ katex: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117346324845812&bvid=BV1Aeaq6tEvT&cid=42262661725&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 8 讲](https://www.bilibili.com/video/BV1Aeaq6tEvT) · [官方课件](https://www.cmu-agents.com/slides/lecture-08-sft.pdf)
-
 ## 将交互轨迹变成模型行为
 
 第 8 讲由 Yueqi Song 于 2026-09-17 授课。课程以 SWE-Gym 的任务记录开场，依次讨论轨迹序列化、监督范围、数据选择、统一表示、训练运行和部署评估。本文按视频与[官方课件](https://www.cmu-agents.com/slides/lecture-08-sft.pdf)整理。

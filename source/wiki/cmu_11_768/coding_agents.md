@@ -15,8 +15,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117346324780626&bvid=BV1Ceaq64Eje&cid=42262464923&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 6 讲](https://www.bilibili.com/video/BV1Ceaq64Eje) · [官方课件](https://www.cmu-agents.com/slides/lecture-06-coding-agents.pdf)
-
 ## 从补全代码到软件开发
 
 第 6 讲由 Graham Neubig 于 2026-09-10 授课。课程先介绍代码模型与功能评测，再转向仓库级定位、编辑和验证，随后讨论训练环境、前端开发、更广的软件任务以及代码世界模型。本文结合视频与[官方课件](https://www.cmu-agents.com/slides/lecture-06-coding-agents.pdf)整理。

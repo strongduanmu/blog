@@ -16,8 +16,6 @@ mermaid: true
   <iframe title="Stanford CS329：课程概览课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV1saWJ6xEhm&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV1saWJ6xEhm/) · [Stanford 官方录像 Part 1](https://www.youtube.com/watch?v=6YnLB0XbTnI) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 1 次课（2025-09-22）：Course Overview。
 
 ## 从规模定律进入自我改进

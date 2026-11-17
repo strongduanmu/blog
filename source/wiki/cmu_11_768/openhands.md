@@ -13,8 +13,6 @@ banner: /assets/banner/banner_15.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117476348204668&bvid=BV1hNni6MEw3&cid=42912776787&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 14 讲](https://www.bilibili.com/video/BV1hNni6MEw3) · [官方课件](https://www.cmu-agents.com/slides/lecture-14-openhands.pdf)
-
 ## 从产品演示理解智能体框架
 
 第 14 讲由 Graham Neubig 于 2026-10-08 授课。Graham 结合建设 OpenHands 的经历，先演示产品，再回顾发展过程，介绍 SDK、单智能体与多智能体、部署界面和软件开发自动化。本文按视频顺序整理，代码接口以本讲课件版本为准。

@@ -15,8 +15,6 @@ katex: true
   <iframe title="Stanford CS329：智能体评估与长时程任务课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV1fyWJ67E9K&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV1fyWJ67E9K/) · [Stanford 官方录像 Part 8](https://www.youtube.com/watch?v=8JAqLnTaZu4) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 17 次课（2025-11-17）：Agentic Evaluations & Long-Horizon Tasks。
 
 ## 能运行很久，是否就能做好工作

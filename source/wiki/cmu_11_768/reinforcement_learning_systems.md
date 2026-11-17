@@ -13,8 +13,6 @@ banner: /assets/banner/banner_13.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117476348204339&bvid=BV18Nni6MEZ9&cid=42912713822&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 12 讲](https://www.bilibili.com/video/BV18Nni6MEZ9) · [官方课件](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf)
-
 ## 一次 RL 更新需要哪些系统操作
 
 第 12 讲由 Apurva Gandhi 于 2026-10-01 授课。课程先拆解推理与训练两类负载，再介绍智能体轨迹特有的问题，最后比较系统架构。本文按视频与[官方课件](https://www.cmu-agents.com/slides/lecture-12-rl-systems.pdf)整理。

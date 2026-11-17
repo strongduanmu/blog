@@ -14,8 +14,6 @@ banner: /assets/banner/banner_12.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117437492109105&bvid=BV1mCpy6cET9&cid=42727639373&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 11 讲](https://www.bilibili.com/video/BV1mCpy6cET9) · [官方课件](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf)
-
 ## 从训练中遇到的问题出发
 
 第 11 讲由 Graham Neubig 于 2026-09-29 授课。课程围绕逐步信用分配、异步采样、稳定更新、奖励可靠性和教师蒸馏展开。本文按视频与[官方课件](https://www.cmu-agents.com/slides/lecture-11-rl-advanced.pdf)的顺序整理。

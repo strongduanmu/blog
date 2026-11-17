@@ -14,8 +14,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117245426538149&bvid=BV13QYT64Eyq&cid=41753051513&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 2 讲](https://www.bilibili.com/video/BV13QYT64Eyq) · [官方课件](https://www.cmu-agents.com/slides/lecture-02-tool-use.pdf)
-
 ## 工具怎样扩展语言模型
 
 本文对应官方第 2 讲，由 Graham Neubig 于 2026-08-27 授课。下面按照视频中的“工具能力—代码组合—调用机制—约束解码—REST 与 MCP—并发与评测”顺序整理，图示取自官方课件。

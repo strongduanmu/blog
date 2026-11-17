@@ -8,81 +8,84 @@ comment_id: 'jdbc_result_sets'
 banner: /assets/banner/banner_9.jpg
 ---
 
-`ResultSet` 对象表示执行 `SQL` 查询返回的结果集。本章描述 `ResultSet` 接口的功能。
+`ResultSet` 对象用于表示 SQL 查询返回的结果集。本章介绍 `ResultSet` 接口的功能。
 
 ## 15.1 `ResultSet` 对象的类型
 
 ### 15.1.1 `ResultSet` 类型
 
-`JDBC` 定义了三种 `ResultSet` 类型：
+JDBC 定义了三种 `ResultSet` 类型：
 
 - **`TYPE_FORWARD_ONLY`** — 游标只能向前移动
 - **`TYPE_SCROLL_INSENSITIVE`** — 游标可以向前和向后滚动，但对底层更改不敏感
 - **`TYPE_SCROLL_SENSITIVE`** — 游标可以向前和向后滚动，并且对底层更改敏感
 
-### 15.1.2 `ResultSet` 并发性
+### 15.1.2 `ResultSet` 并发模式
 
-`JDBC` 定义了两种并发模式：
+JDBC 定义了两种并发模式：
 
 - **`CONCUR_READ_ONLY`** — `ResultSet` 不能用于更新数据库
 - **`CONCUR_UPDATABLE`** — `ResultSet` 可用于更新数据库
 
-### 15.1.3 `ResultSet` 可保持性
+### 15.1.3 `ResultSet` 保持性
 
-可保持性指定 `ResultSet` 在事务提交时是否保持打开：
+保持性用于指定事务提交时，`ResultSet` 是否继续保持打开：
 
 - **`HOLD_CURSORS_OVER_COMMIT`** — 在事务提交时保持游标打开
 - **`CLOSE_CURSORS_AT_COMMIT`** — 在事务提交时关闭游标
 
-#### 15.1.3.1 确定 `ResultSet` 可保持性
+#### 15.1.3.1 确定 `ResultSet` 保持性
 
-可以通过 `DatabaseMetaData.getResultSetHoldability()` 方法确定默认可保持性。
+可以通过 `DatabaseMetaData.getResultSetHoldability()` 方法确定默认保持性。
 
-### 15.1.4 指定 `ResultSet` 类型、并发性和可保持性
+### 15.1.4 指定 `ResultSet` 类型、并发模式和保持性
 
-创建 `Statement`、`PreparedStatement` 或 `CallableStatement` 时可以指定这些属性。
+创建 `Statement`、`PreparedStatement` 或 `CallableStatement` 时，可以指定结果集的上述属性。
 
 ## 15.2 创建和操作 `ResultSet` 对象
 
 ### 15.2.1 创建 `ResultSet` 对象
 
-`ResultSet` 对象通过执行查询来创建。
+执行查询后，可以获得相应的 `ResultSet` 对象。
 
 ```java
 Statement stmt = con.createStatement();
 ResultSet rs = stmt.executeQuery("SELECT * FROM employees");
 ```
+
 ### 15.2.2 游标移动
 
-`ResultSet` 提供了移动游标的方法：
+`ResultSet` 提供以下方法来移动游标：
 
 - `next()`：移动到下一行
 - `previous()`：移动到上一行
 - `absolute(int row)`：移动到指定行
 - `relative(int rows)`：按相对位移移动指定行数
 - `first()`、`last()`：移动到第一行或最后一行
-- `beforeFirst()`、`afterLast()`：移动到结果集之前或之后
+- `beforeFirst()`、`afterLast()`：移动到结果集第一行之前或最后一行之后
 
 ### 15.2.3 检索值
 
 #### 15.2.3.1 数据类型转换
 
-`ResultSet` 提供了各种 `getXXX` 方法来检索不同类型的数据。
+`ResultSet` 通过不同的 `getXXX` 方法读取相应类型的数据。
 
 ```java
 int id = rs.getInt("id");
 String name = rs.getString("name");
 Date hireDate = rs.getDate("hire_date");
 ```
+
 #### 15.2.3.2 `ResultSet` 元数据
 
-`ResultSetMetaData` 接口提供有关 `ResultSet` 结构的信息。
+`ResultSetMetaData` 接口提供结果集的结构信息。
 
 ```java
 ResultSetMetaData rsmd = rs.getMetaData();
 int columnCount = rsmd.getColumnCount();
 String columnName = rsmd.getColumnName(1);
 ```
+
 #### 15.2.3.3 检索 `NULL` 值
 
 当列值为 `SQL NULL` 时，`getXXX` 方法返回特定的默认值：
@@ -91,7 +94,7 @@ String columnName = rsmd.getColumnName(1);
 - 布尔类型返回 `false`
 - 对象类型返回 `null`
 
-可以使用 `wasNull()` 方法确定最后一个读取的值是否为 `SQL NULL`。
+调用 `wasNull()`，可以判断最近一次读取的值是否为 `SQL NULL`。
 
 ### 15.2.4 修改 `ResultSet` 对象
 
@@ -103,11 +106,13 @@ String columnName = rsmd.getColumnName(1);
 rs.updateString("name", "New Name");
 rs.updateRow();
 ```
+
 #### 15.2.4.2 删除行
 
 ```java
 rs.deleteRow();
 ```
+
 #### 15.2.4.3 插入行
 
 ```java
@@ -117,20 +122,22 @@ rs.updateString("name", "New Employee");
 rs.insertRow();
 rs.moveToCurrentRow();
 ```
+
 #### 15.2.4.4 定位更新和删除
 
 可以使用 `ResultSet` 中的定位更新和删除功能。
 
 ### 15.2.5 关闭 `ResultSet` 对象
 
-当应用程序完成使用 `ResultSet` 时，应该关闭它以释放资源。
+应用程序使用完 `ResultSet` 后，应当将其关闭，释放相关资源。
 
 ```java
 rs.close();
 ```
+
 ## 15.3 性能提示
 
-对于大型结果集，考虑使用以下技术：
+处理大型结果集时，可以考虑以下方式：
 
 - 使用 `setFetchSize()` 控制从数据库获取的行数
 - 使用 `setFetchDirection()` 优化游标移动

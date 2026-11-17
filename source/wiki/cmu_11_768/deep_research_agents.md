@@ -13,8 +13,6 @@ banner: /assets/banner/banner_11.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117430814906243&bvid=BV1RLpf62EcE&cid=42693757889&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 10 讲](https://www.bilibili.com/video/BV1RLpf62EcE) · [官方课件](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf)
-
 ## 从一次查找到多轮研究
 
 第 10 讲由 Akari Asai 于 2026-09-24 授课。课程依次讨论深度研究任务、评测、模型训练和检索。本文结合视频和[官方课件](https://www.cmu-agents.com/slides/lecture-10-deep-research-agents.pdf)整理；课件包含逐步展开的动画页，图片引用均使用 PDF 页序。

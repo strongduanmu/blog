@@ -15,8 +15,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117245426604755&bvid=BV1hQYT64EXQ&cid=41753053659&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 3 讲](https://www.bilibili.com/video/BV1hQYT64EXQ) · [官方课件](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf)
-
 ## 智能体的历史为什么越积越长
 
 第 3 讲由 Graham Neubig 于 2026-09-01 授课。课程先分析智能体输入的增长，再依次讨论推理、长上下文架构与训练、缓存，以及上下文压缩。下面结合视频和[官方课件](https://www.cmu-agents.com/slides/lecture-03-long-context.pdf)整理。

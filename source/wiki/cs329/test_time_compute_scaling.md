@@ -15,8 +15,6 @@ katex: true
   <iframe title="Stanford CS329：推理时计算扩展课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV1ZmWJ6LEb1&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV1ZmWJ6LEb1/) · [Stanford 官方录像 Part 2](https://www.youtube.com/watch?v=-Ggc37xLj_Y) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 2 次课（2025-09-26）：Test-Time Compute Scaling。
 
 ## 推理时计算与预训练计算的区别

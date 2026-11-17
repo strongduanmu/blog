@@ -15,8 +15,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117346341492295&bvid=BV1Waaq6ZEhq&cid=42262725708&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 9 讲](https://www.bilibili.com/video/BV1Waaq6ZEhq) · [官方课件](https://www.cmu-agents.com/slides/lecture-09-rl-basics.pdf)
-
 ## 从猜数字理解强化学习
 
 第 9 讲由 Daniel Fried 于 2026-09-22 授课。课程沿着猜数字任务，建立轨迹、期望奖励与策略梯度，再介绍基线、优势和组相对估计。本文按视频与[官方课件](https://www.cmu-agents.com/slides/lecture-09-rl-basics.pdf)整理。

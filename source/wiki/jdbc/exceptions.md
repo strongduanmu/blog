@@ -8,41 +8,41 @@ comment_id: 'jdbc_exceptions'
 banner: /assets/banner/banner_9.jpg
 ---
 
-`SQLException` 类及其子类型提供有关访问数据源时发生的错误和警告的信息。
+`SQLException` 类及其子类用于描述访问数据源时发生的错误和警告。
 
 ## 8.1 `SQLException`
 
-当与数据源交互期间发生错误时，会抛出 `SQLException` 实例。该异常包含以下信息：
+与数据源交互时，如果发生错误，就会抛出 `SQLException`。该异常包含以下信息：
 
-- **错误的文本描述** — 包含描述的 `String` 可以通过调用 `SQLException.getMessage` 方法检索。
+- **错误的文本描述** — 通过 `SQLException.getMessage` 方法获取，返回值为 `String`。
 
-- **`SQLState`** — 包含 `SQLState` 的 `String` 可以通过调用 `SQLException.getSQLState` 方法检索。`SQLState` 字符串的值将取决于设置该值的底层数据源。`X/Open` 和 `SQL:2003` 都定义了 `SQLState` 值以及应该设置它们的条件。尽管这些值集有重叠，但 `SQL:2003` 定义的值不是 `X/Open` 的超集。`DatabaseMetaData` 方法 `getSQLStateType` 允许应用程序确定数据源返回的 `SQLState` 是 `X/Open` 还是 `SQL:2003`。
+- **`SQLState`** — 通过 `SQLException.getSQLState` 方法获取，返回值为 `String`。具体取值由底层数据源决定。X/Open 和 SQL:2003 都定义了 `SQLState` 的取值及适用条件。两者虽然有重叠，但 SQL:2003 定义的取值并不是 X/Open 的超集。应用程序可以通过 `DatabaseMetaData.getSQLStateType` 判断数据源使用的是哪一套定义。
 
-- **错误代码** — 这是一个整数值，用于标识导致抛出 `SQLException` 的错误。其值和含义是实现特定的，可能是底层数据源返回的实际错误代码。可以使用 `SQLException.getErrorCode` 方法检索错误代码。
+- **错误代码** — 用于标识导致 `SQLException` 的错误，类型为整数。具体取值和含义由实现决定，也可能直接使用底层数据源返回的错误代码。应用程序可以通过 `SQLException.getErrorCode` 获取。
 
-- **原因** — 这是导致此 `SQLException` 发生的另一个 `Throwable`。
+- **原因** — 指引发当前 `SQLException` 的另一个 `Throwable` 对象。
 
-- **对任何"链式"异常的引用** — 如果发生多个错误，则通过此链引用异常。可以通过对抛出的异常递归调用 `SQLException.getNextException` 方法来检索所有链式异常。如果没有更多异常被链接，`getNextException` 方法返回 `null`。
+- **异常链中的后续异常** — 发生多个错误时，这些异常会通过异常链关联起来。应用程序可以反复调用 `SQLException.getNextException`，依次获取后续异常；返回 `null` 时，表示异常链已遍历完毕。
 
-`SQLException` 有多个子类，将在第 8-48 页的 8.5 节"分类 `SQLException`"中描述。
+`SQLException` 的各个子类将在第 8.5 节“`SQLException` 异常分类”中介绍。
 
-### 8.1.1 支持 `Java SE` 链式异常
+### 8.1.1 支持 Java SE 链式异常
 
-`SQLException` 类及其子类已被增强以支持 `Java SE` 链式异常功能，也称为原因功能。支持此功能的更改包括：
+`SQLException` 类及其子类支持 Java SE 的链式异常机制，即通过 cause 记录异常原因。为支持这一机制，API 作出了以下改进：
 
 - 添加了四个构造函数以支持 `cause` 参数
-- 向 `SQLException` 类添加了支持，以支持 `J2SE` 5.0 中引入的增强 `For-Each` 循环，允许导航 `SQLException` 及其原因关系，而无需在每次调用 `getNextException` 后调用 `getCause`
-- `getCause` 方法可能返回非 `SQLException` 以及 `SQLException`
+- 为 `SQLException` 添加对 J2SE 5.0 增强 for-each 循环的支持，使应用程序能够遍历异常及其原因，而不必在每次调用 `getNextException` 后再调用 `getCause`
+- `getCause` 返回的原因既可能是 `SQLException`，也可能是其他类型的异常
 
-有关其他信息，请参阅 `JDBC API` 规范。
+有关其他信息，请参阅 JDBC API 规范。
 
-### 8.1.2 导航 `SQLException`
+### 8.1.2 遍历 `SQLException`
 
-在执行 `SQL` 语句期间可能会发生一个或多个异常，每个异常都有自己的潜在因果关系。这意味着当 `JDBC` 应用程序捕获 `SQLException` 时，可能存在其他 `SQLException` 链接到原始抛出的 `SQLException`。要访问其他链式 `SQLException`，应用程序将递归调用 `getNextException` 直到返回 `null` 值。
+执行 SQL 语句时，可能发生一个或多个异常，每个异常也可能有自己的原因链。因此，应用程序捕获一个 `SQLException` 后，还可能需要处理与它关联的其他 `SQLException`。反复调用 `getNextException`，直到返回 `null`，即可遍历这些异常。
 
-`SQLException` 可能具有因果关系，由一个或多个导致抛出 `SQLException` 的 `Throwable` 组成。您可以递归调用方法 `SQLException.getCause`，直到返回 `null` 值，以导航原因链。
+每个 `SQLException` 还可能关联一条原因链，由引发该异常的一个或多个 `Throwable` 对象组成。从 `SQLException.getCause` 开始，继续调用原因对象的 `getCause`，直到返回 `null`，即可遍历原因链。
 
-以下代码演示了应用程序如何导航 `SQLException` 及其原因。
+下面的代码展示了如何遍历 `SQLException` 异常链，以及每个异常的原因链。
 
 ```java
 catch(SQLException ex) {
@@ -59,13 +59,14 @@ catch(SQLException ex) {
     }
 }
 ```
-**代码示例 8-1 导航 `SQLException` 和原因**
 
-### 8.1.2.1 使用 `For-Each` 循环处理 `SQLException`
+**代码示例 8-1 遍历 `SQLException` 及其原因**
 
-`JDBC` 应用程序可以使用 `Java SE` `For-Each` 循环增强来导航 `SQLException` 及其原因关系。
+### 8.1.2.1 使用 for-each 循环处理 `SQLException`
 
-以下代码演示了如何将 `For-Each` 循环与 `SQLException` 一起使用。
+JDBC 应用程序也可以使用 Java SE 的增强 for-each 循环，遍历 `SQLException` 及其原因。
+
+以下代码演示了如何将 for-each 循环与 `SQLException` 一起使用。
 
 ```java
 catch(SQLException ex) {
@@ -74,7 +75,8 @@ catch(SQLException ex) {
     }
 }
 ```
-**代码示例 8-2 使用 `For-Each` 循环处理 `SQLException`**
+
+**代码示例 8-2 使用 for-each 循环处理 `SQLException`**
 
 ## 8.2 `SQLWarning`
 
@@ -85,42 +87,42 @@ catch(SQLException ex) {
 - `Statement`
 - `ResultSet`
 
-当方法生成 `SQLWarning` 对象时，不会通知调用者发生了数据访问警告。必须在适当的对象上调用 `getWarnings` 方法来检索 `SQLWarning` 对象。但是，在某些情况下可能会抛出 `SQLWarning` 的 `DataTruncation` 子类，有关更多详细信息，请参阅第 8-46 页的 8.3 节"`DataTruncation`"。
+方法生成 `SQLWarning` 对象时，不会主动通知调用者。应用程序必须在相应对象上调用 `getWarnings`，才能获取警告。不过，`SQLWarning` 的子类 `DataTruncation` 在某些情况下会作为异常抛出，具体见第 8.3 节“`DataTruncation`”。
 
-如果发生多个数据访问警告，它们将链接到第一个警告，并且可以通过递归调用 `SQLWarning.getNextWarning` 方法来检索。如果链中没有更多警告，`getNextWarning` 返回 `null`。
+发生多个数据访问警告时，后续警告会链接到第一个警告。应用程序可以反复调用 `SQLWarning.getNextWarning` 遍历警告链，返回 `null` 时表示没有更多警告。
 
-后续的 `SQLWarning` 对象将继续添加到链中，直到执行下一个语句，或者对于 `ResultSet` 对象，当游标重新定位时，此时将删除链中的所有 `SQLWarning` 对象。
+后续的 `SQLWarning` 会继续追加到警告链中。执行下一条语句时，链中的警告会被清除；对于 `ResultSet`，则在游标重新定位时清除。
 
 ## 8.3 `DataTruncation`
 
-`DataTruncation` 类是 `SQLWarning` 的子类，在数据被截断时提供信息。当在写入数据源时发生数据截断时，将抛出 `DataTruncation` 对象。即使生成了警告，被截断的数据值也可能已写入数据源。当在从数据源读取时发生数据截断时，将报告 `SQLWarning`。
+`DataTruncation` 是 `SQLWarning` 的子类，用于描述数据截断。向数据源写入数据时，如果发生截断，就会抛出 `DataTruncation`；即使报告了警告，截断后的值也可能已经写入数据源。从数据源读取数据时，如果发生截断，则通过 `SQLWarning` 报告。
 
 `DataTruncation` 对象包含以下信息：
 
-- 描述性 `String` "Data `truncation`"
+- 描述字符串 `"Data truncation"`
 - 当从数据源读取时发生数据截断时的 `SQLState` "01004"
 - 当向数据源写入时发生数据截断时的 `SQLState` "22001"
 - 一个布尔值，指示是截断了列值还是参数。如果截断了参数，`DataTruncation.getParameter` 方法返回 `true`；如果截断了列值，则返回 `false`。
-- 一个 int，给出被截断的列或参数的索引。如果列或参数的索引未知，`DataTruncation.getIndex` 方法返回 -1。如果索引未知，`DataTruncation.getParameter` 和 `DataTruncation.getRead` 方法返回的值未定义。
+- 被截断的列或参数的索引，类型为 `int`，可通过 `DataTruncation.getIndex` 获取。索引未知时返回 `-1`，此时 `getParameter` 和 `getRead` 的返回值未定义。
 - 一个布尔值，指示截断是发生在读取还是写入操作上。如果截断发生在读取上，`DataTruncation.getRead` 方法返回 `true`；如果截断发生在写入上，则返回 `false`。
-- `DataTruncation.getDataSize` 方法返回一个 int，表示应该传输的数据字节数。如果正在执行数据转换，此数字可能是近似的。如果大小未知，该值可能是 -1。
-- 一个 int，指示实际传输的字节数。`DataTruncation.getTransferSize` 方法返回实际传输的字节数，如果字节数未知则返回 -1。
+- `DataTruncation.getDataSize` 返回应当传输的字节数，类型为 `int`。涉及数据转换时，这个值可能只是近似值；大小未知时，可能返回 `-1`。
+- 实际传输的字节数，类型为 `int`，通过 `DataTruncation.getTransferSize` 获取。字节数未知时返回 `-1`。
 
 ### 8.3.1 静默截断
 
 `Statement.setMaxFieldSize` 方法允许设置最大大小（以字节为单位）。此限制仅适用于 `BINARY`、`VARBINARY`、`LONGVARBINARY`、`CHAR`、`VARCHAR`、`LONGVARCHAR`、`NCHAR`、`NVARCHAR` 和 `LONGNVARCHAR` 数据类型。
 
-如果使用 `setMaxFieldSize` 设置了限制，并且尝试读取超过限制的数据，则由于超过设置限制而发生的任何截断将不会被报告。
+如果设置了 `setMaxFieldSize` 限制，读取的数据超过该限制时，由此产生的截断不会被报告。
 
 ## 8.4 `BatchUpdateException`
 
-`BatchUpdateException` 对象提供有关在执行语句批处理期间发生的错误的信息。此异常的行为在第 14 章"批处理更新"中描述。
+`BatchUpdateException` 对象提供有关在执行语句批处理期间发生的错误的信息。此异常的行为在第 14 章“批处理更新”中描述。
 
-## 8.5 分类 `SQLException`
+## 8.5 `SQLException` 异常分类
 
-分类 `SQLException` 提供了到常见 `SQLState` 类值和到不与特定 `SQLState` 类值关联的常见错误状态的标准映射。`SQLState` 类值在 `SQL:2003` 规范中定义。`JDBC` 驱动程序也可能为 `JDBC` 驱动程序检测到的错误抛出分类 `SQLException`。新的 `SQLException` 子类将为 `JDBC` 程序员提供一种方法来编写更可移植的错误处理代码。
+对 `SQLException` 进行分类，可以在异常类型与常见 `SQLState` 类值之间建立标准映射，也可以表示未关联特定 `SQLState` 类值的常见错误。`SQLState` 类值由 SQL:2003 定义。驱动程序自身检测到错误时，也可以抛出相应类别的异常。这些 `SQLException` 子类有助于开发者编写可移植的错误处理代码。
 
-新的 `SQLException` 将分为三个异常类别：
+新增的 `SQLException` 子类分为三类：
 
 - `SQLNonTransientException`
 - `SQLTransientException`
@@ -128,11 +130,11 @@ catch(SQLException ex) {
 
 ### 8.5.1 非瞬态 `SQLException`
 
-非瞬态 `SQLException` 必须扩展 `SQLNonTransientException` 类。在重试相同操作将失败的情况下（除非纠正了 `SQLException` 的原因），将抛出非瞬态 `SQLException`。在发生 `SQLNonTransientConnectionException` 以外的非瞬态 `SQLException` 后，应用程序可以假定连接仍然有效。对于指示非瞬态错误但下表中未指定的 `SQLState` 类值，实现可以抛出 `SQLNonTransientException` 类的实例。
+非瞬态 `SQLException` 必须继承 `SQLNonTransientException`。如果不先消除异常原因，重试相同操作仍然会失败，此时会抛出非瞬态异常。在发生 `SQLNonTransientConnectionException` 以外的非瞬态 `SQLException` 后，应用程序可以假定连接仍然有效。对于表示非瞬态错误、但未在下表列出的 `SQLState` 类值，实现可以抛出 `SQLNonTransientException`。
 
 **表 8-1 非瞬态 `SQLException` 子类**
 
-| `SQL` `State` 类 | `SQLNonTransientException` 子类 |
+| `SQLState` 类 | `SQLNonTransientException` 子类 |
 |-------------|------------------------------|
 | 0A | `SQLFeatureNotSupportedException` |
 | 08 | `SQLNonTransientConnectionException` |
@@ -141,28 +143,28 @@ catch(SQLException ex) {
 | 28 | `SQLInvalidAuthorizationSpecException` |
 | 42 | `SQLSyntaxErrorException` |
 
-`JDBC` 驱动程序实现也可能为表 8-1 中未指定的供应商特定的非瞬态条件抛出 `NonTransientSQLException`。
+对于表 8-1 未列出的供应商特定非瞬态错误，驱动程序也可以抛出 `SQLNonTransientException`。
 
-> **注意** — 当违反模式对象的可访问性时，也会发生 `SQLSyntaxException`，例如，基于 `SQL:2003` 规范中给出的规则。
+> **注意** — 违反模式对象的可访问性规则时，也会抛出 `SQLSyntaxErrorException`，例如违反 SQL:2003 规定的相关规则。
 
 ### 8.5.2 瞬态 `SQLException`
 
-瞬态 `SQLException` 必须扩展 `SQLTransientException` 类。在先前失败的操作可能在没有应用程序级功能干预的情况下重试操作时成功的情况下，将抛出瞬态 `SQLException`。在发生 `SQLTransientConnectionException` 以外的瞬态 `SQLException` 后，应用程序可以假定连接仍然有效。对于指示瞬态错误但下表中未指定的 `SQLState` 类值，实现可以抛出 `SQLTransientException` 类的实例。
+瞬态 `SQLException` 必须继承 `SQLTransientException`。如果不需要应用程序采取额外措施，重试先前失败的操作就有可能成功，此时会抛出瞬态异常。在发生 `SQLTransientConnectionException` 以外的瞬态 `SQLException` 后，应用程序可以假定连接仍然有效。对于表示瞬态错误、但未在下表列出的 `SQLState` 类值，实现可以抛出 `SQLTransientException`。
 
 **表 8-2 瞬态 `SQLException` 子类**
 
-| `SQL` `State` 类 | `SQLTransientException` 子类 |
+| `SQLState` 类 | `SQLTransientException` 子类 |
 |-------------|---------------------------|
 | 08 | `SQLTransientConnectionException` |
 | 40 | `SQLTransactionRollbackException` |
 | `N/A` | `SQLTimeoutException` |
 
-`JDBC` 驱动程序实现也可能为表 8-2 中未指定的供应商特定的瞬态条件抛出 `TransientSQLException`。
+对于表 8-2 未列出的供应商特定瞬态错误，驱动程序也可以抛出 `SQLTransientException`。
 
 ### 8.5.3 `SQLRecoverableException`
 
-如果应用程序执行一些恢复步骤并重试整个事务，或者在分布式事务的情况下重试事务分支，失败的操作可能会成功，在这种情况下将抛出 `SQLRecoverableException`。至少，恢复包括关闭当前连接并获取新连接。在 `SQLRecoverableException` 之后，应用程序必须假定连接不再有效。
+如果应用程序执行恢复操作后，重试整个事务或分布式事务中的事务分支，先前失败的操作就有可能成功，此时会抛出 `SQLRecoverableException`。恢复操作至少包括关闭当前连接并获取新连接。发生该异常后，应用程序必须认为当前连接已失效。
 
 ## 8.6 `SQLClientInfoException`
 
-当设置一个或多个指定客户端属性的 `Connection.setClientInfo` 方法发生失败时，将抛出 `SQLClientInfoException`。`SQLClientInfoException` 包含指示哪些客户端信息属性未设置的信息。
+调用 `Connection.setClientInfo` 设置一个或多个客户端信息属性时，如果设置失败，就会抛出 `SQLClientInfoException`。应用程序可以通过该异常了解哪些属性未能设置。

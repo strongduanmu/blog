@@ -15,8 +15,6 @@ katex: true
   <iframe title="Stanford CS329：未来研究方向课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV1EyWJ67EUH&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV1EyWJ67EUH/) · [Stanford 官方录像 Part 9](https://www.youtube.com/watch?v=AyO6wyu4DEg) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 20 次课（2025-12-05）：Future Research Areas。
 
 ## 继续改进智能体，还缺少哪些环节

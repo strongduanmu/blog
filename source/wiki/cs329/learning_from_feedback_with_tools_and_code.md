@@ -15,8 +15,6 @@ katex: true
   <iframe title="Stanford CS329：利用工具与代码反馈学习课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV17mWJ6LE7y&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV17mWJ6LE7y/) · [Stanford 官方录像 Part 4](https://www.youtube.com/watch?v=Lxh9RF5S-K0) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 4 次课（2025-10-03）：Learning from Feedback with Tools/Code。
 
 ## 让反馈参与下一步决策

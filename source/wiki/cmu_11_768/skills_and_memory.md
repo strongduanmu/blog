@@ -14,8 +14,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117245443315225&bvid=BV1GSYT6ZEb4&cid=41753117912&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 4 讲](https://www.bilibili.com/video/BV1GSYT6ZEb4) · [官方课件](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf)
-
 ## 从重复任务中留下什么
 
 第 4 讲由 Daniel Fried 于 2026-09-03 授课。上一讲关注单次长任务如何保存状态，本讲讨论跨任务复用：已经完成一次的工作，能否让下一次少走一些步骤？本文按视频与[官方课件](https://www.cmu-agents.com/slides/lecture-04-memory-and-skills.pdf)的顺序，整理人工编写的技能、外部记忆、技能归纳和维护。

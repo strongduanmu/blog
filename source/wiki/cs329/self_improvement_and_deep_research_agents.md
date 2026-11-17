@@ -16,8 +16,6 @@ mermaid: true
   <iframe title="Stanford CS329：自我改进与深度研究智能体课程视频" src="https://player.bilibili.com/player.html?isOutside=true&bvid=BV1jUWJ6yEUP&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站中英文字幕](https://www.bilibili.com/video/BV1jUWJ6yEUP/) · [Stanford 官方录像 Part 7](https://www.youtube.com/watch?v=Uni9dqyuuDM) · [课程目录](/wiki/cs329/)
-
 对应官方 2025 年秋季课表第 8 次课（2025-10-17）：Self-Improvement and Deep Research Agents。
 
 ## 从程序候选到知识搜索

@@ -8,15 +8,15 @@ comment_id: 'jdbc_distributed_transactions'
 banner: /assets/banner/banner_9.jpg
 ---
 
-分布式事务允许应用程序同时访问和更新多个数据源，同时保持事务的原子性、一致性、隔离性和持久性（`ACID`）特性。本章介绍 `JDBC API` 对分布式事务的支持。
+分布式事务允许应用程序访问和更新多个数据源，并保持事务的原子性、一致性、隔离性和持久性（ACID）。本章介绍 JDBC API 对分布式事务的支持。
 
 ## 12.1 基础设施
 
-分布式事务需要以下基础设施角色：
+分布式事务需要以下基础设施组件：
 
-- **事务管理器**：控制事务边界并管理两阶段提交协议，通常由 `JTA` 实现提供。
-- **实现了 `XADataSource`、`XAConnection` 和 `XAResource` 的 `JDBC` 驱动程序**。
-- **对应用程序可见的 `DataSource` 实现**：位于每个 `XADataSource` 之上，并与事务管理器交互；这部分通常由应用服务器提供。
+- **事务管理器**：控制事务边界并管理两阶段提交协议，通常由 JTA 实现提供。
+- **实现了 `XADataSource`、`XAConnection` 和 `XAResource` 的 JDBC 驱动程序**。
+- **面向应用程序的 `DataSource` 实现**：在各个 `XADataSource` 之上提供封装，并与事务管理器交互。这部分通常由应用服务器提供。
 
 图 12-1 展示了分布式事务的基础设施。
 
@@ -45,11 +45,11 @@ Connection con = xac.getConnection();
 
 ### 12.2.2 获取连接
 
-应用程序通过 `XAConnection` 获取逻辑 `Connection` 对象，并由应用服务器负责与事务管理器协作。
+应用程序使用通过 `XAConnection` 获取的逻辑 `Connection` 对象，应用服务器则负责与事务管理器协作。
 
 ## 12.3 `XAResource`
 
-`XAResource` 接口定义了分布式事务使用的契约。它基于 `X/Open CAE` 规范。`XAResource` 的关键方法包括：
+`XAResource` 接口定义了参与分布式事务时需要遵循的约定。它基于 `X/Open CAE` 规范。`XAResource` 的关键方法包括：
 
 - `start`：开始一个事务分支上的工作。
 - `end`：结束一个事务分支上的工作。
@@ -68,7 +68,7 @@ Connection con = xac.getConnection();
 
 ## 12.5 关闭连接
 
-当应用程序完成分布式事务工作后，应关闭逻辑连接。底层物理连接可能会被返回到连接池中，而不是立即断开。
+应用程序完成分布式事务中的工作后，应当关闭逻辑连接。底层物理连接可能返回连接池，供后续重用，而非立即断开。
 
 ## 12.6 `XAResource` 接口的限制
 

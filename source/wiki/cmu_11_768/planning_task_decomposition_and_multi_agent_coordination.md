@@ -14,8 +14,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117346324714497&bvid=BV1peaq64E6G&cid=42262135855&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 5 讲](https://www.bilibili.com/video/BV1peaq64E6G) · [官方课件](https://www.cmu-agents.com/slides/lecture-05-planning.pdf)
-
 ## 工作站采购中的计划
 
 第 5 讲由 Daniel Fried 于 2026-09-08 授课，主题是规划、任务分解及多智能体协调。本文沿原视频顺序，先看任务为什么需要结构，再讨论计划表示、重规划和长任务，最后介绍 MACU。

@@ -14,8 +14,6 @@ mermaid: true
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=117346324714933&bvid=BV1peaq64Ek1&cid=42262659399&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站观看第 7 讲](https://www.bilibili.com/video/BV1peaq64Ek1) · [官方课件](https://www.cmu-agents.com/slides/lecture-07-computer-use-agents.pdf)
-
 ## 通过界面观察和行动
 
 第 7 讲由 Jing Yu Koh 于 2026-09-15 授课，官方名称为 Computer Use Agents。本文按视频中的“交互循环—评测—建模—训练—开放问题”顺序整理。图片标注 PDF 页码；该版课件部分页内编号与 PDF 页序不同，引用以 PDF 页序为准。
