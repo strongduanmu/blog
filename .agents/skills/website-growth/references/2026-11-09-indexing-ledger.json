@@ -1,0 +1,3903 @@
+{
+  "schema_version": 1,
+  "checked_on": "2026-11-09",
+  "timezone": "Asia/Shanghai",
+  "site": "https://strongduanmu.com/",
+  "scope": "173 current canonical sitemap URLs; AI Wiki 38 individually checked on Google and Bing; other URLs partly checked",
+  "summary": {
+    "google": {
+      "indexed": 84,
+      "not_indexed": 15,
+      "pending_verification": 74
+    },
+    "bing": {
+      "pending_verification": 135,
+      "indexed": 33,
+      "not_discovered": 5
+    },
+    "baidu": {
+      "pending_verification": 173
+    }
+  },
+  "ai_summary": {
+    "google": {
+      "indexed": 27,
+      "not_indexed": 11
+    },
+    "bing": {
+      "indexed": 33,
+      "not_discovered": 5
+    },
+    "baidu": {
+      "pending_verification": 38
+    }
+  },
+  "sitemaps": {
+    "google": {
+      "url": "https://strongduanmu.com/sitemap.xml",
+      "status": "submitted_successfully",
+      "submittedAt": "2026-11-09T02:02:02.752Z",
+      "previousLastRead": "2026-11-04",
+      "previousDiscoveredPages": 163
+    },
+    "bing": {
+      "url": "https://strongduanmu.com/sitemap.xml",
+      "status": "processing",
+      "submittedAt": "2026-11-09T02:12:20.371Z",
+      "previousLastRead": "2026-11-04",
+      "previousDiscoveredPages": 163
+    }
+  },
+  "limits": {
+    "google_request": {
+      "status": "daily_limit",
+      "at": "2026-11-09T02:26:48.343Z",
+      "receipt": "Quota exceeded; exceeded your daily quota; try again tomorrow"
+    },
+    "google_inspection": {
+      "status": "daily_limit",
+      "checkedAt": "2026-11-09T02:55:21.693Z",
+      "receipt": "You have exceeded your property's URL inspection quota. Quota is renewed daily.",
+      "checked": 99,
+      "remaining": 74
+    },
+    "baidu": {
+      "checkedAt": "2026-11-09T02:40:20.671Z",
+      "reportDate": "2026-11-07",
+      "totalIndexed": 4,
+      "aiPerURLStatus": "not_available_from_total_report",
+      "acceptedToday": 10,
+      "cmuDirectoryRequest": "captcha_pending"
+    }
+  },
+  "pages": [
+    {
+      "url": "https://strongduanmu.com/",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:42:49.945Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/",
+      "robots": "",
+      "bodyChars": 642,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/blog/analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:42:53.160Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere 联邦查询 GROUPING 聚合结果问题分析",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/analyze-wrong-result-for-shardingsphere-sql-federation-grouping-function.html",
+      "robots": "",
+      "bodyChars": 51675,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:42:56.412Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite Catalog 拾遗之 UDF 函数实现和扩展",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/apache-calcite-catalog-udf-function-implementation-and-extension.html",
+      "robots": "",
+      "bodyChars": 69770,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/apache-calcite-learning-materials.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:42:59.661Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite 学习资料整理",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/apache-calcite-learning-materials.html",
+      "robots": "",
+      "bodyChars": 1641,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:03.774Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite 快速入门指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/apache-calcite-quick-start-guide.html",
+      "robots": "",
+      "bodyChars": 22333,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:07.457Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Calcite UDF 实战之 ShardingSphere 联邦查询适配 MySQL BIT_COUNT",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html",
+      "robots": "",
+      "bodyChars": 25875,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/centos-dev-environment-setup-note.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:10.676Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "CentOS 开发环境搭建笔记",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/centos-dev-environment-setup-note.html",
+      "robots": "",
+      "bodyChars": 3213,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:13.894Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "CBO 优化的基石——Apache Calcite 统计信息和代价模型详解",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/cornerstone-of-cbo-optimization-apache-calcite-statistics-and-cost-model.html",
+      "robots": "",
+      "bodyChars": 36363,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:17.107Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "无关性的基石之 Java 字节码技术初探",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/cornerstone-of-irrelevance-preliminary-study-of-java-bytecode-technology.html",
+      "robots": "",
+      "bodyChars": 31978,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:20.340Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "深入理解 Apache Calcite ValcanoPlanner 优化器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/deep-understand-of-apache-calcite-volcano-planner.html",
+      "robots": "",
+      "bodyChars": 45728,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/download-ding-talk-video-by-charles.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:23.800Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Charles 抓包下载钉钉群直播视频",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/download-ding-talk-video-by-charles.html",
+      "robots": "",
+      "bodyChars": 2332,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:28.963Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite System Catalog 实现探究",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/explore-apache-calcite-system-catalog-implementation.html",
+      "robots": "",
+      "bodyChars": 21117,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/explore-shardingsphere-5.0.0-beta-kernel-enhancement.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:32.374Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "探秘 ShardingSphere 5.0.0 beta 版内核增强",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/explore-shardingsphere-5.0.0-beta-kernel-enhancement.html",
+      "robots": "",
+      "bodyChars": 5111,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/explore-the-practice-of-apache-calcite-in-mycat2.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:35.750Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite 在 MyCat2 中的实践探究",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/explore-the-practice-of-apache-calcite-in-mycat2.html",
+      "robots": "",
+      "bodyChars": 45384,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:39.184Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "GraalVM 编译动态链接库之 MySQL UDF 实现",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/graalvm-compilation-of-dynamic-link-library-mysql-udf-implementation.html",
+      "robots": "",
+      "bodyChars": 17786,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:54.392Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Apache Calcite SQL Parser 原理剖析",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/implementation-principle-of-apache-calcite-sql-parser.html",
+      "robots": "",
+      "bodyChars": 30503,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:43:57.672Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "深度探究 Apache Calcite SQL 校验器实现原理",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html",
+      "robots": "",
+      "bodyChars": 33438,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/introduction-to-antlr.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:01.016Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ANTLR 基础入门",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/introduction-to-antlr.html",
+      "robots": "",
+      "bodyChars": 16569,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/java-8-new-features-in-action.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:04.307Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Java8 新特性实战",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/java-8-new-features-in-action.html",
+      "robots": "",
+      "bodyChars": 25689,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:10.173Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Java AOT 编译框架 GraalVM 快速入门",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/java-aot-compiler-framework-graalvm-quick-start.html",
+      "robots": "",
+      "bodyChars": 17396,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/jvm-learning-materials.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:16.462Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "JVM 学习资料整理",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/jvm-learning-materials.html",
+      "robots": "",
+      "bodyChars": 823,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/blog/mysql-5.7.40-install-and-initial-config-guide.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:19.700Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "MySQL 5.7.40 安装及初始化配置指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/mysql-5.7.40-install-and-initial-config-guide.html",
+      "robots": "",
+      "bodyChars": 7465,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/mysql-learning-materials.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:22.964Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "MySQL 学习资料整理",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/mysql-learning-materials.html",
+      "robots": "",
+      "bodyChars": 386,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:30.342Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Java 虚拟机指令操作码和助记符映射关系",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/opcode-mnemonics-by-opcode.html",
+      "robots": "",
+      "bodyChars": 8053,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/openclaw-configuration-and-feishu-integration-guide.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:36.273Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "打造 24 小时专属 AI 管家！OpenClaw 基础入门与飞书实战",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/openclaw-configuration-and-feishu-integration-guide.html",
+      "robots": "",
+      "bodyChars": 10016,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/polardb-x-dev-environment-setup-note.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:40.094Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "PolarDB-X 开发环境搭建笔记",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/polardb-x-dev-environment-setup-note.html",
+      "robots": "",
+      "bodyChars": 40400,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/shardingsphere-5.0.0-kernel-optimization-and-upgrade-guide.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:43.412Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere 5.0.0 内核优化及升级指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/shardingsphere-5.0.0-kernel-optimization-and-upgrade-guide.html",
+      "robots": "",
+      "bodyChars": 27016,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/shardingsphere-5.1.0-execution-engine-performance-optimization.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:44:47.878Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere 5.1.0 执行引擎性能优化揭秘",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/shardingsphere-5.1.0-execution-engine-performance-optimization.html",
+      "robots": "",
+      "bodyChars": 16937,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/shardingsphere-5.3.1-new-feature-dynamic-data-masking.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:46:00.341Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere 5.3.1 新特性之动态数据脱敏",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/shardingsphere-5.3.1-new-feature-dynamic-data-masking.html",
+      "robots": "",
+      "bodyChars": 20678,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/shardingsphere-proxy-adapt-mysql-add-batch-execute-batch-return-int-array-in-action.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:50:41.682Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere Proxy 适配 MySQL addBatch/executeBatch 数组结果实战",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/shardingsphere-proxy-adapt-mysql-add-batch-execute-batch-return-int-array-in-action.html",
+      "robots": "",
+      "bodyChars": 15208,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/shardingsphere-proxy-integration-test-debug-in-action.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:50:45.730Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "ShardingSphere Proxy 集成测试代码调试实战",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/shardingsphere-proxy-integration-test-debug-in-action.html",
+      "robots": "",
+      "bodyChars": 5626,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:50:49.770Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "百倍提速！ShardingSphere 联邦查询批量 IN 查询深度优化",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/speed-up-by-100x-shardingsphere-sql-federation-in-predicate-deep-optimization-practice.html",
+      "robots": "",
+      "bodyChars": 54733,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/use-java-remote-debugging-to-locate-system-table-loading-bug.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:50:54.115Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "使用 Java 远程调试技术定位系统表加载问题",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/use-java-remote-debugging-to-locate-system-table-loading-bug.html",
+      "robots": "",
+      "bodyChars": 5312,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/use-sqlancer-to-test-shardingsphere-sql-federation.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:50:59.391Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "使用 SQLancer 测试 ShardingSphere 联邦查询",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/use-sqlancer-to-test-shardingsphere-sql-federation.html",
+      "robots": "",
+      "bodyChars": 19438,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/blog/use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:03.693Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "使用 Wireshark 解决 BenchmarkSQL 压测 Proxy 异常",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/blog/use-wireshark-to-solve-benchmarksql-exception-with-shardingsphere-proxy.html",
+      "robots": "",
+      "bodyChars": 11593,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/more/",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:07.585Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/more/",
+      "robots": "",
+      "bodyChars": 1515,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/",
+      "scope": "other",
+      "google": {
+        "status": "not_indexed",
+        "reason": "Excluded by ‘noindex’ tag",
+        "checkedAt": "2026-11-09T02:51:11.524Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Common",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/",
+      "robots": "",
+      "bodyChars": 348,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/docker.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:45.761Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Docker",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/docker.html",
+      "robots": "",
+      "bodyChars": 4020,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/git.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:49.759Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Git",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/git.html",
+      "robots": "",
+      "bodyChars": 9480,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/idea.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:53.683Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "IDEA",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/idea.html",
+      "robots": "",
+      "bodyChars": 427,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/mac.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:51:57.760Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Mac",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/mac.html",
+      "robots": "",
+      "bodyChars": 439,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/shell.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:52:02.383Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Shell",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/shell.html",
+      "robots": "",
+      "bodyChars": 537,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/virtual_box.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:52:06.340Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "VirtualBox",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/virtual_box.html",
+      "robots": "",
+      "bodyChars": 489,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/notes/wireshark.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:52:10.325Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "WireShark",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/notes/wireshark.html",
+      "robots": "",
+      "bodyChars": 69,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/topic/",
+      "scope": "other",
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:52:15.576Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/topic/",
+      "robots": "",
+      "bodyChars": 339,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:52:19.526Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/",
+      "robots": "",
+      "bodyChars": 1704,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/background.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:52:23.526Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "背景",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/background.html",
+      "robots": "",
+      "bodyChars": 3046,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/client_reference.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:14.716Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "客户端参考",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/client_reference.html",
+      "robots": "",
+      "bodyChars": 3341,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/compatibility.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:18.946Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "兼容性",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/compatibility.html",
+      "robots": "",
+      "bodyChars": 2013,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/custom_client_artifacts.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:24.049Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "自定义客户端构件",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/custom_client_artifacts.html",
+      "robots": "",
+      "bodyChars": 3849,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/docker_images.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:28.109Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Docker 镜像",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/docker_images.html",
+      "robots": "",
+      "bodyChars": 3364,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/go_client_reference.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:32.179Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Go 客户端参考",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/go_client_reference.html",
+      "robots": "",
+      "bodyChars": 3871,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/go_howto.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:36.251Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Go 客户端使用指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/go_howto.html",
+      "robots": "",
+      "bodyChars": 6248,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/howto.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:42.762Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "使用指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/howto.html",
+      "robots": "",
+      "bodyChars": 8868,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/json_reference.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:47.462Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "JSON 参考",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/json_reference.html",
+      "robots": "",
+      "bodyChars": 16882,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/protobuf_reference.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:52.032Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Protocol Buffers 参考",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/protobuf_reference.html",
+      "robots": "",
+      "bodyChars": 20037,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/protocol_testing.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:53:56.144Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "协议测试",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/protocol_testing.html",
+      "robots": "",
+      "bodyChars": 2275,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/roadmap.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:54:11.426Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "路线图",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/roadmap.html",
+      "robots": "",
+      "bodyChars": 575,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/avatica/security.html",
+      "scope": "other",
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:54:15.529Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "安全",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/avatica/security.html",
+      "robots": "",
+      "bodyChars": 7885,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/c/",
+      "scope": "other",
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:54:20.117Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "学习资料",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/c/",
+      "robots": "",
+      "bodyChars": 212,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/c/introduction.html",
+      "scope": "other",
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:54:24.952Z"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "C 语言入门",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/c/introduction.html",
+      "robots": "",
+      "bodyChars": 3564,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/adapters.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/adapters.html",
+      "robots": "",
+      "bodyChars": 11012,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/algebra.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "代数",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/algebra.html",
+      "robots": "",
+      "bodyChars": 11951,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/background.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "背景",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/background.html",
+      "robots": "",
+      "bodyChars": 2849,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/cassandra-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Cassandra 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/cassandra-adapter.html",
+      "robots": "",
+      "bodyChars": 1772,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/develop.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "开发 Calcite",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/develop.html",
+      "robots": "",
+      "bodyChars": 6695,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/druid-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Druid 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/druid-adapter.html",
+      "robots": "",
+      "bodyChars": 6460,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/elasticsearch-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Elasticsearch 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/elasticsearch-adapter.html",
+      "robots": "",
+      "bodyChars": 2820,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/file-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "文件适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/file-adapter.html",
+      "robots": "",
+      "bodyChars": 6495,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/geode-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Geode 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/geode-adapter.html",
+      "robots": "",
+      "bodyChars": 3409,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/howto.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "如何参与",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/howto.html",
+      "robots": "",
+      "bodyChars": 22660,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/innodb-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "InnoDB 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/innodb-adapter.html",
+      "robots": "",
+      "bodyChars": 8960,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/kafka-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Kafka 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/kafka-adapter.html",
+      "robots": "",
+      "bodyChars": 2268,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/lattice.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Lattice 格",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/lattice.html",
+      "robots": "",
+      "bodyChars": 9134,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/materialized-views.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "物化视图",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/materialized-views.html",
+      "robots": "",
+      "bodyChars": 4635,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/model.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "JSON/YAML 模型",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/model.html",
+      "robots": "",
+      "bodyChars": 9113,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/os-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "操作系统适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/os-adapter.html",
+      "robots": "",
+      "bodyChars": 5258,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/pig-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Pig 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/pig-adapter.html",
+      "robots": "",
+      "bodyChars": 1317,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/redis-adapter.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Redis 适配器",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/redis-adapter.html",
+      "robots": "",
+      "bodyChars": 6117,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/reference.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "参考指南",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/reference.html",
+      "robots": "",
+      "bodyChars": 82439,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/spatial.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "空间",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/spatial.html",
+      "robots": "",
+      "bodyChars": 2940,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/stream.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "流式查询",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/stream.html",
+      "robots": "",
+      "bodyChars": 19521,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/calcite/tutorial.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "教程",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/calcite/tutorial.html",
+      "robots": "",
+      "bodyChars": 18082,
+      "eligibleForSubmission": true
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "index",
+      "title": "课程资料",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/",
+      "robots": "",
+      "sourceChars": 7190,
+      "images": 1,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:31:31.506Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:19.594Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "captcha_pending",
+        "attemptedAt": "2026-11-09T02:38:04.193Z"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "advanced_reinforcement_learning_algorithms",
+      "title": "高级强化学习算法",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms.html",
+      "robots": "",
+      "sourceChars": 4082,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:03.536Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:04.729Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "agents_and_the_future_of_work",
+      "title": "智能体与工作的未来",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/agents_and_the_future_of_work.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/agents_and_the_future_of_work.html",
+      "robots": "",
+      "sourceChars": 2622,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:34.421Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:18.179Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "assignment_1_harness",
+      "title": "Assignment 1：搭建智能体 Harness",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_1_harness.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/assignment_1_harness.html",
+      "robots": "",
+      "sourceChars": 2504,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:08.826Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:43.084Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "assignment_2_eval",
+      "title": "Assignment 2：设计智能体评测",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_2_eval.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/assignment_2_eval.html",
+      "robots": "",
+      "sourceChars": 2147,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:12.522Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:45.516Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "assignment_3_training",
+      "title": "Assignment 3：训练智能体",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_3_training.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/assignment_3_training.html",
+      "robots": "",
+      "sourceChars": 2588,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:16.104Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:48.013Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "coding_agents",
+      "title": "编程智能体",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/coding_agents.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/coding_agents.html",
+      "robots": "",
+      "sourceChars": 4853,
+      "images": 3,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:32:44.623Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:44.187Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "context_management_for_long_context_agents",
+      "title": "长上下文智能体的上下文管理",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/context_management_for_long_context_agents.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/context_management_for_long_context_agents.html",
+      "robots": "",
+      "sourceChars": 5208,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:31:46.933Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:37.893Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "deep_research_agents",
+      "title": "深度研究智能体",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/deep_research_agents.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/deep_research_agents.html",
+      "robots": "",
+      "sourceChars": 4563,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:00.304Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:52.760Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "guest_lecture_karthik_narasimhan",
+      "title": "客座讲座（11 月 19 日）",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/guest_lecture_karthik_narasimhan.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/guest_lecture_karthik_narasimhan.html",
+      "robots": "",
+      "sourceChars": 388,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:02.088Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:39.417Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "guest_lecture_sasha_rush",
+      "title": "客座讲座（11 月 24 日）",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/guest_lecture_sasha_rush.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/guest_lecture_sasha_rush.html",
+      "robots": "",
+      "sourceChars": 388,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:05.587Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:41.388Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "gui_agents",
+      "title": "计算机使用智能体（GUI Agents）",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/gui_agents.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/gui_agents.html",
+      "robots": "",
+      "sourceChars": 4074,
+      "images": 5,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:32:47.889Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:46.436Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "human_agent_interaction",
+      "title": "人机交互",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/human_agent_interaction.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/human_agent_interaction.html",
+      "robots": "",
+      "sourceChars": 316,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:41.227Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:22.248Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "langgraph",
+      "title": "智能体编排与监控：LangGraph 与轨迹分析",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/langgraph.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/langgraph.html",
+      "robots": "",
+      "sourceChars": 2881,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:27.789Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:14.552Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "multi_agent_interaction",
+      "title": "多智能体系统：协调、交互与监督",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/multi_agent_interaction.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/multi_agent_interaction.html",
+      "robots": "",
+      "sourceChars": 2708,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:37.672Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:20.059Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "observability_and_monitoring",
+      "title": "可观测性与监控",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/observability_and_monitoring.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/observability_and_monitoring.html",
+      "robots": "",
+      "sourceChars": 392,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "URL is unknown to Google",
+        "checkedAt": "2026-11-09T02:33:31.045Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:16.431Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "openhands",
+      "title": "OpenHands：框架设计与软件开发自动化",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/openhands.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/openhands.html",
+      "robots": "",
+      "sourceChars": 3678,
+      "images": 5,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:23.660Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:12.620Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "planning_task_decomposition_and_multi_agent_coordination",
+      "title": "规划、任务分解与多智能体协同",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination.html",
+      "robots": "",
+      "sourceChars": 4282,
+      "images": 3,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:32:41.301Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:41.995Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "reinforcement_learning_basics",
+      "title": "强化学习基础",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_basics.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_basics.html",
+      "robots": "",
+      "sourceChars": 4321,
+      "images": 3,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:32:56.822Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:50.578Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "reinforcement_learning_systems",
+      "title": "强化学习系统",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_systems.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_systems.html",
+      "robots": "",
+      "sourceChars": 3854,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:07.600Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:08.424Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "reranking_and_critic_models",
+      "title": "重排序与 Critic 模型",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/reranking_and_critic_models.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/reranking_and_critic_models.html",
+      "robots": "",
+      "sourceChars": 326,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:54.577Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:35.684Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "research_project",
+      "title": "期末研究项目",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/research_project.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/research_project.html",
+      "robots": "",
+      "sourceChars": 1717,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:34:19.337Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:49.936Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "sandboxing_and_credential_management",
+      "title": "智能体安全：沙箱、凭证与监控",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/sandboxing_and_credential_management.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/sandboxing_and_credential_management.html",
+      "robots": "",
+      "sourceChars": 3445,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:20.322Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:10.757Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "skills_and_memory",
+      "title": "技能与记忆",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/skills_and_memory.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/skills_and_memory.html",
+      "robots": "",
+      "sourceChars": 4606,
+      "images": 3,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:31:52.155Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:39.993Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "supervised_fine_tuning",
+      "title": "监督微调",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/supervised_fine_tuning.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/supervised_fine_tuning.html",
+      "robots": "",
+      "sourceChars": 4012,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "requestStatus": "accepted",
+        "requestedDate": "2026-11-08",
+        "requestEvidence": "previous_review_explicit_receipt",
+        "avoidDuplicateRequest": true,
+        "reason": null,
+        "checkedAt": "2026-11-09T02:32:51.320Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:48.735Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedDate": "2026-11-08",
+        "requestEvidence": "previous_review_explicit_receipt",
+        "avoidDuplicateRequest": true
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "tool_use",
+      "title": "工具调用",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/tool_use.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/tool_use.html",
+      "robots": "",
+      "sourceChars": 6199,
+      "images": 4,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:31:41.755Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:35.853Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "tree_search",
+      "title": "树搜索",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/tree_search.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/tree_search.html",
+      "robots": "",
+      "sourceChars": 315,
+      "images": 0,
+      "outline": false,
+      "google": {
+        "status": "indexed",
+        "reason": null,
+        "checkedAt": "2026-11-09T02:33:57.803Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:36:37.636Z"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "eligibleForSubmission": false,
+      "exclusionReason": "course_material_placeholder",
+      "scope": "ai"
+    },
+    {
+      "course": "cmu_11_768",
+      "slug": "what_are_agents_and_how_do_they_work",
+      "title": "什么是智能体 & 他们如何工作",
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html",
+      "robots": "",
+      "sourceChars": 17793,
+      "images": 13,
+      "outline": true,
+      "google": {
+        "status": "indexed",
+        "requestStatus": "accepted",
+        "requestedDate": "2026-11-08",
+        "requestEvidence": "previous_review_explicit_receipt",
+        "avoidDuplicateRequest": true,
+        "reason": null,
+        "checkedAt": "2026-11-09T02:31:36.545Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:22.220Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedDate": "2026-11-08",
+        "requestEvidence": "previous_review_explicit_receipt",
+        "avoidDuplicateRequest": true
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_445/",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "课程资料",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_445/",
+      "robots": "",
+      "bodyChars": 448,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_445/course-introduction-and-the-relational-model.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "课程简介与关系模型",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_445/course-introduction-and-the-relational-model.html",
+      "robots": "",
+      "bodyChars": 10341,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_445/joins-algorithms.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Join 算法",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_445/joins-algorithms.html",
+      "robots": "",
+      "bodyChars": 1256,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "课程资料",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/",
+      "robots": "",
+      "bodyChars": 1336,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/adaptivity_feedback.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "自适应：反馈",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/adaptivity_feedback.html",
+      "robots": "",
+      "bodyChars": 2896,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/adaptivity_runtime_processing.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "自适应：运行时处理",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/adaptivity_runtime_processing.html",
+      "robots": "",
+      "bodyChars": 3486,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/cascades.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Cascades",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/cascades.html",
+      "robots": "",
+      "bodyChars": 4535,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_cardinality_estimation.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "代价模型：基数估计",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_cardinality_estimation.html",
+      "robots": "",
+      "bodyChars": 4338,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_learned_approaches.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "代价模型：学习型方法",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_learned_approaches.html",
+      "robots": "",
+      "bodyChars": 3811,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_more_cardinality_estimation.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "代价模型：更多基数估计",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_more_cardinality_estimation.html",
+      "robots": "",
+      "bodyChars": 4092,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_statistics.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "代价模型：统计信息",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/cost_models_statistics.html",
+      "robots": "",
+      "bodyChars": 4361,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/ibm_starburst.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "IBM Starburst",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/ibm_starburst.html",
+      "robots": "",
+      "bodyChars": 6194,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/ibm_system_r.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "IBM System R",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/ibm_system_r.html",
+      "robots": "",
+      "bodyChars": 13937,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/implementation_apache_calcite.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "实现：Apache Calcite",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/implementation_apache_calcite.html",
+      "robots": "",
+      "bodyChars": 4111,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/implementation_microsoft_fabric.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "实现：Microsoft Fabric",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/implementation_microsoft_fabric.html",
+      "robots": "",
+      "bodyChars": 3957,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/implementation_mongodb.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "实现：MongoDB",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/implementation_mongodb.html",
+      "robots": "",
+      "bodyChars": 3283,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/implementation_orca.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "实现：Orca",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/implementation_orca.html",
+      "robots": "",
+      "bodyChars": 3432,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/intro_to_query_optimization.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "查询优化简介",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/intro_to_query_optimization.html",
+      "robots": "",
+      "bodyChars": 5083,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/join_ordering_bottom_up.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Join 排序：自下而上",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/join_ordering_bottom_up.html",
+      "robots": "",
+      "bodyChars": 5108,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/join_ordering_top_down.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Join 排序：自上而下",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/join_ordering_top_down.html",
+      "robots": "",
+      "bodyChars": 4048,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/parallelization_bottom_up.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "并行化：自下而上",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/parallelization_bottom_up.html",
+      "robots": "",
+      "bodyChars": 4303,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/parallelization_top_down.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "并行化：自上而下",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/parallelization_top_down.html",
+      "robots": "",
+      "bodyChars": 3736,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/parametric_query_optimization.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "参数化查询优化",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/parametric_query_optimization.html",
+      "robots": "",
+      "bodyChars": 3433,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/transformations.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "转换规则",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/transformations.html",
+      "robots": "",
+      "bodyChars": 4622,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/unnesting_queries.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "查询去嵌套",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/unnesting_queries.html",
+      "robots": "",
+      "bodyChars": 5462,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/user_defined_function_optimizations.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "用户自定义函数优化",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/user_defined_function_optimizations.html",
+      "robots": "",
+      "bodyChars": 4204,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_15_799/volcano.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Volcano",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cmu_15_799/volcano.html",
+      "robots": "",
+      "bodyChars": 5515,
+      "eligibleForSubmission": true
+    },
+    {
+      "course": "cs329",
+      "slug": "index",
+      "title": "课程资料",
+      "url": "https://strongduanmu.com/wiki/cs329/",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/",
+      "robots": "",
+      "sourceChars": 3561,
+      "images": 1,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "URL is unknown to Google",
+        "checkedAt": "2026-11-09T01:59:53.933Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T01:59:53.938Z"
+      },
+      "bing": {
+        "status": "not_discovered",
+        "checkedAt": "2026-11-09T02:09:43.285Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:10:04.377Z",
+        "quotaBefore": 10000
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:21:55.162Z",
+        "receipt": "链接提交成功"
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "agentic_evaluations_and_long_horizon_tasks",
+      "title": "智能体评估与长时程任务",
+      "url": "https://strongduanmu.com/wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html",
+      "robots": "",
+      "sourceChars": 5445,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:30:59.693Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:12.002Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "course_overview",
+      "title": "课程概览",
+      "url": "https://strongduanmu.com/wiki/cs329/course_overview.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/course_overview.html",
+      "robots": "",
+      "sourceChars": 4884,
+      "images": 5,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "URL is unknown to Google",
+        "lastCrawl": "N/A",
+        "checkedAt": "2026-11-09T02:03:03.667Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:08:31.420Z"
+      },
+      "bing": {
+        "status": "not_discovered",
+        "checkedAt": "2026-11-09T02:12:46.404Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:13:33.773Z",
+        "receipt": "Indexing requested."
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "future_research_areas",
+      "title": "未来研究方向",
+      "url": "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+      "robots": "",
+      "sourceChars": 5775,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:31:26.082Z"
+      },
+      "bing": {
+        "status": "not_discovered",
+        "checkedAt": "2026-11-09T02:35:14.010Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:35:17.333Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "learning_from_feedback_with_tools_and_code",
+      "title": "利用工具与代码反馈学习",
+      "url": "https://strongduanmu.com/wiki/cs329/learning_from_feedback_with_tools_and_code.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/learning_from_feedback_with_tools_and_code.html",
+      "robots": "",
+      "sourceChars": 5356,
+      "images": 5,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:11:44.283Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:13:49.729Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:02.378Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "planning_and_multi_step_reasoning",
+      "title": "规划与多步推理",
+      "url": "https://strongduanmu.com/wiki/cs329/planning_and_multi_step_reasoning.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/planning_and_multi_step_reasoning.html",
+      "robots": "",
+      "sourceChars": 5528,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "URL is unknown to Google",
+        "checkedAt": "2026-11-09T02:13:58.388Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:16:34.202Z"
+      },
+      "bing": {
+        "status": "not_discovered",
+        "checkedAt": "2026-11-09T02:35:04.181Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:35:06.346Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "robust_verification",
+      "title": "鲁棒验证",
+      "url": "https://strongduanmu.com/wiki/cs329/robust_verification.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/robust_verification.html",
+      "robots": "",
+      "sourceChars": 4895,
+      "images": 5,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:10:30.982Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:11:37.086Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:20:50.103Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:16:04.273Z",
+        "previousStatus": "not_discovered",
+        "evidence": "URL Inspection: Indexed successfully; URL can appear on Bing"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "self_improvement_and_deep_research_agents",
+      "title": "自我改进与深度研究智能体",
+      "url": "https://strongduanmu.com/wiki/cs329/self_improvement_and_deep_research_agents.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/self_improvement_and_deep_research_agents.html",
+      "robots": "",
+      "sourceChars": 5279,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:19:07.788Z",
+        "requestStatus": "daily_limit",
+        "attemptedAt": "2026-11-09T02:26:48.342Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:10.107Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "test_time_compute_scaling",
+      "title": "推理时计算扩展",
+      "url": "https://strongduanmu.com/wiki/cs329/test_time_compute_scaling.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/test_time_compute_scaling.html",
+      "robots": "",
+      "sourceChars": 5411,
+      "images": 6,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "URL is unknown to Google",
+        "checkedAt": "2026-11-09T02:09:06.383Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:10:19.770Z"
+      },
+      "bing": {
+        "status": "not_discovered",
+        "checkedAt": "2026-11-09T02:14:43.586Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:14:45.543Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "course": "cs329",
+      "slug": "train_time_scaling_and_reinforcement_learning",
+      "title": "训练时扩展与强化学习",
+      "url": "https://strongduanmu.com/wiki/cs329/train_time_scaling_and_reinforcement_learning.html",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/cs329/train_time_scaling_and_reinforcement_learning.html",
+      "robots": "",
+      "sourceChars": 6301,
+      "images": 7,
+      "outline": false,
+      "google": {
+        "status": "not_indexed",
+        "reason": "Discovered – currently not indexed",
+        "checkedAt": "2026-11-09T02:16:42.571Z",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:18:53.468Z"
+      },
+      "bing": {
+        "status": "indexed",
+        "checkedAt": "2026-11-09T02:35:08.270Z"
+      },
+      "baidu": {
+        "status": "pending_verification",
+        "requestStatus": "accepted",
+        "requestedAt": "2026-11-09T02:24:08.279Z",
+        "receipt": "链接提交成功",
+        "batchSize": 9
+      },
+      "eligibleForSubmission": true,
+      "exclusionReason": null,
+      "scope": "ai"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Database 分享总结",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/database_share/",
+      "robots": "",
+      "bodyChars": 278,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Calcite：跳出 SQL 查询优化，转向数据优化",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html",
+      "robots": "",
+      "bodyChars": 14101,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/calcite-tactical-data-engineering-data-first-engineering-implementation.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "Calcite：战术数据工程，数据优先理念的工程落地",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/database_share/calcite-tactical-data-engineering-data-first-engineering-implementation.html",
+      "robots": "",
+      "bodyChars": 7563,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "YugabyteDB：集 Aurora 与 Spanner 之长，打造新一代分布式 SQL",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/database_share/yugabytedb-bringing-together-the-best-of-amazon-aurora-and-google-spanner.html",
+      "robots": "",
+      "bodyChars": 6908,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/database_share/yugabytedb-modern-distributed-postgresql-architecture-and-evolution.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "YugabyteDB：面向现代应用的分布式 PostgreSQL",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/database_share/yugabytedb-modern-distributed-postgresql-architecture-and-evolution.html",
+      "robots": "",
+      "bodyChars": 10446,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/advanced-data-types.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十六章 高级数据类型",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/advanced-data-types.html",
+      "robots": "",
+      "bodyChars": 3423,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/batch-updates.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十四章 批处理更新",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/batch-updates.html",
+      "robots": "",
+      "bodyChars": 1480,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/classes-and-interfaces.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第五章 类和接口",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/classes-and-interfaces.html",
+      "robots": "",
+      "bodyChars": 2561,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/compliance.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第六章 合规性",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/compliance.html",
+      "robots": "",
+      "bodyChars": 4595,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/connection-pooling.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十一章 连接池",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/connection-pooling.html",
+      "robots": "",
+      "bodyChars": 2126,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/connections.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第九章 连接",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/connections.html",
+      "robots": "",
+      "bodyChars": 6318,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/customized-type-mapping.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十七章 自定义类型映射",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/customized-type-mapping.html",
+      "robots": "",
+      "bodyChars": 2461,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/database-metadata.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第七章 数据库元数据",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/database-metadata.html",
+      "robots": "",
+      "bodyChars": 2496,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/distributed-transactions.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十二章 分布式事务",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/distributed-transactions.html",
+      "robots": "",
+      "bodyChars": 1157,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/exceptions.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第八章 异常",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/exceptions.html",
+      "robots": "",
+      "bodyChars": 5453,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/goals.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第二章 目标",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/goals.html",
+      "robots": "",
+      "bodyChars": 2020,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/introduction.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第一章 介绍",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/introduction.html",
+      "robots": "",
+      "bodyChars": 1213,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/overview.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第四章 概述",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/overview.html",
+      "robots": "",
+      "bodyChars": 2788,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/preface.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "前言",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/preface.html",
+      "robots": "",
+      "bodyChars": 873,
+      "eligibleForSubmission": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/relationship-to-connectors.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十八章 与连接器的关系",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/relationship-to-connectors.html",
+      "robots": "",
+      "bodyChars": 1303,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/result-sets.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十五章 结果集",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/result-sets.html",
+      "robots": "",
+      "bodyChars": 1997,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/statements.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十三章 语句",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/statements.html",
+      "robots": "",
+      "bodyChars": 3206,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/summary-of-new-features.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第三章 新特性摘要",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/summary-of-new-features.html",
+      "robots": "",
+      "bodyChars": 2355,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/jdbc/transactions.html",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "第十章 事务",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/jdbc/transactions.html",
+      "robots": "",
+      "bodyChars": 1746,
+      "eligibleForSubmission": true
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/tsinghua_database/",
+      "scope": "other",
+      "google": {
+        "status": "pending_verification"
+      },
+      "bing": {
+        "status": "pending_verification"
+      },
+      "baidu": {
+        "status": "pending_verification"
+      },
+      "title": "课程资料",
+      "status": 200,
+      "canonical": "https://strongduanmu.com/wiki/tsinghua_database/",
+      "robots": "",
+      "bodyChars": 237,
+      "eligibleForSubmission": false
+    }
+  ],
+  "submission_plan": {
+    "google": {
+      "not_before": "2026-11-10",
+      "reason": "daily URL inspection and request-indexing quotas exhausted; recheck before requesting",
+      "urls": [
+        "https://strongduanmu.com/wiki/c/introduction.html",
+        "https://strongduanmu.com/wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html",
+        "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+        "https://strongduanmu.com/wiki/cs329/self_improvement_and_deep_research_agents.html"
+      ]
+    },
+    "bing": {
+      "recheck_accepted_unindexed": [
+        "https://strongduanmu.com/wiki/cs329/",
+        "https://strongduanmu.com/wiki/cs329/course_overview.html",
+        "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+        "https://strongduanmu.com/wiki/cs329/planning_and_multi_step_reasoning.html",
+        "https://strongduanmu.com/wiki/cs329/test_time_compute_scaling.html"
+      ]
+    },
+    "baidu": {
+      "queue": "baidu-submission-queue.json",
+      "captcha_pending": "https://strongduanmu.com/wiki/cmu_11_768/"
+    }
+  }
+}

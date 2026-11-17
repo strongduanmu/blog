@@ -62,11 +62,11 @@ Daniel 展示了 Jing Yu Koh 制作的 GUI 智能体演示。任务是在匹兹�
 
 ![OpenHands 在浏览器中测试待办事项应用](/wiki/cmu_11_768/what_are_agents_and_how_do_they_work/lecture_01_10m56s_openhands_visual_debugging.png)
 
-运行过程中，智能体从日志发现端口已被占用，继续处理启动问题；页面打开后，它输入待办事项、点击添加按钮，再检查删除功能。这个过程把代码编辑、终端执行和 GUI 操作连接了起来。老师借此说明，智能体能读取执行结果、发现问题，并继续采取行动。后续课程还会介绍 OpenHands 及其 SDK。
+运行过程中，智能体从日志发现端口已被占用，它自行处理了启动问题；页面打开后，它输入待办事项、点击添加按钮，再检查删除功能。整个过程把代码编辑、终端执行和 GUI 操作连接了起来。老师借此说明，智能体能读取执行结果、发现问题，并继续采取行动。后续课程还会介绍 OpenHands 及其 SDK。
 
 ## 课程团队与算力支持
 
-演示之后，课堂介绍了课程团队。两位授课老师分别是 `Daniel Fried` 和 `Graham Neubig`，助教包括 Aditya Soni、Andy Liu、Apurva Gandhi、Demi Wang、Jiarui Liu、Saujas Vaduguru、Weiwei Sun 和 Yueqi Song。团队的研究方向涉及智能体训练、奖励设计、多智能体协作以及人与智能体的交互，老师鼓励学生在研究项目阶段利用助教的经验。课程还获得了 `Fireworks AI`、`Modal`、`Prime Intellect` 和 `Sail` 的算力支持，用于作业与研究项目。
+演示之后，课堂介绍了课程团队。两位授课老师分别是 `Daniel Fried` 和 `Graham Neubig`，助教包括 Aditya Soni、Andy Liu、Apurva Gandhi、Demi Wang、Jiarui Liu、Saujas Vaduguru、Weiwei Sun 和 Yueqi Song。团队的研究方向涉及智能体训练、奖励设计、多智能体协作以及人与智能体的交互，老师鼓励学生在研究项目阶段利用助教的经验，多多交流。此外，课程还获得了 `Fireworks AI`、`Modal`、`Prime Intellect` 和 `Sail` 的算力支持，用于作业与研究项目。
 
 ## 什么是智能体
 
@@ -145,9 +145,7 @@ Daniel 在这里提到了 [Toolformer](https://arxiv.org/abs/2302.04761)：它�
 
 ### 将工具结果加入历史
 
-TODO
-
-slide 第 14 页用“a model in a loop”解释智能体，并引用了 [ReAct](https://arxiv.org/abs/2210.03629)。ReAct 将推理（reasoning）和行动（acting）交替组织，模型根据已有上下文考虑下一步，再执行操作、读取观察。
+slide 第 14 页用 `a model in a loop` 解释智能体，并引用了 [ReAct](https://arxiv.org/abs/2210.03629)。ReAct 将推理（`reasoning`）和行动（`acting`）交替组织，模型根据已有上下文考虑下一步，再执行操作、读取观察。
 
 一次模型请求的上下文包含任务要求、可用工具，以及过去的行动和观察。课件继续使用读取 `test.py` 的例子：模型生成 `read_file("test.py")`，环境执行读取，返回 `add(a, b)` 的文件内容，并将结果加入历史。
 

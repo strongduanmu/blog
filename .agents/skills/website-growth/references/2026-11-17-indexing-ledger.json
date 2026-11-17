@@ -1,0 +1,29 @@
+{
+  "checked_on": "2026-11-17",
+  "site": "https://strongduanmu.com/",
+  "pages": [
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/self_improvement_and_deep_research_agents.html",
+      "platform": "google",
+      "before": "Discovered – currently not indexed",
+      "public_validation": "200, self canonical, no noindex, substantive published note",
+      "result": "request_accepted",
+      "receipt": "Indexing requested; URL was added to a priority crawl queue",
+      "indexed": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html",
+      "platform": "google",
+      "result": "indexed",
+      "receipt": "URL is on Google; Page is indexed",
+      "request_sent": false
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+      "platform": "google",
+      "result": "indexed",
+      "receipt": "URL is on Google; Page is indexed",
+      "request_sent": false
+    }
+  ]
+}

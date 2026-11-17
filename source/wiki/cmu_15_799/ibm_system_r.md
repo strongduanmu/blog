@@ -27,6 +27,8 @@ banner: /assets/banner/banner_3.jpg
 
 ### 早期 RDBMS
 
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/early-rdbms.png' alt='早期关系数据库系统及其研究机构'>
+
 | 系统 | 机构 | 早期优化策略 |
 | --- | --- | --- |
 | Peterlee Relational Test Vehicle（PRTV） | IBM Research UK | 关系模型实验系统 |
@@ -35,15 +37,17 @@ banner: /assets/banner/banner_3.jpg
 | Oracle | Larry Ellison | 早期长期使用启发式优化 |
 | Mimer | Uppsala University | 早期关系数据库实现 |
 
-System R 于 1975 年，在 IBM San Jose Research Laboratory 启动。这个实验系统要验证一件当时并不确定的事——关系模型既能提供易用的声明式接口，也能达到生产系统所需的功能和性能。它后来直接影响了 SQL 标准和 IBM DB2，许多商业及开源数据库也沿用了它建立的优化框架。
+这些系统共同面对的问题是：声明式语言只描述“要什么结果”，具体访问哪条索引、先连接哪两张表，要交给数据库自己决定。因此，关系模型的实现最终都需要查询优化器。
 
-TODO
+老师依次介绍了这些系统的来历：PRTV 是 IBM 英国研究机构的早期关系模型原型；System R 来自 IBM San Jose；Stonebraker 团队在 Berkeley 开发 INGRES，采用的查询语言是 QUEL。Postgres 的名字也体现了它与 INGRES 的承接关系。Oracle 采用 SQL，瑞典的 Mimer 也是这一时期的关系数据库实现。这里介绍的是不同系统对关系模型的探索，不能把它们都看成一开始就采用同一种 SQL 语言或同一种优化算法。
 
-
+System R 的代表性工作，是将统计信息、代价模型和 Join 搜索结合起来，比较不同访问路径与连接顺序。老师没有确认 Mimer 当时的具体优化算法，因此这里也不把它归入某种确定的优化路线。
 
 ### 查询优化器的演进路线
 
 沿着查询优化器的发展，可以看到几条主要路线：
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/optimizer-history.png' alt='查询优化器的五种历史设计路线'>
 
 | 路线 | 代表系统 | 核心思路 |
 | --- | --- | --- |
@@ -54,6 +58,8 @@ TODO
 | 随机化搜索 | 学术系统、PostgreSQL GEQO | 在大规模 Join 场景中用随机化方法控制优化耗时 |
 
 System R 处在纯启发式方法与现代可扩展优化器之间：逻辑改写仍由一组固定规则完成，物理计划则交给代价模型和动态规划选择。
+
+这些路线并不是互不相容的五个盒子。老师特别提醒，统一搜索也可以分阶段执行，分层与统一的界线并不总是清晰。后面学习实现时，更需要追踪搜索是怎样自下而上构造计划，或者怎样自上而下转换已有计划。
 
 ## 启发式查询优化
 
@@ -108,29 +114,45 @@ WHERE ARTIST.ID = APPEARS.ARTIST_ID
 ORDER BY ARTIST.ID;
 ```
 
-对这条 SQL，最直接的几步改写是：
+#### 拆分合取谓词
 
-1. **拆分合取谓词**：把 `WHERE` 中的三个条件拆成可以独立移动的谓词；
-2. **谓词下推**：将 `ALBUM.NAME = 'Mooshoo Tribute'` 下推到 `ALBUM` 扫描，将 Join 谓词移动到对应两张表之上；
-3. **笛卡尔积替换**：将“笛卡尔积 + 等值过滤”转换为 Inner Join；
-4. **投影下推**：在需要物化数据的流水线阻塞点之前移除无用列，减少中间数据宽度。
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/combined-predicate.png' alt='合取谓词尚未拆分的初始逻辑计划'>
 
-前三项通常都能稳定减少工作量。投影下推更依赖执行引擎：行存还是列存、是否向量化、何时物化，都会改变它的实际收益。
+初始计划先对三张表做笛卡尔积，再把整个 `WHERE` 条件作为一个选择算子。这个计划表达了查询语义，却没有利用各个条件的作用范围。
 
-### 启发式方法的能力边界
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/split-predicates.png' alt='将 WHERE 条件拆成独立的选择算子'>
 
-启发式方法容易实现和调试，处理简单查询时也足够快。但规则一多，问题就逐渐暴露出来：
+将 `AND` 连接的三个条件拆开后，每个选择算子只处理一个谓词，就可以分别移动。这里没有根据选择率给条件排序：此时还没有引入代价模型和统计信息，拆分只是为后面的等价变换创造条件。
 
-- 固定规则经常依赖经验阈值或“魔法常量”；
-- 多条规则之间存在依赖时，规则应用顺序难以控制；
-- 缺少统计信息和代价模型时，优化器无法可靠判断两个合法计划中哪一个更快；
-- Join 顺序对中间结果规模影响巨大，仅凭固定规则难以做出稳定选择。
+#### 谓词下推
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/predicate-pushdown.png' alt='将单表过滤与连接过滤下推到可执行的位置'>
+
+`ALBUM.NAME = 'Mooshoo Tribute'` 只依赖 `ALBUM`，因此可以一直下推到这张表的扫描之上。`ARTIST.ID = APPEARS.ARTIST_ID` 依赖两张表，必须等它们的列都可见时才能计算，不能再推入任意一个单表扫描。下推的边界由谓词引用的列决定，并不是把所有选择算子一律移动到树底部。
+
+#### 用 Join 替换笛卡尔积
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/replace-cartesian-products.png' alt='将笛卡尔积与等值过滤替换为 Inner Join'>
+
+当笛卡尔积上方紧接着引用两边输入的连接条件时，可以把二者合并为 Inner Join。这样仍然保持结果等价，同时为后续选择具体 Join 实现提供了入口。此时还没有确定 Nested Loop Join 或 Merge Join，图中表达的是逻辑连接。
+
+#### 投影下推
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/projection-pushdown.png' alt='在中间计划中仅保留后续仍需使用的列'>
+
+最终只输出 `ARTIST.NAME`，但中间节点还需要连接键，最终排序还需要 `ARTIST.ID`。因此，扫描 `ARTIST` 时需要保留 `ID` 和 `NAME`，扫描 `APPEARS` 时需要保留两侧连接键，`ALBUM` 完成名称过滤后仍要保留 `ID`。只有后续不再使用的列才能删除。
+
+投影下推主要减少排序、物化等流水线阻塞点需要保存的数据宽度。老师强调，这条规则的收益取决于行存或列存、表的宽度，以及单机或分布式执行方式；不能因为列数变少就断言每次扫描一定更快。
+
+以上几步都可以依靠关系代数等价规则完成，不需要先估算每个候选计划的成本。但三张表的 Join 顺序仍然没有经过代价比较，这就引出了 INGRES 与 System R 的不同处理方式。
 
 ### INGRES 的查询分解
 
 早期 INGRES 处理多表查询的办法很直白：把复杂查询拆成一串“单变量查询（Single-Variable Query）”。每一步只访问一张真实表，并读取上一步生成的临时表。
 
-前面的三表查询大致会被拆成这样：
+前面的三表查询大致会被拆成这样。下面沿用课堂中的临时表命名，列名统一使用前面定义的 `ARTIST.ID`：
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/ingres-decomposition.png' alt='INGRES 将三表查询分解为依赖临时结果的单关系查询'>
 
 ```sql
 -- 第一步：找到目标专辑
@@ -150,62 +172,32 @@ FROM ARTIST, TEMP2
 WHERE ARTIST.ID = TEMP2.ARTIST_ID;
 ```
 
-执行从最内层开始，结果再代入下一层。这种做法绕开了直接优化多表 Join 的难题，但 Join 顺序基本由 SQL 写法和分解顺序决定，还可能重复执行同一查询、频繁读写临时表。
+执行从最内层开始，结果再代入下一层。课上的例子先查出 `ALBUM_ID = 9999`，然后把这个值代入 `APPEARS` 的查询，得到 `ARTIST_ID = 123` 和 `456`。最后对两个艺人分别执行一次姓名查询，得到 O.D.B. 和 DJ Premier。
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/ingres-substitution.png' alt='将专辑与艺人编号逐层代入后续查询'>
+
+这不是先生成一个完整三表物理计划再统一执行，而是用已经得到的值把下一步问题缩小成单关系查询。老师用 SQL 展示分解结果，真正的分析与变换发生在逻辑计划层。这种办法实现了连接，却缺少用代价模型比较整体 Join 顺序的能力，还可能重复执行查询、频繁读写临时结果。
+
+### 启发式方法的能力边界
+
+启发式方法容易实现和调试，处理简单查询时也足够快。但规则一多，问题就逐渐暴露出来：
+
+- 固定规则经常依赖经验阈值或“魔法常量”；
+- 多条规则之间存在依赖时，规则应用顺序难以控制；
+- 缺少统计信息和代价模型时，优化器无法可靠判断两个合法计划中哪一个更快；
+- Join 顺序对中间结果规模影响巨大，仅凭固定规则难以做出稳定选择。
 
 ## System R 查询处理流程
 
-原论文把一条 SQL 的处理过程分成四步：
+课程接下来引入“启发式规则 + 基于代价的搜索”。先用静态规则完成逻辑到逻辑的改写，再枚举访问路径、Join 算法和物化方式，以代价模型比较逻辑到物理的不同实现。索引是否可用与索引是否划算，是这里需要分开的两个问题。
 
-| 阶段 | 主要职责 |
-| --- | --- |
-| Parsing | 检查 SQL 语法，将语句拆成一个或多个 Query Block |
-| Optimization | 绑定表和列、检查类型、读取目录统计信息、枚举并选择访问计划 |
-| Code Generation | 将优化器输出的 ASL（Access Specification Language）计划编译为机器码 |
-| Execution | 调用底层 RSS，通过选定的访问路径执行扫描和 Join |
+System R 先把 SQL 拆成查询块（Query Block）。每个查询块包含一个 `SELECT`、引用一张或多张关系的 `FROM`，以及表示谓词的 `WHERE`；嵌套子查询形成独立的查询块，分别进行优化。
 
-`SELECT` 列表、`FROM` 列表和 `WHERE` 谓词树共同组成一个 Query Block。SQL 中每出现一个子查询，就会多出一个 Query Block。System R 逐块优化，优化器也就无法轻易跨过这个边界重排整个查询。
-
-在优化阶段，系统会：
-
-1. 从系统目录验证表、列和类型；
-2. 读取表、索引和统计信息；
-3. 确定多个 Query Block 的求值顺序；
-4. 枚举每个关系的访问路径；
-5. 对多表 Query Block 枚举 Join 顺序和 Join 方法；
-6. 选择总估算代价最低的计划，并把它写成 ASL 树。
-
-程序里的 SQL 可以只编译一次，之后反复执行。优化成本能够被多次运行摊薄，因此 System R 愿意在编译阶段多花一点时间寻找更好的计划。
-
-## 存储系统与访问路径
-
-### RSS 与 RSI
-
-System R 把物理存储、索引、锁、日志和恢复放在底层的 Research Storage System（`RSS`）中。执行代码通过 Research Storage Interface（`RSI`）调用它。
-
-RSS 暴露的是面向元组的扫描接口，调用方式很简单：
-
-```text
-OPEN -> NEXT -> NEXT -> ... -> CLOSE
-```
-
-元组存放在 4KB 页面中，并且不会跨页。页面再组成 Segment；一个 Segment 可以混放多个关系，一个关系则只属于一个 Segment。
-
-### Segment Scan
-
-Segment Scan 大致相当于今天的全表扫描。它逐页检查 Segment 中的所有非空页，只返回属于目标关系的元组。由于同一个 Segment 里可能混放多个关系，扫描成本还取决于目标关系占了多少页面。
-
-### Index Scan
-
-System R 使用 B-Tree 索引，叶子节点保存 `(key, tuple identifier)`。叶子页首尾相连，扫描器可以先沿着叶子链读取一段键值，再根据 tuple identifier 找到数据页。
-
-索引分为两类：
-
-- **Clustered Index**：数据元组的物理邻近关系与索引键顺序一致。按索引扫描时，同一数据页通常只需要读取一次；
-- **Non-clustered Index**：索引顺序与数据页布局缺少对应关系。多个相邻索引项可能指向不同数据页，也可能反复访问同一数据页。
-
-两类索引的成本差别很大。非聚簇索引一旦命中很多记录，最坏情况接近“每条记录随机读一次页面”，这时顺序扫描往往更便宜。
+对每个查询块，优化器先生成逻辑算子，再枚举能够实现它们的物理算子，比较访问路径与 Join 算法。单关系查询主要比较顺序扫描和索引访问；涉及多个关系时，再通过动态规划逐步确定 Join 顺序。是否物化临时结果，也属于物理执行策略的一部分。
 
 ## SARG：能够用于访问路径的谓词
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/single-relation-access.png' alt='单关系查询的范围谓词与索引访问路径'>
 
 SARG 是 Search Argument 的缩写。在 System R 中，能够整理成下面这种形式的谓词称为 Sargable Predicate：
 
@@ -221,94 +213,15 @@ WHERE val >= 123 AND val <= 456
 
 如果 `val` 上有索引，Index Scan 可以直接定位到第一个匹配键，沿叶子链读到范围终点，无需扫描整个索引。
 
-对于复合索引，谓词引用的列需要构成索引键的前缀。例如 `(name, location)` 索引可以匹配：
-
-```sql
-WHERE name = 'SMITH'
-  AND location = 'SAN JOSE'
-```
-
-扫描器可以接收一组 SARG，直接在 RSS 内部过滤元组。不匹配的元组不会越过 RSI 交给上层，CPU 工作和接口调用都会减少。无法缩小索引范围的条件则作为残余谓词，留到上层计算。
-
-课程视频还演示了一个容易忽略的问题：选择访问路径不能只匹配列名，还得理解表达式。比如下面两个排序键在数学上等价：
-
-```sql
-ORDER BY val
-ORDER BY val + 0
-```
-
-只有做过常量折叠、表达式规范化或等价推导，优化器才知道第二种写法也能利用 `val` 索引的顺序。不同 DBMS 对这类表达式的识别能力并不一致；索引用不用得上，取决于绑定、重写和优化几个环节能否接上。
-
-## 统计信息
-
-System R 从系统目录中读取下列统计量：
-
-| 统计量 | 含义 |
-| --- | --- |
-| `NCARD(T)` | 关系 `T` 的元组数量 |
-| `TCARD(T)` | Segment 中包含关系 `T` 元组的数据页数量 |
-| `P(T)` | Segment 非空页中包含 `T` 元组的页面比例 |
-| `ICARD(I)` | 索引 `I` 中不同键值的数量 |
-| `NINDX(I)` | 索引 `I` 占用的页面数量 |
-
-这些统计量会在批量加载或创建索引时初始化，也可以通过 `UPDATE STATISTICS` 更新。System R 不会在每次 `INSERT`、`DELETE` 或 `UPDATE` 后同步刷新全部统计信息，否则系统目录会承受额外 I/O 和锁竞争，甚至成为串行瓶颈。
-
-这个矛盾今天仍然存在。统计信息更新得越勤、记录得越细，维护成本越高；数据摘要越旧、越粗，优化器判断失误的概率也越大。
-
-## 选择率与基数估计
-
-### 选择率因子
-
-谓词的选择率因子（`Selectivity Factor`，记为 `F`）表示预计有多大比例的元组能通过该条件。System R 根据谓词类型和索引统计，用一组固定公式估算 `F`。
-
-原论文中的典型公式如下：
-
-| 谓词 | 选择率估算 |
-| --- | --- |
-| `column = value`，列上有索引 | `1 / ICARD(index)` |
-| `column = value`，没有索引统计 | `1 / 10` |
-| `column1 = column2`，两列都有索引 | `1 / MAX(ICARD(index1), ICARD(index2))` |
-| `column > value` 等单边范围，数值边界已知 | `(high - value) / (high - low)` |
-| 单边范围，无法插值 | `1 / 3` |
-| `column BETWEEN value1 AND value2` | `(value2 - value1) / (high - low)` |
-| `BETWEEN` 无法插值 | `1 / 4` |
-| `column IN (value-list)` | `列表长度 × F(column = value)`，上限为 `1 / 2` |
-| `p1 AND p2` | `F(p1) × F(p2)` |
-| `p1 OR p2` | `F(p1) + F(p2) - F(p1) × F(p2)` |
-| `NOT p` | `1 - F(p)` |
-
-这些公式建立在两个很强的假设上：
-
-1. **均匀分布假设**：每个不同键值拥有近似相同的元组数量；
-2. **独立性假设**：多个谓词相互独立，因此合取选择率可以直接相乘。
-
-真实数据经常既有倾斜，也有相关性。城市与邮编就高度相关，`city = 'Pittsburgh' AND zip_code = '15213'` 不能当作两个独立事件。直接把两个选择率相乘会严重低估行数，这个误差还会沿计划树一直传到上层。
-
-### Query Cardinality 与 RSI Cardinality
-
-System R 用下面的公式估算一个 Query Block 最终会返回多少行：
-
-```text
-QCARD = FROM 中所有关系的 NCARD 乘积
-        × 所有布尔因子的选择率乘积
-```
-
-这个结果记为 `QCARD`。
-
-另一个指标 `RSICARD` 估算 RSS 需要经 RSI 交给上层多少元组。它只计算能在 RSS 内部执行的 SARG：
-
-```text
-RSICARD = FROM 中所有关系的 NCARD 乘积
-          × 所有 Sargable 谓词的选择率乘积
-```
-
-两者的差值来自谓词的执行位置。RSS 能提前过滤多少记录，RSI 就能少传多少；残余谓词仍要等候选元组返回上层后再判断。
+课程在这里强调，应先识别哪些索引能够支持给定谓词，再通过代价模型判断它们是否比顺序扫描更便宜。存在索引只代表多了一种候选访问路径，并不意味着优化器一定选择它。
 
 ## System R 代价模型
 
 ### 总体公式
 
 System R 的代价公式很简单：
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/system-r-cost-model.png' alt='System R 代价模型与 PostgreSQL 代价常量的对照'>
 
 ```text
 COST = PAGE FETCHES + W × RSI CALLS
@@ -322,36 +235,9 @@ Cost 是优化器内部比较计划的相对值。`W` 把 RSI 调用折算到能
 
 只数页面，会漏掉谓词计算、元组构造和接口调用等 CPU 工作；只数元组，又分不出顺序 I/O、随机 I/O 和数据布局的差别。这个简单的加权公式把两类开销放进了同一个比较尺度。
 
-### 单表访问成本
+## 与现代 PostgreSQL 的对照
 
-原论文中的几种典型成本如下：
-
-| 访问方式 | 主要成本特征 |
-| --- | --- |
-| 唯一索引 + 等值谓词 | 读取索引页和数据页，再返回一个元组，论文简化为 `1 + 1 + W` |
-| 匹配谓词的聚簇索引 | 选择率乘以索引页与数据页数量，再加 RSI 调用成本 |
-| 匹配谓词的非聚簇索引 | 数据页访问上界可能接近命中元组数，缓存能够降低重复页面读取 |
-| 未匹配谓词的索引 | 需要扫描完整索引及相应数据范围，索引价值主要来自输出顺序 |
-| Segment Scan | 扫描 Segment 页面，再加满足 SARG 的 RSI 调用成本 |
-
-对应的代表性公式为：
-
-```text
-匹配谓词的聚簇索引：
-F(predicates) × (NINDX(I) + TCARD(T)) + W × RSICARD
-
-匹配谓词的非聚簇索引（数据无法驻留缓冲区时）：
-F(predicates) × (NINDX(I) + NCARD(T)) + W × RSICARD
-
-Segment Scan：
-TCARD(T) / P(T) + W × RSICARD
-```
-
-`TCARD(T) / P(T)` 得到目标关系所在 Segment 的非空页总数。Segment Scan 必须检查所有这些页面，其中只有 `P(T)` 的比例真正含有目标关系的元组。
-
-### 与现代 PostgreSQL 的对照
-
-课程视频用 PostgreSQL 作了对照。它的计划 Cost 同样采用相对单位，并以 `seq_page_cost` 为常用基准。PostgreSQL 18 默认把顺序读取一页设为 `1.0`、随机读取一页设为 `4.0`，再叠加这些参数：
+课程视频用 PostgreSQL 作了对照。它的计划 Cost 同样采用相对单位，并以 `seq_page_cost` 为常用基准。课上展示的文档将顺序读取一页设为 `1.0`、随机读取一页设为 `4.0`，再叠加这些参数。这是课程中的参数示例，具体系统需要结合版本、存储设备和配置解释：
 
 - `random_page_cost`：随机读取页面的相对成本；
 - `cpu_tuple_cost`：处理一行的 CPU 成本；
@@ -361,18 +247,63 @@ TCARD(T) / P(T) + W × RSICARD
 
 参数和公式比 System R 丰富了许多，思路仍是一脉相承：把不同资源的消耗换算成相对代价，用总成本给候选计划排序。
 
+## 统计信息与选择率
+
+代价公式需要估算扫描时读取多少页面、向上层返回多少元组，这些值来自系统目录维护的表和索引统计信息。老师提到，统计信息可以在批量加载时收集，也可以通过专门的统计更新操作维护。优化器使用的是数据摘要，不会为了优化每条查询都先完整执行一次扫描。
+
+谓词的选择率因子（Selectivity Factor，记为 `F`）表示预计有多大比例的元组满足条件。课程借原论文中的公式说明，优化器怎样把谓词与统计信息联系起来：
+
+| 条件 | 估算方式 |
+| --- | --- |
+| `column = value`，有索引键值统计 | `F = 1 / ICARD(index)`，其中 `ICARD` 是不同索引键值的数量 |
+| 缺少对应统计信息 | 使用 `F = 1 / 10` 这样的默认估计 |
+
+第一个公式假设每个不同键值对应的元组数量近似相同。老师用美国邮编举例：洛杉矶地区与蒙大拿州不同邮编下的人口规模并不相同，因此均匀分布假设很容易偏离真实数据。第二个公式则直接使用固定常量；它能让优化继续进行，但没有提供关于当前数据分布的新证据。
+
+这些估算会影响下一个算子处理多少数据，以及整个计划需要做多少工作。课程后面还会继续讨论均匀分布与谓词独立性假设造成的问题。
+
+## 课堂演示：表达式怎样影响索引选择
+
+老师随后用一张约一千万行的 `xxx` 表演示访问路径选择。表中有 `id` 和 `val`，并在 `val` 上建立索引。首先查看范围查询：
+
+```sql
+EXPLAIN SELECT id
+FROM xxx
+WHERE val >= 123 AND val <= 456;
+```
+
+课堂中的 PostgreSQL 计划通过 `Bitmap Index Scan` 找出候选记录，再通过 `Bitmap Heap Scan` 读取数据页。随后执行下面两条排序查询：
+
+```sql
+EXPLAIN SELECT id FROM xxx ORDER BY val LIMIT 20;
+EXPLAIN SELECT id FROM xxx ORDER BY val + 0 LIMIT 20;
+```
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/postgres-expression-demo.png' alt='PostgreSQL 对直接列排序与加零表达式排序生成的不同计划'>
+
+第一条使用 `Index Scan`，按索引顺序取得前 20 行；第二条在排序键上增加 `+ 0`，画面中的计划变成 `Parallel Seq Scan`、`Sort` 和 `Gather Merge`，最上层再执行 `Limit`。这里展示的是优化器选出的计划，不是两条查询的实际执行耗时对比。
+
+老师接着检查 DuckDB：当时的范围查询可以使用索引，但 `ORDER BY` 与 `LIMIT` 的组合没有选择他期望的索引路径，加上 `+ 0` 也没有改变这个结果。SQL Server 的对照采用 `SET SHOWPLAN_ALL ON` 查看计划，并以 `TOP 20` 表达行数限制：
+
+```sql
+SELECT TOP 20 id FROM xxx ORDER BY val + 0;
+```
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/sqlserver-expression-demo.png' alt='SQL Server 在计算排序表达式时仍使用有序索引扫描'>
+
+画面中的 SQL Server 计划保留了 `ORDERED FORWARD` 的索引扫描，并通过 `Compute Scalar` 处理表达式，上层是 `Top`。这个对照要说明的是：**识别访问路径需要理解表达式，不能只按列名做字符串匹配**。常量折叠、表达式等价性与排序属性能否联系起来，会影响索引的使用。
+
+这些结果只描述 2025 年课程演示中的环境，没有据此断言各数据库的所有版本都会如此。老师没有展示 MySQL 的结果，也没有在这一段测量各系统运行时间，不能把它补成跨数据库性能比较。
+
 ## Interesting Orders
 
 ### 为什么“最便宜的子计划”可能导致昂贵的完整计划
 
-假设同一张表有两个访问计划：
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/interesting-orders.png' alt='比较自然有序的访问路径与无序访问后排序的总成本'>
 
-- 计划 A：顺序扫描，局部成本为 100，输出无序；
-- 计划 B：索引扫描，局部成本为 120，输出已经按照 `artist_id` 排序。
+课程先从 `ORDER BY` 与 `GROUP BY` 的顺序要求进入：如果一个访问方法已经产生所需顺序，就可能省掉后面的排序。在当时讨论的实现中，分组同样依靠排序，不能忽略这项成本。
 
-如果上层要执行 `ORDER BY artist_id` 或 Merge Join，计划 A 还得花 80 做一次排序，总成本变成 180；计划 B 可以沿用现成的顺序，总成本仍是 120。
-
-所以，一个关系集合只留局部最便宜的计划还不够。输出顺序会改变上层算子的成本，它本身也是计划状态的一部分。
+因此，不能只比较顺序扫描和索引扫描本身的成本。如果上层需要有序结果，还要把顺序扫描之后的 Sort 计入总成本，再与直接提供所需顺序的索引访问比较。
 
 ### System R 的处理方式
 
@@ -397,57 +328,15 @@ VS.
 最低成本无序计划 + 最终 Sort 成本
 ```
 
-Join 谓词还可以建立顺序等价类。例如：
-
-```text
-E.DNO = D.DNO
-D.DNO = F.DNO
-```
-
-则 `E.DNO`、`D.DNO` 和 `F.DNO` 属于同一个有序性等价类，优化器只需为该等价类保存最低成本计划，减少重复状态。
-
-`Interesting Order` 已经有了现代优化器“物理属性（Physical Property）”的雏形。今天的系统还会跟踪数据分区、分布位置、并行度、唯一性和数据格式等属性。
+多表连接时，Join 谓词也会带来值得保留的输入顺序。课程指出，原始逻辑计划没有统一表达这些物理属性，需要为有序和无序方案额外保留状态，再检查最终是否还要排序。后面的 Volcano、Cascades 会进一步处理物理属性。
 
 ## 多表 Join 优化
 
 ### System R 支持的 Join 算法
 
-原始的 System R 优化器主要在两种 Join 实现之间选择。
+课程中的 System R 主要考虑 Nested Loop Join 和 Merge Scan Join：前者对 Outer 的每个元组访问 Inner，后者利用按连接键排序的两个输入向前扫描。两者处理的数据量与输入顺序不同，因此需要结合 Outer、Inner 的元组数量估算成本。
 
-#### Nested Loop Join
-
-```text
-for each tuple in outer:
-    open a scan on inner
-    find tuples matching the join predicate
-    emit joined tuples
-```
-
-外表每产生一个元组，就拿它的 Join Key 到内表查找。内表的 Join 列上有合适索引时，这一步可以直接定位；没有索引时，反复扫描内表会非常昂贵。
-
-其代价抽象为：
-
-```text
-C_nested_loop(path_outer, path_inner)
-    = C_outer(path_outer) + N_outer × C_inner(path_inner)
-```
-
-#### Merge Scan Join
-
-Merge Scan Join 要求两边都按 Join Key 排好序，再同步向前扫描。输入可能已经由索引提供顺序，也可能要先显式 Sort，并把结果写入临时结构。
-
-```text
-C_merge(path_outer, path_inner)
-    = C_outer(path_outer) + N_outer × C_inner(path_inner)
-
-如果 Inner 预先排序并存入临时数据：
-C_inner(sorted_list)
-    = TEMP_PAGES / N_outer + W × RSI_CARD
-
-完整代价还要加入必要的 Outer Sort 和 Inner Sort 成本。
-```
-
-这版优化器还没有 Hash Join。同一个多表计划中可以混用 Nested Loop Join 和 Merge Scan Join。
+老师提醒，这版系统还没有使用 Hash Join。不能把今天常见的全部 Join 实现都当作图中的候选算法。
 
 ### 为什么选择左深树
 
@@ -480,13 +369,7 @@ T1 -- T2 -- T3
 
 System R 用关系集合作为状态，从单表开始，逐层构造更大的 Join 子计划。
 
-可以把核心状态写成：
-
-```text
-Best[S, O] = 关系集合 S 在输出顺序 O 下的最低成本计划
-```
-
-其中 `O` 可以是无序状态，也可以是一种 Interesting Order。
+每一层比较当前关系集合的候选实现，保留后续构造计划仍然需要的低成本方案。涉及输出顺序时，还需要区分 Interesting Order，不能把不同物理属性的计划直接合并为一个赢家。
 
 搜索过程是：
 
@@ -499,35 +382,11 @@ Best[S, O] = 关系集合 S 在输出顺序 O 下的最低成本计划
 7. **迭代到完整集合**：重复以上步骤，直到计划包含 Query Block 中的全部关系；
 8. **处理最终顺序**：比较天然满足 `ORDER BY` / `GROUP BY` 的计划和“最低成本无序计划 + Sort”。
 
-伪代码如下：
-
-```text
-for each relation R:
-    for each access path p of R:
-        update Best[{R}, output_order(p)] with p
-
-for size = 2 ... n:
-    for each relation subset S with |S| = size:
-        for each inner relation R in S:
-            outer_set = S - {R}
-            if R connects to outer_set or Cartesian product is unavoidable:
-                for each retained outer plan in Best[outer_set, *]:
-                    for each legal access path and join method:
-                        candidate = join(outer_plan, R)
-                        update Best[S, output_order(candidate)]
-```
-
-动态规划能够剪枝，是因为关系集合和物理属性都相同时，更贵的子计划不会在后续突然翻盘。物理属性不同的计划则不能放在一起比较；一种顺序也许暂时更贵，却可能省掉后面的 Join、排序或分组成本。
-
-原论文给出的状态数量上界约为：
-
-```text
-2^n × Interesting Order 的数量
-```
-
-实际状态通常少得多，因为连接图、左深树、延迟笛卡尔积和属性等价类都会裁掉一批候选。
+课堂用图展示了这个逐层构造的过程。这里的“无需维护历史”是相对于后面自上而下搜索的历史管理而言：较小子问题的结果已经包含在当前构造出的子计划中，不代表实现动态规划时不需要保存各层的候选结果。
 
 ### 三表查询示例
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/join-orderings.png' alt='三表查询的访问路径与候选连接顺序'>
 
 回到课程中的 `ARTIST`、`APPEARS`、`ALBUM` 查询。假设目录统计与索引信息表明：
 
@@ -539,20 +398,59 @@ ALBUM   -> Index Lookup on NAME
 
 优化器会这样展开搜索：
 
-1. 从 `ALBUM.NAME = 'Mooshoo Tribute'` 的高选择性索引查找开始构造候选计划；
+1. 为三张表分别准备访问计划，其中 `ALBUM` 可通过名称索引过滤；并不预先认定完整计划一定从它开始；
 2. 枚举 `ALBUM ⋈ APPEARS`、`APPEARS ⋈ ARTIST` 等有 Join 边连接的二表计划；
 3. 对每个关系集合分别比较 Nested Loop Join 与 Merge Scan Join；
 4. 为无序输出、按 `ARTIST.ID` 排序的输出以及 Join Key 顺序分别保留低成本计划；
 5. 将剩余关系加入二表计划，生成完整三表计划；
 6. 比较保序计划与“无序计划 + Sort”，满足最终 `ORDER BY ARTIST.ID`。
 
+课堂接着把搜索过程展开成逻辑节点和物理节点：灰色节点表示尚待实现的逻辑子问题，黑色节点表示 Nested Loop Join 或 Merge Join 等物理选择。
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/bottom-up-candidates.png' alt='从单关系出发生成二表连接的物理候选'>
+
+先为同一二表连接生成多个实现，再比较它们的估算成本。例如 `ARTIST ⋈ APPEARS` 可以分别考虑 Nested Loop Join 和 Merge Join；输入关系相同并不意味着具体工作量相同。
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/bottom-up-pruning.png' alt='比较同一子问题的候选成本并保留低成本路径'>
+
+剪枝之后，使用留下来的二表方案继续加入第三张表。下一层的选择建立在上一层结果之上，而不是每次重新从三张表的全部组合开始计算。
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/bottom-up-extension.png' alt='在二表子计划上扩展剩余关系并比较 Join 实现'>
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/bottom-up-final-plan.png' alt='选择完整物理计划时仍需比较输出顺序与额外排序成本'>
+
+最后还要处理 `ORDER BY ARTIST.ID`。图中的逻辑节点没有表达完整的排序属性，因此不能只沿一条最低成本的无序路径走到最后；仍需比较有序方案与“无序方案 + Sort”。这正是前面保留 Interesting Order 的原因。
+
 这里没有哪项决策是孤立的：`ALBUM` 的过滤选择率影响 Join 顺序，Join 顺序改变中间结果规模，访问路径带来的顺序又会改变后续 Merge Join 和最终 Sort 的成本。
+
+### 自下而上搜索与 Bushy Tree
+
+课堂将前面的过程称为生成式、自下而上搜索（Generative / Bottom-Up）：从小的子问题开始，一层层加入物理算子，构造完整计划。后面的转换式、自上而下搜索（Transformative / Top-Down）则从要实现的目标进入，逐步寻找能够实现目标的子计划。这个区别会影响搜索状态、历史结果和重复工作的管理。
+
+有同学问，自下而上能否搜索 Bushy Tree。老师的回答是可以：四表查询中，可以分别构造两组二表连接，再连接它们的输出。**只枚举左深树是 System R 对搜索空间的限制，不是动态规划或自下而上搜索本身的限制。**
+
+下面根据这段解释整理两种树形，四表名称只用于示意：
+
+```mermaid
+flowchart LR
+  subgraph L["左深树"]
+    A["R1 ⋈ R2"] --> B["连接 R3"] --> C["连接 R4"]
+  end
+  subgraph T["Bushy Tree"]
+    D["R1 ⋈ R2"] --> F["连接两份中间结果"]
+    E["R3 ⋈ R4"] --> F
+  end
+```
+
+左深树便于把前一个 Join 的输出流水线传给下一个 Join。课堂用当时内存有限的背景解释，Bushy Tree 可能需要先将一侧结果写盘，腾出空间计算另一侧，再读回来连接。这是当时选择较小搜索空间的工程理由，不能由此推导出 Bushy Tree 总是更慢。
 
 ## 嵌套查询
 
-System R 会把嵌套查询拆成独立的 Query Block。
+System R 会把嵌套查询拆成独立的 Query Block。课程在这里再次联系 INGRES 的分解办法：找出内外查询的依赖，先处理内部查询，再将结果代回外部查询。对于不依赖外层行的子查询，这可以表现为优化外层查询之前先求出内层结果；依赖外层值的相关子查询则不能直接提前执行一次。
 
 ### 非相关标量子查询
+
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_system_r/nested-query-substitution.png' alt='先执行平均工资子查询再将标量结果代入外层查询'>
 
 ```sql
 SELECT name
@@ -568,114 +466,27 @@ FROM employee
 WHERE salary > 100000;
 ```
 
-### 返回集合的非相关子查询
+### 子查询结果与外层规划
 
-```sql
-SELECT name
-FROM employee
-WHERE department_number IN (
-    SELECT department_number
-    FROM department
-    WHERE location = 'DENVER'
-);
-```
+如果内部查询产生多个值，可以先将结果物化成临时表，再供外层查询使用。这与前面 INGRES 将复杂问题拆成若干单关系查询的做法相似：先求出一部分结果，再继续处理依赖它的部分。
 
-子查询结果先存进临时列表，外层谓词再查这个列表。
+老师明确提醒，这里是在解释早期系统怎样实现嵌套查询，而不是推荐今天照搬这套策略。课程后面会单独讨论怎样将嵌套查询重写为 Join，使它进入更大的关系表达式中优化。本讲没有展开相关子查询的完整算法。
 
-### 相关子查询
+## 启发式规则与代价搜索的优点和局限
 
-```sql
-SELECT name
-FROM employee x
-WHERE salary > (
-    SELECT salary
-    FROM employee
-    WHERE employee_number = x.manager
-);
-```
+这套方法通常能够在合理的时间内找到较好的计划，无需遍历全部可能的执行方式。老师引用原论文提到，当时八表查询已经能在数秒内完成优化；这个数值属于当时的软硬件环境，不能用于比较现代系统的优化速度。
 
-相关子查询依赖外层元组中的 `x.manager`，原则上每来一个外层元组就要重跑一次。System R 会借助顺序减少重复工作：如果外层输入按 `manager` 排序，连续几条记录引用同一个经理，就能复用上一次的子查询结果。优化器甚至会估算，为此先按相关列排序是否划算。
+它仍然存在几项限制：
 
-逐块执行和替换很容易实现，却可能带来重复计算和昂贵的物化。现代优化器通常会尝试对子查询去相关，把它改写成 Join，再放进更大的关系表达式中统一优化。
+- **规则实现难以维护**：启发式变换仍由过程式的 `if/else` 控制，规则多了之后，应用顺序与依赖关系会纠缠在代码中。下一讲的 Starburst 将继续讨论规则如何声明和管理。
+- **左深树限制了搜索空间**：它简化了问题，也可能排除代价更低的 Bushy Tree。
+- **物理属性缺少统一表示**：输出顺序需要额外维护；到了分布式环境，数据所在位置等属性也会影响后续选择。
 
-## 正确理解 System R 的“最优”
+## 小结
 
-所谓 System R 的“最优”，准确地说，是**在既定搜索空间中，由当前代价模型判断出的最低成本计划**。它受三层边界约束：
+老师最后回到代价模型的简化假设。底层算子如果低估输出基数，这个估计就会成为上层算子的输入，上层再继续估算，误差会沿计划逐步传播。均匀分布与谓词独立性并不能总在真实数据上成立，这也是后面学习基数估计时需要继续解决的问题。
 
-1. **搜索空间边界**：主要枚举左深树，Bushy Tree 等候选计划被排除；
-2. **代价模型边界**：页面读取和 RSI 调用是近似指标，缓存、并发、流水线等行为被简化；
-3. **基数估计边界**：均匀分布、谓词独立和默认选择率会产生估算误差。
-
-即使所有允许的 Join 顺序都枚举到了，错误的基数和成本仍会把优化器带向错误计划。搜索越彻底，只能越确定地找到“估算值最低”的那个；它跑起来是否真的快，还得看估算是否靠谱。
-
-## 原论文的实验结论
-
-Selinger 等人在论文中给出了当时的初步测试结果：
-
-- Cost 的绝对值经常与实际开销存在偏差，但候选计划的相对排序在很多测试中保持正确；
-- 优化器在大多数测试中选择了候选搜索空间里的真实最优访问路径；
-- 二表 Join 的优化开销约等于 5 到 20 次数据库检索；
-- 在 IBM 370/158 上，典型优化仅需几千字节存储和零点几秒 CPU 时间；
-- 八表 Join 可以在数秒内完成优化；
-- SQL 程序编译一次、运行多次时，优化成本能够在多次执行中摊销。
-
-这些数字只能放在 1979 年的软硬件环境里看。论文真正验证的是：Cost 不必精确等于运行时间，只要候选计划的相对次序大体可靠，就足以指导优化器做选择。
-
-## 局限性与后续演进
-
-### 规则系统难以维护
-
-System R 主要用过程式代码实现启发式规则。规则变多以后，触发条件、应用次序和规则之间的影响会纠缠成复杂的控制流。后来的 IBM Starburst 改用更声明式、也更容易扩展的规则系统。
-
-### 左深树会遗漏优秀计划
-
-左深树便于流水线执行，也能压住搜索规模。到了分析型、并行或分布式查询中，Bushy Tree 有时能同时计算两个分支，或者先把两组关系各自过滤到很小再连接。只搜索左深树，就会漏掉这类计划。
-
-### 物理属性表达能力有限
-
-System R 为排序单独引入 Interesting Order，用额外逻辑维护有序和无序计划。现代优化器把顺序、分布、分区、并行性等都表示为 Physical Property，属性要求因而可以沿计划树统一地下传和满足。
-
-### Query Block 隔离限制全局优化
-
-逐块优化降低了实现难度，也把 Join 重排、谓词下推和中间结果复用限制在 Query Block 内。查询去相关技术把嵌套查询改写成 Join，才让这些操作能跨过原来的边界。
-
-### 简单统计假设造成误差传播
-
-均匀分布看不到热点值，单列统计看不到跨列相关性，固定默认值只能粗略兜底。底层节点一旦低估基数，偏差就会继续影响上层的 Join 算法、Join 顺序、内外表选择和物化策略。
-
-现代数据库会用直方图、Most Common Values、采样和多列扩展统计来改善估算。PostgreSQL 就支持函数依赖、跨列 `n-distinct` 和多列 MCV，用来修正简单独立性假设带来的误差。
-
-## System R 留下来的几条经验
-
-### 剪枝之前，先定义什么叫“等价”
-
-只有当两个候选计划的语义和物理属性对上层完全相同时，动态规划才能安全地淘汰较贵的那个。关系集合相同而输出顺序不同，仍然是两个状态；过早只留成本最低的计划，反而会破坏最优子结构。
-
-### Cost 靠基数估计打地基
-
-Join 成本高度依赖 Outer 和 Inner 的行数。底层的基数误差经过几层乘法放大，足以让 Join 顺序和算法一起选错。调试执行计划时，需要把 `estimated rows` 和 `actual rows` 对照着看，先找到误差最早出现的节点。
-
-### 索引还会带来顺序
-
-索引除了过滤数据，还能提供顺序。一次局部成本稍高的索引扫描，可能替 Merge Join、`GROUP BY`、`ORDER BY` 或 `LIMIT` 省下一次昂贵的排序。
-
-### 优化器本身也有时间预算
-
-搜索得越广，找到好计划的概率越高，编译时间和内存消耗也涨得越快。左深树、连接图约束、属性等价类、动态规划剪枝和随机化搜索，本质上都在分配这笔时间预算。
-
-### Cost 用来比较，反馈用来校准
-
-Cost 用相对单位给计划排序。硬件、缓存命中率、网络、并发和数据分布一直在变，统计信息更新、代价参数校准和运行时反馈负责让这把尺子尽量贴近真实环境。
-
-## 结语
-
-System R 把查询优化变成了一个可以落地的工程问题：先用等价规则改写逻辑计划，再根据统计信息估算选择率、基数和成本，最后用动态规划挑选访问路径、Join 顺序与 Join 算法。今天常见的基于代价优化器，骨架仍然是这一套。
-
-其中最有生命力的想法是 `Interesting Orders`。它要求优化器在比较子计划时，不只看眼前的成本，还要保留可能被上层利用的输出顺序。后来，顺序被扩展成更一般的物理属性，数据分布、分区方式和并行度也被纳入同一套框架。
-
-System R 的局限同样清楚：左深树缩小了搜索空间，均匀分布和谓词独立简化了基数估计，Query Block 隔离降低了实现复杂度。这些限制让系统在当时的硬件上跑得起来，也留下了后来几十年持续改进的方向。
-
-查询优化器至今仍在回答 System R 面对的三个问题：有哪些计划可选，怎样估算它们的代价，以及如何在有限时间里找到足够好的那个。后来的优化器复杂了许多，这三个问题没有变。
+**即使枚举了全部 Join 顺序，错误的统计信息与代价估算仍可能让优化器选中很差的计划。** 因此，搜索得更全面与估算得更准确，是两个需要分别处理的问题。System R 为这一类优化器建立了基础，下一讲将沿着课程时间线进入 IBM Starburst。
 
 ## 参考资料
 

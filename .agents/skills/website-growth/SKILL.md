@@ -17,7 +17,7 @@ description: 通过 Chrome 巡检 strongduanmu.com 的 Google、Bing、百度搜
 | Google AdSense | [账号首页](https://adsense.google.com/adsense/u/0/pub-9880881761323734/home) | 报告、网站、广告、政策中心、优化和隐私权与消息 |
 | AdSense 原始入口 | [用户提供的后台地址](https://adsense.google.com/adsense/u/0/pub-9880881761323734/payments/signup/adsense) | 这是付款相关入口；分析收益应从侧栏进入报告，不操作付款设置 |
 
-先读 [站点实现与验收方法](references/site-context.md)。复查历史发现时读 [2026-11-03 巡检记录](references/2026-11-03-review.md)，其中的数据不是实时状态。最新复查见 [2026-11-04 巡检记录](references/2026-11-04-review.md)。
+先读 [站点实现与验收方法](references/site-context.md)。复查历史发现时读 [2026-11-03 巡检记录](references/2026-11-03-review.md)和 [2026-11-04 巡检记录](references/2026-11-04-review.md)，其中的数据不是实时状态。最新复查见 [2026-11-08 巡检记录](references/2026-11-08-review.md)。
 
 ## Chrome 操作与隐私
 

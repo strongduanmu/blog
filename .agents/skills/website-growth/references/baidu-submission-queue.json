@@ -3,7 +3,7 @@
   "site": "https://strongduanmu.com/",
   "platform": "baidu",
   "mode": "on_user_triggered_seo_review",
-  "updated_at": "2026-11-04",
+  "updated_at": "2026-11-17",
   "last_observed_batch_max": 20,
   "daily_remaining": null,
   "day_ledger": [
@@ -14,95 +14,119 @@
       "result": "daily_limit",
       "verification": "completed_by_user",
       "note": "No success receipt; keep all candidates pending. Recheck actual quota on a later date."
+    },
+    {
+      "date": "2026-11-08",
+      "attempted_count": 11,
+      "confirmed_accepted_count": 10,
+      "result": "daily_limit",
+      "verification": "completed_by_user",
+      "note": "Ten distinct URLs explicitly accepted. Eleventh URL /wiki/jdbc/overview.html received explicit daily limit after user verification; no success. /wiki/jdbc/statements.html not attempted today. Stop requests until a later-date review or explicit restored-quota evidence."
+    },
+    {
+      "date": "2026-11-09",
+      "attempted_count": 11,
+      "confirmed_accepted_count": 10,
+      "result": "captcha_pending",
+      "verification": "completed_by_user",
+      "note": "CS329 directory and nine notes explicitly accepted (10 URLs). CMU directory currently waits for CAPTCHA and has no success receipt; keep pending. Daily remaining unknown; no daily-limit receipt obtained. A transient malformed input was rejected and was corrected before this valid pending request."
+    },
+    {
+      "date": "2026-11-17",
+      "attempted_count": 1,
+      "confirmed_accepted_count": 0,
+      "result": "captcha_pending",
+      "verification": "not_completed",
+      "note": "Manual form shows max 20 per batch; daily remaining not shown. Single pending JDBC overview URL attempted after public validation; security CAPTCHA required. No success receipt; stop and retain queue."
     }
   ],
   "items": [
     {
       "url": "https://strongduanmu.com/blog/centos-dev-environment-setup-note.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/c/introduction.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/cmu_11_768/supervised_fine_tuning.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/cmu_11_768/what_are_agents_and_how_do_they_work.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/database_share/calcite-beyond-sql-query-optimization-to-data-optimization.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/database_share/calcite-tactical-data-engineering-data-first-engineering-implementation.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/jdbc/advanced-data-types.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/jdbc/compliance.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/jdbc/connection-pooling.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/jdbc/goals.html",
-      "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
+      "status": "accepted",
+      "last_attempt_date": "2026-11-08",
+      "last_result": "accepted",
       "not_before": "2026-11-05",
-      "submitted_at": null
+      "submitted_at": "2026-11-08"
     },
     {
       "url": "https://strongduanmu.com/wiki/jdbc/overview.html",
       "status": "pending",
-      "last_attempt_date": "2026-11-04",
-      "last_result": "daily_limit",
-      "not_before": "2026-11-05",
+      "last_attempt_date": "2026-11-17",
+      "last_result": "captcha_pending",
+      "not_before": "2026-11-09",
       "submitted_at": null
     },
     {
@@ -110,8 +134,308 @@
       "status": "pending",
       "last_attempt_date": "2026-11-04",
       "last_result": "daily_limit",
-      "not_before": "2026-11-05",
+      "not_before": "2026-11-09",
       "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "captcha_pending",
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/tool_use.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/context_management_for_long_context_agents.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/skills_and_memory.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/planning_task_decomposition_and_multi_agent_coordination.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/coding_agents.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/gui_agents.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_basics.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/deep_research_agents.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/advanced_reinforcement_learning_algorithms.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/reinforcement_learning_systems.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/sandboxing_and_credential_management.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/openhands.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/langgraph.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/agents_and_the_future_of_work.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/multi_agent_interaction.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_1_harness.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_2_eval.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/assignment_3_training.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cmu_11_768/research_project.html",
+      "status": "pending",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": null,
+      "last_result": null,
+      "not_before": "2026-11-09",
+      "submitted_at": null
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/course_overview.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/test_time_compute_scaling.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/robust_verification.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/learning_from_feedback_with_tools_and_code.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/planning_and_multi_step_reasoning.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/train_time_scaling_and_reinforcement_learning.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/self_improvement_and_deep_research_agents.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/agentic_evaluations_and_long_horizon_tasks.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
+    },
+    {
+      "url": "https://strongduanmu.com/wiki/cs329/future_research_areas.html",
+      "status": "accepted",
+      "priority": "ai_wiki",
+      "added_at": "2026-11-09",
+      "last_attempt_date": "2026-11-09",
+      "last_result": "accepted",
+      "not_before": "2026-11-09",
+      "submitted_at": "2026-11-09"
     }
   ]
 }
