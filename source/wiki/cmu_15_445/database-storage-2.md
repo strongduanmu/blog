@@ -35,7 +35,7 @@ Slotted Page 读取先通过目录找到页面，载入缓冲池，再通过槽�
 
 ## Log-Structured Storage
 
-![不可变 SSTable 中的更新和删除记录 的写入和读取](/wiki/cmu_15_445/database-storage-2/log-structured-storage.webp)
+![不可变 SSTable 中的更新和删除记录](/wiki/cmu_15_445/database-storage-2/log-structured-storage.webp)
 
 日志结构存储将更新放入内存 MemTable，再按键排序、顺序写成不可变 SSTable。修改同一个键时可以追加新的版本或删除标记，而不立即寻找磁盘中的旧位置覆盖。
 
