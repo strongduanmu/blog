@@ -13,10 +13,6 @@ banner: /assets/banner/banner_12.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836565784419&bvid=BV1cyKd6GEgF&cid=39520502618&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：11 - Lecture 11 - Unnesting Queries](https://www.bilibili.com/video/BV1cyKd6GEgF)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 子查询的逻辑调用与物理执行
 
 第 11 讲研究查询去嵌套（Unnesting）与去相关（Decorrelation）。SQL 可以让内层查询引用外层行，逻辑上就像把外层列作为参数传入一次函数调用。优化器希望把这种依赖转换成可批量处理的关系运算。
@@ -39,7 +35,7 @@ WHERE s.score = (
 
 ## 先看一个能够展开的例子
 
-![依赖连接的下推方向与参数域去重，课程视频 43:00](/assets/wiki/cmu_15_799/unnesting_queries/video-4300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/unnesting_queries/dependent-join-pushdown.png' alt='依赖连接的下推方向与参数域去重'>
 
 [视频 43:00：依赖连接的下推方向与参数域去重](https://www.bilibili.com/video/BV1cyKd6GEgF/?t=2580)。最高分示例的红色箭头标出依赖连接继续向内侧推进的方向。课件提出按 correlated columns 的不同组合计算内侧，并使用 Duplicate Elimination Scan 形成参数域。这里需要区分参数域去重和最终结果的重复行。正文 SQL 用聚合加 Join 表达相同目标，并单独检查 NULL 专业。
 
@@ -85,7 +81,7 @@ WHERE EXISTS (
 
 ## Dependent Join 怎样表达依赖
 
-![Dependent Join 的参数传递，课程视频 35:30](/assets/wiki/cmu_15_799/unnesting_queries/video-3530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/unnesting_queries/dependent-join.png' alt='Dependent Join 的参数传递'>
 
 [视频 35:30：Dependent Join 的参数传递](https://www.bilibili.com/video/BV1cyKd6GEgF/?t=2130)。左侧输入提供参数，右侧子计划引用它；输出保留每次绑定与对应结果。它先把 SQL 相关性显式转成逻辑算子，再通过代数改写消除依赖。这里的概念与本文参数域 D 一起使用：D 可以减少相同参数重复计算，原外层行仍需正确恢复。
 
@@ -151,7 +147,7 @@ LEFT JOIN (
 
 ## 从局部消除到整体去嵌套
 
-![Indexed Algebra 跟踪列来源与使用位置，课程视频 55:30](/assets/wiki/cmu_15_799/unnesting_queries/video-5530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/unnesting_queries/holistic-identification.png' alt='Indexed Algebra 跟踪列来源与使用位置'>
 
 [视频 55:30：Indexed Algebra 跟踪列来源与使用位置](https://www.bilibili.com/video/BV1cyKd6GEgF/?t=3330)。画面区分普通算子连接、作用域以及列的来源和消费者。Holistic Unnesting 需要知道外层提供的列在哪里被读取，才能统一处理多个依赖连接。这里的辅助索引针对计划分析，不是表数据上的索引访问。
 
@@ -190,7 +186,7 @@ WHERE c.segment = 'AUTOMOBILE'
 
 ### 去相关后的计划仍需比较成本
 
-![Holistic Elimination 的多步计划变化，课程视频 70:30](/assets/wiki/cmu_15_799/unnesting_queries/video-7030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/unnesting_queries/holistic-elimination.png' alt='Holistic Elimination 的多步计划变化'>
 
 [视频 70:30：Holistic Elimination 的多步计划变化](https://www.bilibili.com/video/BV1cyKd6GEgF/?t=4230)。三列计划树和红色箭头展示整体改写的多个阶段，红框标出正在处理的算子与属性。读图时跟踪同一个参数列在哪一层产生、在哪一层使用，以及参数域何时真正加入计划。复杂代数符号可以结合本讲高清课件和主论文逐项放大查看。
 

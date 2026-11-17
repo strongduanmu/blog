@@ -13,10 +13,6 @@ banner: /assets/banner/banner_11.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836549072734&bvid=BV1pzKd61Emc&cid=39520370715&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：10 - Lecture 10 - Parallelization Top-Down](https://www.bilibili.com/video/BV1pzKd61Emc)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 让任务的依赖显式可见
 
 第 10 讲讨论自上而下优化器的并行化。Cascades 的任务对象已经保存了部分执行状态，单线程栈能够通过入栈顺序安排依赖；多个 worker 同时取任务时，需要另外知道哪些任务能运行、哪些任务还在等待输入。
@@ -25,7 +21,7 @@ banner: /assets/banner/banner_11.jpg
 
 ## 从父目标产生多个搜索分支
 
-![Orca 示例中的并行任务依赖，课程视频 38:00](/assets/wiki/cmu_15_799/parallelization_top_down/video-3800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_top_down/orca-task-dependencies.png' alt='Orca 示例中的并行任务依赖'>
 
 [视频 38:00：Orca 示例中的并行任务依赖](https://www.bilibili.com/video/BV1pzKd61Emc/?t=2280)。左侧红色任务边从根优化延伸到规则探索和输入优化，右侧 Memo 给出对应的组表达式。独立分支可以同时推进，父候选成本仍要等待自己的必要输入。箭头表示任务依赖，Memo 引用表示结构共享，二者分别组织执行时机与候选内容。
 
@@ -48,7 +44,7 @@ flowchart BT
 
 ## 任务状态怎样变化
 
-![SSDG 中的四种任务状态，课程视频 25:30](/assets/wiki/cmu_15_799/parallelization_top_down/video-2530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_top_down/search-state-dependency-graph.png' alt='SSDG 中的四种任务状态'>
 
 [视频 25:30：SSDG 中的四种任务状态](https://www.bilibili.com/video/BV1pzKd61Emc/?t=1530)。Runnable 可以分配给 worker，Running 已被执行，Inactive 等待依赖，Finalized 表示任务完成。挂起与恢复改变任务状态，不要求一个 worker 一直阻塞等待。结合正文状态表看父任务如何从等待子目标回到就绪状态。
 
@@ -108,7 +104,7 @@ Branch-and-Bound 使用的上界也会并发更新。若一个线程晚看到更
 
 ## 并行度随搜索过程变化
 
-![不同查询图上的加速与共享瓶颈，课程视频 43:00](/assets/wiki/cmu_15_799/parallelization_top_down/video-4300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_top_down/speed-up.png' alt='不同查询图上的加速与共享瓶颈'>
 
 [视频 43:00：不同查询图上的加速与共享瓶颈](https://www.bilibili.com/video/BV1pzKd61Emc/?t=2580)。两组曲线对应星形和链形查询，横轴增加优化 worker，纵轴观察性能变化。读取时先确认这是论文的四核实验环境，再看不同策略的趋势。任务并行机会、Memo 锁竞争和调度开销共同决定收益，曲线不支持把 worker 数直接等同于加速倍率。
 

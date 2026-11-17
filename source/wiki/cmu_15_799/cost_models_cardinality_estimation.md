@@ -13,10 +13,6 @@ banner: /assets/banner/banner_14.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836599338941&bvid=BV1NvKd6EE4h&cid=39520699336&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：13 - Lecture 13 - Cost Models Cardinality Estimation](https://www.bilibili.com/video/BV1NvKd6EE4h)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 从统计摘要推算每个算子的行数
 
 第 13 讲讨论基数估计（Cardinality Estimation，CE）。基数是一个关系结果中的行数。扫描、过滤、Join 和聚合都会产生不同规模的结果，优化器需要沿计划推导这些数量，再决定访问方式、Join 顺序和资源需求。
@@ -25,7 +21,7 @@ banner: /assets/banner/banner_14.jpg
 
 ## 单个过滤条件
 
-![等值条件怎样利用桶内频率，课程视频 10:30](/assets/wiki/cmu_15_799/cost_models_cardinality_estimation/video-1030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_cardinality_estimation/equality-selection.png' alt='等值条件怎样利用桶内频率'>
 
 [视频 10:30：等值条件怎样利用桶内频率](https://www.bilibili.com/video/BV1NvKd6EE4h/?t=630)。例子先找到常量所属的桶，再用桶行数与桶中不同值数估计等值频率，最后除以总行数得到选择率。这个计算依赖桶内均匀分布假设。热点值已有单独统计时，应优先结合它的信息，不能始终机械使用平均频率。
 
@@ -52,7 +48,7 @@ s(NOT P) = 1 - s(P) - u(P)
 
 ## 多个过滤条件与独立性
 
-![品牌与型号相关性造成的低估，课程视频 23:00](/assets/wiki/cmu_15_799/cost_models_cardinality_estimation/video-2300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_cardinality_estimation/correlated-attributes.png' alt='品牌与型号相关性造成的低估'>
 
 [视频 23:00：品牌与型号相关性造成的低估](https://www.bilibili.com/video/BV1NvKd6EE4h/?t=1380)。课件用汽车品牌和型号说明：型号本身已经强烈约束品牌，将两个单列概率相乘会把相同约束重复当成独立筛选。右边列出独立公式和相关关系下的结果，正文进一步用联合概率及约束解释这一类误差。
 
@@ -124,7 +120,7 @@ N(R ⋈ S) = Σ_v frequency_R(v) × frequency_S(v)
 
 ## 误差怎样传到物理计划
 
-![基础过滤与多层 Join 的误差传播，课程视频 40:30](/assets/wiki/cmu_15_799/cost_models_cardinality_estimation/video-4030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_cardinality_estimation/error-propagation.png' alt='基础过滤与多层 Join 的误差传播'>
 
 [视频 40:30：基础过滤与多层 Join 的误差传播](https://www.bilibili.com/video/BV1NvKd6EE4h/?t=2430)。左侧 SQL 与树形结构对应，右侧公式从基本表规模开始，逐层计算 Join 输出。一个基础过滤估计会继续作为父 Join 输入，后面的均匀性与包含性假设还可能引入新误差。诊断时应沿树找到最早偏离的位置，再观察父节点如何使用该规模。
 
@@ -153,7 +149,7 @@ Q = max(estimated / actual, actual / estimated)
 
 ## JOB 实验怎样读
 
-![多个系统在不同 Join 数量下的估计分布，课程视频 50:30](/assets/wiki/cmu_15_799/cost_models_cardinality_estimation/video-5030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_cardinality_estimation/estimator-quality.png' alt='多个系统在不同 Join 数量下的估计分布'>
 
 [视频 50:30：多个系统在不同 Join 数量下的估计分布](https://www.bilibili.com/video/BV1NvKd6EE4h/?t=3030)。图里按系统分面，横轴增加 Join 数量，纵轴展示估计与真实行数的比例，比例为 1 的水平基准线标出准确估计的位置。先确认纵轴比例和对数尺度，再比较分布与尾部。它来自论文的特定工作负载与版本，适合分析误差机制，不能直接当成今天各产品的排名。
 

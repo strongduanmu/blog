@@ -13,10 +13,6 @@ banner: /assets/banner/banner_8.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836481898121&bvid=BV1mgKo6WEDr&cid=39520043686&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：07 - Lecture 07 - Join Ordering Bottom-Up](https://www.bilibili.com/video/BV1mgKo6WEDr)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## Join 顺序为什么需要专门的枚举算法
 
 第 07 讲讨论自下而上的 Join 排序。转换规则可以从一棵树生成另一棵等价树，但反复使用交换律和结合律，会产生许多重复候选。专门的 Join 枚举算法直接利用查询图生成组合，减少重复和无效工作。
@@ -121,7 +117,7 @@ DPHyp 将这种思路扩展到超图（Hypergraph）。一条超边能连接两�
 
 ## 查询结构怎样影响搜索量
 
-![按查询复杂度切换枚举策略，课程视频 13:00](/assets/wiki/cmu_15_799/join_ordering_bottom_up/video-1300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_bottom_up/adaptive-decision-tree.png' alt='按查询复杂度切换枚举策略'>
 
 [视频 13:00：按查询复杂度切换枚举策略](https://www.bilibili.com/video/BV1mgKo6WEDr/?t=780)。课件把查询分为 Small、Medium、Large，分别走完整优化、搜索空间线性化与更贪心的策略。判断复杂度时需要同时看关系数量和图结构。这里的 Adaptive Optimization 指编译时选择搜索算法，和后面执行中调整计划的 AQP 具有不同决策时机。
 
@@ -132,7 +128,7 @@ DPHyp 将这种思路扩展到超图（Hypergraph）。一条超边能连接两�
 
 ### 线性化：固定叶子顺序，继续选择括号
 
-![搜索空间线性化后的 Join 树，课程视频 30:30](/assets/wiki/cmu_15_799/join_ordering_bottom_up/video-3030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_bottom_up/search-space-linearization.png' alt='搜索空间线性化后的 Join 树'>
 
 [视频 30:30：搜索空间线性化后的 Join 树](https://www.bilibili.com/video/BV1mgKo6WEDr/?t=1830)。上方保留原查询图，下方固定一条关系序列，再对相邻子链组合进行 DP。固定叶子顺序后仍有多种括号与浓密树；它减少了允许探索的结构，因此最优性限定在线性化的空间内。可以把正文四表状态换成连续区间，观察哪些切分仍然允许。
 
@@ -145,7 +141,7 @@ DPHyp 将这种思路扩展到超图（Hypergraph）。一条超边能连接两�
 
 ### 更大查询的局部改进
 
-![GOO 合并节点后更新查询图，课程视频 45:30](/assets/wiki/cmu_15_799/join_ordering_bottom_up/video-4530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_bottom_up/greedy-operator-ordering.png' alt='GOO 合并节点后更新查询图'>
 
 [视频 45:30：GOO 合并节点后更新查询图](https://www.bilibili.com/video/BV1mgKo6WEDr/?t=2730)。红色标记给出当前被选择的关系对，图下方将它们合并成复合节点并重新计算后续边。Greedy Operator Ordering 每步做局部选择，后续搜索建立在已经确定的合并之上。与完整 DP 保存多种子结果不同，这种策略以较小编译开销换取受限的选择空间。
 

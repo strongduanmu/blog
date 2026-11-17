@@ -13,10 +13,6 @@ banner: /assets/banner/banner_6.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836431568299&bvid=BV1knKo62EM9&cid=39519781686&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：05 - Lecture 05 - Cascades](https://www.bilibili.com/video/BV1knKo62EM9)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 把优化搜索拆成可调度的任务
 
 第 05 讲讨论 Cascades。上一讲的 Volcano 已经使用等价类、属性需求和记忆化搜索；Cascades 进一步把优化过程表示为任务，让探索逻辑形式、生成物理实现和优化输入能够按依赖推进。[Cascades 原论文](https://15799.courses.cs.cmu.edu/spring2025/papers/05-cascades/graefe-ieee1995.pdf)是本讲的主要依据。
@@ -25,7 +21,7 @@ banner: /assets/banner/banner_6.jpg
 
 ## Memo 保存的是什么
 
-![Memo 中的成本与共享子组，课程视频 53:00](/assets/wiki/cmu_15_799/cascades/video-5300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cascades/memo-table.png' alt='Memo 中的成本与共享子组'>
 
 [视频 53:00：Memo 中的成本与共享子组](https://www.bilibili.com/video/BV1knKo62EM9/?t=3180)。左边是根 Group 列表，右边是相应逻辑与物理表达式。箭头把组表达式连接到被引用的子组，红色成本标记展示局部候选的比较。一个子组可以被多个父表达式引用，所以新增子实现无需为所有完整计划复制一棵新树。
 
@@ -66,7 +62,7 @@ G_ABC = { Join(G_AB, G_C), Join(G_A, G_BC), ... }
 
 ## Rule、Pattern 与 Binding
 
-![规则 Pattern 与两种替换结果，课程视频 25:30](/assets/wiki/cmu_15_799/cascades/video-2530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cascades/rules.png' alt='规则 Pattern 与两种替换结果'>
 
 [视频 25:30：规则 Pattern 与两种替换结果](https://www.bilibili.com/video/BV1knKo62EM9/?t=1530)。左侧 Pattern 用 Group 占位匹配局部 Join 结构，中间给出匹配结果；右侧分别展示逻辑变换与物理实现。Group 占位符允许规则绑定组内候选，替换结果再进入相应等价组。这里可以直接对照正文的结合律例子，观察引用的是子组还是某一棵固定完整树。
 
@@ -87,7 +83,7 @@ Cascades 在统一的框架中表示逻辑变换与物理实现规则。为了�
 
 ## 六类任务怎样协作
 
-![Cascades 的六类搜索任务，课程视频 35:30](/assets/wiki/cmu_15_799/cascades/video-3530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cascades/search-tasks.png' alt='Cascades 的六类搜索任务'>
 
 [视频 35:30：Cascades 的六类搜索任务](https://www.bilibili.com/video/BV1knKo62EM9/?t=2130)。画面将 Optimize、Explore、Apply Rule 与 Optimize Inputs 分开。先用 Optimize Group 确定当前目标，再看逻辑探索如何产生候选、输入优化如何计算完整成本。这些任务描述依赖和恢复点；它们的名称不意味着已经使用多个线程执行。
 

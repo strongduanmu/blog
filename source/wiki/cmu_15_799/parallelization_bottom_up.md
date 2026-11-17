@@ -13,10 +13,6 @@ banner: /assets/banner/banner_10.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836515454428&bvid=BV11VKo6HEkH&cid=39520241675&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：09 - Lecture 09 - Parallelization Bottom-Up](https://www.bilibili.com/video/BV11VKo6HEkH)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 并行的是编译阶段的计划搜索
 
 第 09 讲研究自下而上优化器怎样利用多个 CPU 核心或 GPU。这里的 worker 在枚举和比较执行计划；查询最终是否使用并行扫描或并行 Join，是另一项物理规划决策。
@@ -78,7 +74,7 @@ MPDP 的一般算法先为当前集合 S 找出这些 Block，在各个 Block �
 
 ## GPU 上的搜索需要准备哪些数据
 
-![GPU 搜索的位图、Warp 与统计前提，课程视频 33:00](/assets/wiki/cmu_15_799/parallelization_bottom_up/video-3300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_bottom_up/gpu-mpdp.png' alt='GPU 搜索的位图、Warp 与统计前提'>
 
 [视频 33:00：GPU 搜索的位图、Warp 与统计前提](https://www.bilibili.com/video/BV11VKo6HEkH/?t=1980)。课件强调 fixed-width bitmaps、减少分支分化，以及代价估计所需信息应位于 GPU 可用的数据集中。大量线程的收益依赖这些准备，频繁等待 CPU 返回基数会破坏并行流水线。正文接着把集合生成、过滤、候选评估和 Memo 写回串成一层完整数据流。
 
@@ -119,7 +115,7 @@ GPU 擅长同时执行大量相似的小任务。Join 枚举可以把关系集�
 
 ## 超大查询仍需近似与分区
 
-![UnionDP 的图划分与复合节点，课程视频 28:00](/assets/wiki/cmu_15_799/parallelization_bottom_up/video-2800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_bottom_up/uniondp.png' alt='UnionDP 的图划分与复合节点'>
 
 [视频 28:00：UnionDP 的图划分与复合节点](https://www.bilibili.com/video/BV11VKo6HEkH/?t=1680)。右侧示例先比较边对应的规模，合并部分关系，得到较小的复合查询图。每个受限子图使用 MPDP，再继续组合复合节点。这一步改变完整搜索范围，需要同时评价编译时间和最终计划质量；较小子图的最优结果并不自动等于原图全空间最优。
 
@@ -130,7 +126,7 @@ GPU 擅长同时执行大量相似的小任务。Join 枚举可以把关系集�
 
 ## MPJ：把组合过程看成一次内部 Join
 
-![MPJ 的层次化状态组合，课程视频 48:00](/assets/wiki/cmu_15_799/parallelization_bottom_up/video-4800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/parallelization_bottom_up/mpj-overview.png' alt='MPJ 的层次化状态组合'>
 
 [视频 48:00：MPJ 的层次化状态组合](https://www.bilibili.com/video/BV11VKo6HEkH/?t=2880)。左边列出由不同数量关系组成的计划状态，右边把它们分为若干组合层。这里的 Join 是优化器内部对候选状态做匹配与合成；状态保存关系集合和候选计划，尚未执行用户查询的数据 Join。分层以后再分配 worker，便能研究每层工作量与负载倾斜。
 

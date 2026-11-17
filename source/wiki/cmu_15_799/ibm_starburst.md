@@ -13,10 +13,6 @@ banner: /assets/banner/banner_4.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836398011692&bvid=BV1y7Ko6UEVD&cid=39519650255&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：03 - Lecture 03 - IBM Starburst](https://www.bilibili.com/video/BV1y7Ko6UEVD)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 从 System R 的固定算法到可扩展优化器
 
 第 03 讲关注 IBM Starburst。前一讲的 System R 用动态规划比较访问路径和 Join 顺序，已经建立了基于代价的优化思路。继续扩展数据库时，我们还会遇到另一类问题：新增一种数据类型、索引或 Join 算法，优化器怎样知道它存在，又怎样把它与已有能力组合起来？
@@ -25,7 +21,7 @@ Starburst 希望把这些扩展写成规则，将“有哪些合法实现”与�
 
 ### 先重写，再选择物理实现
 
-![Starburst 的完整优化流水线，课程视频 27:00](/assets/wiki/cmu_15_799/ibm_starburst/video-2700.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_starburst/optimizer-pipeline.png' alt='Starburst 的完整优化流水线'>
 
 [视频 27:00：Starburst 的完整优化流水线](https://www.bilibili.com/video/BV1y7Ko6UEVD/?t=1620)。先区分黑色控制流箭头和红色数据流箭头。Parser/Binder 产生 QGM，Query Rewriter 修改逻辑表示，Plan Optimizer 生成 Physical Plan，Plan Refinement 还能同时读取逻辑与物理信息。因此 QGM 贯穿多个阶段，不能简单理解成只在解析之后使用一次的临时对象。
 
@@ -46,7 +42,7 @@ flowchart TB
 
 ## QGM 怎样保存查询语义
 
-![QGM 中的 Box、迭代器与量词，课程视频 40:30](/assets/wiki/cmu_15_799/ibm_starburst/video-4030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_starburst/query-graph-model.png' alt='QGM 中的 Box、迭代器与量词'>
 
 [视频 40:30：QGM 中的 Box、迭代器与量词](https://www.bilibili.com/video/BV1y7Ko6UEVD/?t=2430)。左侧图把存储表、内层查询与外层查询连接起来，右侧 SQL 给出相应的列与谓词。圆圈里的 F 表示形成输出元组的输入，∀ 对应 ALL 的全称量化；上方 Head 记录输出列和去重要求。读图时先从底部 inventory、quotations 找输入，再向上追踪 q1、q2、q3、q4 的引用。
 
@@ -109,7 +105,7 @@ QGM 中，Box 表示一个基本表或查询块，每个 Box 分为 Head 和 Bod
 
 ## 重写器怎样处理规则
 
-![SELECT Merge 的条件与动作，课程视频 53:00](/assets/wiki/cmu_15_799/ibm_starburst/video-5300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_starburst/select-merge.png' alt='SELECT Merge 的条件与动作'>
 
 [视频 53:00：SELECT Merge 的条件与动作](https://www.bilibili.com/video/BV1y7Ko6UEVD/?t=3180)。画面中的规则先检查上下层 SELECT、谓词和 distinct 状态，再进行合并。ENFORCE、PRESERVE、PERMIT 描述重复行处理约束。它展示了规则的两个部分：匹配条件决定是否允许合并，动作再更新输入与属性；本文后面的半连接例子用于展开相同的语义检查思路。
 
@@ -132,7 +128,7 @@ rule MatchExists(outer_box, inner_box):
 
 ## STAR 与 LOLEPOP：从策略到执行算子
 
-![访问路径候选的递归展开，课程视频 65:30](/assets/wiki/cmu_15_799/ibm_starburst/video-6530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/ibm_starburst/table-access-alternatives.png' alt='访问路径候选的递归展开'>
 
 [视频 65:30：访问路径候选的递归展开](https://www.bilibili.com/video/BV1y7Ko6UEVD/?t=3930)。从顶部 AccessRoot(T) 沿绿色分支向下看：SCAN 是一条访问候选，其他策略继续展开索引访问、FETCH、SORT 等组合。最底层可以执行的低层算子组成计划，中间策略描述替代选择。图来自课程引用的 DB2 示例，具体规则名称与原型 Starburst 有差异。
 

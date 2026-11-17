@@ -13,10 +13,6 @@ banner: /assets/banner/banner_9.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836498808242&bvid=BV1s5Ko6QEfL&cid=39520112196&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：08 - Lecture 08 - Join Ordering Top-Down](https://www.bilibili.com/video/BV1s5Ko6QEfL)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 从完整查询的最后一次 Join 开始
 
 第 08 讲讨论自上而下 Join 枚举。假定目标关系集合为 `{A,B,C,D}`，根节点最后一次 Join 可以将它切成 `A | BCD`、`AB | CD` 或 `ABC | D`。先确定一个切分，再递归求解两侧，就得到面向目标的搜索。
@@ -25,7 +21,7 @@ banner: /assets/banner/banner_9.jpg
 
 ## 分区必须保留连通性
 
-![从完整图递归产生连通分区，课程视频 23:00](/assets/wiki/cmu_15_799/join_ordering_top_down/video-2300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_top_down/optimal-top-down-partitioning.png' alt='从完整图递归产生连通分区'>
 
 [视频 23:00：从完整图递归产生连通分区](https://www.bilibili.com/video/BV1s5Ko6QEfL/?t=1380)。右侧从完整关系集合逐层拆成两个部分，再继续优化子部分。画面关注哪些二分能够形成合法 Join 输入。将其与正文的 A—B—C—D 对照，先排除 AC 与 BD 这种不连通两侧，再区分结构二分和物理 Join 的左右方向。
 
@@ -61,7 +57,7 @@ GetBestPlan(S, required):
 
 ## 累计成本定界
 
-![Accumulated-cost Bounding 的逐层下界，课程视频 50:30](/assets/wiki/cmu_15_799/join_ordering_top_down/video-5030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_top_down/accumulated-cost-bound.png' alt='Accumulated-cost Bounding 的逐层下界'>
 
 [视频 50:30：Accumulated-cost Bounding 的逐层下界](https://www.bilibili.com/video/BV1s5Ko6QEfL/?t=3030)。顶部完整计划提供 Upper-Bound 100，沿当前分支向下逐步累计已确定的物理成本。画面中的 50、30、35 展示成本怎样加入部分计划。只有可靠下界超过完整计划上界时，才能确定当前分支不值得继续；正文使用另一组数字把这个判断完整展开。
 
@@ -99,7 +95,7 @@ GetBestPlan(S, required):
 
 ## 预测成本定界的收益与边界
 
-![Predicted-cost Bounding 先估计未展开子问题，课程视频 58:00](/assets/wiki/cmu_15_799/join_ordering_top_down/video-5800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/join_ordering_top_down/predicted-cost-bound.png' alt='Predicted-cost Bounding 先估计未展开子问题'>
 
 [视频 58:00：Predicted-cost Bounding 先估计未展开子问题](https://www.bilibili.com/video/BV1s5Ko6QEfL/?t=3480)。这幅图对尚未完整搜索的逻辑子表达式使用预测成本，因而比单纯累计已完成工作更早形成界限。预测可能减少搜索，也需要检查是否满足安全下界条件。画面里的示意数值解释方法，不能自动当作任意数据库都成立的下界证明。
 

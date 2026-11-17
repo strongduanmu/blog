@@ -13,10 +13,6 @@ banner: /assets/banner/banner_7.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836465121845&bvid=BV123Ko6XEXP&cid=39519850029&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：06 - Lecture 06 - Transformations](https://www.bilibili.com/video/BV123Ko6XEXP)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 一条规则要同时说明结构与语义前提
 
 第 06 讲从优化器框架转向具体转换。规则扩展了搜索空间，代价模型比较这些候选；规则能否进入搜索，首先取决于它是否保留查询结果。本文按课件中的访问路径、Join、外连接和聚合展开，补充 SQL 示例说明条件。
@@ -25,7 +21,7 @@ SQL 使用多重集（Bag）语义，重复行通常被保留；比较可能产�
 
 ## 从过滤条件到访问路径
 
-![多个访问方法组合出的候选，课程视频 30:30](/assets/wiki/cmu_15_799/transformations/video-3030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/transformations/multiple-access-methods.png' alt='多个访问方法组合出的候选'>
 
 [视频 30:30：多个访问方法组合出的候选](https://www.bilibili.com/video/BV123Ko6XEXP/?t=1830)。课件为两个过滤条件建立不同索引路径，画面中还包含 Key Lookup。索引能定位部分条件，剩余条件可能需要取得数据后再次检查；计划合法性与具体成本依赖索引键、包含列和匹配规模。观察 Filter 最终落在哪一层，能判断哪些条件真正参与了访问。
 
@@ -67,7 +63,7 @@ Hash Join 通常利用等值键寻找候选，再检查残余条件；Merge Join
 
 ## 外连接转内连接：看过滤放在哪里
 
-![Null-rejecting 谓词与外连接化简，课程视频 55:30](/assets/wiki/cmu_15_799/transformations/video-5530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/transformations/outer-join-reduction.png' alt='Null-rejecting 谓词与外连接化简'>
 
 [视频 55:30：Null-rejecting 谓词与外连接化简](https://www.bilibili.com/video/BV123Ko6XEXP/?t=3330)。画面中的过滤位于 LEFT OUTER JOIN 上方，条件针对右侧 S 的字段。未匹配行的该字段被补成 NULL，过滤不会保留它，因此这类条件可能支持化简。关键是谓词在 Join 之后过滤补空行；正文把相同条件放入 ON 子句时，行为需要重新推导。
 
@@ -96,7 +92,7 @@ LEFT JOIN orders AS o
 
 ## 聚合下推为什么需要键和函数信息
 
-![完整 GROUP BY 下推的条件与树形变化，课程视频 60:30](/assets/wiki/cmu_15_799/transformations/video-6030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/transformations/complete-group-by-pushdown.png' alt='完整 GROUP BY 下推的条件与树形变化'>
 
 [视频 60:30：完整 GROUP BY 下推的条件与树形变化](https://www.bilibili.com/video/BV123Ko6XEXP/?t=3630)。上方 SQL 的聚合只使用一侧数据，画面同时列出另一侧主键、分组列和连接列的约束。右边将聚合放到 Join 下方，以较少的组参与连接。先核对键约束与聚合输入，再看树形变化，随后用正文的 SUM 与 AVG 例子分析为什么不能只凭“聚合更早”就执行规则。
 

@@ -13,10 +13,6 @@ banner: /assets/banner/banner_5.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836414789449&bvid=BV11jKo6JEPv&cid=39519653878&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：04 - Lecture 04 - Volcano](https://www.bilibili.com/video/BV11jKo6JEPv)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 优化一个结果，还要指定它怎样输出
 
 第 04 讲从 EXODUS 讲到 Volcano 优化器生成器。Starburst 让物理候选能够通过规则扩展；Volcano 进一步把搜索组织成一个目标：为给定逻辑结果，寻找满足物理属性要求且代价最低的实现。本文主要依据 [1993 年优化器生成器论文](https://15799.courses.cs.cmu.edu/spring2025/papers/04-volcano/graefe-icde1993.pdf)。
@@ -39,7 +35,7 @@ ORDER BY c.id;
 
 ## 逻辑算子、物理算子与 Enforcer
 
-![同一个逻辑结果的两层表示，课程视频 45:30](/assets/wiki/cmu_15_799/volcano/video-4530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/volcano/logical-physical-expressions.png' alt='同一个逻辑结果的两层表示'>
 
 [视频 45:30：同一个逻辑结果的两层表示](https://www.bilibili.com/video/BV11jKo6JEPv/?t=2730)。右侧上方用逻辑算子表达要计算的结果，下方用扫描和具体 Join 实现表达执行算法。上方的小图例区分 Logical Op 与 Physical Op。观察替换前后哪些关系语义保持相同，哪些只是实现选择，再阅读 Transformation Rule 与 Implementation Rule 的分工。
 
@@ -72,7 +68,7 @@ Best(逻辑等价类, 所需物理属性, 可用外部参数)
 
 ## 从根目标递归到子目标
 
-![Forward Chaining 与 Backward Chaining，课程视频 55:30](/assets/wiki/cmu_15_799/volcano/video-5530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/volcano/forward-backward-chaining.png' alt='Forward Chaining 与 Backward Chaining'>
 
 [视频 55:30：Forward Chaining 与 Backward Chaining](https://www.bilibili.com/video/BV11jKo6JEPv/?t=3330)。上半部分从已有表达式触发规则，向外生成更多结果；下半部分从想要的输出出发，反向寻找能够产生它的算子，再提出输入目标。箭头表示搜索推导方向，执行数据仍从输入端产生。带属性的 FindBest 正是沿后者的目标分解来组织。
 
@@ -122,7 +118,7 @@ FindBest(group, required_properties, limit):
 
 ## 等价类怎样避免重复工作
 
-![Volcano 搜索中的候选与属性补齐，课程视频 65:30](/assets/wiki/cmu_15_799/volcano/video-6530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/volcano/search-space.png' alt='Volcano 搜索中的候选与属性补齐'>
 
 [视频 65:30：Volcano 搜索中的候选与属性补齐](https://www.bilibili.com/video/BV11jKo6JEPv/?t=3930)。画面保留了多种逻辑形态及它们的物理实现，下方显示为满足需求而考虑的额外算子。顶部 ORDER BY 提出排序需求，红叉对应尚未补齐该顺序的 Hash Join 路径，右侧展示 Sort Enforcer。读图时分别跟踪逻辑等价关系、实现规则和属性需求，避免把每条红线都理解成执行时的数据流。
 

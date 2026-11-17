@@ -13,10 +13,6 @@ banner: /assets/banner/banner_15.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836632894831&bvid=BV1ABKd6jEjs&cid=39520767576&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：14 - Lecture 14 - Cost Models More Cardinality Estimation](https://www.bilibili.com/video/BV1ABKd6jEjs)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 估计更准以后，计划究竟改了哪里
 
 第 14 讲承接 JOB 分析，把问题扩展到 SQL Server 的更多工作负载、行存与列存执行方式。主要阅读 [Analyzing the Impact of Cardinality Estimation on Execution Plans in Microsoft SQL Server](https://15799.courses.cs.cmu.edu/spring2025/papers/14-cardinalities2/lee-vldb2023.pdf)。
@@ -25,7 +21,7 @@ banner: /assets/banner/banner_15.jpg
 
 ## 把真实基数注入搜索
 
-![用逻辑表达式标识注入真实基数，课程视频 18:00](/assets/wiki/cmu_15_799/cost_models_more_cardinality_estimation/video-1800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_more_cardinality_estimation/cardinality-injection.png' alt='用逻辑表达式标识注入真实基数'>
 
 [视频 18:00：用逻辑表达式标识注入真实基数](https://www.bilibili.com/video/BV1ABKd6jEjs/?t=1080)。课件说明为搜索中的逻辑表达式生成标识，反向构造 SQL 并执行，随后用相同标识在 Cascades 中取得真实行数。需要覆盖候选表达式，包含原计划没有使用的结构，才能比较另一种 Join 顺序或访问方式。
 
@@ -46,7 +42,7 @@ banner: /assets/banner/banner_15.jpg
 
 ## 准确基数影响的不只是 Join 顺序
 
-![JOB 17a 修正前后的完整物理计划，课程视频 33:00](/assets/wiki/cmu_15_799/cost_models_more_cardinality_estimation/video-3300.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_more_cardinality_estimation/job17a-plan-improvements.png' alt='JOB 17a 修正前后的完整物理计划'>
 
 [视频 33:00：JOB 17a 修正前后的完整物理计划](https://www.bilibili.com/video/BV1ABKd6jEjs/?t=1980)。左侧大量 Index Nested Loop 和索引访问在右侧变成扫描、Hash Join 或 Merge Join 等组合。每个节点还并列展示估计与真实规模。先观察访问路径与 Join 算法，再看树形顺序，能够理解为什么准确基数的收益不只来自更换 Join 括号。
 
@@ -80,7 +76,7 @@ banner: /assets/banner/banner_15.jpg
 
 ## Bitmap Filter 怎样减少无效探测
 
-![Hash Join 向探测侧传递 Bloom Filter，课程视频 58:00](/assets/wiki/cmu_15_799/cost_models_more_cardinality_estimation/video-5800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_more_cardinality_estimation/bitmap-filtering.png' alt='Hash Join 向探测侧传递 Bloom Filter'>
 
 [视频 58:00：Hash Join 向探测侧传递 Bloom Filter](https://www.bilibili.com/video/BV1ABKd6jEjs/?t=3480)。右侧箭头将构建侧键摘要送到探测侧扫描，先排除不可能匹配的行，再由正式 Join 验证。过滤信息提前使用可以减少实际工作，但保留真匹配和控制假阳性是必要条件。它改变运行中的输入规模，并不自动改变完整 Join 树。
 
@@ -93,7 +89,7 @@ Hash Join 构建侧可以产生过滤摘要，用于提前排除探测侧不可�
 
 ## Adaptive Join 能修正哪一步
 
-![Adaptive Join 在两种实现间延迟选择，课程视频 65:30](/assets/wiki/cmu_15_799/cost_models_more_cardinality_estimation/video-6530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_more_cardinality_estimation/adaptive-join.png' alt='Adaptive Join 在两种实现间延迟选择'>
 
 [视频 65:30：Adaptive Join 在两种实现间延迟选择](https://www.bilibili.com/video/BV1ABKd6jEjs/?t=3930)。课件把 Hash Join 与 Nested Loop 的路径放在同一个自适应节点里，运行时根据观察到的输入规模和阈值选择。它缓解当前节点的部分估计风险；此前扫描、树形结构和其他节点仍可能受到初始决策影响。
 
@@ -104,7 +100,7 @@ Adaptive Join 允许在执行中获得输入规模后，在预设实现之间选
 
 ## 找到需要准确估计的最小区域
 
-![Essential Logical Groups 与全部 Memo 组的关系，课程视频 50:30](/assets/wiki/cmu_15_799/cost_models_more_cardinality_estimation/video-5030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_more_cardinality_estimation/essential-logical-groups.png' alt='Essential Logical Groups 与全部 Memo 组的关系'>
 
 [视频 50:30：Essential Logical Groups 与全部 Memo 组的关系](https://www.bilibili.com/video/BV1ABKd6jEjs/?t=3030)。横轴是搜索涉及的 Memo 组数量，纵轴是关键组数量，两轴采用对数尺度。关键组表示在论文实验设置下，对恢复准确基数计划效果特别重要的部分。不能简单把点的位置解释成误差最大的节点数，正文说明它与候选竞争和决策边界有关。
 

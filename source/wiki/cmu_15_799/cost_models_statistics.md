@@ -13,10 +13,6 @@ banner: /assets/banner/banner_13.jpg
   <iframe src="https://player.bilibili.com/player.html?isOutside=true&aid=116836582562703&bvid=BV1ckKd6CEYj&cid=39520570134&page=1&high_quality=1&qn=120&quality=120&danmaku=0&autoplay=0" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"></iframe>
 </div>
 
-[B 站高清观看：12 - Lecture 12 - Cost Models Statistics](https://www.bilibili.com/video/BV1ckKd6CEYj)
-
-本页截图取自上方 B 站课程录像，标注时间可跳回对应位置；图中细字可配合文末的高清课件查看。正文里的教学数据与原课示例分别说明。
-
 ## 优化器怎样在执行前了解数据
 
 第 12 讲开始讨论代价模型。优化器无法为每个候选都完整执行一次，所以需要统计摘要近似数据分布。统计信息是估计输入；基数估计利用这些输入预测行数；物理代价模型再把行数、行宽和算法工作量换算成可比较成本。
@@ -47,7 +43,7 @@ NDV 为 10 并不意味着每种状态各有 10% 的行。假设已付款占 90%
 
 ## 直方图怎样压缩分布
 
-![从精确频数到直方图摘要，课程视频 38:00](/assets/wiki/cmu_15_799/cost_models_statistics/video-3800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_statistics/equi-depth-histogram.png' alt='从精确频数到直方图摘要'>
 
 [视频 38:00：从精确频数到直方图摘要](https://www.bilibili.com/video/BV1ckKd6CEYj/?t=2280)。横轴表示不同值，纵轴表示出现次数。原始分布中每个值都有自己的频数，直方图把这些信息压缩到有限桶。后续范围估计需要在桶内恢复一部分未知分布，正文用三个桶的数值说明均匀插值从哪里产生误差。
 
@@ -84,7 +80,7 @@ End-Biased Histogram 一类表示会显式保存热点值，其余值合并处�
 
 ## Sketch 保存的是哪种摘要
 
-![Count-Min Sketch 查询取多行计数的最小值，课程视频 48:00](/assets/wiki/cmu_15_799/cost_models_statistics/video-4800.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_statistics/count-min-sketch.png' alt='Count-Min Sketch 查询取多行计数的最小值'>
 
 [视频 48:00：Count-Min Sketch 查询取多行计数的最小值](https://www.bilibili.com/video/BV1ckKd6CEYj/?t=2880)。示例将同一键映射到不同哈希行，查询位置里的计数分别来自该键和其他碰撞键。底部的 Min 操作选择多个计数中的较小值，以减轻碰撞造成的高估。先观察哪些位置被更新，再对照正文的三行计数例子。
 
@@ -105,7 +101,7 @@ HyperLogLog 用哈希值的分布近似不同值数量，能够以较小摘要�
 
 ### Count-Min Sketch 的一次查询
 
-![HyperLogLog 的寄存器与哈希位，课程视频 50:30](/assets/wiki/cmu_15_799/cost_models_statistics/video-5030.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_statistics/hyperloglog.png' alt='HyperLogLog 的寄存器与哈希位'>
 
 [视频 50:30：HyperLogLog 的寄存器与哈希位](https://www.bilibili.com/video/BV1ckKd6CEYj/?t=3030)。课件把一个哈希值拆成寄存器索引与剩余模式，更新时保留对应位置观察到的极端前导零长度。它估计的是不同值数量，与前一幅图查询某个值的频率不同。理解寄存器的含义以后，再看多个兼容摘要为什么能合并。
 
@@ -120,7 +116,7 @@ Count-Min Sketch 面向某个值的频率，HyperLogLog 面向整个集合的不
 
 ## 采样怎样省下收集成本
 
-![用样本命中比例估计选择率，课程视频 55:30](/assets/wiki/cmu_15_799/cost_models_statistics/video-5530.jpg)
+<img no-lazy loading='lazy' src='/wiki/cmu_15_799/cost_models_statistics/sampling.png' alt='用样本命中比例估计选择率'>
 
 [视频 55:30：用样本命中比例估计选择率](https://www.bilibili.com/video/BV1ckKd6CEYj/?t=3330)。画面从原表抽取样本，用满足条件的样本行比例估计过滤选择率。红色标记对应样本里实际命中的行。结果质量依赖采样方式和样本是否覆盖目标区域，零命中也只描述样本，不能直接证明原表结果为空。
 
