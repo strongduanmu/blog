@@ -1,8 +1,8 @@
 name: CMU 15-721
 title: CMU 15-721 学习笔记
-subtitle: '热门的数据库进阶课程 | 网红教授 Andy 亲自授课教学'
+subtitle: 'Andy Pavlo · Spring 2024 | 现代分析型数据库实现'
 tags: Database
-description: CMU 15-721 是卡内基梅隆大学 Andy Pavlo 教授推出的高级数据库课程，主要介绍数据库管理系统中的高级话题，例如：数据库压缩、查询编译代码、向量化执行等。同时，课程中还会关注很多新的技术研究方向与话题，适合有一定数据库基础想要继续深入研究的同学学习。
+description: 按 Andy Pavlo 主讲的 CMU 15-721 2024 春季课程整理 23 讲笔记，结合官方课件、课程笔记和清晰图示，学习数据编码、向量化、查询编译、并行连接、调度、优化器及现代分析型数据库实现。
 icon: /assets/wiki/cmu_15_799/icon.png
 cover: /assets/wiki/cmu_15_799/cover.png
 coverpage: true
@@ -14,3 +14,26 @@ leftbar:
 base_dir: /wiki/cmu_15_721/
 tree:
   - index
+  - course_overview
+  - modern_analytical_database_systems
+  - data_formats_and_encoding_1
+  - data_formats_and_encoding_2
+  - query_execution_and_processing_1
+  - query_execution_and_processing_2
+  - vectorized_query_execution
+  - code_generation_and_compilation
+  - scheduling_and_coordination
+  - hash_join_algorithms
+  - multi_way_join_algorithms
+  - server_side_logic_execution
+  - networking_protocols
+  - optimizer_implementation_1
+  - optimizer_implementation_2
+  - optimizer_implementation_3
+  - cost_models
+  - system_analysis_bigquery
+  - system_analysis_databricks
+  - system_analysis_snowflake
+  - system_analysis_duckdb
+  - system_analysis_yellowbrick
+  - system_analysis_redshift
