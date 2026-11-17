@@ -1,0 +1,37 @@
+name: MIT 6.5840
+title: 'MIT 6.5840: Distributed Systems 学习笔记'
+subtitle: 'Spring 2026 · 原 6.824 | 复制、共识、事务与容错'
+tags: Distributed Systems
+description: 按 MIT 6.5840（原 6.824）2026 年春季课表整理 21 次授课笔记，提供官方讲义、论文、高清图示与可对应的往年公开视频，覆盖 MapReduce、RPC、GFS、Paxos、Raft、ZooKeeper、Spanner、FaRM、Ray、SUNDR 和 PBFT。
+icon: /assets/wiki/mit_6_5840/cover.svg
+cover: /assets/wiki/mit_6_5840/cover.svg
+coverpage: true
+search:
+  filter: /wiki/mit_6_5840/
+  placeholder: 在 MIT 6.5840 中搜索...
+leftbar:
+  - tree
+base_dir: /wiki/mit_6_5840/
+tree:
+  - index
+  - introduction-and-mapreduce
+  - rpc-and-threads
+  - gfs
+  - paxos
+  - go-concurrency-patterns
+  - raft-1
+  - raft-2
+  - linearizability
+  - zookeeper
+  - raft-lab-qa
+  - distributed-transactions
+  - spanner
+  - chain-replication
+  - farm
+  - ironfleet
+  - memcached
+  - aws-lambda
+  - ray
+  - sundr
+  - bitcoin
+  - byzantine-fault-tolerance
