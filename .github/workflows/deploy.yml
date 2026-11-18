@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - master
+    # These repository notes are not part of the generated website.
+    paths-ignore:
+      - '.agents/**'
+      - '.codex/**'
+      - 'AGENTS.md'
+      - 'README.md'
+  workflow_dispatch:
 
 env:
   GIT_USER: strongduanmu
