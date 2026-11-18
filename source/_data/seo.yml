@@ -39,11 +39,6 @@ pages:
   /notes/wireshark.html:
     title: Wireshark 排障：Mac 抓包权限与设备访问问题
     description: 记录 Mac 上 Wireshark 因设备访问权限不足而无法抓包的现象及历史处理命令，便于对照错误排查抓包环境。调整设备权限前应核对当前安装方式和系统配置，避免扩大无关权限。
-  /wiki/c/:
-    title: C 语言学习资料与程序运行原理参考
-    description: 整理 C 语言学习过程中参考的教程与程序运行原理资料，从课程目录进入 C 语言入门笔记，继续了解基础语法、开发环境、编译运行流程和指针等内容。
-  /wiki/c/introduction.html:
-    title: C 语言入门：开发环境、编译运行与基础语法
   /wiki/tsinghua_database/:
     title: 课程资料与 HuaDB 数据库实验入口
     description: 整理清华大学数据库管理系统课程的学习入口，包括课程主页、B 站教学视频和 HuaDB 数据库内核实验文档，方便结合课堂讲解与课程实验学习数据库系统的基本原理和实现方法。
