@@ -3,8 +3,8 @@ title: 'CMU 17-214/514: AI 软件开发学习笔记'
 subtitle: 'Agentic Software Development | 验证、设计、智能体监督与系统运行'
 tags: AI
 description: 按 CMU 17-214/514 2026 秋季 Agentic Software Development 官方课件整理，涵盖生成代码验证、可测试性、模块化、设计记忆、重构、编程智能体监督、数据与并发、CI/CD 和系统运行，配合原课高清图示与实验作业资料。
-icon: /assets/wiki/cmu_11_768/logo.png
-cover: /wiki/cmu_17_214/course_introduction/course-cover.webp
+icon: /wiki/cmu_17_214/index/logo.webp
+cover: /wiki/cmu_17_214/index/logo.webp
 coverpage: true
 search:
   filter: /wiki/cmu_17_214/
