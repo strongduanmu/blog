@@ -138,7 +138,6 @@ inject:
     - <link rel="icon" type="image/png" sizes="16x16" href="/assets/placeholder/favicon-16x16.png">
     - <link rel="manifest" href="/assets/placeholder/site.webmanifest">
     - <link rel="stylesheet" href="/css/custom.css">
-    - <link rel="stylesheet" href="/css/lxgwwenkaimono-bold.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/css/lxgwwenkaimono-bold.css"></noscript>
     - <link rel="stylesheet" href="/css/lxgwwenkaiscreen.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="/css/lxgwwenkaiscreen.css"></noscript>
     - <link rel="preconnect" href="https://cdn.jsdelivr.net">
     - <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
