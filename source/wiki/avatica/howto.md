@@ -26,7 +26,7 @@ $ cd apache-calcite-avatica-1.27.0-src
 $ gradle build
 ```
 
-[运行测试](#running-tests) 描述了如何运行更多或更少的测试（但您应该使用 `gradle` 命令而不是 `./gradlew`）。
+[运行测试](#运行测试) 描述了如何运行更多或更少的测试（但您应该使用 `gradle` 命令而不是 `./gradlew`）。
 
 ## 从 Git 构建
 
@@ -40,7 +40,7 @@ $ cd avatica
 $ ./gradlew build
 ```
 
-[运行测试](#running-tests) 描述了如何运行更多或更少的测试。
+[运行测试](#运行测试) 描述了如何运行更多或更少的测试。
 
 ## 运行测试
 
@@ -381,7 +381,7 @@ docker compose run promote-release
 
 ## 添加发布说明并发布公告
 
-通过复制 [site/_posts/2016-11-01-release-1.9.0.md]({{ site.sourceRoot }}/site/_posts/2016-11-01-release-1.9.0.md) 添加发布说明，更新 `gradle.properties` 中的版本号，生成 javadoc 并复制到 `site/target/avatica/javadocAggregate`，[发布网站](#publish-the-web-site)，并检查它是否出现在[新闻](http://localhost:4000/news/)目录中。
+通过复制 [site/_posts/2016-11-01-release-1.9.0.md]({{ site.sourceRoot }}/site/_posts/2016-11-01-release-1.9.0.md) 添加发布说明，更新 `gradle.properties` 中的版本号，生成 javadoc 并复制到 `site/target/avatica/javadocAggregate`，[发布网站](#发布网站针对-calcite-提交者)，并检查它是否出现在[新闻](https://calcite.apache.org/avatica/news/)目录中。
 
 24 小时后，通过向 [announce@apache.org](https://mail-archives.apache.org/mod_mbox/www-announce/) 发送邮件来发布公告。您可以使用 [1.8.0 公告](https://mail-archives.apache.org/mod_mbox/www-announce/201606.mbox/%3C57559CC7.1000402@apache.org%3E)作为模板。务必包含项目的简要描述。
 

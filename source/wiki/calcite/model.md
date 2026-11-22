@@ -556,7 +556,7 @@ tiles:
 
 * `tiles`（[Tile](https://strongduanmu.com/wiki/calcite/model.html#tile-%E5%9D%97) 元素的可选列表）表示要预先创建的物化聚合的列表；
 
-* `defaultMeasures`（可选的[度量](#measure)元素列表）表示图块默认应具有的度量列表。`tiles` 中定义的任何图块仍然可以定义自己的度量，包括不在此列表中的度量。如果未指定，默认的度量列表只是 `count(*)`：
+* `defaultMeasures`（可选的[度量](#度量)元素列表）表示图块默认应具有的度量列表。`tiles` 中定义的任何图块仍然可以定义自己的度量，包括不在此列表中的度量。如果未指定，默认的度量列表只是 `count(*)`：
 
 **JSON：**
 

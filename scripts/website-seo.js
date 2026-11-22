@@ -36,6 +36,31 @@ function descriptionFromContent(content) {
   return end >= 70 ? excerpt.slice(0, end + 1) : excerpt + '…';
 }
 
+function isoDate(value) {
+  const date = new Date(value?.valueOf());
+  return Number.isNaN(date.valueOf()) ? undefined : date.toISOString();
+}
+
+function articleData(page, canonical, image) {
+  if (!image || page.layout !== 'post' || !indexable(page, 'default')) return;
+  const datePublished = isoDate(page.date);
+  if (!datePublished || !page.seo_title || !hexo.config.author) return;
+
+  const dateModified = isoDate(page.updated);
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    headline: page.seo_title,
+    description: page.seo_description,
+    image: [new URL(image, canonical).href],
+    datePublished,
+    dateModified: dateModified > datePublished ? dateModified : undefined,
+    author: [{ '@type': 'Person', name: hexo.config.author, url: canonicalUrl('more/') }]
+  };
+  return JSON.stringify(data).replace(/</g, '\\u003c');
+}
+
 hexo.extend.filter.register('template_locals', function(locals) {
   const page = locals.page;
   const seo = locals.site.data.seo || {};
@@ -53,6 +78,7 @@ hexo.extend.filter.register('template_locals', function(locals) {
     page.robots = 'noindex,follow';
   }
   page.seo_description = entry.description || page.seo_description || page.description || descriptionFromContent(page.content) || hexo.config.description;
+  page.seo_article_data = articleData(page, canonical, entry.article_image);
   // Keep existing per-page injections; normalize directory aliases to one URL.
   // https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
   const oldHead = page.inject && page.inject.head;

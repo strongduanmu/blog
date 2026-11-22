@@ -126,6 +126,7 @@ pages:
     description: 按官方文档、基础介绍、优化器和执行器等主题整理 Apache Calcite 学习资料，收集源码分析文章与工程实践入口，方便从 SQL 解析、校验和查询计划继续深入学习。
   /blog/apache-calcite-quick-start-guide.html:
     description: 通过 CSV 示例了解 Apache Calcite 的架构和查询执行流程，从连接 SQLLine、注册 Schema 与 Table 元数据，到规则注册、计划优化和生成可执行代码，逐步跟踪一次 SQL 查询。
+    article_image: /assets/blog/2022/07/31/1659246792.png
   /blog/basic-introduction-to-common-distributed-transaction-solutions.html:
     description: 从跨服务和跨数据库操作中的一致性问题介绍分布式事务，梳理 XA 协议及 DTP 模型中的应用程序、资源管理器和事务管理器，说明各组件的职责与协作方式。
   /blog/calcite-udf-in-action-shardingsphere-sql-federation-adapte-to-mysql-bit-count.html:
@@ -138,7 +139,9 @@ pages:
   /blog/deep-understand-of-apache-calcite-hep-planner.html:
     description: 从 RBO 规则优化出发，介绍 Apache Calcite HepPlanner 中的 HepProgram、HepInstruction 等概念，结合源码跟踪规则匹配与执行过程，理解启发式优化器怎样改写关系表达式。
   /blog/deep-understand-of-apache-calcite-volcano-planner.html:
+    title: 深入理解 Apache Calcite VolcanoPlanner 优化器
     description: 结合 Volcano 与 Cascades 优化器的论文概念，分析 Apache Calcite VolcanoPlanner 的核心对象和执行流程，从初始化、setRoot 到 findBestExp 跟踪基于代价的查询计划搜索。
+    article_image: /blog/deep-understand-of-apache-calcite-volcano-planner/1702118316.png
   /blog/download-ding-talk-video-by-charles.html:
     description: 记录 Charles 抓包与 FFmpeg 工具的使用过程，包括代理配置、请求定位和 m3u8 视频下载，结合具体操作说明怎样为技术分享直播准备离线回看资源。
   /blog/explore-apache-calcite-system-catalog-implementation.html:
@@ -151,6 +154,9 @@ pages:
     description: 通过 SM4 加解密示例研究 GraalVM 编译动态链接库的方法，对照 MySQL UDF 的初始化、执行和释放接口，说明 Java 原生函数导出、动态库编译及 C 层调用的实现过程。
   /blog/implementation-principle-of-apache-calcite-sql-parser.html:
     description: 从 JavaCC 的语法描述与解析器生成过程进入 Apache Calcite SQL Parser 源码，分析 Parser.jj、解析器扩展与 SqlNode 体系，并说明解析后的语法树如何用于 SQL 生成。
+    article_image: /assets/blog/blog/202310160913074.png
+  /blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator.html:
+    article_image: /blog/in-depth-exploration-of-implementation-principle-of-apache-calcite-sql-validator/validate-sequence.png
   /blog/java-aot-compiler-framework-graalvm-quick-start.html:
     description: 结合云原生应用的启动与内存开销问题介绍 GraalVM AOT 编译，比较提前编译的优势和限制，通过 SDK 安装、Maven Native Image 构建与 Tracing Agent 演示实际使用过程。
   /blog/mysql-5.7.40-install-and-initial-config-guide.html:

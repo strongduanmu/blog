@@ -3,7 +3,10 @@ function loadPlugins() {
   var el = ''
 
   // search
-  if (theme.search[theme.search.service]) {
+  if (theme.search.service === 'local_search' && theme.search.local_search) {
+    const indexUrl = url_for(theme.search.local_search.path || '/search.json')
+    el += `<script defer src="${url_for('/js/plugins/local-search.js')}" data-search-index="${escape_html(indexUrl)}"></script>`
+  } else if (theme.search[theme.search.service]) {
     el += partial(`search/${theme.search.service}`, {conf: theme.search[theme.search.service]});
   }
 

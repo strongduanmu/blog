@@ -110,7 +110,7 @@ function custom_inject() {
   <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
   <meta name="HandheldFriendly" content="True" >
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000">
   <meta name="theme-color" content="#f9fafb">
   
@@ -120,6 +120,9 @@ function custom_inject() {
     <%- open_graph(og_args()) %>
   <% } %>
   <%- generate_description() %>
+  <% if (page.seo_article_data) { %>
+    <script type="application/ld+json"><%- page.seo_article_data %></script>
+  <% } %>
   
   <%- generate_keywords() %>
 

@@ -8,7 +8,7 @@ const cheerio = require('cheerio');
 
 function harness() {
   const filters = {}, generators = {};
-  const hexo = { config: { url: 'https://strongduanmu.com/', description: 'Site fallback',
+  const hexo = { config: { url: 'https://strongduanmu.com/', description: 'Site fallback', author: '端小强',
     sitemap: { path: 'sitemap.xml' }, baidusitemap: { path: 'baidusitemap.xml' } },
     extend: { filter: { register: (name, fn) => { filters[name] = fn; } },
       generator: { register: (name, fn) => { generators[name] = fn; } } } };
@@ -44,6 +44,49 @@ test('automatic descriptions exclude attribution URLs, code, tables and injected
   h.filters.template_locals(locals);
   assert.equal(locals.page.seo_description, 'Useful explanation about the actual topic.');
   assert.equal(locals.page.description, undefined);
+});
+
+test('only selected indexable posts emit valid BlogPosting JSON-LD', () => {
+  const h = harness();
+  const post = {
+    path: 'blog/post.html',
+    layout: 'post',
+    title: 'The original title',
+    description: 'The article summary',
+    date: new Date('2026-08-01T12:13:14+08:00'),
+    updated: new Date('2026-08-03T12:13:14+08:00')
+  };
+  const entry = { title: 'The SEO title mentioning </script>', article_image: '/assets/diagram.png' };
+  const localsFor = (page, meta = entry) => ({
+    path: page.path,
+    page,
+    site: { data: { seo: { pages: { ['/blog/post.html']: meta } } } }
+  });
+  h.filters.template_locals(localsFor(post));
+  assert.doesNotMatch(post.seo_article_data, /<\/script>/);
+  assert.deepEqual(JSON.parse(post.seo_article_data), {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    mainEntityOfPage: { '@type': 'WebPage', '@id': 'https://strongduanmu.com/blog/post.html' },
+    headline: entry.title,
+    description: 'The article summary',
+    image: ['https://strongduanmu.com/assets/diagram.png'],
+    datePublished: '2026-08-01T04:13:14.000Z',
+    dateModified: '2026-08-03T04:13:14.000Z',
+    author: [{ '@type': 'Person', name: '端小强', url: 'https://strongduanmu.com/more/' }]
+  });
+  assert.equal(post.title, 'The original title');
+
+  const sameDate = { ...post, updated: post.date };
+  h.filters.template_locals(localsFor(sameDate));
+  assert.equal(JSON.parse(sameDate.seo_article_data).dateModified, undefined);
+
+  for (const page of [{ ...post, layout: 'wiki' }, { ...post, robots: 'noindex,follow' }, { ...post, published: false }]) {
+    h.filters.template_locals(localsFor(page));
+    assert.equal(page.seo_article_data, undefined);
+  }
+  h.filters.template_locals(localsFor(post, {}));
+  assert.equal(post.seo_article_data, undefined);
 });
 
 test('both sitemaps include wiki and portal URLs, deduplicate aliases and exclude drafts and noindex pages', () => {

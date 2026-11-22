@@ -18,11 +18,11 @@ Avatica 提供的身份验证和授权旨在*替代*底层数据库提供的身�
 ## 目录
 {: #table-of-contents }
 
-* [HTTP Basic 身份验证](#http-basic-authentication)
-* [HTTP Digest 身份验证](#http-digest-authentication)
-* [Kerberos 与 SPNEGO 身份验证](#kerberos-with-spnego-authentication)
-* [自定义身份验证](#custom-authentication)
-* [客户端实现](#client-implementation)
+* [HTTP Basic 身份验证](#http-basic-身份验证)
+* [HTTP Digest 身份验证](#http-digest-身份验证)
+* [Kerberos 与 SPNEGO 身份验证](#kerberos-与-spnego-身份验证)
+* [自定义身份验证](#自定义身份验证)
+* [客户端实现](#客户端实现)
 * [TLS](#tls)
 
 ## HTTP Basic 身份验证
@@ -96,7 +96,7 @@ alice: Al1cepA55w0rd,admins
 
 ### 在服务器中启用 SPNEGO/Kerberos 身份验证
 
-Avatica 服务器可以通过使用 JAAS 配置文件登录或以编程方式登录来操作。默认情况下，经过身份验证的客户端将作为 Avatica 服务器的 kerberos 用户执行查询。[模拟（Impersonation）](#impersonation)是允许在服务器中以实际最终用户身份运行操作的功能。
+Avatica 服务器可以通过使用 JAAS 配置文件登录或以编程方式登录来操作。默认情况下，经过身份验证的客户端将作为 Avatica 服务器的 kerberos 用户执行查询。[模拟（Impersonation）](#模拟)是允许在服务器中以实际最终用户身份运行操作的功能。
 
 需要注意的是，Avatica 服务器使用的 Kerberos 主体**必须**具有 `HTTP` 的 primary（其中 Kerberos 主体的形式为 `primary[/instance]@REALM`）。这是由 [RFC-4559](https://tools.ietf.org/html/rfc4559) 指定的。
 
